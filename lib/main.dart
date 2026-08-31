@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_web_plugins/url_strategy.dart';
 
@@ -26,6 +27,18 @@ class HealthyLogApp extends StatelessWidget {
       theme: AppTheme.light,
       darkTheme: AppTheme.dark,
       routerConfig: appRouter,
+      // Comunicazione: l'applicazione è scritta in italiano fin da qui
+      // (CN-1, CN-2) — questo fissa la sola lingua dei widget di
+      // sistema (selettore data e simili) a quella già in uso ovunque
+      // nel codice. La selezione della lingua da parte dell'Utente
+      // (LO-1, LO-2) resta compito di F29, non anticipato qui.
+      locale: const Locale('it'),
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: const [Locale('it')],
     );
   }
 }

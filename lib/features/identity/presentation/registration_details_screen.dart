@@ -39,6 +39,7 @@ class _RegistrationDetailsScreenState extends ConsumerState<RegistrationDetailsS
   DateTime? _birthDate;
   BiologicalSex? _sex;
   bool _obscurePassword = true;
+  bool _obscureConfirmPassword = true;
   bool _submitted = false;
   Timer? _usernameDebounce;
   String? _lastCheckedUsername;
@@ -214,13 +215,18 @@ class _RegistrationDetailsScreenState extends ConsumerState<RegistrationDetailsS
                     onChanged: _onUsernameChanged,
                     suffixIcon: usernameSuffix,
                   ),
-                  Padding(
-                    padding: const EdgeInsets.only(top: AppSpacing.xxs, left: AppSpacing.xxs),
-                    child: Text(
-                      'Servirà al tuo nutrizionista per trovarti',
-                      style: typography.caption.copyWith(color: colors.textSecondary),
+                  // La ragione dell'univocità (PR-2) riguarda solo l'Utente,
+                  // che viene cercato dal proprio Nutrizionista (CP-1): un
+                  // Nutrizionista non ha un proprio Nutrizionista che lo cerchi.
+                  if (widget.role == AccountRole.user) ...[
+                    Padding(
+                      padding: const EdgeInsets.only(top: AppSpacing.xxs, left: AppSpacing.xxs),
+                      child: Text(
+                        'Servirà al tuo nutrizionista per trovarti',
+                        style: typography.caption.copyWith(color: colors.textSecondary),
+                      ),
                     ),
-                  ),
+                  ],
                   const SizedBox(height: AppSpacing.sm),
                   AppTextField(
                     label: 'Indirizzo e-mail',
@@ -255,8 +261,14 @@ class _RegistrationDetailsScreenState extends ConsumerState<RegistrationDetailsS
                   AppTextField(
                     label: 'Conferma password',
                     controller: _confirmPassword,
-                    obscureText: _obscurePassword,
+                    obscureText: _obscureConfirmPassword,
                     errorText: _errorFor('confirmPassword'),
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        _obscureConfirmPassword ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+                      ),
+                      onPressed: () => setState(() => _obscureConfirmPassword = !_obscureConfirmPassword),
+                    ),
                   ),
                   const SizedBox(height: AppSpacing.sm),
                   _DateField(
