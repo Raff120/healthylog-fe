@@ -15,6 +15,7 @@ import '../data/auth_models.dart';
 import '../domain/registration_field_validators.dart';
 import '../providers/registration_controller.dart';
 import '../providers/username_availability_controller.dart';
+import 'widgets/date_and_sex_fields.dart';
 
 /// Dati anagrafici e password (5.1 interfaccia.md, PR-1): schermata unica
 /// scorribile, campi impilati dal più familiare al più burocratico.
@@ -271,7 +272,7 @@ class _RegistrationDetailsScreenState extends ConsumerState<RegistrationDetailsS
                     ),
                   ),
                   const SizedBox(height: AppSpacing.sm),
-                  _DateField(
+                  BirthDateField(
                     value: _birthDate,
                     errorText: _errorFor('birthDate'),
                     onTap: _pickBirthDate,
@@ -279,7 +280,7 @@ class _RegistrationDetailsScreenState extends ConsumerState<RegistrationDetailsS
                   const SizedBox(height: AppSpacing.sm),
                   AppTextField(label: 'Luogo di nascita', controller: _birthPlace, errorText: _errorFor('birthPlace')),
                   const SizedBox(height: AppSpacing.sm),
-                  _SexSelector(
+                  SexSelector(
                     value: _sex,
                     onChanged: (value) => setState(() => _sex = value),
                     errorText: _errorFor('sex'),
@@ -292,95 +293,6 @@ class _RegistrationDetailsScreenState extends ConsumerState<RegistrationDetailsS
           ),
         ),
       ),
-    );
-  }
-}
-
-class _DateField extends StatelessWidget {
-  const _DateField({required this.value, required this.errorText, required this.onTap});
-
-  final DateTime? value;
-  final String? errorText;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    final typography = context.typography;
-    final hasError = errorText != null;
-    final label = value == null
-        ? 'Data di nascita'
-        : '${value!.day.toString().padLeft(2, '0')}/${value!.month.toString().padLeft(2, '0')}/${value!.year}';
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-          child: Container(
-            height: AppSpacing.heightTextField,
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-            decoration: BoxDecoration(
-              color: colors.surface,
-              borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-              border: Border.all(color: hasError ? colors.error : colors.dividerStrong),
-            ),
-            alignment: Alignment.centerLeft,
-            child: Text(
-              label,
-              style: typography.bodyLarge.copyWith(
-                color: value == null ? colors.textSecondary : colors.textPrimary,
-              ),
-            ),
-          ),
-        ),
-        if (hasError) ...[
-          const SizedBox(height: AppSpacing.xxs),
-          Text(errorText!, style: typography.caption.copyWith(color: colors.error)),
-        ],
-      ],
-    );
-  }
-}
-
-class _SexSelector extends StatelessWidget {
-  const _SexSelector({required this.value, required this.onChanged, required this.errorText});
-
-  final BiologicalSex? value;
-  final ValueChanged<BiologicalSex> onChanged;
-  final String? errorText;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    final typography = context.typography;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        SegmentedButton<BiologicalSex>(
-          segments: const [
-            ButtonSegment(value: BiologicalSex.female, label: Text('Femmina')),
-            ButtonSegment(value: BiologicalSex.male, label: Text('Maschio')),
-          ],
-          selected: value == null ? {} : {value!},
-          emptySelectionAllowed: true,
-          onSelectionChanged: (selection) {
-            if (selection.isNotEmpty) onChanged(selection.first);
-          },
-          style: SegmentedButton.styleFrom(
-            backgroundColor: colors.surface,
-            selectedBackgroundColor: colors.accentSubtle,
-            selectedForegroundColor: colors.accent,
-            textStyle: typography.label,
-          ),
-        ),
-        if (errorText != null) ...[
-          const SizedBox(height: AppSpacing.xxs),
-          Text(errorText!, style: typography.caption.copyWith(color: colors.error)),
-        ],
-      ],
     );
   }
 }

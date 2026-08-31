@@ -14,6 +14,16 @@ part of 'api_client.dart';
 /// [apiClient] per non introdurre una dipendenza circolare — il
 /// ripristino della sessione (TK-8) chiama `/auth/refresh` prima ancora
 /// che un token di accesso esista.
+///
+/// `keepAlive`: un client HTTP è per natura un servizio applicativo,
+/// non uno stato legato a una schermata. Senza, un provider che lo
+/// ottiene con `ref.read` invece di `ref.watch` (come i provider
+/// dell'API di una singola feature, che lo leggono una sola volta nel
+/// proprio `build`) non lo terrebbe in vita abbastanza a lungo:
+/// l'eliminazione automatica può intervenire mentre una richiesta è
+/// ancora in corso, invalidando il `ref` catturato dagli intercettori
+/// e bloccandola in modo silenzioso, prima ancora che raggiunga la
+/// rete — lo stesso rischio già corretto per `SessionController`.
 
 @ProviderFor(publicApiClient)
 final publicApiClientProvider = PublicApiClientProvider._();
@@ -24,6 +34,16 @@ final publicApiClientProvider = PublicApiClientProvider._();
 /// [apiClient] per non introdurre una dipendenza circolare — il
 /// ripristino della sessione (TK-8) chiama `/auth/refresh` prima ancora
 /// che un token di accesso esista.
+///
+/// `keepAlive`: un client HTTP è per natura un servizio applicativo,
+/// non uno stato legato a una schermata. Senza, un provider che lo
+/// ottiene con `ref.read` invece di `ref.watch` (come i provider
+/// dell'API di una singola feature, che lo leggono una sola volta nel
+/// proprio `build`) non lo terrebbe in vita abbastanza a lungo:
+/// l'eliminazione automatica può intervenire mentre una richiesta è
+/// ancora in corso, invalidando il `ref` catturato dagli intercettori
+/// e bloccandola in modo silenzioso, prima ancora che raggiunga la
+/// rete — lo stesso rischio già corretto per `SessionController`.
 
 final class PublicApiClientProvider extends $FunctionalProvider<Dio, Dio, Dio>
     with $Provider<Dio> {
@@ -33,13 +53,23 @@ final class PublicApiClientProvider extends $FunctionalProvider<Dio, Dio, Dio>
   /// [apiClient] per non introdurre una dipendenza circolare — il
   /// ripristino della sessione (TK-8) chiama `/auth/refresh` prima ancora
   /// che un token di accesso esista.
+  ///
+  /// `keepAlive`: un client HTTP è per natura un servizio applicativo,
+  /// non uno stato legato a una schermata. Senza, un provider che lo
+  /// ottiene con `ref.read` invece di `ref.watch` (come i provider
+  /// dell'API di una singola feature, che lo leggono una sola volta nel
+  /// proprio `build`) non lo terrebbe in vita abbastanza a lungo:
+  /// l'eliminazione automatica può intervenire mentre una richiesta è
+  /// ancora in corso, invalidando il `ref` catturato dagli intercettori
+  /// e bloccandola in modo silenzioso, prima ancora che raggiunga la
+  /// rete — lo stesso rischio già corretto per `SessionController`.
   PublicApiClientProvider._()
     : super(
         from: null,
         argument: null,
         retry: null,
         name: r'publicApiClientProvider',
-        isAutoDispose: true,
+        isAutoDispose: false,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
@@ -66,49 +96,58 @@ final class PublicApiClientProvider extends $FunctionalProvider<Dio, Dio, Dio>
   }
 }
 
-String _$publicApiClientHash() => r'0811ad6f4c8f1549d45ce6e05348c5edff15afd7';
+String _$publicApiClientHash() => r'a2ee654659265a6d935340bb924645361a667dd2';
 
 /// Client HTTP che allega il token di accesso corrente quando presente
 /// (TK-6) e rinnova trasparentemente alla scadenza (TK-13, TK-14). Per
-/// gli endpoint che richiedono autenticazione.
+/// gli endpoint che richiedono autenticazione. `keepAlive`: stessa
+/// ragione di [publicApiClient].
 ///
-/// L'ordine degli intercettori è significativo: le richieste passano
-/// nell'ordine di aggiunta (intestazione prima di tutto), gli errori
-/// tornano nell'ordine inverso — [ApiErrorInterceptor] deve tradurre la
-/// risposta in [ApiException] prima che [TokenRefreshInterceptor] possa
-/// riconoscere `TOKEN_EXPIRED`.
+/// L'ordine degli intercettori è significativo: sia le richieste sia gli
+/// errori attraversano la coda nell'ordine di aggiunta (dio incatena gli
+/// `onError` con `Future.catchError` in quello stesso ordine).
+/// [TokenRefreshInterceptor] DEVE quindi precedere [ApiErrorInterceptor]
+/// per intercettare la risposta grezza prima che questo la traduca e la
+/// completi con `reject` — che, per impostazione predefinita, salta il
+/// resto della coda (vedi il commento su [TokenRefreshInterceptor]).
 
 @ProviderFor(apiClient)
 final apiClientProvider = ApiClientProvider._();
 
 /// Client HTTP che allega il token di accesso corrente quando presente
 /// (TK-6) e rinnova trasparentemente alla scadenza (TK-13, TK-14). Per
-/// gli endpoint che richiedono autenticazione.
+/// gli endpoint che richiedono autenticazione. `keepAlive`: stessa
+/// ragione di [publicApiClient].
 ///
-/// L'ordine degli intercettori è significativo: le richieste passano
-/// nell'ordine di aggiunta (intestazione prima di tutto), gli errori
-/// tornano nell'ordine inverso — [ApiErrorInterceptor] deve tradurre la
-/// risposta in [ApiException] prima che [TokenRefreshInterceptor] possa
-/// riconoscere `TOKEN_EXPIRED`.
+/// L'ordine degli intercettori è significativo: sia le richieste sia gli
+/// errori attraversano la coda nell'ordine di aggiunta (dio incatena gli
+/// `onError` con `Future.catchError` in quello stesso ordine).
+/// [TokenRefreshInterceptor] DEVE quindi precedere [ApiErrorInterceptor]
+/// per intercettare la risposta grezza prima che questo la traduca e la
+/// completi con `reject` — che, per impostazione predefinita, salta il
+/// resto della coda (vedi il commento su [TokenRefreshInterceptor]).
 
 final class ApiClientProvider extends $FunctionalProvider<Dio, Dio, Dio>
     with $Provider<Dio> {
   /// Client HTTP che allega il token di accesso corrente quando presente
   /// (TK-6) e rinnova trasparentemente alla scadenza (TK-13, TK-14). Per
-  /// gli endpoint che richiedono autenticazione.
+  /// gli endpoint che richiedono autenticazione. `keepAlive`: stessa
+  /// ragione di [publicApiClient].
   ///
-  /// L'ordine degli intercettori è significativo: le richieste passano
-  /// nell'ordine di aggiunta (intestazione prima di tutto), gli errori
-  /// tornano nell'ordine inverso — [ApiErrorInterceptor] deve tradurre la
-  /// risposta in [ApiException] prima che [TokenRefreshInterceptor] possa
-  /// riconoscere `TOKEN_EXPIRED`.
+  /// L'ordine degli intercettori è significativo: sia le richieste sia gli
+  /// errori attraversano la coda nell'ordine di aggiunta (dio incatena gli
+  /// `onError` con `Future.catchError` in quello stesso ordine).
+  /// [TokenRefreshInterceptor] DEVE quindi precedere [ApiErrorInterceptor]
+  /// per intercettare la risposta grezza prima che questo la traduca e la
+  /// completi con `reject` — che, per impostazione predefinita, salta il
+  /// resto della coda (vedi il commento su [TokenRefreshInterceptor]).
   ApiClientProvider._()
     : super(
         from: null,
         argument: null,
         retry: null,
         name: r'apiClientProvider',
-        isAutoDispose: true,
+        isAutoDispose: false,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
@@ -135,4 +174,4 @@ final class ApiClientProvider extends $FunctionalProvider<Dio, Dio, Dio>
   }
 }
 
-String _$apiClientHash() => r'75b3ef9ac89d1be4dace4edb11f84c6798084d92';
+String _$apiClientHash() => r'371123c0407cf85164e2b90b017edf97c310b93e';

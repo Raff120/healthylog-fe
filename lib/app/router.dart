@@ -6,6 +6,8 @@ import '../features/identity/presentation/email_verification_waiting_screen.dart
 import '../features/identity/presentation/login_screen.dart';
 import '../features/identity/presentation/password_reset_confirm_screen.dart';
 import '../features/identity/presentation/password_reset_request_screen.dart';
+import '../features/identity/presentation/personal_data_screen.dart';
+import '../features/identity/presentation/profile_screen.dart';
 import '../features/identity/presentation/registration_details_screen.dart';
 import '../features/identity/presentation/role_selection_screen.dart';
 import 'placeholder_home_screen.dart';
@@ -27,10 +29,15 @@ final GoRouter appRouter = GoRouter(
     ),
     GoRoute(
       path: '/register/details',
+      // `extra` non sopravvive a un ricaricamento diretto
+      // dell'indirizzo (path senza `#`, FE-3): senza il ruolo scelto
+      // al passaggio precedente non c'è nulla da mostrare qui.
+      redirect: (context, state) => state.extra is AccountRole ? null : '/register',
       builder: (context, state) => RegistrationDetailsScreen(role: state.extra as AccountRole),
     ),
     GoRoute(
       path: '/verify-email',
+      redirect: (context, state) => state.extra is String ? null : '/login',
       builder: (context, state) => EmailVerificationWaitingScreen(email: state.extra as String),
     ),
     GoRoute(
@@ -48,5 +55,10 @@ final GoRouter appRouter = GoRouter(
           PasswordResetConfirmScreen(token: state.uri.queryParameters['token'] ?? ''),
     ),
     GoRoute(path: '/home', builder: (context, state) => const PlaceholderHomeScreen()),
+    GoRoute(path: '/profile', builder: (context, state) => const ProfileScreen()),
+    GoRoute(
+      path: '/profile/personal-data',
+      builder: (context, state) => const PersonalDataScreen(),
+    ),
   ],
 );

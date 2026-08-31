@@ -194,5 +194,39 @@ void main() {
       expect(results[1]?.accessToken, 'access-1');
       expect(identityApi.refreshCalls, 1);
     });
+
+    test('un accesso esplicito non è sovrascritto da un ripristino ancora in corso', () async {
+      // Riproduce lo scenario che ha originato questo test: un token di
+      // rinnovo conservato (da una sessione precedente) fa sì che
+      // `build` sia ancora in attesa di `/auth/refresh` quando
+      // l'Utente completa un accesso con un account diverso.
+      final store = _InMemorySecureKeyValueStore()..values['refresh_token'] = 'token-di-una-sessione-precedente';
+      final identityApi = _GatedIdentityApi();
+      final container = ProviderContainer(
+        overrides: [
+          secureKeyValueStoreProvider.overrideWithValue(store),
+          identityApiProvider.overrideWithValue(identityApi),
+        ],
+      );
+      addTearDown(container.dispose);
+
+      // `build` è avviato (legge il token, poi si blocca in `refresh`,
+      // trattenuto da `identityApi`) ma non ancora risolto.
+      final buildFuture = container.read(sessionControllerProvider.future);
+
+      // L'Utente completa un accesso con un account diverso mentre il
+      // ripristino è ancora in corso.
+      await container
+          .read(sessionControllerProvider.notifier)
+          .set(const AuthSession(accessToken: 'nuovo-accesso', refreshToken: 'nuovo-rinnovo'));
+
+      // Il ripristino, tardivo, risolve ora.
+      identityApi.release();
+      await buildFuture;
+
+      final state = container.read(sessionControllerProvider).value;
+      expect(state?.accessToken, 'nuovo-accesso');
+      expect(store.values['refresh_token'], 'nuovo-rinnovo');
+    });
   });
 }

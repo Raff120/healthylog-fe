@@ -19,8 +19,17 @@ part 'session_controller.g.dart';
 class SessionController extends _$SessionController {
   Future<AuthSession?>? _refreshInFlight;
 
+  // Incrementato da `set`/`clear`: se cambia mentre `build` è ancora in
+  // corso, un accesso o una disconnessione espliciti sono intervenuti
+  // nel frattempo e il ripristino, quando infine risolve, NON DEVE
+  // sovrascriverli — altrimenti un accesso appena eseguito potrebbe
+  // essere rimpiazzato dall'esito, tardivo, del tentativo di ripristino
+  // di un token diverso e più vecchio ancora conservato sul dispositivo.
+  int _generation = 0;
+
   @override
   Future<AuthSession?> build() async {
+    final myGeneration = ++_generation;
     final storage = ref.watch(refreshTokenStorageProvider);
     String? refreshToken;
     try {
@@ -28,18 +37,22 @@ class SessionController extends _$SessionController {
     } catch (_) {
       // Archivio sicuro non disponibile (piattaforma priva del canale,
       // ambiente di test): equivale a nessuna sessione da ripristinare.
-      return null;
+      return myGeneration == _generation ? null : state.value;
     }
-    if (refreshToken == null) return null;
-    return _refreshWith(refreshToken);
+    if (refreshToken == null) return myGeneration == _generation ? null : state.value;
+
+    final restored = await _refreshWith(refreshToken);
+    return myGeneration == _generation ? restored : state.value;
   }
 
   Future<void> set(AuthSession session) async {
+    _generation++;
     await ref.read(refreshTokenStorageProvider).write(session.refreshToken);
     state = AsyncValue.data(session);
   }
 
   Future<void> clear() async {
+    _generation++;
     await ref.read(refreshTokenStorageProvider).clear();
     state = const AsyncValue.data(null);
   }

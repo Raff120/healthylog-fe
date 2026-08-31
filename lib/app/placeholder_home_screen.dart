@@ -2,14 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../core/auth/session_controller.dart';
 import 'theme/app_spacing.dart';
 import 'theme/theme_context.dart';
 
 /// Destinazione temporanea dopo l'accesso, in attesa di *Piano* (F12,
 /// Fase 3): serve solo a rendere verificabile la protezione delle rotte
 /// (F06) prima che esista una destinazione reale. Da sostituire
-/// integralmente, non da ampliare.
+/// integralmente, non da ampliare. Il profilo (12.1 interfaccia.md,
+/// dove risiede la disconnessione) è già raggiungibile da qui, in
+/// assenza della barra di navigazione reale (compito di un task
+/// successivo).
 class PlaceholderHomeScreen extends ConsumerWidget {
   const PlaceholderHomeScreen({super.key});
 
@@ -35,11 +37,8 @@ class PlaceholderHomeScreen extends ConsumerWidget {
                 ),
                 const SizedBox(height: AppSpacing.lg),
                 TextButton(
-                  onPressed: () async {
-                    await ref.read(sessionControllerProvider.notifier).clear();
-                    if (context.mounted) context.go('/login');
-                  },
-                  child: const Text('Disconnetti'),
+                  onPressed: () => context.push('/profile'),
+                  child: const Text('Profilo'),
                 ),
               ],
             ),
