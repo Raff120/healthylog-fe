@@ -1,6 +1,7 @@
 import 'package:go_router/go_router.dart';
 
 import '../features/identity/data/account_role.dart';
+import '../features/identity/presentation/devices_screen.dart';
 import '../features/identity/presentation/email_verification_link_screen.dart';
 import '../features/identity/presentation/email_verification_waiting_screen.dart';
 import '../features/identity/presentation/login_screen.dart';
@@ -60,5 +61,6 @@ final GoRouter appRouter = GoRouter(
       path: '/profile/personal-data',
       builder: (context, state) => const PersonalDataScreen(),
     ),
+    GoRoute(path: '/profile/devices', builder: (context, state) => const DevicesScreen()),
   ],
 );

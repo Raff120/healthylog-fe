@@ -8,12 +8,16 @@ import '../../../core/api/api_error_messages.dart';
 import '../../../core/api/api_exception.dart';
 import '../../../core/auth/session_controller.dart';
 import '../providers/profile_providers.dart';
+import '../providers/sessions_providers.dart';
 
 /// Profilo (12.1 interfaccia.md): intestazione personale, elenco delle
 /// sezioni, disconnessione in fondo. Le sole sezioni già realizzate
-/// compaiono: Piani, Gruppo, Nutrizionista e Impostazioni appartengono a
-/// feature non ancora avviate e non sono quindi presenti (2.6: gli
-/// elementi per funzioni inesistenti non compaiono, non sono disabilitati).
+/// compaiono: Piani, Gruppo e Nutrizionista appartengono a feature non
+/// ancora avviate e non sono quindi presenti (2.6: gli elementi per
+/// funzioni inesistenti non compaiono, non sono disabilitati).
+/// "Dispositivi collegati" appartiene propriamente a Impostazioni (12.2),
+/// non ancora realizzata (F29): resta qui finché non trova la propria
+/// sede definitiva, segnalato in decisioni.md.
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
 
@@ -39,6 +43,20 @@ class ProfileScreen extends ConsumerWidget {
     );
     if (confirmed != true) return;
 
+    // AC-13, TK-19: la disconnessione revoca la sessione anche lato
+    // server, non solo l'archivio locale — altrimenti il token di
+    // rinnovo resterebbe valido e la sessione comparirebbe ancora tra
+    // i dispositivi attivi. Se il server non è raggiungibile, la
+    // rimozione locale procede comunque: TK-19 impone la rimozione dei
+    // dati locali, non che essa dipenda dalla raggiungibilità del server.
+    final session = ref.read(sessionControllerProvider).value;
+    if (session != null) {
+      try {
+        await ref.read(sessionsApiProvider).logoutCurrentDevice(session.refreshToken);
+      } catch (_) {
+        // Ignorato di proposito: vedi commento sopra.
+      }
+    }
     await ref.read(sessionControllerProvider.notifier).clear();
     if (context.mounted) context.go('/login');
   }
@@ -96,6 +114,12 @@ class ProfileScreen extends ConsumerWidget {
                   icon: Icons.person_outline,
                   label: 'Dati personali',
                   onTap: () => context.push('/profile/personal-data'),
+                ),
+                const SizedBox(height: AppSpacing.sm),
+                _ProfileSection(
+                  icon: Icons.devices_outlined,
+                  label: 'Dispositivi collegati',
+                  onTap: () => context.push('/profile/devices'),
                 ),
                 const Spacer(),
                 Center(
