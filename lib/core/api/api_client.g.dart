@@ -10,23 +10,26 @@ part of 'api_client.dart';
 // ignore_for_file: type=lint, type=warning
 /// Client HTTP di base (4.2, 4.3 specifica-tecnica.md): JSON con codifica
 /// UTF-8, percorsi privi di prefisso (AP-3), errori tradotti in
-/// [ApiException]. Non allega ancora alcuna intestazione di autorizzazione:
-/// la sessione è predisposta in F06.
+/// [ApiException]. Allega il token di accesso corrente quando presente
+/// (TK-6); il rinnovo trasparente alla scadenza (TK-13, TK-14) è compito
+/// di un task successivo di F06.
 
 @ProviderFor(apiClient)
 final apiClientProvider = ApiClientProvider._();
 
 /// Client HTTP di base (4.2, 4.3 specifica-tecnica.md): JSON con codifica
 /// UTF-8, percorsi privi di prefisso (AP-3), errori tradotti in
-/// [ApiException]. Non allega ancora alcuna intestazione di autorizzazione:
-/// la sessione è predisposta in F06.
+/// [ApiException]. Allega il token di accesso corrente quando presente
+/// (TK-6); il rinnovo trasparente alla scadenza (TK-13, TK-14) è compito
+/// di un task successivo di F06.
 
 final class ApiClientProvider extends $FunctionalProvider<Dio, Dio, Dio>
     with $Provider<Dio> {
   /// Client HTTP di base (4.2, 4.3 specifica-tecnica.md): JSON con codifica
   /// UTF-8, percorsi privi di prefisso (AP-3), errori tradotti in
-  /// [ApiException]. Non allega ancora alcuna intestazione di autorizzazione:
-  /// la sessione è predisposta in F06.
+  /// [ApiException]. Allega il token di accesso corrente quando presente
+  /// (TK-6); il rinnovo trasparente alla scadenza (TK-13, TK-14) è compito
+  /// di un task successivo di F06.
   ApiClientProvider._()
     : super(
         from: null,
@@ -60,4 +63,4 @@ final class ApiClientProvider extends $FunctionalProvider<Dio, Dio, Dio>
   }
 }
 
-String _$apiClientHash() => r'7b4941a4719feec77a035e32b2cdce361f9e9032';
+String _$apiClientHash() => r'ee63cbb543cfa532c3b1c1f409b2227f2c3dbe8c';
