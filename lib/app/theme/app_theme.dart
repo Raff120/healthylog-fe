@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'app_colors.dart';
+import 'app_consumption_colors.dart';
 import 'app_spacing.dart';
 import 'app_typography.dart';
 
@@ -9,10 +10,16 @@ import 'app_typography.dart';
 class AppTheme {
   const AppTheme._();
 
-  static ThemeData get light => _build(AppColors.light, Brightness.light);
-  static ThemeData get dark => _build(AppColors.dark, Brightness.dark);
+  static ThemeData get light =>
+      _build(AppColors.light, AppConsumptionColors.light, Brightness.light);
+  static ThemeData get dark =>
+      _build(AppColors.dark, AppConsumptionColors.dark, Brightness.dark);
 
-  static ThemeData _build(AppColors colors, Brightness brightness) {
+  static ThemeData _build(
+    AppColors colors,
+    AppConsumptionColors consumptionColors,
+    Brightness brightness,
+  ) {
     final colorScheme = ColorScheme(
       brightness: brightness,
       primary: colors.accent,
@@ -43,6 +50,7 @@ class AppTheme {
       extensions: <ThemeExtension<Object?>>[
         colors,
         AppTypography.standard,
+        consumptionColors,
       ],
     );
   }
