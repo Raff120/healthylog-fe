@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -34,6 +33,7 @@ class _RegistrationDetailsScreenState extends ConsumerState<RegistrationDetailsS
   final _username = TextEditingController();
   final _email = TextEditingController();
   final _password = TextEditingController();
+  final _confirmPassword = TextEditingController();
   final _birthPlace = TextEditingController();
 
   DateTime? _birthDate;
@@ -53,6 +53,7 @@ class _RegistrationDetailsScreenState extends ConsumerState<RegistrationDetailsS
     _username.dispose();
     _email.dispose();
     _password.dispose();
+    _confirmPassword.dispose();
     _birthPlace.dispose();
     super.dispose();
   }
@@ -69,39 +70,16 @@ class _RegistrationDetailsScreenState extends ConsumerState<RegistrationDetailsS
 
   Future<void> _pickBirthDate() async {
     final now = DateTime.now();
-    DateTime picked = _birthDate ?? DateTime(now.year - 25, now.month, now.day);
-    await showModalBottomSheet<void>(
+    // FE-11: l'adattamento dipende dalla larghezza della finestra, mai
+    // dalla piattaforma — un selettore a calendario, non a rotelle,
+    // uguale su telefono, tablet e desktop.
+    final picked = await showDatePicker(
       context: context,
-      backgroundColor: context.colors.surface,
-      builder: (sheetContext) {
-        return SizedBox(
-          height: 280,
-          child: Column(
-            children: [
-              Expanded(
-                child: CupertinoDatePicker(
-                  mode: CupertinoDatePickerMode.date,
-                  initialDateTime: picked,
-                  maximumDate: now,
-                  minimumDate: DateTime(now.year - 120),
-                  onDateTimeChanged: (value) => picked = value,
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(AppSpacing.sm),
-                child: AppPrimaryButton(
-                  label: 'Conferma',
-                  onPressed: () {
-                    setState(() => _birthDate = picked);
-                    Navigator.of(sheetContext).pop();
-                  },
-                ),
-              ),
-            ],
-          ),
-        );
-      },
+      initialDate: _birthDate ?? DateTime(now.year - 25, now.month, now.day),
+      firstDate: DateTime(now.year - 120),
+      lastDate: now,
     );
+    if (picked != null) setState(() => _birthDate = picked);
   }
 
   bool _validate() {
@@ -111,6 +89,7 @@ class _RegistrationDetailsScreenState extends ConsumerState<RegistrationDetailsS
       'username': validateUsername(_username.text),
       'email': validateEmail(_email.text),
       'password': validatePassword(_password.text),
+      'confirmPassword': _confirmPassword.text != _password.text ? 'MISMATCH' : null,
       'birthPlace': validateName(_birthPlace.text),
       'birthDate': _birthDate == null ? 'REQUIRED' : null,
       'sex': _sex == null ? 'REQUIRED' : null,
@@ -173,6 +152,7 @@ class _RegistrationDetailsScreenState extends ConsumerState<RegistrationDetailsS
       'TOO_LONG' => 'Troppo lungo',
       'TOO_SHORT' => 'Almeno 12 caratteri',
       'INVALID_FORMAT' => 'Formato non valido',
+      'MISMATCH' => 'Le password non coincidono',
       'EMAIL_ALREADY_USED' => 'Questo indirizzo è già registrato',
       'USERNAME_ALREADY_USED' => 'Questo nome utente è già in uso',
       _ => 'Valore non valido',
@@ -270,6 +250,13 @@ class _RegistrationDetailsScreenState extends ConsumerState<RegistrationDetailsS
                             : colors.textSecondary,
                       ),
                     ),
+                  ),
+                  const SizedBox(height: AppSpacing.sm),
+                  AppTextField(
+                    label: 'Conferma password',
+                    controller: _confirmPassword,
+                    obscureText: _obscurePassword,
+                    errorText: _errorFor('confirmPassword'),
                   ),
                   const SizedBox(height: AppSpacing.sm),
                   _DateField(
