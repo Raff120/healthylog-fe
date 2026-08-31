@@ -13,6 +13,10 @@ part of 'session_controller.dart';
 /// ripristino dal token di rinnovo conservato nell'archivio sicuro
 /// (TK-8): un token presente ma non più valido (revocato, scaduto) è
 /// trattato come sessione assente, non come errore da mostrare.
+///
+/// `keepAlive`: letto con `ref.read` (non `ref.watch`) dagli
+/// intercettori HTTP, che altrimenti non lo terrebbero in vita — la
+/// sessione andrebbe perduta ogni volta che nessuna schermata la osserva.
 
 @ProviderFor(SessionController)
 final sessionControllerProvider = SessionControllerProvider._();
@@ -22,6 +26,10 @@ final sessionControllerProvider = SessionControllerProvider._();
 /// ripristino dal token di rinnovo conservato nell'archivio sicuro
 /// (TK-8): un token presente ma non più valido (revocato, scaduto) è
 /// trattato come sessione assente, non come errore da mostrare.
+///
+/// `keepAlive`: letto con `ref.read` (non `ref.watch`) dagli
+/// intercettori HTTP, che altrimenti non lo terrebbero in vita — la
+/// sessione andrebbe perduta ogni volta che nessuna schermata la osserva.
 final class SessionControllerProvider
     extends $AsyncNotifierProvider<SessionController, AuthSession?> {
   /// Stato della sessione (5.2 interfaccia.md: l'accesso è richiesto una
@@ -29,13 +37,17 @@ final class SessionControllerProvider
   /// ripristino dal token di rinnovo conservato nell'archivio sicuro
   /// (TK-8): un token presente ma non più valido (revocato, scaduto) è
   /// trattato come sessione assente, non come errore da mostrare.
+  ///
+  /// `keepAlive`: letto con `ref.read` (non `ref.watch`) dagli
+  /// intercettori HTTP, che altrimenti non lo terrebbero in vita — la
+  /// sessione andrebbe perduta ogni volta che nessuna schermata la osserva.
   SessionControllerProvider._()
     : super(
         from: null,
         argument: null,
         retry: null,
         name: r'sessionControllerProvider',
-        isAutoDispose: true,
+        isAutoDispose: false,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
@@ -48,13 +60,17 @@ final class SessionControllerProvider
   SessionController create() => SessionController();
 }
 
-String _$sessionControllerHash() => r'9d3ab2226e0e508c66f28033fea3ad37552443fb';
+String _$sessionControllerHash() => r'08688ae97e873927893d6fa4fc9cdf1e9fe4f2a3';
 
 /// Stato della sessione (5.2 interfaccia.md: l'accesso è richiesto una
 /// sola volta per dispositivo, AC-11, TK-15). All'avvio tenta il
 /// ripristino dal token di rinnovo conservato nell'archivio sicuro
 /// (TK-8): un token presente ma non più valido (revocato, scaduto) è
 /// trattato come sessione assente, non come errore da mostrare.
+///
+/// `keepAlive`: letto con `ref.read` (non `ref.watch`) dagli
+/// intercettori HTTP, che altrimenti non lo terrebbero in vita — la
+/// sessione andrebbe perduta ogni volta che nessuna schermata la osserva.
 
 abstract class _$SessionController extends $AsyncNotifier<AuthSession?> {
   FutureOr<AuthSession?> build();

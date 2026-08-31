@@ -11,8 +11,14 @@ part 'session_controller.g.dart';
 /// ripristino dal token di rinnovo conservato nell'archivio sicuro
 /// (TK-8): un token presente ma non più valido (revocato, scaduto) è
 /// trattato come sessione assente, non come errore da mostrare.
-@riverpod
+///
+/// `keepAlive`: letto con `ref.read` (non `ref.watch`) dagli
+/// intercettori HTTP, che altrimenti non lo terrebbero in vita — la
+/// sessione andrebbe perduta ogni volta che nessuna schermata la osserva.
+@Riverpod(keepAlive: true)
 class SessionController extends _$SessionController {
+  Future<AuthSession?>? _refreshInFlight;
+
   @override
   Future<AuthSession?> build() async {
     final storage = ref.watch(refreshTokenStorageProvider);
@@ -25,15 +31,7 @@ class SessionController extends _$SessionController {
       return null;
     }
     if (refreshToken == null) return null;
-
-    try {
-      final tokens = await ref.read(identityApiProvider).refresh(refreshToken);
-      await storage.write(tokens.refreshToken);
-      return AuthSession(accessToken: tokens.accessToken, refreshToken: tokens.refreshToken);
-    } catch (_) {
-      await storage.clear();
-      return null;
-    }
+    return _refreshWith(refreshToken);
   }
 
   Future<void> set(AuthSession session) async {
@@ -41,14 +39,41 @@ class SessionController extends _$SessionController {
     state = AsyncValue.data(session);
   }
 
-  void updateAccessToken(String accessToken) {
-    final current = state.value;
-    if (current == null) return;
-    state = AsyncValue.data(current.copyWith(accessToken: accessToken));
-  }
-
   Future<void> clear() async {
     await ref.read(refreshTokenStorageProvider).clear();
     state = const AsyncValue.data(null);
+  }
+
+  /// TK-13, TK-14: chiamato da [TokenRefreshInterceptor] quando una
+  /// richiesta incontra `TOKEN_EXPIRED`. Le richieste concorrenti che
+  /// invocano questo metodo mentre un rinnovo è già in corso ne
+  /// condividono l'esito invece di avviarne ciascuna uno proprio —
+  /// altrimenti la rotazione (TK-11) scatterebbe più volte e la seconda
+  /// risulterebbe un riuso (TK-12), revocando l'intera catena.
+  Future<AuthSession?> refreshSession() {
+    final inFlight = _refreshInFlight;
+    if (inFlight != null) return inFlight;
+
+    final current = state.value;
+    if (current == null) return Future.value(null);
+
+    final future = _refreshWith(current.refreshToken).then((session) {
+      state = AsyncValue.data(session);
+      return session;
+    });
+    _refreshInFlight = future;
+    future.whenComplete(() => _refreshInFlight = null);
+    return future;
+  }
+
+  Future<AuthSession?> _refreshWith(String refreshToken) async {
+    try {
+      final tokens = await ref.read(identityApiProvider).refresh(refreshToken);
+      await ref.read(refreshTokenStorageProvider).write(tokens.refreshToken);
+      return AuthSession(accessToken: tokens.accessToken, refreshToken: tokens.refreshToken);
+    } catch (_) {
+      await ref.read(refreshTokenStorageProvider).clear();
+      return null;
+    }
   }
 }
