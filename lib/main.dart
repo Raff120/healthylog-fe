@@ -16,17 +16,17 @@ void main() {
   runApp(const ProviderScope(child: HealthyLogApp()));
 }
 
-class HealthyLogApp extends StatelessWidget {
+class HealthyLogApp extends ConsumerWidget {
   const HealthyLogApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return MaterialApp.router(
       title: 'HealthyLog',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light,
       darkTheme: AppTheme.dark,
-      routerConfig: appRouter,
+      routerConfig: ref.watch(goRouterProvider),
       // Comunicazione: l'applicazione è scritta in italiano fin da qui
       // (CN-1, CN-2) — questo fissa la sola lingua dei widget di
       // sistema (selettore data e simili) a quella già in uso ovunque

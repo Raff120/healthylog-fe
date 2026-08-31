@@ -1,26 +1,19 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 
-import '../core/auth/session_controller.dart';
 import 'theme/theme_context.dart';
 
 /// Verifica della sessione all'avvio (5.2 interfaccia.md): il solo
-/// marchio, per un tempo che deve restare impercettibile. Conduce a
-/// *Piano* (qui, provvisoriamente, alla destinazione temporanea) se una
-/// sessione è stata ripristinata dal token di rinnovo (TK-8), altrimenti
-/// all'accesso.
-class SplashScreen extends ConsumerWidget {
+/// marchio, per un tempo che deve restare impercettibile. Puramente
+/// visiva: l'instradamento verso l'accesso o verso la destinazione
+/// autenticata, una volta risolta la sessione, è compito del `redirect`
+/// centralizzato del router (`app/router.dart`), non di questa
+/// schermata — un solo punto in cui la protezione delle rotte è
+/// decisa, non duplicato qui.
+class SplashScreen extends StatelessWidget {
   const SplashScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    ref.listen(sessionControllerProvider, (previous, next) {
-      next.whenOrNull(
-        data: (session) => context.go(session == null ? '/login' : '/home'),
-      );
-    });
-
+  Widget build(BuildContext context) {
     final colors = context.colors;
     final typography = context.typography;
 
