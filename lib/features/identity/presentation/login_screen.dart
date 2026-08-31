@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../app/theme/app_spacing.dart';
 import '../../../app/theme/theme_context.dart';
+import '../../../core/api/api_error_messages.dart';
 import '../../../core/api/api_exception.dart';
 import '../../../core/device/device_label.dart';
 import '../../../core/widgets/app_primary_button.dart';
@@ -48,11 +49,21 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     state.whenOrNull(
       data: (_) => context.go('/home'),
       error: (error, _) {
-        if (error is ApiException && error.code == 'ACCOUNT_NOT_VERIFIED') {
+        final code = error is ApiException ? error.code : null;
+        if (code == 'ACCOUNT_NOT_VERIFIED') {
           context.push('/verify-email', extra: _email.text.trim());
           return;
         }
-        setState(() => _errorMessage = 'Indirizzo o password non corretti.');
+        // AU-23: credenziali errate e blocco temporaneo (AU-21)
+        // condividono deliberatamente lo stesso codice indistinto sul
+        // backend — qualunque altro codice (rete, errore del server)
+        // NON DEVE essere presentato come se fosse una password
+        // sbagliata.
+        setState(() {
+          _errorMessage = code == 'INVALID_CREDENTIALS'
+              ? 'Indirizzo o password non corretti.'
+              : describeApiError(code ?? '');
+        });
       },
     );
   }
