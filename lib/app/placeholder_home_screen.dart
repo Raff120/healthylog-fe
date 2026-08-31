@@ -35,9 +35,9 @@ class PlaceholderHomeScreen extends ConsumerWidget {
                 ),
                 const SizedBox(height: AppSpacing.lg),
                 TextButton(
-                  onPressed: () {
-                    ref.read(sessionControllerProvider.notifier).clear();
-                    context.go('/login');
+                  onPressed: () async {
+                    await ref.read(sessionControllerProvider.notifier).clear();
+                    if (context.mounted) context.go('/login');
                   },
                   child: const Text('Disconnetti'),
                 ),

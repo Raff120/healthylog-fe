@@ -8,28 +8,82 @@ part of 'api_client.dart';
 
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
-/// Client HTTP di base (4.2, 4.3 specifica-tecnica.md): JSON con codifica
-/// UTF-8, percorsi privi di prefisso (AP-3), errori tradotti in
-/// [ApiException]. Allega il token di accesso corrente quando presente
-/// (TK-6); il rinnovo trasparente alla scadenza (TK-13, TK-14) è compito
-/// di un task successivo di F06.
+/// Client HTTP privo dell'intestazione di autorizzazione (4.2, 4.3
+/// specifica-tecnica.md): per gli endpoint pubblici della feature
+/// identity (registrazione, accesso, rinnovo...). Distinto da
+/// [apiClient] per non introdurre una dipendenza circolare — il
+/// ripristino della sessione (TK-8) chiama `/auth/refresh` prima ancora
+/// che un token di accesso esista.
+
+@ProviderFor(publicApiClient)
+final publicApiClientProvider = PublicApiClientProvider._();
+
+/// Client HTTP privo dell'intestazione di autorizzazione (4.2, 4.3
+/// specifica-tecnica.md): per gli endpoint pubblici della feature
+/// identity (registrazione, accesso, rinnovo...). Distinto da
+/// [apiClient] per non introdurre una dipendenza circolare — il
+/// ripristino della sessione (TK-8) chiama `/auth/refresh` prima ancora
+/// che un token di accesso esista.
+
+final class PublicApiClientProvider extends $FunctionalProvider<Dio, Dio, Dio>
+    with $Provider<Dio> {
+  /// Client HTTP privo dell'intestazione di autorizzazione (4.2, 4.3
+  /// specifica-tecnica.md): per gli endpoint pubblici della feature
+  /// identity (registrazione, accesso, rinnovo...). Distinto da
+  /// [apiClient] per non introdurre una dipendenza circolare — il
+  /// ripristino della sessione (TK-8) chiama `/auth/refresh` prima ancora
+  /// che un token di accesso esista.
+  PublicApiClientProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'publicApiClientProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$publicApiClientHash();
+
+  @$internal
+  @override
+  $ProviderElement<Dio> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  Dio create(Ref ref) {
+    return publicApiClient(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(Dio value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<Dio>(value),
+    );
+  }
+}
+
+String _$publicApiClientHash() => r'1265365eff97c4dbd3e51bc59039e03912faedab';
+
+/// Client HTTP che allega il token di accesso corrente quando presente
+/// (TK-6), per gli endpoint che lo richiedono. Il rinnovo trasparente
+/// alla scadenza (TK-13, TK-14) è compito di un task successivo di F06.
 
 @ProviderFor(apiClient)
 final apiClientProvider = ApiClientProvider._();
 
-/// Client HTTP di base (4.2, 4.3 specifica-tecnica.md): JSON con codifica
-/// UTF-8, percorsi privi di prefisso (AP-3), errori tradotti in
-/// [ApiException]. Allega il token di accesso corrente quando presente
-/// (TK-6); il rinnovo trasparente alla scadenza (TK-13, TK-14) è compito
-/// di un task successivo di F06.
+/// Client HTTP che allega il token di accesso corrente quando presente
+/// (TK-6), per gli endpoint che lo richiedono. Il rinnovo trasparente
+/// alla scadenza (TK-13, TK-14) è compito di un task successivo di F06.
 
 final class ApiClientProvider extends $FunctionalProvider<Dio, Dio, Dio>
     with $Provider<Dio> {
-  /// Client HTTP di base (4.2, 4.3 specifica-tecnica.md): JSON con codifica
-  /// UTF-8, percorsi privi di prefisso (AP-3), errori tradotti in
-  /// [ApiException]. Allega il token di accesso corrente quando presente
-  /// (TK-6); il rinnovo trasparente alla scadenza (TK-13, TK-14) è compito
-  /// di un task successivo di F06.
+  /// Client HTTP che allega il token di accesso corrente quando presente
+  /// (TK-6), per gli endpoint che lo richiedono. Il rinnovo trasparente
+  /// alla scadenza (TK-13, TK-14) è compito di un task successivo di F06.
   ApiClientProvider._()
     : super(
         from: null,
@@ -63,4 +117,4 @@ final class ApiClientProvider extends $FunctionalProvider<Dio, Dio, Dio>
   }
 }
 
-String _$apiClientHash() => r'ee63cbb543cfa532c3b1c1f409b2227f2c3dbe8c';
+String _$apiClientHash() => r'71a78ac7c0dfdb0c341fc4f8482886b3681265da';

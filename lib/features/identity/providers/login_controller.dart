@@ -21,7 +21,7 @@ class LoginController extends _$LoginController {
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(() async {
       final tokens = await ref.read(identityApiProvider).login(request);
-      ref
+      await ref
           .read(sessionControllerProvider.notifier)
           .set(AuthSession(accessToken: tokens.accessToken, refreshToken: tokens.refreshToken));
     });

@@ -56,7 +56,7 @@ final class LoginControllerProvider
   }
 }
 
-String _$loginControllerHash() => r'475cb00eaa5ed3938f67f12942569e959d99bfd2';
+String _$loginControllerHash() => r'e24eb53bb532a4f1fd2c4b0fd9d1bf4b9d92253a';
 
 /// Invio del modulo di accesso (AC-8). Le credenziali errate e il blocco
 /// temporaneo (AU-21, AU-23) producono lo stesso codice indistinto

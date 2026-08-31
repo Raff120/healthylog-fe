@@ -9,14 +9,17 @@ import '../features/identity/presentation/password_reset_request_screen.dart';
 import '../features/identity/presentation/registration_details_screen.dart';
 import '../features/identity/presentation/role_selection_screen.dart';
 import 'placeholder_home_screen.dart';
+import 'splash_screen.dart';
 
 /// Instradamento (FE-3): ogni schermata corrisponde a un indirizzo (3.2
 /// interfaccia.md). Le schermate esterne all'applicazione (3.1) sono
-/// definite qui; la protezione delle rotte autenticate è compito di un
-/// task successivo di F06.
+/// definite qui; la protezione delle rotte autenticate (oltre alla sola
+/// verifica iniziale della sessione, TK-8) è compito di un task
+/// successivo di F06.
 final GoRouter appRouter = GoRouter(
-  initialLocation: '/login',
+  initialLocation: '/splash',
   routes: [
+    GoRoute(path: '/splash', builder: (context, state) => const SplashScreen()),
     GoRoute(path: '/login', builder: (context, state) => const LoginScreen()),
     GoRoute(
       path: '/register',

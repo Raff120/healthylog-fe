@@ -27,6 +27,11 @@ class IdentityApi {
     return TokenPair.fromJson(response.data as Map<String, dynamic>);
   }
 
+  Future<TokenPair> refresh(String refreshToken) async {
+    final response = await _dio.post('/auth/refresh', data: {'refreshToken': refreshToken});
+    return TokenPair.fromJson(response.data as Map<String, dynamic>);
+  }
+
   Future<void> verifyEmail(String token) {
     return _dio.post('/auth/verify-email', data: {'token': token});
   }

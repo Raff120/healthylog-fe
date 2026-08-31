@@ -9,29 +9,26 @@ part of 'session_controller.dart';
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
 /// Stato della sessione (5.2 interfaccia.md: l'accesso è richiesto una
-/// sola volta per dispositivo, AC-11, TK-15). La sola tenuta in memoria è
-/// provvisoria: la conservazione del token di rinnovo nell'archivio
-/// sicuro del dispositivo (TK-8) e il ripristino all'avvio sono compiti
-/// del prossimo task di F06 — qui la sessione esiste solo per la durata
-/// del processo.
+/// sola volta per dispositivo, AC-11, TK-15). All'avvio tenta il
+/// ripristino dal token di rinnovo conservato nell'archivio sicuro
+/// (TK-8): un token presente ma non più valido (revocato, scaduto) è
+/// trattato come sessione assente, non come errore da mostrare.
 
 @ProviderFor(SessionController)
 final sessionControllerProvider = SessionControllerProvider._();
 
 /// Stato della sessione (5.2 interfaccia.md: l'accesso è richiesto una
-/// sola volta per dispositivo, AC-11, TK-15). La sola tenuta in memoria è
-/// provvisoria: la conservazione del token di rinnovo nell'archivio
-/// sicuro del dispositivo (TK-8) e il ripristino all'avvio sono compiti
-/// del prossimo task di F06 — qui la sessione esiste solo per la durata
-/// del processo.
+/// sola volta per dispositivo, AC-11, TK-15). All'avvio tenta il
+/// ripristino dal token di rinnovo conservato nell'archivio sicuro
+/// (TK-8): un token presente ma non più valido (revocato, scaduto) è
+/// trattato come sessione assente, non come errore da mostrare.
 final class SessionControllerProvider
-    extends $NotifierProvider<SessionController, AuthSession?> {
+    extends $AsyncNotifierProvider<SessionController, AuthSession?> {
   /// Stato della sessione (5.2 interfaccia.md: l'accesso è richiesto una
-  /// sola volta per dispositivo, AC-11, TK-15). La sola tenuta in memoria è
-  /// provvisoria: la conservazione del token di rinnovo nell'archivio
-  /// sicuro del dispositivo (TK-8) e il ripristino all'avvio sono compiti
-  /// del prossimo task di F06 — qui la sessione esiste solo per la durata
-  /// del processo.
+  /// sola volta per dispositivo, AC-11, TK-15). All'avvio tenta il
+  /// ripristino dal token di rinnovo conservato nell'archivio sicuro
+  /// (TK-8): un token presente ma non più valido (revocato, scaduto) è
+  /// trattato come sessione assente, non come errore da mostrare.
   SessionControllerProvider._()
     : super(
         from: null,
@@ -49,36 +46,27 @@ final class SessionControllerProvider
   @$internal
   @override
   SessionController create() => SessionController();
-
-  /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(AuthSession? value) {
-    return $ProviderOverride(
-      origin: this,
-      providerOverride: $SyncValueProvider<AuthSession?>(value),
-    );
-  }
 }
 
-String _$sessionControllerHash() => r'91426b8e4d92fda9dbe125b533271e7e0b2d2bc1';
+String _$sessionControllerHash() => r'9d3ab2226e0e508c66f28033fea3ad37552443fb';
 
 /// Stato della sessione (5.2 interfaccia.md: l'accesso è richiesto una
-/// sola volta per dispositivo, AC-11, TK-15). La sola tenuta in memoria è
-/// provvisoria: la conservazione del token di rinnovo nell'archivio
-/// sicuro del dispositivo (TK-8) e il ripristino all'avvio sono compiti
-/// del prossimo task di F06 — qui la sessione esiste solo per la durata
-/// del processo.
+/// sola volta per dispositivo, AC-11, TK-15). All'avvio tenta il
+/// ripristino dal token di rinnovo conservato nell'archivio sicuro
+/// (TK-8): un token presente ma non più valido (revocato, scaduto) è
+/// trattato come sessione assente, non come errore da mostrare.
 
-abstract class _$SessionController extends $Notifier<AuthSession?> {
-  AuthSession? build();
+abstract class _$SessionController extends $AsyncNotifier<AuthSession?> {
+  FutureOr<AuthSession?> build();
   @$mustCallSuper
   @override
   WhenComplete runBuild() {
-    final ref = this.ref as $Ref<AuthSession?, AuthSession?>;
+    final ref = this.ref as $Ref<AsyncValue<AuthSession?>, AuthSession?>;
     final element =
         ref.element
             as $ClassProviderElement<
-              AnyNotifier<AuthSession?, AuthSession?>,
-              AuthSession?,
+              AnyNotifier<AsyncValue<AuthSession?>, AuthSession?>,
+              AsyncValue<AuthSession?>,
               Object?,
               Object?
             >;

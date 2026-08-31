@@ -8,13 +8,29 @@ part of 'identity_providers.dart';
 
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
+/// Usa [publicApiClientProvider], non [apiClientProvider]: tutti gli
+/// endpoint della feature identity sono pubblici (4.4 tecnica), e
+/// [apiClientProvider] dipende dalla sessione — usarlo qui produrrebbe
+/// una dipendenza circolare, dato che il ripristino della sessione
+/// (TK-8) chiama `/auth/refresh` attraverso questo stesso provider.
 
 @ProviderFor(identityApi)
 final identityApiProvider = IdentityApiProvider._();
 
+/// Usa [publicApiClientProvider], non [apiClientProvider]: tutti gli
+/// endpoint della feature identity sono pubblici (4.4 tecnica), e
+/// [apiClientProvider] dipende dalla sessione — usarlo qui produrrebbe
+/// una dipendenza circolare, dato che il ripristino della sessione
+/// (TK-8) chiama `/auth/refresh` attraverso questo stesso provider.
+
 final class IdentityApiProvider
     extends $FunctionalProvider<IdentityApi, IdentityApi, IdentityApi>
     with $Provider<IdentityApi> {
+  /// Usa [publicApiClientProvider], non [apiClientProvider]: tutti gli
+  /// endpoint della feature identity sono pubblici (4.4 tecnica), e
+  /// [apiClientProvider] dipende dalla sessione — usarlo qui produrrebbe
+  /// una dipendenza circolare, dato che il ripristino della sessione
+  /// (TK-8) chiama `/auth/refresh` attraverso questo stesso provider.
   IdentityApiProvider._()
     : super(
         from: null,
@@ -48,4 +64,4 @@ final class IdentityApiProvider
   }
 }
 
-String _$identityApiHash() => r'2f972f3c56d9ae4959ad79c9fb99648d4109d56d';
+String _$identityApiHash() => r'244284cf743676b60732a0f9f441e783f5fb5575';
