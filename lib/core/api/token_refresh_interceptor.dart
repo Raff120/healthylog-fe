@@ -13,8 +13,11 @@ import '../auth/session_controller.dart';
 /// `ApiErrorInterceptor` completa con `handler.reject`, che per
 /// impostazione predefinita salta il resto della coda di intercettori
 /// (vedi `ErrorInterceptorHandler.reject` in dio). Questo intercettore
-/// DEVE perciò essere aggiunto **dopo** `ApiErrorInterceptor`, così che
-/// il suo `onError` sia eseguito prima nell'ordine inverso della coda.
+/// DEVE perciò essere aggiunto **prima** di `ApiErrorInterceptor` (dio
+/// incatena gli `onError` nell'ordine di aggiunta, non al contrario),
+/// così da intercettare la risposta grezza prima che l'altro la
+/// traduca e completi con `reject` (vedi il commento su [apiClient]
+/// in `api_client.dart`).
 class TokenRefreshInterceptor extends Interceptor {
   TokenRefreshInterceptor(this._ref, this._dio);
 
