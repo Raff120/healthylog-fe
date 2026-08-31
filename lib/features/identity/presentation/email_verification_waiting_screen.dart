@@ -53,7 +53,7 @@ class _EmailVerificationWaitingScreenState extends ConsumerState<EmailVerificati
     state?.whenOrNull(
       data: (_) => _startCooldown(),
       error: (error, _) {
-        final code = error is ApiException ? error.code : '';
+        final code = error.asApiException?.code ?? '';
         if (code == 'VERIFICATION_RESEND_RATE_LIMITED') {
           _startCooldown();
         }

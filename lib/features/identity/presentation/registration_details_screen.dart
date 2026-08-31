@@ -150,13 +150,14 @@ class _RegistrationDetailsScreenState extends ConsumerState<RegistrationDetailsS
     state.whenOrNull(
       data: (result) => context.push('/verify-email', extra: result.email),
       error: (error, _) {
-        if (error is ApiException && error.code == 'EMAIL_ALREADY_USED') {
-          setState(() => _fieldErrors['email'] = error.code);
-        } else if (error is ApiException && error.code == 'USERNAME_ALREADY_USED') {
-          setState(() => _fieldErrors['username'] = error.code);
+        final code = error.asApiException?.code;
+        if (code == 'EMAIL_ALREADY_USED') {
+          setState(() => _fieldErrors['email'] = code);
+        } else if (code == 'USERNAME_ALREADY_USED') {
+          setState(() => _fieldErrors['username'] = code);
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(describeApiError(error is ApiException ? error.code : ''))),
+            SnackBar(content: Text(describeApiError(code ?? ''))),
           );
         }
       },

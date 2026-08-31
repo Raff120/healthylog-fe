@@ -63,7 +63,7 @@ class _PasswordResetConfirmScreenState extends ConsumerState<PasswordResetConfir
         context.go('/login');
       },
       error: (error, _) {
-        final code = error is ApiException ? error.code : '';
+        final code = error.asApiException?.code ?? '';
         if (code == 'PASSWORD_RESET_TOKEN_INVALID') {
           setState(() => _expired = true);
         } else {

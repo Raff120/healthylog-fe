@@ -49,7 +49,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     state.whenOrNull(
       data: (_) => context.go('/home'),
       error: (error, _) {
-        final code = error is ApiException ? error.code : null;
+        final code = error.asApiException?.code;
         if (code == 'ACCOUNT_NOT_VERIFIED') {
           context.push('/verify-email', extra: _email.text.trim());
           return;
