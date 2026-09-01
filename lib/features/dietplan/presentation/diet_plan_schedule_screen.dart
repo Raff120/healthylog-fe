@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../app/app_breakpoints.dart';
 import '../../../app/theme/app_spacing.dart';
 import '../../../app/theme/theme_context.dart';
 import '../../../core/api/api_error_messages.dart';
 import '../../../core/api/api_exception.dart';
+import '../../../core/widgets/app_primary_button.dart';
 import '../data/diet_plan.dart';
 import '../data/diet_plan_requests.dart';
+import '../data/plan_status.dart';
 import '../data/slot_type.dart';
 import '../data/weekday.dart';
 import '../providers/diet_plan_providers.dart';
@@ -26,13 +29,15 @@ final RegExp _recipeNameFieldPattern = RegExp(r'^days\[(\d+)\]\.slots\[(\d+)\]\.
 /// su `compact`, navigazione dei giorni affiancata alla redazione su
 /// `expanded` e oltre (MP-6, 7.3 interfaccia.md).
 ///
-/// Non compaiono: la conferma del piano (CV-2, macchina a stati di F10,
-/// non ancora implementata) e la striscia informativa di modifica di un
-/// piano attivo (5.3 funzionale, F22) — il backend ammette la
-/// sostituzione dello schema solo sul piano in Bozza (`PLAN_NOT_DRAFT`),
-/// unico caso qui possibile. Il salvataggio come template (TP-5, CD-18)
-/// compare nel menu dell'intestazione, disponibile in ogni momento (7.3
-/// interfaccia.md), non condizionato alle modifiche pendenti.
+/// La conferma del piano (CV-2) compare in fondo, solo in Bozza (7.3
+/// interfaccia.md). Non compare invece la striscia informativa di
+/// modifica di un piano attivo (5.3 funzionale, F22) — il backend
+/// ammette la sostituzione dello schema solo sul piano in Bozza
+/// (`PLAN_NOT_DRAFT`), unico caso qui possibile finché F22 non introduce
+/// la modifica di un piano in corso. Il salvataggio come template (TP-5,
+/// CD-18) compare nel menu dell'intestazione, disponibile in ogni
+/// momento (7.3 interfaccia.md), non condizionato alle modifiche
+/// pendenti.
 class DietPlanScheduleScreen extends ConsumerStatefulWidget {
   const DietPlanScheduleScreen({super.key, required this.planId});
 
@@ -191,6 +196,89 @@ class _DietPlanScheduleScreenState extends ConsumerState<DietPlanScheduleScreen>
     );
   }
 
+  /// CV-2, CD-13, CD-15: la completezza è verificata qui, sullo schema
+  /// già salvato (l'azione resta disabilitata mentre restano modifiche
+  /// pendenti, vedi `build`) — non serve attendere l'esito del server per
+  /// sapere quali giorni mancano, `EditableDay.hasIncompleteSlot` lo dice
+  /// già (CD-15).
+  Future<void> _confirm() async {
+    final incompleteDays = _days!.where((day) => day.hasIncompleteSlot).toList();
+    if (incompleteDays.isNotEmpty) {
+      await _showIncompleteDaysSheet(incompleteDays);
+      return;
+    }
+    await ref.read(confirmDietPlanControllerProvider.notifier).confirm(widget.planId);
+    if (!mounted) return;
+    final state = ref.read(confirmDietPlanControllerProvider);
+    state?.whenOrNull(
+      data: (_) => context.pushReplacement('/profile/plans'),
+      error: (error, _) {
+        final exception = error.asApiException;
+        if (exception?.code == 'PLAN_INCOMPLETE') {
+          // Difformità fra lo stato locale e quello del server (raro: lo
+          // schema è stato modificato altrove nel frattempo): si rimanda
+          // comunque a un giorno, sul modello sotto, ma senza poter
+          // essere puntuali quanto la verifica locale.
+          setState(() => _selectedDay = _days!.first.dayOfWeek);
+        }
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(describeApiError(exception?.code ?? ''))),
+        );
+      },
+    );
+  }
+
+  /// CD-15, TR-6: elenco puntuale dei giorni incompleti, ciascuno
+  /// toccabile per raggiungerlo direttamente. `isScrollControlled` e
+  /// l'elenco proprio (non un `Column` di soli `ListTile`) evitano un
+  /// overflow quando lo schema è ancora quasi interamente da compilare —
+  /// fino a sette giorni, più di quanti un foglio di altezza fissa ne
+  /// contenga.
+  Future<void> _showIncompleteDaysSheet(List<EditableDay> incompleteDays) {
+    final colors = context.colors;
+    final typography = context.typography;
+    return showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: colors.surface,
+      isScrollControlled: true,
+      builder: (sheetContext) => SafeArea(
+        child: ConstrainedBox(
+          constraints: BoxConstraints(maxHeight: MediaQuery.of(sheetContext).size.height * 0.7),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(AppSpacing.md, AppSpacing.md, AppSpacing.md, AppSpacing.xs),
+                child: Text('Schema incompleto', style: typography.titleMedium.copyWith(color: colors.textPrimary)),
+              ),
+              Flexible(
+                child: ListView(
+                  shrinkWrap: true,
+                  children: [
+                    for (final day in incompleteDays)
+                      ListTile(
+                        title: Text(day.dayOfWeek.label, style: typography.bodyLarge.copyWith(color: colors.textPrimary)),
+                        subtitle: Text(
+                          '${day.slots.where((slot) => slot.isEmpty).length} pasto/i senza contenuto',
+                          style: typography.caption.copyWith(color: colors.textSecondary),
+                        ),
+                        trailing: Icon(Icons.chevron_right, color: colors.textTertiary),
+                        onTap: () {
+                          Navigator.of(sheetContext).pop();
+                          setState(() => _selectedDay = day.dayOfWeek);
+                        },
+                      ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   /// Elenco degli slot del giorno selezionato e azioni di aggiunta
   /// (CD-7): comune a `compact` ed `expanded` (MP-6), a cui cambia solo
   /// ciò che vi si affianca.
@@ -245,9 +333,11 @@ class _DietPlanScheduleScreenState extends ConsumerState<DietPlanScheduleScreen>
     final typography = context.typography;
     final planState = ref.watch(dietPlanScheduleControllerProvider(widget.planId));
     // Tiene vivo il controller per la durata del salvataggio come
-    // template (autoDispose lo eliminerebbe altrimenti fra un
-    // `ref.read` e l'altro, dato che nessun altro punto lo osserva).
+    // template, e di quello della conferma (autoDispose li eliminerebbe
+    // altrimenti fra un `ref.read` e l'altro, dato che nessun altro punto
+    // li osserva).
     ref.watch(saveDietPlanAsTemplateControllerProvider);
+    final confirming = ref.watch(confirmDietPlanControllerProvider)?.isLoading ?? false;
 
     return PopScope(
       canPop: !_dirty,
@@ -330,8 +420,9 @@ class _DietPlanScheduleScreenState extends ConsumerState<DietPlanScheduleScreen>
               // MP-6, MP-7: la disposizione dipende dalla larghezza della
               // finestra, non dalla piattaforma — la stessa soglia già
               // condivisa da tutte le schermate (app_breakpoints.dart).
+              final Widget editor;
               if (context.breakpoint.isAtLeastExpanded) {
-                return Row(
+                editor = Row(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     SizedBox(
@@ -346,13 +437,36 @@ class _DietPlanScheduleScreenState extends ConsumerState<DietPlanScheduleScreen>
                     Expanded(child: _buildDayEditor(day)),
                   ],
                 );
+              } else {
+                editor = Column(
+                  children: [
+                    DaySelector(days: _days!, selected: _selectedDay, onSelect: (d) => setState(() => _selectedDay = d)),
+                    const Divider(height: 1),
+                    Expanded(child: _buildDayEditor(day)),
+                  ],
+                );
               }
+
+              // CV-2, 7.3 interfaccia.md: solo in Bozza. Il pulsante di
+              // salvataggio già impedisce di lasciare modifiche pendenti
+              // non riflesse nel piano che il server confermerebbe.
+              if (plan.status != PlanStatus.draft) return editor;
 
               return Column(
                 children: [
-                  DaySelector(days: _days!, selected: _selectedDay, onSelect: (d) => setState(() => _selectedDay = d)),
+                  Expanded(child: editor),
                   const Divider(height: 1),
-                  Expanded(child: _buildDayEditor(day)),
+                  SafeArea(
+                    top: false,
+                    child: Padding(
+                      padding: const EdgeInsets.all(AppSpacing.md),
+                      child: AppPrimaryButton(
+                        label: 'Conferma piano',
+                        loading: confirming,
+                        onPressed: _dirty ? null : _confirm,
+                      ),
+                    ),
+                  ),
                 ],
               );
             },

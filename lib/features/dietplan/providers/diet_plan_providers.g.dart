@@ -236,3 +236,64 @@ abstract class _$DietPlanScheduleController extends $AsyncNotifier<DietPlan> {
     return element.handleCreate(ref, () => build(_$args));
   }
 }
+
+/// CV-2: conferma del piano in redazione.
+
+@ProviderFor(ConfirmDietPlanController)
+final confirmDietPlanControllerProvider = ConfirmDietPlanControllerProvider._();
+
+/// CV-2: conferma del piano in redazione.
+final class ConfirmDietPlanControllerProvider
+    extends
+        $NotifierProvider<ConfirmDietPlanController, AsyncValue<DietPlan>?> {
+  /// CV-2: conferma del piano in redazione.
+  ConfirmDietPlanControllerProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'confirmDietPlanControllerProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$confirmDietPlanControllerHash();
+
+  @$internal
+  @override
+  ConfirmDietPlanController create() => ConfirmDietPlanController();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(AsyncValue<DietPlan>? value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<AsyncValue<DietPlan>?>(value),
+    );
+  }
+}
+
+String _$confirmDietPlanControllerHash() =>
+    r'77ae868118f159cf316d0c196ef3c1e4dcb02010';
+
+/// CV-2: conferma del piano in redazione.
+
+abstract class _$ConfirmDietPlanController
+    extends $Notifier<AsyncValue<DietPlan>?> {
+  AsyncValue<DietPlan>? build();
+  @$mustCallSuper
+  @override
+  WhenComplete runBuild() {
+    final ref = this.ref as $Ref<AsyncValue<DietPlan>?, AsyncValue<DietPlan>?>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<AsyncValue<DietPlan>?, AsyncValue<DietPlan>?>,
+              AsyncValue<DietPlan>?,
+              Object?,
+              Object?
+            >;
+    return element.handleCreate(ref, build);
+  }
+}

@@ -116,7 +116,12 @@ void main() {
     expect(find.text('Dieta di prova'), findsOneWidget);
     expect(find.text('Colazione'), findsOneWidget);
     expect(find.text('Pranzo'), findsOneWidget);
+    // F10: "Conferma piano" in fondo (solo in Bozza, 7.3 interfaccia.md)
+    // riduce lo spazio verticale dell'elenco degli slot — "Cena", ultimo
+    // dello schema predefinito, va raggiunto scorrendo.
+    await tester.scrollUntilVisible(find.text('Cena'), 100);
     expect(find.text('Cena'), findsOneWidget);
+    expect(find.text('Conferma piano'), findsOneWidget);
   });
 
   testWidgets('su schermo ampio affianca la navigazione dei giorni alla redazione (MP-6)', (tester) async {
@@ -190,5 +195,72 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Serve una denominazione se è presente il testo della ricetta'), findsOneWidget);
+  });
+
+  testWidgets('la conferma di uno schema incompleto elenca i giorni mancanti (CD-15)', (tester) async {
+    final dio = Dio(BaseOptions(baseUrl: 'http://example.test'));
+    // Ogni giorno è privo di contenuto su ogni slot (default di
+    // _planJson): la conferma non deve nemmeno raggiungere il server.
+    dio.httpClientAdapter = _JsonAdapter((_) => _planJson());
+    dio.interceptors.add(ApiErrorInterceptor());
+
+    await _pumpScheduleScreen(tester, DietPlanApi(dio));
+    await tester.tap(find.text('Conferma piano'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Schema incompleto'), findsOneWidget);
+    // `find.widgetWithText` invece di `find.text`: il selettore dei
+    // giorni riporta la stessa etichetta abbreviata a un'iniziale
+    // (`day_selector.dart`), non un rischio di ambiguità qui, ma un
+    // riscontro più mirato — cerca proprio la voce del foglio.
+    expect(find.widgetWithText(ListTile, 'Lunedì'), findsOneWidget);
+  });
+
+  testWidgets('conferma un piano completo e conduce alla gestione (CV-2)', (tester) async {
+    final dio = Dio(BaseOptions(baseUrl: 'http://example.test'));
+    // CD-13: la conferma richiede ogni giorno completo, non il solo
+    // lunedì — a differenza del test precedente, qui tutti i sette.
+    final completeSlots = [
+      for (var i = 0; i < _slotTypesInOrder.length; i++) _slotJson(_slotTypesInOrder[i], i, content: 'Pasto $i'),
+    ];
+    Map<String, dynamic> completePlan({String status = 'DRAFT'}) {
+      final plan = _planJson(mondaySlots: completeSlots);
+      plan['status'] = status;
+      for (final day in plan['weeklySchedule'] as List) {
+        (day as Map<String, dynamic>)['slots'] = completeSlots;
+      }
+      return plan;
+    }
+
+    dio.httpClientAdapter = _JsonAdapter((options) {
+      if (options.path.endsWith('/confirm')) {
+        return completePlan(status: 'SCHEDULED');
+      }
+      return completePlan();
+    });
+    dio.interceptors.add(ApiErrorInterceptor());
+
+    final router = GoRouter(
+      initialLocation: '/diet-plans/plan-1/schedule',
+      routes: [
+        GoRoute(
+          path: '/diet-plans/:id/schedule',
+          builder: (context, state) => DietPlanScheduleScreen(planId: state.pathParameters['id']!),
+        ),
+        GoRoute(path: '/profile/plans', builder: (context, state) => const Scaffold(body: Text('Gestione piano'))),
+      ],
+    );
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [dietPlanApiProvider.overrideWithValue(DietPlanApi(dio))],
+        child: MaterialApp.router(theme: AppTheme.light, routerConfig: router),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Conferma piano'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Gestione piano'), findsOneWidget);
   });
 }

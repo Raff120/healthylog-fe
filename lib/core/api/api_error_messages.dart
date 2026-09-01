@@ -20,6 +20,10 @@ String describeApiError(String code) {
     'REFRESH_TOKEN_INVALID' => 'La sessione non è più valida. Accedi di nuovo.',
     'AUTHENTICATION_REQUIRED' => 'Devi accedere per continuare.',
     'NETWORK_ERROR' => 'Connessione assente. Riprova.',
+    'PLAN_INCOMPLETE' => 'Lo schema settimanale non è ancora completo.',
+    'PLAN_TRANSITION_NOT_ALLOWED' => 'Questa operazione non è più possibile per il piano.',
+    'PLAN_ACTIVE_CANNOT_DELETE' => 'Un piano Attivo non può essere eliminato: sospendilo o concludilo prima.',
+    'PLAN_PERIOD_OVERLAP' => 'Il periodo si sovrappone a un piano esistente.',
     _ => 'Qualcosa non ha funzionato. Riprova.',
   };
 }

@@ -39,3 +39,15 @@ class DietPlanScheduleController extends _$DietPlanScheduleController {
     return plan;
   }
 }
+
+/// CV-2: conferma del piano in redazione.
+@riverpod
+class ConfirmDietPlanController extends _$ConfirmDietPlanController {
+  @override
+  AsyncValue<DietPlan>? build() => null;
+
+  Future<void> confirm(String planId) async {
+    state = const AsyncValue.loading();
+    state = await AsyncValue.guard(() => ref.read(dietPlanApiProvider).confirm(planId));
+  }
+}

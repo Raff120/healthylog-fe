@@ -31,4 +31,10 @@ class DietPlanApi {
     final response = await _dio.post('/diet-plans/$id/save-as-template', data: request.toJson());
     return DietPlanTemplate.fromJson(response.data as Map<String, dynamic>);
   }
+
+  /// CV-2: da Bozza a Programmato.
+  Future<DietPlan> confirm(String id) async {
+    final response = await _dio.post('/diet-plans/$id/confirm');
+    return DietPlan.fromJson(response.data as Map<String, dynamic>);
+  }
 }
