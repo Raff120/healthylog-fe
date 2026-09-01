@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../app/app_breakpoints.dart';
 import '../../../app/theme/app_spacing.dart';
 import '../../../app/theme/theme_context.dart';
 import '../../../core/api/api_error_messages.dart';
@@ -13,13 +14,15 @@ import '../providers/diet_plan_providers.dart';
 import 'editable_slot.dart';
 import 'slot_type_presentation.dart';
 import 'widgets/day_selector.dart';
+import 'widgets/day_sidebar.dart';
 import 'widgets/slot_card.dart';
 
 final RegExp _recipeNameFieldPattern = RegExp(r'^days\[(\d+)\]\.slots\[(\d+)\]\.recipeName$');
 
 /// Redazione dello schema settimanale (7.3 interfaccia.md, CD-5, CD-7,
-/// CD-8, CD-10, CD-11). Disposizione `compact` soltanto (un giorno per
-/// volta): l'adattamento a schermo ampio è il task successivo di F08.
+/// CD-8, CD-10, CD-11, MP-6): un giorno per volta con selettore in cima
+/// su `compact`, navigazione dei giorni affiancata alla redazione su
+/// `expanded` e oltre (MP-6, 7.3 interfaccia.md).
 ///
 /// Non compaiono: la conferma del piano (CV-2, macchina a stati di F10,
 /// non ancora implementata), il salvataggio come template (TP-5, F09) e
@@ -160,6 +163,54 @@ class _DietPlanScheduleScreenState extends ConsumerState<DietPlanScheduleScreen>
     );
   }
 
+  /// Elenco degli slot del giorno selezionato e azioni di aggiunta
+  /// (CD-7): comune a `compact` ed `expanded` (MP-6), a cui cambia solo
+  /// ciò che vi si affianca.
+  Widget _buildDayEditor(EditableDay day) {
+    return Column(
+      children: [
+        Expanded(
+          child: ReorderableListView.builder(
+            buildDefaultDragHandles: false,
+            padding: const EdgeInsets.all(AppSpacing.md),
+            itemCount: day.slots.length,
+            onReorderItem: _reorder,
+            itemBuilder: (context, index) {
+              final slot = day.slots[index];
+              return SlotCard(
+                key: ValueKey(slot),
+                slot: slot,
+                index: index,
+                onChanged: _markDirty,
+                onRemove: () => _removeSlot(slot),
+              );
+            },
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(AppSpacing.md, 0, AppSpacing.md, AppSpacing.md),
+          child: Wrap(
+            spacing: AppSpacing.xs,
+            runSpacing: AppSpacing.xs,
+            children: [
+              for (final type in [SlotType.breakfast, SlotType.lunch, SlotType.dinner])
+                OutlinedButton.icon(
+                  onPressed: day.hasType(type) ? null : () => _addSlot(type),
+                  icon: Icon(type.icon, size: 18),
+                  label: Text('Aggiungi ${type.displayName.toLowerCase()}'),
+                ),
+              OutlinedButton.icon(
+                onPressed: () => _addSlot(SlotType.snack),
+                icon: const Icon(Icons.add, size: 18),
+                label: const Text('Aggiungi spuntino'),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
@@ -236,48 +287,32 @@ class _DietPlanScheduleScreenState extends ConsumerState<DietPlanScheduleScreen>
               _initializeFrom(plan);
               final day = _currentDay;
 
+              // MP-6, MP-7: la disposizione dipende dalla larghezza della
+              // finestra, non dalla piattaforma — la stessa soglia già
+              // condivisa da tutte le schermate (app_breakpoints.dart).
+              if (context.breakpoint.isAtLeastExpanded) {
+                return Row(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    SizedBox(
+                      width: AppSpacing.widthDayNavigationSidebar,
+                      child: DaySidebar(
+                        days: _days!,
+                        selected: _selectedDay,
+                        onSelect: (d) => setState(() => _selectedDay = d),
+                      ),
+                    ),
+                    const VerticalDivider(width: 1),
+                    Expanded(child: _buildDayEditor(day)),
+                  ],
+                );
+              }
+
               return Column(
                 children: [
                   DaySelector(days: _days!, selected: _selectedDay, onSelect: (d) => setState(() => _selectedDay = d)),
                   const Divider(height: 1),
-                  Expanded(
-                    child: ReorderableListView.builder(
-                      buildDefaultDragHandles: false,
-                      padding: const EdgeInsets.fromLTRB(AppSpacing.md, AppSpacing.md, AppSpacing.md, AppSpacing.md),
-                      itemCount: day.slots.length,
-                      onReorderItem: _reorder,
-                      itemBuilder: (context, index) {
-                        final slot = day.slots[index];
-                        return SlotCard(
-                          key: ValueKey(slot),
-                          slot: slot,
-                          index: index,
-                          onChanged: _markDirty,
-                          onRemove: () => _removeSlot(slot),
-                        );
-                      },
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(AppSpacing.md, 0, AppSpacing.md, AppSpacing.md),
-                    child: Wrap(
-                      spacing: AppSpacing.xs,
-                      runSpacing: AppSpacing.xs,
-                      children: [
-                        for (final type in [SlotType.breakfast, SlotType.lunch, SlotType.dinner])
-                          OutlinedButton.icon(
-                            onPressed: day.hasType(type) ? null : () => _addSlot(type),
-                            icon: Icon(type.icon, size: 18),
-                            label: Text('Aggiungi ${type.displayName.toLowerCase()}'),
-                          ),
-                        OutlinedButton.icon(
-                          onPressed: () => _addSlot(SlotType.snack),
-                          icon: const Icon(Icons.add, size: 18),
-                          label: const Text('Aggiungi spuntino'),
-                        ),
-                      ],
-                    ),
-                  ),
+                  Expanded(child: _buildDayEditor(day)),
                 ],
               );
             },

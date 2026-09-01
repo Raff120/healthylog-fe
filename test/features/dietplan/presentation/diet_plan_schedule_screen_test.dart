@@ -119,6 +119,23 @@ void main() {
     expect(find.text('Cena'), findsOneWidget);
   });
 
+  testWidgets('su schermo ampio affianca la navigazione dei giorni alla redazione (MP-6)', (tester) async {
+    addTearDown(() => tester.view.resetPhysicalSize());
+    tester.view.physicalSize = const Size(1300, 800);
+    tester.view.devicePixelRatio = 1.0;
+
+    final dio = Dio(BaseOptions(baseUrl: 'http://example.test'));
+    dio.httpClientAdapter = _JsonAdapter((_) => _planJson());
+    dio.interceptors.add(ApiErrorInterceptor());
+
+    await _pumpScheduleScreen(tester, DietPlanApi(dio));
+
+    // 7.3 interfaccia.md: su `expanded` la navigazione dei giorni mostra
+    // il nome per intero (Lunedì...), non le sole iniziali di `compact`.
+    expect(find.text('Lunedì'), findsOneWidget);
+    expect(find.text('Colazione'), findsOneWidget);
+  });
+
   testWidgets('il salvataggio riuscito azzera le modifiche pendenti (CD-10)', (tester) async {
     final dio = Dio(BaseOptions(baseUrl: 'http://example.test'));
     dio.httpClientAdapter = _JsonAdapter((options) {
