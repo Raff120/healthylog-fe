@@ -57,6 +57,22 @@ class DietPlanTemplateScheduleController extends _$DietPlanTemplateScheduleContr
   }
 }
 
+/// Rinomina e modifica della descrizione (TP-12).
+@riverpod
+class UpdateDietPlanTemplateController extends _$UpdateDietPlanTemplateController {
+  @override
+  AsyncValue<DietPlanTemplate>? build() => null;
+
+  Future<void> update(String templateId, UpdateDietPlanTemplateRequest request) async {
+    state = const AsyncValue.loading();
+    state = await AsyncValue.guard(() => ref.read(dietPlanTemplateApiProvider).update(templateId, request));
+    if (state?.hasError == false) {
+      ref.invalidate(dietPlanTemplatePreviewProvider(templateId));
+      ref.invalidate(dietPlanTemplateListProvider);
+    }
+  }
+}
+
 /// Eliminazione del template (TP-12): nessun effetto sui piani già
 /// derivati (CT-16).
 @riverpod

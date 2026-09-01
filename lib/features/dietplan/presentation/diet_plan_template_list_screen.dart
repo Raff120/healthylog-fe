@@ -9,6 +9,7 @@ import '../../../core/api/api_exception.dart';
 import '../data/diet_plan_template.dart';
 import '../data/diet_plan_template_requests.dart';
 import '../providers/diet_plan_template_providers.dart';
+import 'widgets/name_description_dialog.dart';
 
 /// Elenco dei template (7.4 interfaccia.md, CT-2, CT-3): raggiunto per ora
 /// da un punto d'accesso provvisorio (nessuna schermata "Piani" esiste
@@ -17,9 +18,15 @@ import '../providers/diet_plan_template_providers.dart';
 class DietPlanTemplateListScreen extends ConsumerWidget {
   const DietPlanTemplateListScreen({super.key});
 
+  /// TP-3: la denominazione è raccolta subito, non proposta di default —
+  /// a differenza del piano (CD-1), il template non ha un'origine "in
+  /// bianco" da nominare in un secondo momento.
   Future<void> _create(BuildContext context, WidgetRef ref) async {
+    final input = await showNameDescriptionDialog(context, title: 'Nuovo template', confirmLabel: 'Crea');
+    if (input == null) return;
+    if (!context.mounted) return;
     await ref.read(createDietPlanTemplateControllerProvider.notifier).create(
-          const CreateDietPlanTemplateRequest(name: 'Nuovo template'),
+          CreateDietPlanTemplateRequest(name: input.name, description: input.description),
         );
     final state = ref.read(createDietPlanTemplateControllerProvider);
     if (!context.mounted || state == null) return;

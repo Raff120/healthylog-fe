@@ -439,6 +439,82 @@ abstract class _$DietPlanTemplateScheduleController
   }
 }
 
+/// Rinomina e modifica della descrizione (TP-12).
+
+@ProviderFor(UpdateDietPlanTemplateController)
+final updateDietPlanTemplateControllerProvider =
+    UpdateDietPlanTemplateControllerProvider._();
+
+/// Rinomina e modifica della descrizione (TP-12).
+final class UpdateDietPlanTemplateControllerProvider
+    extends
+        $NotifierProvider<
+          UpdateDietPlanTemplateController,
+          AsyncValue<DietPlanTemplate>?
+        > {
+  /// Rinomina e modifica della descrizione (TP-12).
+  UpdateDietPlanTemplateControllerProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'updateDietPlanTemplateControllerProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$updateDietPlanTemplateControllerHash();
+
+  @$internal
+  @override
+  UpdateDietPlanTemplateController create() =>
+      UpdateDietPlanTemplateController();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(AsyncValue<DietPlanTemplate>? value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<AsyncValue<DietPlanTemplate>?>(
+        value,
+      ),
+    );
+  }
+}
+
+String _$updateDietPlanTemplateControllerHash() =>
+    r'db0caaf659519b76159b32338faf048cf5c51fb1';
+
+/// Rinomina e modifica della descrizione (TP-12).
+
+abstract class _$UpdateDietPlanTemplateController
+    extends $Notifier<AsyncValue<DietPlanTemplate>?> {
+  AsyncValue<DietPlanTemplate>? build();
+  @$mustCallSuper
+  @override
+  WhenComplete runBuild() {
+    final ref =
+        this.ref
+            as $Ref<
+              AsyncValue<DietPlanTemplate>?,
+              AsyncValue<DietPlanTemplate>?
+            >;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<
+                AsyncValue<DietPlanTemplate>?,
+                AsyncValue<DietPlanTemplate>?
+              >,
+              AsyncValue<DietPlanTemplate>?,
+              Object?,
+              Object?
+            >;
+    return element.handleCreate(ref, build);
+  }
+}
+
 /// Eliminazione del template (TP-12): nessun effetto sui piani già
 /// derivati (CT-16).
 

@@ -6,7 +6,6 @@ import '../../../app/theme/app_spacing.dart';
 import '../../../app/theme/theme_context.dart';
 import '../../../core/api/api_error_messages.dart';
 import '../../../core/api/api_exception.dart';
-import '../../../core/widgets/app_text_field.dart';
 import '../data/diet_plan.dart';
 import '../data/diet_plan_requests.dart';
 import '../data/slot_type.dart';
@@ -17,6 +16,7 @@ import 'editable_slot.dart';
 import 'slot_type_presentation.dart';
 import 'widgets/day_selector.dart';
 import 'widgets/day_sidebar.dart';
+import 'widgets/name_description_dialog.dart';
 import 'widgets/slot_card.dart';
 
 final RegExp _recipeNameFieldPattern = RegExp(r'^days\[(\d+)\]\.slots\[(\d+)\]\.recipeName$');
@@ -118,39 +118,15 @@ class _DietPlanScheduleScreenState extends ConsumerState<DietPlanScheduleScreen>
   /// interfaccia.md), non condizionata alle modifiche pendenti — copia lo
   /// schema salvato sul server, non quello ancora in redazione locale.
   Future<void> _saveAsTemplate(String planName) async {
-    final nameController = TextEditingController(text: planName);
-    final descriptionController = TextEditingController();
-    final colors = context.colors;
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        backgroundColor: colors.surface,
-        title: const Text('Salva come template'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            AppTextField(label: 'Denominazione', controller: nameController),
-            const SizedBox(height: AppSpacing.sm),
-            AppTextField(label: 'Descrizione', controller: descriptionController, maxLines: 3),
-          ],
-        ),
-        actions: [
-          TextButton(onPressed: () => Navigator.of(dialogContext).pop(false), child: const Text('Annulla')),
-          TextButton(onPressed: () => Navigator.of(dialogContext).pop(true), child: const Text('Salva')),
-        ],
-      ),
+    final input = await showNameDescriptionDialog(
+      context,
+      title: 'Salva come template',
+      confirmLabel: 'Salva',
+      initialName: planName,
     );
-    if (confirmed != true || nameController.text.trim().isEmpty) {
-      nameController.dispose();
-      descriptionController.dispose();
-      return;
-    }
-    final request = SaveDietPlanAsTemplateRequest(
-      name: nameController.text.trim(),
-      description: descriptionController.text.trim().isEmpty ? null : descriptionController.text.trim(),
-    );
-    nameController.dispose();
-    descriptionController.dispose();
+    if (input == null) return;
+    if (!mounted) return;
+    final request = SaveDietPlanAsTemplateRequest(name: input.name, description: input.description);
     await ref.read(saveDietPlanAsTemplateControllerProvider.notifier).save(widget.planId, request);
     if (!mounted) return;
     final state = ref.read(saveDietPlanAsTemplateControllerProvider);
@@ -268,6 +244,10 @@ class _DietPlanScheduleScreenState extends ConsumerState<DietPlanScheduleScreen>
     final colors = context.colors;
     final typography = context.typography;
     final planState = ref.watch(dietPlanScheduleControllerProvider(widget.planId));
+    // Tiene vivo il controller per la durata del salvataggio come
+    // template (autoDispose lo eliminerebbe altrimenti fra un
+    // `ref.read` e l'altro, dato che nessun altro punto lo osserva).
+    ref.watch(saveDietPlanAsTemplateControllerProvider);
 
     return PopScope(
       canPop: !_dirty,

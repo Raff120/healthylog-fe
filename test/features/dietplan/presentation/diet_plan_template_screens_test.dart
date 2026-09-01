@@ -43,6 +43,32 @@ class _JsonAdapter implements HttpClientAdapter {
   }
 }
 
+class _RecordingAdapter implements HttpClientAdapter {
+  _RecordingAdapter(this._responseFor);
+
+  final Object? Function(RequestOptions options) _responseFor;
+  final List<RequestOptions> requests = [];
+
+  @override
+  void close({bool force = false}) {}
+
+  @override
+  Future<ResponseBody> fetch(
+    RequestOptions options,
+    Stream<Uint8List>? requestStream,
+    Future<void>? cancelFuture,
+  ) async {
+    requests.add(options);
+    return ResponseBody.fromString(
+      jsonEncode(_responseFor(options)),
+      200,
+      headers: {
+        Headers.contentTypeHeader: [Headers.jsonContentType],
+      },
+    );
+  }
+}
+
 final _templateSummaryJson = {
   'id': 'template-1',
   'name': 'Template estivo',
@@ -173,5 +199,107 @@ void main() {
 
     expect(find.text('Da un template'), findsNothing);
     expect(find.text('Denominazione'), findsOneWidget);
+  });
+
+  testWidgets('la creazione senza denominazione non invia alcuna richiesta (TP-3)', (tester) async {
+    final adapter = _RecordingAdapter((options) => [_templateSummaryJson]);
+    final dio = Dio(BaseOptions(baseUrl: 'http://example.test'));
+    dio.httpClientAdapter = adapter;
+    dio.interceptors.add(ApiErrorInterceptor());
+    final api = DietPlanTemplateApi(dio);
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [dietPlanTemplateApiProvider.overrideWithValue(api)],
+        child: MaterialApp(theme: AppTheme.light, home: const DietPlanTemplateListScreen()),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byIcon(Icons.add));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Crea'));
+    await tester.pumpAndSettle();
+
+    expect(adapter.requests.where((r) => r.method == 'POST'), isEmpty);
+  });
+
+  testWidgets('la creazione con denominazione la invia e apre la redazione (TP-3)', (tester) async {
+    final adapter = _RecordingAdapter((options) {
+      if (options.method == 'POST') return _templateJson();
+      return [_templateSummaryJson];
+    });
+    final dio = Dio(BaseOptions(baseUrl: 'http://example.test'));
+    dio.httpClientAdapter = adapter;
+    dio.interceptors.add(ApiErrorInterceptor());
+    final api = DietPlanTemplateApi(dio);
+    final router = GoRouter(
+      initialLocation: '/diet-plan-templates',
+      routes: [
+        GoRoute(path: '/diet-plan-templates', builder: (context, state) => const DietPlanTemplateListScreen()),
+        GoRoute(
+          path: '/diet-plan-templates/:id/schedule',
+          builder: (context, state) => Text('redazione ${state.pathParameters['id']}'),
+        ),
+      ],
+    );
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [dietPlanTemplateApiProvider.overrideWithValue(api)],
+        child: MaterialApp.router(theme: AppTheme.light, routerConfig: router),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byIcon(Icons.add));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextField).first, 'Il mio template');
+    await tester.tap(find.text('Crea'));
+    await tester.pumpAndSettle();
+
+    final created = adapter.requests.firstWhere((r) => r.method == 'POST');
+    expect((created.data as Map)['name'], 'Il mio template');
+    expect(find.text('redazione template-1'), findsOneWidget);
+  });
+
+  testWidgets('la denominazione è modificabile dall\'anteprima (TP-12)', (tester) async {
+    final dio = Dio(BaseOptions(baseUrl: 'http://example.test'));
+    final adapter = _RecordingAdapter((options) => _templateJson());
+    dio.httpClientAdapter = adapter;
+    dio.interceptors.add(ApiErrorInterceptor());
+    final api = DietPlanTemplateApi(dio);
+    final router = GoRouter(
+      initialLocation: '/diet-plan-templates/template-1',
+      routes: [
+        GoRoute(
+          path: '/diet-plan-templates/:id',
+          builder: (context, state) =>
+              DietPlanTemplatePreviewScreen(templateId: state.pathParameters['id']!),
+        ),
+      ],
+    );
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [dietPlanTemplateApiProvider.overrideWithValue(api)],
+        child: MaterialApp.router(theme: AppTheme.light, routerConfig: router),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byType(PopupMenuButton<String>));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Rinomina'));
+    await tester.pumpAndSettle();
+
+    expect(find.widgetWithText(TextField, 'Template estivo'), findsOneWidget);
+
+    await tester.enterText(find.byType(TextField).first, 'Nome nuovo');
+    await tester.tap(find.text('Salva'));
+    await tester.pumpAndSettle();
+
+    final patched = adapter.requests.firstWhere((r) => r.method == 'PATCH');
+    expect((patched.data as Map)['name'], 'Nome nuovo');
   });
 }

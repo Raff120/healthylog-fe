@@ -9,8 +9,10 @@ import '../../../core/api/api_exception.dart';
 import '../../../core/widgets/app_primary_button.dart';
 import '../data/diet_plan.dart';
 import '../data/diet_plan_template.dart';
+import '../data/diet_plan_template_requests.dart';
 import '../providers/diet_plan_template_providers.dart';
 import 'slot_type_presentation.dart';
+import 'widgets/name_description_dialog.dart';
 
 /// Anteprima del template (7.4 interfaccia.md, CT-4, CT-5): schema
 /// settimanale integrale, di sola lettura. In attesa di F16 (vista
@@ -53,12 +55,41 @@ class DietPlanTemplatePreviewScreen extends ConsumerWidget {
     context.pop();
   }
 
+  /// TP-12: rinomina e modifica della descrizione, senza toccare lo
+  /// schema (`updateSchedule`, azione distinta di "Modifica").
+  Future<void> _rename(BuildContext context, WidgetRef ref, DietPlanTemplate template) async {
+    final input = await showNameDescriptionDialog(
+      context,
+      title: 'Rinomina template',
+      confirmLabel: 'Salva',
+      initialName: template.name,
+      initialDescription: template.description ?? '',
+    );
+    if (input == null) return;
+    if (!context.mounted) return;
+    await ref.read(updateDietPlanTemplateControllerProvider.notifier).update(
+          templateId,
+          UpdateDietPlanTemplateRequest(name: input.name, description: input.description),
+        );
+    final state = ref.read(updateDietPlanTemplateControllerProvider);
+    if (!context.mounted) return;
+    state?.whenOrNull(
+      error: (error, _) => ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(describeApiError(error.asApiException?.code ?? ''))),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final colors = context.colors;
     final typography = context.typography;
     final previewState = ref.watch(dietPlanTemplatePreviewProvider(templateId));
     final deleting = ref.watch(deleteDietPlanTemplateControllerProvider)?.isLoading ?? false;
+    // Tiene vivo il provider per la durata dell'operazione asincrona
+    // (autoDispose lo eliminerebbe altrimenti fra un `ref.read` e
+    // l'altro, dato che nessun altro punto lo osserva).
+    final renaming = ref.watch(updateDietPlanTemplateControllerProvider)?.isLoading ?? false;
 
     return Scaffold(
       backgroundColor: colors.background,
@@ -74,9 +105,11 @@ class DietPlanTemplatePreviewScreen extends ConsumerWidget {
           if (previewState.value != null)
             PopupMenuButton<String>(
               onSelected: (value) {
+                if (value == 'rename') _rename(context, ref, previewState.value!);
                 if (value == 'delete') _confirmDelete(context, ref, previewState.value!);
               },
               itemBuilder: (context) => [
+                PopupMenuItem(value: 'rename', enabled: !renaming, child: const Text('Rinomina')),
                 PopupMenuItem(
                   value: 'delete',
                   enabled: !deleting,
