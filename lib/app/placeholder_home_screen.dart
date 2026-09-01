@@ -12,6 +12,13 @@ import 'theme/theme_context.dart';
 /// dove risiede la disconnessione) è già raggiungibile da qui, in
 /// assenza della barra di navigazione reale (compito di un task
 /// successivo).
+///
+/// Il pulsante "TEMP Nuovo piano" verso `/diet-plans/new` è provvisorio,
+/// per prova manuale (richiesto esplicitamente dall'utente il
+/// 2026-09-01, vedi decisioni.md): a differenza della prova analoga
+/// scartata alla chiusura di F08, questa volta resta nel codice fino
+/// all'introduzione della vista giornaliera reale (F12), unico punto di
+/// accesso definitivo alla creazione del piano.
 class PlaceholderHomeScreen extends ConsumerWidget {
   const PlaceholderHomeScreen({super.key});
 
@@ -39,6 +46,10 @@ class PlaceholderHomeScreen extends ConsumerWidget {
                 TextButton(
                   onPressed: () => context.push('/profile'),
                   child: const Text('Profilo'),
+                ),
+                TextButton(
+                  onPressed: () => context.push('/diet-plans/new'),
+                  child: const Text('TEMP Nuovo piano'),
                 ),
               ],
             ),
