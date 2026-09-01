@@ -40,6 +40,14 @@ L'indirizzo del backend è configurabile a compilazione (default `http://localho
 flutter run --dart-define=API_BASE_URL=http://localhost:8080
 ```
 
+**Emulatore Android**: `localhost` nell'emulatore indica l'emulatore stesso, non la macchina host. Usare l'alias speciale `10.0.2.2`:
+
+```bash
+flutter run --dart-define=API_BASE_URL=http://10.0.2.2:8080
+```
+
+Un dispositivo fisico Android richiede invece l'indirizzo IP della macchina host sulla rete locale.
+
 ## Test
 
 ```bash

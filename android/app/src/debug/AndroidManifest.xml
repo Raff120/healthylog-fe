@@ -4,4 +4,8 @@
          to allow setting breakpoints, to provide hot reload, etc.
     -->
     <uses-permission android:name="android.permission.INTERNET"/>
+    <!-- Il backend locale (CG-1) risponde in HTTP semplice, non HTTPS:
+         Android 9+ blocca il traffico in chiaro per difetto. Ammesso solo
+         nella build di debug, non in quella di rilascio (TS-9). -->
+    <application android:usesCleartextTraffic="true"/>
 </manifest>

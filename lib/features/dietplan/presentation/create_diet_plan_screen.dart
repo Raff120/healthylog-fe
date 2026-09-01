@@ -9,19 +9,25 @@ import '../../../core/api/api_exception.dart';
 import '../../../core/widgets/app_primary_button.dart';
 import '../../../core/widgets/app_text_field.dart';
 import '../data/diet_plan_requests.dart';
+import '../data/diet_plan_template.dart';
 import '../domain/diet_plan_field_validators.dart';
 import '../providers/diet_plan_providers.dart';
+import '../providers/diet_plan_template_providers.dart';
 
-/// Creazione del piano da zero (7.2 interfaccia.md, CD-1, CD-4). La scelta
-/// dell'origine (da zero / da template, CT-1) non compare: nessun
-/// template esiste finché F09 non li introduce, quindi la seconda card
-/// sarebbe sempre assente (7.2, "La seconda card è assente quando non si
-/// possiedono template") — si passa direttamente ai dati. Il destinatario
-/// (CD-2, riservato al Nutrizionista) e le note generali (PA-13, non
-/// ancora accettate da `POST /diet-plans`) non compaiono per lo stesso
-/// motivo di scope registrato in decisioni.md.
+/// Creazione del piano, da zero o da template (7.2 interfaccia.md, CD-1,
+/// CD-4, CT-1). Se [sourceTemplate] è già valorizzato (provenienza:
+/// "Usa questo template" dall'anteprima, 7.4) la scelta dell'origine è
+/// saltata e si passa direttamente ai dati, con la denominazione proposta
+/// dal template (CT-7); altrimenti la scelta compare solo se esistono
+/// template propri (7.2, "La seconda card è assente quando non si
+/// possiedono template"). Il destinatario (CD-2, riservato al
+/// Nutrizionista) e le note generali (PA-13, non ancora accettate da
+/// `POST /diet-plans`) non compaiono per motivo di scope registrato in
+/// decisioni.md.
 class CreateDietPlanScreen extends ConsumerStatefulWidget {
-  const CreateDietPlanScreen({super.key});
+  const CreateDietPlanScreen({super.key, this.sourceTemplate});
+
+  final DietPlanTemplate? sourceTemplate;
 
   @override
   ConsumerState<CreateDietPlanScreen> createState() => _CreateDietPlanScreenState();
@@ -35,12 +41,20 @@ class _CreateDietPlanScreenState extends ConsumerState<CreateDietPlanScreen> {
   bool _submitted = false;
   String? _overlapMessage;
 
+  /// CT-1: `null` finché la scelta dell'origine non è compiuta (o non
+  /// compare affatto, template assente in partenza e nessun template
+  /// posseduto).
+  DietPlanTemplate? _selectedTemplate;
+  bool _scratchChosen = false;
+
   final Map<String, String?> _fieldErrors = {};
 
   @override
   void initState() {
     super.initState();
     _startDate = _nextMonday(DateTime.now());
+    _selectedTemplate = widget.sourceTemplate;
+    if (_selectedTemplate != null) _name.text = _selectedTemplate!.name;
   }
 
   @override
@@ -113,6 +127,7 @@ class _CreateDietPlanScreenState extends ConsumerState<CreateDietPlanScreen> {
             name: _name.text.trim(),
             startDate: _startDate!,
             endDate: _indefinite ? null : _endDate,
+            sourceTemplateId: _selectedTemplate?.id,
           ),
         );
 
@@ -153,11 +168,119 @@ class _CreateDietPlanScreenState extends ConsumerState<CreateDietPlanScreen> {
   String _formatDate(DateTime date) =>
       '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
 
+  /// CT-1: due card impilate, come nella scelta del ruolo (5.1
+  /// interfaccia.md). Mostrata solo quando esistono template propri —
+  /// altrimenti si passa direttamente ai dati (7.2).
+  Widget _buildOriginStep() {
+    return Center(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(AppSpacing.md),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 480),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              _OriginCard(
+                icon: Icons.note_add_outlined,
+                title: 'Da zero',
+                description: 'Componi lo schema settimanale partendo da una struttura vuota',
+                onTap: () => setState(() => _scratchChosen = true),
+              ),
+              const SizedBox(height: AppSpacing.sm),
+              _OriginCard(
+                icon: Icons.copy_outlined,
+                title: 'Da un template',
+                description: 'Parti da uno schema già pronto e modificalo',
+                onTap: () => context.push('/diet-plan-templates'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDataForm(bool loading) {
+    final colors = context.colors;
+    final typography = context.typography;
+    return Center(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.fromLTRB(AppSpacing.md, AppSpacing.md, AppSpacing.md, AppSpacing.xxl),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 480),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              AppTextField(label: 'Denominazione', controller: _name, errorText: _errorFor('name')),
+              const SizedBox(height: AppSpacing.sm),
+              _DateField(
+                label: 'Data di inizio',
+                value: _startDate,
+                errorText: _errorFor('startDate'),
+                onTap: _pickStartDate,
+                formatter: _formatDate,
+              ),
+              const SizedBox(height: AppSpacing.sm),
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      'A tempo indeterminato',
+                      style: typography.bodyMedium.copyWith(color: colors.textPrimary),
+                    ),
+                  ),
+                  Switch(
+                    value: _indefinite,
+                    activeThumbColor: colors.accent,
+                    onChanged: (value) => setState(() {
+                      _indefinite = value;
+                      _overlapMessage = null;
+                    }),
+                  ),
+                ],
+              ),
+              if (!_indefinite) ...[
+                const SizedBox(height: AppSpacing.sm),
+                _DateField(
+                  label: 'Data di fine',
+                  value: _endDate,
+                  errorText: null,
+                  onTap: _pickEndDate,
+                  formatter: _formatDate,
+                ),
+              ],
+              if (_overlapMessage != null) ...[
+                const SizedBox(height: AppSpacing.xs),
+                Text(_overlapMessage!, style: typography.caption.copyWith(color: colors.error)),
+              ],
+              const SizedBox(height: AppSpacing.lg),
+              AppPrimaryButton(label: 'Crea piano', loading: loading, onPressed: _submit),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
     final typography = context.typography;
     final loading = ref.watch(createDietPlanControllerProvider)?.isLoading ?? false;
+    final showingOrigin = _selectedTemplate == null && !_scratchChosen;
+    final templatesAsync = showingOrigin ? ref.watch(dietPlanTemplateListProvider) : null;
+
+    Widget body;
+    if (!showingOrigin) {
+      body = _buildDataForm(loading);
+    } else {
+      body = templatesAsync!.when(
+        loading: () => const Center(child: CircularProgressIndicator()),
+        // Un elenco non disponibile non deve impedire la creazione da zero.
+        error: (_, _) => _buildDataForm(loading),
+        data: (templates) => templates.isEmpty ? _buildDataForm(loading) : _buildOriginStep(),
+      );
+    }
 
     return Scaffold(
       backgroundColor: colors.background,
@@ -167,62 +290,55 @@ class _CreateDietPlanScreenState extends ConsumerState<CreateDietPlanScreen> {
         scrolledUnderElevation: 0,
         title: Text('Nuovo piano', style: typography.titleMedium.copyWith(color: colors.textPrimary)),
       ),
-      body: SafeArea(
-        child: Center(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(AppSpacing.md, AppSpacing.md, AppSpacing.md, AppSpacing.xxl),
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 480),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  AppTextField(label: 'Denominazione', controller: _name, errorText: _errorFor('name')),
-                  const SizedBox(height: AppSpacing.sm),
-                  _DateField(
-                    label: 'Data di inizio',
-                    value: _startDate,
-                    errorText: _errorFor('startDate'),
-                    onTap: _pickStartDate,
-                    formatter: _formatDate,
-                  ),
-                  const SizedBox(height: AppSpacing.sm),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          'A tempo indeterminato',
-                          style: typography.bodyMedium.copyWith(color: colors.textPrimary),
-                        ),
-                      ),
-                      Switch(
-                        value: _indefinite,
-                        activeThumbColor: colors.accent,
-                        onChanged: (value) => setState(() {
-                          _indefinite = value;
-                          _overlapMessage = null;
-                        }),
-                      ),
-                    ],
-                  ),
-                  if (!_indefinite) ...[
-                    const SizedBox(height: AppSpacing.sm),
-                    _DateField(
-                      label: 'Data di fine',
-                      value: _endDate,
-                      errorText: null,
-                      onTap: _pickEndDate,
-                      formatter: _formatDate,
-                    ),
+      body: SafeArea(child: body),
+    );
+  }
+}
+
+/// Card dell'origine (7.2 interfaccia.md, CT-1), sul modello di `_RoleCard`
+/// (identity/presentation/role_selection_screen.dart): stessa disposizione
+/// impilata della scelta del ruolo (5.1).
+class _OriginCard extends StatelessWidget {
+  const _OriginCard({
+    required this.icon,
+    required this.title,
+    required this.description,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String title;
+  final String description;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final typography = context.typography;
+
+    return Material(
+      color: colors.surface,
+      borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.all(AppSpacing.md),
+          child: Row(
+            children: [
+              Icon(icon, size: 32, color: colors.accent),
+              const SizedBox(width: AppSpacing.md),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(title, style: typography.titleMedium.copyWith(color: colors.textPrimary)),
+                    const SizedBox(height: AppSpacing.xxs),
+                    Text(description, style: typography.bodyMedium.copyWith(color: colors.textSecondary)),
                   ],
-                  if (_overlapMessage != null) ...[
-                    const SizedBox(height: AppSpacing.xs),
-                    Text(_overlapMessage!, style: typography.caption.copyWith(color: colors.error)),
-                  ],
-                  const SizedBox(height: AppSpacing.lg),
-                  AppPrimaryButton(label: 'Crea piano', loading: loading, onPressed: _submit),
-                ],
+                ),
               ),
-            ),
+            ],
           ),
         ),
       ),

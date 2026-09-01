@@ -6,51 +6,46 @@ import '../../../app/theme/app_spacing.dart';
 import '../../../app/theme/theme_context.dart';
 import '../../../core/api/api_error_messages.dart';
 import '../../../core/api/api_exception.dart';
-import '../data/diet_plan.dart';
 import '../data/diet_plan_requests.dart';
+import '../data/diet_plan_template.dart';
 import '../data/slot_type.dart';
 import '../data/weekday.dart';
-import '../providers/diet_plan_providers.dart';
 import '../providers/diet_plan_template_providers.dart';
 import 'editable_slot.dart';
 import 'slot_type_presentation.dart';
 import 'widgets/day_selector.dart';
 import 'widgets/day_sidebar.dart';
-import 'widgets/name_description_dialog.dart';
 import 'widgets/slot_card.dart';
 
 final RegExp _recipeNameFieldPattern = RegExp(r'^days\[(\d+)\]\.slots\[(\d+)\]\.recipeName$');
 
-/// Redazione dello schema settimanale (7.3 interfaccia.md, CD-5, CD-7,
-/// CD-8, CD-10, CD-11, MP-6): un giorno per volta con selettore in cima
-/// su `compact`, navigazione dei giorni affiancata alla redazione su
-/// `expanded` e oltre (MP-6, 7.3 interfaccia.md).
-///
-/// Non compaiono: la conferma del piano (CV-2, macchina a stati di F10,
-/// non ancora implementata) e la striscia informativa di modifica di un
-/// piano attivo (5.3 funzionale, F22) — il backend ammette la
-/// sostituzione dello schema solo sul piano in Bozza (`PLAN_NOT_DRAFT`),
-/// unico caso qui possibile. Il salvataggio come template (TP-5, CD-18)
-/// compare nel menu dell'intestazione, disponibile in ogni momento (7.3
-/// interfaccia.md), non condizionato alle modifiche pendenti.
-class DietPlanScheduleScreen extends ConsumerStatefulWidget {
-  const DietPlanScheduleScreen({super.key, required this.planId});
+/// Redazione dello schema del template (7.4 interfaccia.md, "medesima
+/// schermata di 7.3, priva dei campi di data e destinatario", TP-12):
+/// stessa struttura di [DietPlanScheduleScreen] — stesse regole GG-4,
+/// GG-5, GG-15 sul backend (`WeeklyScheduleConverter`, condiviso col
+/// piano) — ma senza conferma né striscia di piano attivo, dato che il
+/// template non possiede alcuno stato (CO-8, TP-2). Non generalizzata a
+/// partire da [DietPlanScheduleScreen]: le due schermate restano
+/// indipendenti finché una reale esigenza di riuso non lo giustifichi
+/// (vedi decisioni.md).
+class DietPlanTemplateScheduleScreen extends ConsumerStatefulWidget {
+  const DietPlanTemplateScheduleScreen({super.key, required this.templateId});
 
-  final String planId;
+  final String templateId;
 
   @override
-  ConsumerState<DietPlanScheduleScreen> createState() => _DietPlanScheduleScreenState();
+  ConsumerState<DietPlanTemplateScheduleScreen> createState() => _DietPlanTemplateScheduleScreenState();
 }
 
-class _DietPlanScheduleScreenState extends ConsumerState<DietPlanScheduleScreen> {
+class _DietPlanTemplateScheduleScreenState extends ConsumerState<DietPlanTemplateScheduleScreen> {
   List<EditableDay>? _days;
   late Weekday _selectedDay;
   bool _dirty = false;
   bool _saving = false;
 
-  void _initializeFrom(DietPlan plan) {
+  void _initializeFrom(DietPlanTemplate template) {
     if (_days != null) return;
-    _days = plan.weeklySchedule.map(EditableDay.fromWeekDay).toList();
+    _days = template.weeklySchedule.map(EditableDay.fromWeekDay).toList();
     _selectedDay = _days!.first.dayOfWeek;
   }
 
@@ -114,44 +109,21 @@ class _DietPlanScheduleScreenState extends ConsumerState<DietPlanScheduleScreen>
     );
   }
 
-  /// TP-5, CD-18: disponibile in ogni momento della redazione (7.3
-  /// interfaccia.md), non condizionata alle modifiche pendenti — copia lo
-  /// schema salvato sul server, non quello ancora in redazione locale.
-  Future<void> _saveAsTemplate(String planName) async {
-    final input = await showNameDescriptionDialog(
-      context,
-      title: 'Salva come template',
-      confirmLabel: 'Salva',
-      initialName: planName,
-    );
-    if (input == null) return;
-    if (!mounted) return;
-    final request = SaveDietPlanAsTemplateRequest(name: input.name, description: input.description);
-    await ref.read(saveDietPlanAsTemplateControllerProvider.notifier).save(widget.planId, request);
-    if (!mounted) return;
-    final state = ref.read(saveDietPlanAsTemplateControllerProvider);
-    state?.whenOrNull(
-      data: (_) => ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Template creato.'))),
-      error: (error, _) => ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(describeApiError(error.asApiException?.code ?? ''))),
-      ),
-    );
-  }
-
   Future<void> _save() async {
     final request = UpdateWeeklyScheduleRequest(days: _days!.map((day) => day.toRequest()).toList());
     setState(() => _saving = true);
     try {
-      final plan = await ref.read(dietPlanScheduleControllerProvider(widget.planId).notifier).save(request);
+      final template =
+          await ref.read(dietPlanTemplateScheduleControllerProvider(widget.templateId).notifier).save(request);
       if (!mounted) return;
       setState(() {
         _days?.forEach((day) => day.dispose());
         _days = null;
-        _initializeFrom(plan);
+        _initializeFrom(template);
         _dirty = false;
         _saving = false;
       });
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Piano salvato.')));
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Template salvato.')));
     } catch (error) {
       if (!mounted) return;
       setState(() => _saving = false);
@@ -191,9 +163,9 @@ class _DietPlanScheduleScreenState extends ConsumerState<DietPlanScheduleScreen>
     );
   }
 
-  /// Elenco degli slot del giorno selezionato e azioni di aggiunta
-  /// (CD-7): comune a `compact` ed `expanded` (MP-6), a cui cambia solo
-  /// ciò che vi si affianca.
+  /// Elenco degli slot del giorno selezionato e azioni di aggiunta,
+  /// comune a `compact` ed `expanded` (MP-6): stesso criterio già seguito
+  /// da `DietPlanScheduleScreen._buildDayEditor`.
   Widget _buildDayEditor(EditableDay day) {
     return Column(
       children: [
@@ -243,11 +215,7 @@ class _DietPlanScheduleScreenState extends ConsumerState<DietPlanScheduleScreen>
   Widget build(BuildContext context) {
     final colors = context.colors;
     final typography = context.typography;
-    final planState = ref.watch(dietPlanScheduleControllerProvider(widget.planId));
-    // Tiene vivo il controller per la durata del salvataggio come
-    // template (autoDispose lo eliminerebbe altrimenti fra un
-    // `ref.read` e l'altro, dato che nessun altro punto lo osserva).
-    ref.watch(saveDietPlanAsTemplateControllerProvider);
+    final templateState = ref.watch(dietPlanTemplateScheduleControllerProvider(widget.templateId));
 
     return PopScope(
       canPop: !_dirty,
@@ -268,7 +236,7 @@ class _DietPlanScheduleScreenState extends ConsumerState<DietPlanScheduleScreen>
           elevation: 0,
           scrolledUnderElevation: 0,
           title: Text(
-            planState.value?.name ?? 'Redazione dello schema',
+            templateState.value?.name ?? 'Redazione del template',
             style: typography.titleMedium.copyWith(color: colors.textPrimary),
           ),
           actions: [
@@ -304,18 +272,10 @@ class _DietPlanScheduleScreenState extends ConsumerState<DietPlanScheduleScreen>
                 ),
               ),
             ),
-            PopupMenuButton<String>(
-              onSelected: (value) {
-                if (value == 'save-as-template') _saveAsTemplate(planState.value?.name ?? '');
-              },
-              itemBuilder: (context) => const [
-                PopupMenuItem(value: 'save-as-template', child: Text('Salva come template')),
-              ],
-            ),
           ],
         ),
         body: SafeArea(
-          child: planState.when(
+          child: templateState.when(
             loading: () => const Center(child: CircularProgressIndicator()),
             error: (error, _) => Center(
               child: Text(
@@ -323,13 +283,10 @@ class _DietPlanScheduleScreenState extends ConsumerState<DietPlanScheduleScreen>
                 style: typography.bodyMedium.copyWith(color: colors.textSecondary),
               ),
             ),
-            data: (plan) {
-              _initializeFrom(plan);
+            data: (template) {
+              _initializeFrom(template);
               final day = _currentDay;
 
-              // MP-6, MP-7: la disposizione dipende dalla larghezza della
-              // finestra, non dalla piattaforma — la stessa soglia già
-              // condivisa da tutte le schermate (app_breakpoints.dart).
               if (context.breakpoint.isAtLeastExpanded) {
                 return Row(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
