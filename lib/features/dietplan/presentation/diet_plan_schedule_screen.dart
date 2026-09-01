@@ -279,53 +279,60 @@ class _DietPlanScheduleScreenState extends ConsumerState<DietPlanScheduleScreen>
     );
   }
 
-  /// Elenco degli slot del giorno selezionato e azioni di aggiunta
-  /// (CD-7): comune a `compact` ed `expanded` (MP-6), a cui cambia solo
-  /// ciò che vi si affianca.
+  /// Elenco degli slot del giorno selezionato (CD-7): comune a `compact`
+  /// ed `expanded` (MP-6), a cui cambia solo ciò che vi si affianca.
+  /// L'aggiunta di uno slot non compare più qui in coda (7.3
+  /// interfaccia.md), ma nel menu "+" dell'intestazione — deviazione
+  /// deliberata, vedi decisioni.md: la fascia fissa in coda, sommata a
+  /// quella di "Conferma piano", lasciava troppo poco spazio all'elenco
+  /// scorrevole su schermi reali di altezza ridotta.
   Widget _buildDayEditor(EditableDay day) {
-    return Column(
-      children: [
-        Expanded(
-          child: ReorderableListView.builder(
-            buildDefaultDragHandles: false,
-            padding: const EdgeInsets.all(AppSpacing.md),
-            itemCount: day.slots.length,
-            onReorderItem: _reorder,
-            itemBuilder: (context, index) {
-              final slot = day.slots[index];
-              return SlotCard(
-                key: ValueKey(slot),
-                slot: slot,
-                index: index,
-                onChanged: _markDirty,
-                onRemove: () => _removeSlot(slot),
-              );
-            },
+    return ReorderableListView.builder(
+      buildDefaultDragHandles: false,
+      padding: const EdgeInsets.all(AppSpacing.md),
+      itemCount: day.slots.length,
+      onReorderItem: _reorder,
+      itemBuilder: (context, index) {
+        final slot = day.slots[index];
+        return SlotCard(
+          key: ValueKey(slot),
+          slot: slot,
+          index: index,
+          onChanged: _markDirty,
+          onRemove: () => _removeSlot(slot),
+        );
+      },
+    );
+  }
+
+  /// Menu "+" dell'intestazione (7.3 interfaccia.md, GG-5): un'unica voce
+  /// di ingresso invece di quattro pulsanti separati, con lo stesso
+  /// criterio di disabilitazione di prima — colazione/pranzo/cena solo
+  /// se non già presenti, spuntino sempre.
+  List<PopupMenuEntry<SlotType>> _addSlotMenuItems(EditableDay day) => [
+        for (final type in [SlotType.breakfast, SlotType.lunch, SlotType.dinner])
+          PopupMenuItem(
+            value: type,
+            enabled: !day.hasType(type),
+            child: Row(
+              children: [
+                Icon(type.icon, size: 18),
+                const SizedBox(width: AppSpacing.xs),
+                Flexible(child: Text('Aggiungi ${type.displayName.toLowerCase()}', overflow: TextOverflow.ellipsis)),
+              ],
+            ),
           ),
-        ),
-        Padding(
-          padding: const EdgeInsets.fromLTRB(AppSpacing.md, 0, AppSpacing.md, AppSpacing.md),
-          child: Wrap(
-            spacing: AppSpacing.xs,
-            runSpacing: AppSpacing.xs,
+        PopupMenuItem(
+          value: SlotType.snack,
+          child: const Row(
             children: [
-              for (final type in [SlotType.breakfast, SlotType.lunch, SlotType.dinner])
-                OutlinedButton.icon(
-                  onPressed: day.hasType(type) ? null : () => _addSlot(type),
-                  icon: Icon(type.icon, size: 18),
-                  label: Text('Aggiungi ${type.displayName.toLowerCase()}'),
-                ),
-              OutlinedButton.icon(
-                onPressed: () => _addSlot(SlotType.snack),
-                icon: const Icon(Icons.add, size: 18),
-                label: const Text('Aggiungi spuntino'),
-              ),
+              Icon(Icons.add, size: 18),
+              SizedBox(width: AppSpacing.xs),
+              Flexible(child: Text('Aggiungi spuntino', overflow: TextOverflow.ellipsis)),
             ],
           ),
         ),
-      ],
-    );
-  }
+      ];
 
   @override
   Widget build(BuildContext context) {
@@ -338,6 +345,11 @@ class _DietPlanScheduleScreenState extends ConsumerState<DietPlanScheduleScreen>
     // li osserva).
     ref.watch(saveDietPlanAsTemplateControllerProvider);
     final confirming = ref.watch(confirmDietPlanControllerProvider)?.isLoading ?? false;
+    // Inizializza `_days` prima dello Scaffold, non dentro il solo `data:`
+    // del corpo: il menu "+" dell'intestazione ne ha bisogno fin dal primo
+    // fotogramma in cui il piano è disponibile, e l'intestazione è
+    // costruita prima del corpo nello stesso `build`.
+    planState.whenData(_initializeFrom);
 
     return PopScope(
       canPop: !_dirty,
@@ -394,6 +406,13 @@ class _DietPlanScheduleScreenState extends ConsumerState<DietPlanScheduleScreen>
                 ),
               ),
             ),
+            if (_days != null)
+              PopupMenuButton<SlotType>(
+                icon: const Icon(Icons.add),
+                tooltip: 'Aggiungi',
+                onSelected: _addSlot,
+                itemBuilder: (context) => _addSlotMenuItems(_currentDay),
+              ),
             PopupMenuButton<String>(
               onSelected: (value) {
                 if (value == 'save-as-template') _saveAsTemplate(planState.value?.name ?? '');
@@ -414,7 +433,6 @@ class _DietPlanScheduleScreenState extends ConsumerState<DietPlanScheduleScreen>
               ),
             ),
             data: (plan) {
-              _initializeFrom(plan);
               final day = _currentDay;
 
               // MP-6, MP-7: la disposizione dipende dalla larghezza della
@@ -440,8 +458,23 @@ class _DietPlanScheduleScreenState extends ConsumerState<DietPlanScheduleScreen>
               } else {
                 editor = Column(
                   children: [
-                    DaySelector(days: _days!, selected: _selectedDay, onSelect: (d) => setState(() => _selectedDay = d)),
-                    const Divider(height: 1),
+                    // Pannello di superficie invece di un divisore a
+                    // riga piena (stesso trattamento della barra di
+                    // navigazione principale, `main_shell.dart`): lo
+                    // stacco resta leggibile senza la riga netta che
+                    // dava, sui dispositivi reali, la sensazione di un
+                    // taglio (vedi decisioni.md).
+                    DecoratedBox(
+                      decoration: BoxDecoration(
+                        color: colors.surface,
+                        border: Border(bottom: BorderSide(color: colors.dividerStrong)),
+                      ),
+                      child: DaySelector(
+                        days: _days!,
+                        selected: _selectedDay,
+                        onSelect: (d) => setState(() => _selectedDay = d),
+                      ),
+                    ),
                     Expanded(child: _buildDayEditor(day)),
                   ],
                 );
@@ -455,15 +488,20 @@ class _DietPlanScheduleScreenState extends ConsumerState<DietPlanScheduleScreen>
               return Column(
                 children: [
                   Expanded(child: editor),
-                  const Divider(height: 1),
-                  SafeArea(
-                    top: false,
-                    child: Padding(
-                      padding: const EdgeInsets.all(AppSpacing.md),
-                      child: AppPrimaryButton(
-                        label: 'Conferma piano',
-                        loading: confirming,
-                        onPressed: _dirty ? null : _confirm,
+                  DecoratedBox(
+                    decoration: BoxDecoration(
+                      color: colors.surface,
+                      border: Border(top: BorderSide(color: colors.dividerStrong)),
+                    ),
+                    child: SafeArea(
+                      top: false,
+                      child: Padding(
+                        padding: const EdgeInsets.all(AppSpacing.md),
+                        child: AppPrimaryButton(
+                          label: 'Conferma piano',
+                          loading: confirming,
+                          onPressed: _dirty ? null : _confirm,
+                        ),
                       ),
                     ),
                   ),

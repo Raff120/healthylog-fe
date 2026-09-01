@@ -9,6 +9,7 @@ import 'package:go_router/go_router.dart';
 import 'package:healthylog/app/theme/app_theme.dart';
 import 'package:healthylog/core/api/api_error_interceptor.dart';
 import 'package:healthylog/features/dietplan/data/diet_plan_api.dart';
+import 'package:healthylog/features/dietplan/data/slot_type.dart';
 import 'package:healthylog/features/dietplan/presentation/diet_plan_schedule_screen.dart';
 import 'package:healthylog/features/dietplan/providers/diet_plan_providers.dart';
 
@@ -262,5 +263,42 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Gestione piano'), findsOneWidget);
+  });
+
+  testWidgets('il menu "+" dell\'intestazione aggiunge uno spuntino (7.3 interfaccia.md, GG-4)', (tester) async {
+    final dio = Dio(BaseOptions(baseUrl: 'http://example.test'));
+    dio.httpClientAdapter = _JsonAdapter((_) => _planJson());
+    dio.interceptors.add(ApiErrorInterceptor());
+
+    await _pumpScheduleScreen(tester, DietPlanApi(dio));
+
+    await tester.tap(find.byIcon(Icons.add));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Aggiungi spuntino'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Modifiche non salvate'), findsOneWidget);
+  });
+
+  testWidgets('il menu "+" disabilita colazione, pranzo e cena già presenti (GG-5)', (tester) async {
+    final dio = Dio(BaseOptions(baseUrl: 'http://example.test'));
+    dio.httpClientAdapter = _JsonAdapter((_) => _planJson());
+    dio.interceptors.add(ApiErrorInterceptor());
+
+    await _pumpScheduleScreen(tester, DietPlanApi(dio));
+
+    await tester.tap(find.byIcon(Icons.add));
+    await tester.pumpAndSettle();
+
+    for (final label in ['Aggiungi colazione', 'Aggiungi pranzo', 'Aggiungi cena']) {
+      final item = tester.widget<PopupMenuItem<SlotType>>(
+        find.ancestor(of: find.text(label), matching: find.byType(PopupMenuItem<SlotType>)),
+      );
+      expect(item.enabled, isFalse, reason: '$label dovrebbe essere disabilitato: già presente (GG-5)');
+    }
+    final snackItem = tester.widget<PopupMenuItem<SlotType>>(
+      find.ancestor(of: find.text('Aggiungi spuntino'), matching: find.byType(PopupMenuItem<SlotType>)),
+    );
+    expect(snackItem.enabled, isTrue);
   });
 }
