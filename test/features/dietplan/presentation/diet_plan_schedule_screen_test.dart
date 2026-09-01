@@ -64,7 +64,11 @@ Map<String, dynamic> _slotJson(String type, int order, {String? content, String?
       'adherenceWeight': type == 'SNACK' ? 0.5 : 1.0,
     };
 
-Map<String, dynamic> _planJson({String name = 'Dieta di prova', List<Map<String, dynamic>>? mondaySlots}) {
+Map<String, dynamic> _planJson({
+  String name = 'Dieta di prova',
+  String status = 'DRAFT',
+  List<Map<String, dynamic>>? mondaySlots,
+}) {
   const days = ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY'];
   return {
     'id': 'plan-1',
@@ -72,7 +76,7 @@ Map<String, dynamic> _planJson({String name = 'Dieta di prova', List<Map<String,
     'authorId': 'user-1',
     'authorRole': 'USER',
     'name': name,
-    'status': 'DRAFT',
+    'status': status,
     'startDate': '2026-09-07',
     'endDate': null,
     'weeklySchedule': days.map((day) {
@@ -300,5 +304,103 @@ void main() {
       find.ancestor(of: find.text('Aggiungi spuntino'), matching: find.byType(PopupMenuItem<SlotType>)),
     );
     expect(snackItem.enabled, isTrue);
+  });
+
+  testWidgets('un piano Attivo mostra la striscia informativa e "Salva modifiche" al posto della conferma (MD-1, MD-2, MD-3)',
+      (tester) async {
+    final dio = Dio(BaseOptions(baseUrl: 'http://example.test'));
+    dio.httpClientAdapter = _JsonAdapter((_) => _planJson(status: 'ACTIVE'));
+    dio.interceptors.add(ApiErrorInterceptor());
+
+    await _pumpScheduleScreen(tester, DietPlanApi(dio));
+
+    expect(find.textContaining('decorrono da oggi'), findsOneWidget);
+    expect(find.text('Salva modifiche'), findsOneWidget);
+    expect(find.text('Conferma piano'), findsNothing);
+  });
+
+  testWidgets('il salvataggio di un piano Sospeso con schema incompleto è impedito (MD-7)', (tester) async {
+    final dio = Dio(BaseOptions(baseUrl: 'http://example.test'));
+    var putCalled = false;
+    dio.httpClientAdapter = _JsonAdapter((options) {
+      if (options.method == 'PUT') putCalled = true;
+      return _planJson(status: 'SUSPENDED');
+    });
+    dio.interceptors.add(ApiErrorInterceptor());
+
+    await _pumpScheduleScreen(tester, DietPlanApi(dio));
+
+    await tester.tap(find.text('Colazione'));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.widgetWithText(TextField, 'Contenuto'), 'Yogurt e cereali');
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Salva modifiche'));
+    await tester.pumpAndSettle();
+
+    expect(putCalled, isFalse);
+    expect(find.text('Schema incompleto'), findsOneWidget);
+  });
+
+  testWidgets('il menu dell\'intestazione offre "Elimina" per il Sospeso ma non per l\'Attivo (CV-11)', (tester) async {
+    final dio = Dio(BaseOptions(baseUrl: 'http://example.test'));
+    dio.httpClientAdapter = _JsonAdapter((_) => _planJson(status: 'ACTIVE'));
+    dio.interceptors.add(ApiErrorInterceptor());
+
+    await _pumpScheduleScreen(tester, DietPlanApi(dio));
+    // `PopupMenuButton<String>` è l'unico tipo generico usato dal menu
+    // dell'intestazione — il menu "+" per l'aggiunta degli slot è
+    // `PopupMenuButton<SlotType>`, non ambiguo con questo.
+    await tester.tap(find.byType(PopupMenuButton<String>));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Salva come template'), findsOneWidget);
+    expect(find.text('Elimina'), findsNothing);
+  });
+
+  testWidgets('"Elimina" nel menu di un piano Sospeso richiede conferma rafforzata e conduce alla gestione (CV-10)',
+      (tester) async {
+    final dio = Dio(BaseOptions(baseUrl: 'http://example.test'));
+    var deleteCalled = false;
+    dio.httpClientAdapter = _JsonAdapter((options) {
+      if (options.method == 'DELETE') {
+        deleteCalled = true;
+        return <String, dynamic>{};
+      }
+      return _planJson(status: 'SUSPENDED');
+    });
+    dio.interceptors.add(ApiErrorInterceptor());
+
+    final router = GoRouter(
+      initialLocation: '/diet-plans/plan-1/schedule',
+      routes: [
+        GoRoute(
+          path: '/diet-plans/:id/schedule',
+          builder: (context, state) => DietPlanScheduleScreen(planId: state.pathParameters['id']!),
+        ),
+        GoRoute(path: '/profile/plans', builder: (context, state) => const Scaffold(body: Text('Gestione piano'))),
+      ],
+    );
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [dietPlanApiProvider.overrideWithValue(DietPlanApi(dio))],
+        child: MaterialApp.router(theme: AppTheme.light, routerConfig: router),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byType(PopupMenuButton<String>));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Elimina'));
+    await tester.pumpAndSettle();
+
+    expect(deleteCalled, isFalse);
+    expect(find.textContaining('perdute in modo definitivo'), findsOneWidget);
+
+    await tester.tap(find.descendant(of: find.byType(AlertDialog), matching: find.text('Elimina')));
+    await tester.pumpAndSettle();
+
+    expect(deleteCalled, isTrue);
+    expect(find.text('Gestione piano'), findsOneWidget);
   });
 }

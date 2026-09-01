@@ -19,6 +19,7 @@ import 'editable_slot.dart';
 import 'slot_type_presentation.dart';
 import 'widgets/day_selector.dart';
 import 'widgets/day_sidebar.dart';
+import 'widgets/delete_plan_dialog.dart';
 import 'widgets/name_description_dialog.dart';
 import 'widgets/slot_card.dart';
 
@@ -29,15 +30,14 @@ final RegExp _recipeNameFieldPattern = RegExp(r'^days\[(\d+)\]\.slots\[(\d+)\]\.
 /// su `compact`, navigazione dei giorni affiancata alla redazione su
 /// `expanded` e oltre (MP-6, 7.3 interfaccia.md).
 ///
-/// La conferma del piano (CV-2) compare in fondo, solo in Bozza (7.3
-/// interfaccia.md). Non compare invece la striscia informativa di
-/// modifica di un piano attivo (5.3 funzionale, F22) — il backend
-/// ammette la sostituzione dello schema solo sul piano in Bozza
-/// (`PLAN_NOT_DRAFT`), unico caso qui possibile finché F22 non introduce
-/// la modifica di un piano in corso. Il salvataggio come template (TP-5,
-/// CD-18) compare nel menu dell'intestazione, disponibile in ogni
-/// momento (7.3 interfaccia.md), non condizionato alle modifiche
-/// pendenti.
+/// La stessa schermata serve anche la modifica di un piano Attivo o
+/// Sospeso (5.3 funzionale, MD-1): una striscia informativa avverte che
+/// le modifiche decorrono da oggi (MD-2, MD-3), e "Conferma piano" è
+/// sostituito da "Salva modifiche" (7.3 interfaccia.md). Il salvataggio
+/// come template (TP-5, CD-18) e l'eliminazione (CV-10, CV-11) compaiono
+/// nel menu dell'intestazione, disponibili in ogni momento — l'una non
+/// condizionata alle modifiche pendenti, l'altra assente per l'Attivo,
+/// che CV-11 esclude.
 class DietPlanScheduleScreen extends ConsumerStatefulWidget {
   const DietPlanScheduleScreen({super.key, required this.planId});
 
@@ -143,7 +143,19 @@ class _DietPlanScheduleScreenState extends ConsumerState<DietPlanScheduleScreen>
     );
   }
 
+  /// MD-7: su un piano non più in Bozza (Attivo o Sospeso) uno schema
+  /// incompleto non si salva — a differenza della Bozza, dove restare
+  /// incompleti durante la redazione è normale. Stessa verifica locale
+  /// di `_confirm` (CD-15), applicata qui solo quando rilevante.
   Future<void> _save() async {
+    final status = ref.read(dietPlanScheduleControllerProvider(widget.planId)).value?.status;
+    if (status != null && status != PlanStatus.draft) {
+      final incompleteDays = _days!.where((day) => day.hasIncompleteSlot).toList();
+      if (incompleteDays.isNotEmpty) {
+        await _showIncompleteDaysSheet(incompleteDays);
+        return;
+      }
+    }
     final request = UpdateWeeklyScheduleRequest(days: _days!.map((day) => day.toRequest()).toList());
     setState(() => _saving = true);
     try {
@@ -193,6 +205,24 @@ class _DietPlanScheduleScreenState extends ConsumerState<DietPlanScheduleScreen>
     }
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(describeApiError(exception?.code ?? ''))),
+    );
+  }
+
+  /// CV-10, CV-11: eliminazione definitiva, assente dal menu per l'Attivo
+  /// (vedi `build`) — il server la rifiuta comunque, questa è solo
+  /// l'anticipazione in interfaccia della stessa regola.
+  Future<void> _delete(PlanStatus status) async {
+    final confirmed = await confirmDeletePlan(context, status);
+    if (!confirmed) return;
+    if (!mounted) return;
+    await ref.read(dietPlanLifecycleControllerProvider.notifier).delete(widget.planId);
+    if (!mounted) return;
+    final state = ref.read(dietPlanLifecycleControllerProvider);
+    state?.whenOrNull(
+      data: (_) => context.pushReplacement('/profile/plans'),
+      error: (error, _) => ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(describeApiError(error.asApiException?.code ?? ''))),
+      ),
     );
   }
 
@@ -334,6 +364,51 @@ class _DietPlanScheduleScreenState extends ConsumerState<DietPlanScheduleScreen>
         ),
       ];
 
+  /// MD-2, MD-3, 7.3 interfaccia.md: unica differenza di contenuto, oltre
+  /// al pulsante finale, fra la redazione di una Bozza e la modifica di un
+  /// piano Attivo o Sospeso.
+  Widget _buildActiveEditBanner() {
+    final colors = context.colors;
+    final typography = context.typography;
+    return Container(
+      width: double.infinity,
+      color: colors.accentSubtle,
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.sm),
+      child: Row(
+        children: [
+          Icon(Icons.info_outline, size: 18, color: colors.accent),
+          const SizedBox(width: AppSpacing.xs),
+          Expanded(
+            child: Text(
+              'Le modifiche decorrono da oggi: le giornate già trascorse restano invariate.',
+              style: typography.caption.copyWith(color: colors.textPrimary),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Fascia fissa in fondo, comune a "Conferma piano" (Bozza, CV-2) e
+  /// "Salva modifiche" (Attivo o Sospeso, MD-1) — cambia solo l'etichetta
+  /// e l'azione, non la disposizione.
+  Widget _bottomActionBar({required String label, required bool loading, required VoidCallback? onPressed}) {
+    final colors = context.colors;
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: colors.surface,
+        border: Border(top: BorderSide(color: colors.dividerStrong)),
+      ),
+      child: SafeArea(
+        top: false,
+        child: Padding(
+          padding: const EdgeInsets.all(AppSpacing.md),
+          child: AppPrimaryButton(label: label, loading: loading, onPressed: onPressed),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
@@ -344,6 +419,7 @@ class _DietPlanScheduleScreenState extends ConsumerState<DietPlanScheduleScreen>
     // altrimenti fra un `ref.read` e l'altro, dato che nessun altro punto
     // li osserva).
     ref.watch(saveDietPlanAsTemplateControllerProvider);
+    ref.watch(dietPlanLifecycleControllerProvider);
     final confirming = ref.watch(confirmDietPlanControllerProvider)?.isLoading ?? false;
     // Inizializza `_days` prima dello Scaffold, non dentro il solo `data:`
     // del corpo: il menu "+" dell'intestazione ne ha bisogno fin dal primo
@@ -416,9 +492,13 @@ class _DietPlanScheduleScreenState extends ConsumerState<DietPlanScheduleScreen>
             PopupMenuButton<String>(
               onSelected: (value) {
                 if (value == 'save-as-template') _saveAsTemplate(planState.value?.name ?? '');
+                if (value == 'delete') _delete(planState.value!.status);
               },
-              itemBuilder: (context) => const [
-                PopupMenuItem(value: 'save-as-template', child: Text('Salva come template')),
+              itemBuilder: (context) => [
+                const PopupMenuItem(value: 'save-as-template', child: Text('Salva come template')),
+                // CV-11: l'Attivo non compare, il server la rifiuterebbe comunque.
+                if (planState.value != null && planState.value!.status != PlanStatus.active)
+                  PopupMenuItem(value: 'delete', child: Text('Elimina', style: TextStyle(color: colors.error))),
               ],
             ),
           ],
@@ -480,33 +560,45 @@ class _DietPlanScheduleScreenState extends ConsumerState<DietPlanScheduleScreen>
                 );
               }
 
-              // CV-2, 7.3 interfaccia.md: solo in Bozza. Il pulsante di
-              // salvataggio già impedisce di lasciare modifiche pendenti
-              // non riflesse nel piano che il server confermerebbe.
-              if (plan.status != PlanStatus.draft) return editor;
+              // MD-1, MD-2, MD-3, 7.3 interfaccia.md: la stessa schermata
+              // serve anche la modifica di un piano Attivo o Sospeso, con
+              // la sola striscia informativa in più e "Salva modifiche" al
+              // posto di "Conferma piano" — Programmato e Concluso non vi
+              // giungono mai (il primo passa per il ritiro, MD-1; il
+              // secondo ha la propria vista di sola lettura, 7.5), ma
+              // restano privi di fascia fissa per sicurezza.
+              final isActiveEdit = plan.status == PlanStatus.active || plan.status == PlanStatus.suspended;
+              final content = isActiveEdit
+                  ? Column(children: [_buildActiveEditBanner(), Expanded(child: editor)])
+                  : editor;
 
-              return Column(
-                children: [
-                  Expanded(child: editor),
-                  DecoratedBox(
-                    decoration: BoxDecoration(
-                      color: colors.surface,
-                      border: Border(top: BorderSide(color: colors.dividerStrong)),
+              if (plan.status == PlanStatus.draft) {
+                return Column(
+                  children: [
+                    Expanded(child: content),
+                    _bottomActionBar(
+                      label: 'Conferma piano',
+                      loading: confirming,
+                      onPressed: _dirty ? null : _confirm,
                     ),
-                    child: SafeArea(
-                      top: false,
-                      child: Padding(
-                        padding: const EdgeInsets.all(AppSpacing.md),
-                        child: AppPrimaryButton(
-                          label: 'Conferma piano',
-                          loading: confirming,
-                          onPressed: _dirty ? null : _confirm,
-                        ),
-                      ),
+                  ],
+                );
+              }
+
+              if (isActiveEdit) {
+                return Column(
+                  children: [
+                    Expanded(child: content),
+                    _bottomActionBar(
+                      label: 'Salva modifiche',
+                      loading: _saving,
+                      onPressed: _dirty ? _save : null,
                     ),
-                  ),
-                ],
-              );
+                  ],
+                );
+              }
+
+              return content;
             },
           ),
         ),
