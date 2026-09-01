@@ -77,10 +77,10 @@ Future<ProviderContainer> _pumpAuthenticatedApp(WidgetTester tester, {required S
     ..httpClientAdapter = _StatusCodeAdapter(200, '{"accessToken":"a","refreshToken":"r"}');
   final profileDio = Dio(BaseOptions(baseUrl: 'http://example.test'))
     ..httpClientAdapter = _StatusCodeAdapter(200, _profileJson(role));
-  // PA-8: nessun piano in corso, così la card di 7.1 non serve a questo
+  // PA-9: nessun piano, così la schermata di 7.1 non serve a questo
   // banco di prova — solo che il tocco su "Piani" vi conduca davvero.
   final dietPlanDio = Dio(BaseOptions(baseUrl: 'http://example.test'))
-    ..httpClientAdapter = _StatusCodeAdapter(404, '{"code":"RESOURCE_NOT_FOUND"}')
+    ..httpClientAdapter = _StatusCodeAdapter(200, '[]')
     ..interceptors.add(ApiErrorInterceptor());
 
   final container = ProviderContainer(

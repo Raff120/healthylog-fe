@@ -12,7 +12,8 @@ import 'package:healthylog/features/dietplan/data/diet_plan_api.dart';
 import 'package:healthylog/features/dietplan/presentation/diet_plan_management_screen.dart';
 import 'package:healthylog/features/dietplan/providers/diet_plan_providers.dart';
 
-/// 7.1 interfaccia.md: card del piano in corso e azioni di stato (F10).
+/// 7.1 interfaccia.md: card del piano in corso, voci compatte per gli
+/// altri piani (Bozza compresa, PA-9) e azioni di stato (F10).
 class _JsonAdapter implements HttpClientAdapter {
   _JsonAdapter(this._responseFor);
 
@@ -47,14 +48,20 @@ class _ErrorResponse {
   final Map<String, dynamic> body;
 }
 
-Map<String, dynamic> _planJson({required String status, String name = 'Dieta di prova'}) => {
-      'id': 'plan-1',
+Map<String, dynamic> _planJson({
+  required String status,
+  String id = 'plan-1',
+  String name = 'Dieta di prova',
+  String startDate = '2026-09-01',
+}) =>
+    {
+      'id': id,
       'ownerId': 'user-1',
       'authorId': 'user-1',
       'authorRole': 'USER',
       'name': name,
       'status': status,
-      'startDate': '2026-09-01',
+      'startDate': startDate,
       'endDate': null,
       'periods': const [],
       'suspensions': const [],
@@ -62,6 +69,13 @@ Map<String, dynamic> _planJson({required String status, String name = 'Dieta di 
       'createdAt': '2026-09-01T00:00:00Z',
       'updatedAt': '2026-09-01T00:00:00Z',
     };
+
+/// L'elenco (`GET /diet-plans`, senza segmenti successivi) è l'unica
+/// richiesta che il client emette per popolare la schermata: le mutazioni
+/// (confirm/withdraw/...) restituiscono il piano aggiornato ma il client
+/// non lo usa direttamente, si affida all'invalidazione e a una nuova
+/// lettura dell'elenco.
+bool _isListRequest(RequestOptions options) => options.method == 'GET' && options.path == '/diet-plans';
 
 Future<void> _pumpManagementScreen(WidgetTester tester, DietPlanApi api) async {
   final router = GoRouter(
@@ -88,8 +102,7 @@ Future<void> _pumpManagementScreen(WidgetTester tester, DietPlanApi api) async {
 void main() {
   testWidgets('nessun piano mostra lo stato vuoto e conduce alla creazione', (tester) async {
     final dio = Dio(BaseOptions(baseUrl: 'http://example.test'));
-    dio.httpClientAdapter =
-        _JsonAdapter((_) => const _ErrorResponse(404, {'code': 'RESOURCE_NOT_FOUND'}));
+    dio.httpClientAdapter = _JsonAdapter((_) => const <dynamic>[]);
     dio.interceptors.add(ApiErrorInterceptor());
 
     await _pumpManagementScreen(tester, DietPlanApi(dio));
@@ -105,6 +118,7 @@ void main() {
     var status = 'ACTIVE';
     dio.httpClientAdapter = _JsonAdapter((options) {
       if (options.path.endsWith('/suspend')) status = 'SUSPENDED';
+      if (_isListRequest(options)) return [_planJson(status: status)];
       return _planJson(status: status);
     });
     dio.interceptors.add(ApiErrorInterceptor());
@@ -134,7 +148,7 @@ void main() {
         completed = true;
         return _planJson(status: 'COMPLETED');
       }
-      if (completed) return const _ErrorResponse(404, {'code': 'RESOURCE_NOT_FOUND'});
+      if (_isListRequest(options)) return completed ? const <dynamic>[] : [_planJson(status: 'ACTIVE')];
       return _planJson(status: 'ACTIVE');
     });
     dio.interceptors.add(ApiErrorInterceptor());
@@ -151,13 +165,16 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(completeCalled, isTrue);
-    // Nessun piano in corso dopo la conclusione: torna allo stato vuoto.
+    // Un piano Concluso esce dall'elenco: torna allo stato vuoto.
     expect(find.text('Inizia da qui'), findsOneWidget);
   });
 
   testWidgets('un piano Programmato mostra Modifica, Ritira e Attiva ora (7.1)', (tester) async {
     final dio = Dio(BaseOptions(baseUrl: 'http://example.test'));
-    dio.httpClientAdapter = _JsonAdapter((_) => _planJson(status: 'SCHEDULED'));
+    dio.httpClientAdapter = _JsonAdapter((options) {
+      if (_isListRequest(options)) return [_planJson(status: 'SCHEDULED')];
+      return _planJson(status: 'SCHEDULED');
+    });
     dio.interceptors.add(ApiErrorInterceptor());
 
     await _pumpManagementScreen(tester, DietPlanApi(dio));
@@ -176,6 +193,7 @@ void main() {
         withdrawCalled = true;
         return _planJson(status: 'DRAFT');
       }
+      if (_isListRequest(options)) return [_planJson(status: 'SCHEDULED')];
       return _planJson(status: 'SCHEDULED');
     });
     dio.interceptors.add(ApiErrorInterceptor());
@@ -194,6 +212,7 @@ void main() {
       if (options.path.endsWith('/suspend')) {
         return const _ErrorResponse(409, {'code': 'PLAN_TRANSITION_NOT_ALLOWED'});
       }
+      if (_isListRequest(options)) return [_planJson(status: 'ACTIVE')];
       return _planJson(status: 'ACTIVE');
     });
     dio.interceptors.add(ApiErrorInterceptor());
@@ -203,5 +222,46 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Questa operazione non è più possibile per il piano.'), findsOneWidget);
+  });
+
+  testWidgets('mostra la Bozza come voce compatta e vi conduce al tocco (PA-9)', (tester) async {
+    final dio = Dio(BaseOptions(baseUrl: 'http://example.test'));
+    dio.httpClientAdapter = _JsonAdapter((options) {
+      if (_isListRequest(options)) {
+        return [
+          _planJson(status: 'ACTIVE', id: 'plan-1', name: 'Dieta in corso', startDate: '2026-08-01'),
+          _planJson(status: 'DRAFT', id: 'plan-2', name: 'Nuova bozza', startDate: '2026-10-01'),
+        ];
+      }
+      return _planJson(status: 'ACTIVE');
+    });
+    dio.interceptors.add(ApiErrorInterceptor());
+
+    await _pumpManagementScreen(tester, DietPlanApi(dio));
+
+    expect(find.text('Dieta in corso'), findsOneWidget);
+    expect(find.text('Nuova bozza'), findsOneWidget);
+    expect(find.textContaining('Bozza'), findsOneWidget);
+
+    await tester.tap(find.text('Nuova bozza'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Redazione plan-2'), findsOneWidget);
+  });
+
+  testWidgets('il pulsante di creazione compare anche quando l\'elenco non è vuoto (7.1)', (tester) async {
+    final dio = Dio(BaseOptions(baseUrl: 'http://example.test'));
+    dio.httpClientAdapter = _JsonAdapter((options) {
+      if (_isListRequest(options)) return [_planJson(status: 'ACTIVE')];
+      return _planJson(status: 'ACTIVE');
+    });
+    dio.interceptors.add(ApiErrorInterceptor());
+
+    await _pumpManagementScreen(tester, DietPlanApi(dio));
+
+    await tester.tap(find.byType(FloatingActionButton));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Nuovo piano'), findsOneWidget);
   });
 }

@@ -9,17 +9,22 @@ import '../../../core/api/api_exception.dart';
 import '../../../core/widgets/app_primary_button.dart';
 import '../data/diet_plan.dart';
 import '../data/plan_status.dart';
+import '../domain/current_diet_plan.dart';
 import '../providers/diet_plan_providers.dart';
 
-/// Gestione del piano in corso (7.1 interfaccia.md, raggiunta da Profilo
-/// → Piani): la card del piano Attivo, Sospeso o Programmato, con le
-/// azioni di stato di F10 (CV-2, AS-11, CV-4, CV-S1, CV-S6, CV-5).
+/// Gestione dei piani (7.1 interfaccia.md, raggiunta da Profilo → Piani):
+/// la card del piano in corso (Attivo, Sospeso o il prossimo Programmato,
+/// PA-8) con le azioni di stato di F10 (CV-2, AS-11, CV-4, CV-S1, CV-S6,
+/// CV-5), seguita dalle voci compatte degli altri piani non conclusi —
+/// Bozza compresa (PA-9). Pulsante di creazione sempre presente (7.1: "Il
+/// pulsante è assente al Paziente" — non ancora rilevante, il Paziente
+/// non esiste prima di F22).
 ///
 /// Non compare qui — assente dallo scopo di questa feature, vedi
-/// decisioni.md — l'elenco dei piani conclusi (ST-1, ST-2, F27, che
-/// dipende dall'aderenza di F25) né alcuna Bozza non ancora confermata
-/// (7.1 non la prevede fra gli stati della card; resta raggiungibile
-/// solo nella sessione in cui è stata creata, F08).
+/// decisioni.md — l'elenco dei piani **conclusi** (ST-1, ST-2, F27, che
+/// dipende dall'aderenza di F25) né la loro riattivazione o eliminazione
+/// (CV-7, CV-10, CV-11: 7.5 interfaccia.md le colloca nel dettaglio del
+/// piano concluso, non qui).
 class DietPlanManagementScreen extends ConsumerWidget {
   const DietPlanManagementScreen({super.key});
 
@@ -122,7 +127,7 @@ class DietPlanManagementScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final colors = context.colors;
     final typography = context.typography;
-    final planState = ref.watch(currentDietPlanProvider);
+    final listState = ref.watch(ownedDietPlansProvider);
     final acting = ref.watch(dietPlanLifecycleControllerProvider)?.isLoading ?? false;
 
     return Scaffold(
@@ -133,8 +138,14 @@ class DietPlanManagementScreen extends ConsumerWidget {
         scrolledUnderElevation: 0,
         title: Text('Piani', style: typography.titleMedium.copyWith(color: colors.textPrimary)),
       ),
+      // 7.1 interfaccia.md: "Pulsante mobile in basso a destra", sempre
+      // presente — non solo nello stato vuoto.
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => context.push('/diet-plans/new'),
+        child: const Icon(Icons.add),
+      ),
       body: SafeArea(
-        child: planState.when(
+        child: listState.when(
           loading: () => const Center(child: CircularProgressIndicator()),
           error: (error, _) => Center(
             child: Text(
@@ -142,18 +153,15 @@ class DietPlanManagementScreen extends ConsumerWidget {
               style: typography.bodyMedium.copyWith(color: colors.textSecondary),
             ),
           ),
-          data: (plan) {
-            if (plan == null) {
+          data: (plans) {
+            if (plans.isEmpty) {
               return Center(
                 child: Padding(
                   padding: const EdgeInsets.all(AppSpacing.md),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Text(
-                        'Inizia da qui',
-                        style: typography.titleMedium.copyWith(color: colors.textPrimary),
-                      ),
+                      Text('Inizia da qui', style: typography.titleMedium.copyWith(color: colors.textPrimary)),
                       const SizedBox(height: AppSpacing.xs),
                       Text(
                         'Non hai ancora un piano alimentare.',
@@ -173,19 +181,37 @@ class DietPlanManagementScreen extends ConsumerWidget {
                 ),
               );
             }
-            return Padding(
-              padding: const EdgeInsets.all(AppSpacing.md),
-              child: _CurrentPlanCard(
-                plan: plan,
-                acting: acting,
-                formatDate: _formatDate,
-                onSuspend: () => _suspend(context, ref, plan.id),
-                onResume: () => _resume(context, ref, plan.id),
-                onComplete: () => _complete(context, ref, plan.id),
-                onWithdraw: () => _withdraw(context, ref, plan.id),
-                onActivateNow: () => _activateNow(context, ref, plan.id),
-                onEdit: () => _edit(context, ref, plan.id),
-              ),
+
+            final current = findCurrentPlan(plans);
+            final others = plans.where((plan) => plan.id != current?.id).toList();
+
+            return ListView(
+              padding: const EdgeInsets.fromLTRB(AppSpacing.md, AppSpacing.md, AppSpacing.md, AppSpacing.xxl),
+              children: [
+                if (current != null) ...[
+                  _CurrentPlanCard(
+                    plan: current,
+                    acting: acting,
+                    formatDate: _formatDate,
+                    onSuspend: () => _suspend(context, ref, current.id),
+                    onResume: () => _resume(context, ref, current.id),
+                    onComplete: () => _complete(context, ref, current.id),
+                    onWithdraw: () => _withdraw(context, ref, current.id),
+                    onActivateNow: () => _activateNow(context, ref, current.id),
+                    onEdit: () => _edit(context, ref, current.id),
+                  ),
+                  if (others.isNotEmpty) const SizedBox(height: AppSpacing.md),
+                ],
+                for (final plan in others)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+                    child: _OtherPlanTile(
+                      plan: plan,
+                      formatDate: _formatDate,
+                      onTap: () => context.push('/diet-plans/${plan.id}/schedule'),
+                    ),
+                  ),
+              ],
             );
           },
         ),
@@ -226,12 +252,6 @@ class _CurrentPlanCard extends StatelessWidget {
         _ => '',
       };
 
-  String get _period {
-    final start = formatDate(plan.startDate);
-    if (plan.endDate == null) return 'Dal $start';
-    return '$start – ${formatDate(plan.endDate!)}';
-  }
-
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
@@ -250,7 +270,7 @@ class _CurrentPlanCard extends StatelessWidget {
           const SizedBox(height: AppSpacing.xxs),
           Text(plan.name, style: typography.titleLarge.copyWith(color: colors.textPrimary)),
           const SizedBox(height: AppSpacing.xxs),
-          Text(_period, style: typography.bodyMedium.copyWith(color: colors.textSecondary)),
+          Text(planPeriodLabel(plan, formatDate), style: typography.bodyMedium.copyWith(color: colors.textSecondary)),
           const SizedBox(height: AppSpacing.md),
           Wrap(
             spacing: AppSpacing.xs,
@@ -291,4 +311,80 @@ class _PlanAction {
 
   final String label;
   final VoidCallback onPressed;
+}
+
+/// Voce compatta di un piano diverso da quello in corso (7.1
+/// interfaccia.md, "Voci dell'elenco"): una Bozza da riprendere, o un
+/// altro Programmato oltre al più vicino (PA-9). Il tocco apre la
+/// redazione in entrambi i casi: per la Bozza è la sola azione utile,
+/// per un Programmato ulteriore non esiste ancora un'anteprima dedicata
+/// (assente da 7.1 per questo caso, non ancora incontrato in pratica).
+class _OtherPlanTile extends StatelessWidget {
+  const _OtherPlanTile({required this.plan, required this.formatDate, required this.onTap});
+
+  final DietPlan plan;
+  final String Function(DateTime) formatDate;
+  final VoidCallback onTap;
+
+  String get _statusLabel => switch (plan.status) {
+        PlanStatus.draft => 'Bozza',
+        PlanStatus.scheduled => 'Programmato',
+        _ => '',
+      };
+
+  Color _dotColor(BuildContext context) {
+    final colors = context.colors;
+    // 7.1 interfaccia.md definisce il colore solo per Programmato
+    // (accento) e Concluso (terziario, mai presente in questo elenco);
+    // per la Bozza, non prevista lì, si usa lo stesso terziario per non
+    // introdurre un terzo significato cromatico non documentato.
+    return plan.status == PlanStatus.scheduled ? colors.accent : colors.textTertiary;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final typography = context.typography;
+
+    return Material(
+      color: colors.surface,
+      borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.sm),
+          child: Row(
+            children: [
+              Container(
+                width: 8,
+                height: 8,
+                decoration: BoxDecoration(color: _dotColor(context), shape: BoxShape.circle),
+              ),
+              const SizedBox(width: AppSpacing.sm),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(plan.name, style: typography.titleMedium.copyWith(color: colors.textPrimary)),
+                    Text(
+                      '$_statusLabel · ${planPeriodLabel(plan, formatDate)}',
+                      style: typography.caption.copyWith(color: colors.textSecondary),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(Icons.chevron_right, color: colors.textTertiary),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+String planPeriodLabel(DietPlan plan, String Function(DateTime) formatDate) {
+  final start = formatDate(plan.startDate);
+  if (plan.endDate == null) return 'Dal $start';
+  return '$start – ${formatDate(plan.endDate!)}';
 }

@@ -298,78 +298,91 @@ abstract class _$ConfirmDietPlanController
   }
 }
 
-/// PA-8: il piano "in corso" (7.1 interfaccia.md).
+/// PA-9, 7.1 interfaccia.md: l'elenco dei piani non conclusi, Bozza
+/// compresa — a differenza del solo piano "in corso" di PA-8, che la
+/// schermata di gestione determina da questo stesso elenco (vedi
+/// `findCurrentPlan`), non con una richiesta separata.
 
-@ProviderFor(currentDietPlan)
-final currentDietPlanProvider = CurrentDietPlanProvider._();
+@ProviderFor(ownedDietPlans)
+final ownedDietPlansProvider = OwnedDietPlansProvider._();
 
-/// PA-8: il piano "in corso" (7.1 interfaccia.md).
+/// PA-9, 7.1 interfaccia.md: l'elenco dei piani non conclusi, Bozza
+/// compresa — a differenza del solo piano "in corso" di PA-8, che la
+/// schermata di gestione determina da questo stesso elenco (vedi
+/// `findCurrentPlan`), non con una richiesta separata.
 
-final class CurrentDietPlanProvider
+final class OwnedDietPlansProvider
     extends
         $FunctionalProvider<
-          AsyncValue<DietPlan?>,
-          DietPlan?,
-          FutureOr<DietPlan?>
+          AsyncValue<List<DietPlan>>,
+          List<DietPlan>,
+          FutureOr<List<DietPlan>>
         >
-    with $FutureModifier<DietPlan?>, $FutureProvider<DietPlan?> {
-  /// PA-8: il piano "in corso" (7.1 interfaccia.md).
-  CurrentDietPlanProvider._()
+    with $FutureModifier<List<DietPlan>>, $FutureProvider<List<DietPlan>> {
+  /// PA-9, 7.1 interfaccia.md: l'elenco dei piani non conclusi, Bozza
+  /// compresa — a differenza del solo piano "in corso" di PA-8, che la
+  /// schermata di gestione determina da questo stesso elenco (vedi
+  /// `findCurrentPlan`), non con una richiesta separata.
+  OwnedDietPlansProvider._()
     : super(
         from: null,
         argument: null,
         retry: null,
-        name: r'currentDietPlanProvider',
+        name: r'ownedDietPlansProvider',
         isAutoDispose: true,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
 
   @override
-  String debugGetCreateSourceHash() => _$currentDietPlanHash();
+  String debugGetCreateSourceHash() => _$ownedDietPlansHash();
 
   @$internal
   @override
-  $FutureProviderElement<DietPlan?> $createElement($ProviderPointer pointer) =>
-      $FutureProviderElement(pointer);
+  $FutureProviderElement<List<DietPlan>> $createElement(
+    $ProviderPointer pointer,
+  ) => $FutureProviderElement(pointer);
 
   @override
-  FutureOr<DietPlan?> create(Ref ref) {
-    return currentDietPlan(ref);
+  FutureOr<List<DietPlan>> create(Ref ref) {
+    return ownedDietPlans(ref);
   }
 }
 
-String _$currentDietPlanHash() => r'e0d082fd7d16910fe97cc87c2579466b6f0e75d6';
+String _$ownedDietPlansHash() => r'60286f0979b508c2d4e61d6f4c548d40b8fe1dbc';
 
 /// Transizioni di stato disposte dalla schermata di gestione (7.1
-/// interfaccia.md, F10): ciascuna invalida [currentDietPlanProvider], così
-/// che la card rifletta lo stato realmente raggiunto — anche quando
-/// cambia identità (AS-11: il piano ritirato non è più "in corso";
-/// CV-5: il piano concluso lascia il posto, se esiste, al prossimo
-/// Programmato) — invece di aggiornare uno stato locale che dovrebbe
-/// replicare la stessa logica di priorità del server (PA-9).
+/// interfaccia.md, F10): ciascuna invalida [ownedDietPlansProvider], così
+/// che l'elenco rifletta lo stato realmente raggiunto — anche quando il
+/// piano "in corso" cambia identità (AS-11: il piano ritirato non è più
+/// "in corso"; CV-5: il piano concluso esce del tutto dall'elenco,
+/// lasciando il posto, se esiste, al prossimo Programmato) — invece di
+/// aggiornare uno stato locale che dovrebbe replicare la stessa logica
+/// di priorità del server.
 
 @ProviderFor(DietPlanLifecycleController)
 final dietPlanLifecycleControllerProvider =
     DietPlanLifecycleControllerProvider._();
 
 /// Transizioni di stato disposte dalla schermata di gestione (7.1
-/// interfaccia.md, F10): ciascuna invalida [currentDietPlanProvider], così
-/// che la card rifletta lo stato realmente raggiunto — anche quando
-/// cambia identità (AS-11: il piano ritirato non è più "in corso";
-/// CV-5: il piano concluso lascia il posto, se esiste, al prossimo
-/// Programmato) — invece di aggiornare uno stato locale che dovrebbe
-/// replicare la stessa logica di priorità del server (PA-9).
+/// interfaccia.md, F10): ciascuna invalida [ownedDietPlansProvider], così
+/// che l'elenco rifletta lo stato realmente raggiunto — anche quando il
+/// piano "in corso" cambia identità (AS-11: il piano ritirato non è più
+/// "in corso"; CV-5: il piano concluso esce del tutto dall'elenco,
+/// lasciando il posto, se esiste, al prossimo Programmato) — invece di
+/// aggiornare uno stato locale che dovrebbe replicare la stessa logica
+/// di priorità del server.
 final class DietPlanLifecycleControllerProvider
     extends
         $NotifierProvider<DietPlanLifecycleController, AsyncValue<DietPlan>?> {
   /// Transizioni di stato disposte dalla schermata di gestione (7.1
-  /// interfaccia.md, F10): ciascuna invalida [currentDietPlanProvider], così
-  /// che la card rifletta lo stato realmente raggiunto — anche quando
-  /// cambia identità (AS-11: il piano ritirato non è più "in corso";
-  /// CV-5: il piano concluso lascia il posto, se esiste, al prossimo
-  /// Programmato) — invece di aggiornare uno stato locale che dovrebbe
-  /// replicare la stessa logica di priorità del server (PA-9).
+  /// interfaccia.md, F10): ciascuna invalida [ownedDietPlansProvider], così
+  /// che l'elenco rifletta lo stato realmente raggiunto — anche quando il
+  /// piano "in corso" cambia identità (AS-11: il piano ritirato non è più
+  /// "in corso"; CV-5: il piano concluso esce del tutto dall'elenco,
+  /// lasciando il posto, se esiste, al prossimo Programmato) — invece di
+  /// aggiornare uno stato locale che dovrebbe replicare la stessa logica
+  /// di priorità del server.
   DietPlanLifecycleControllerProvider._()
     : super(
         from: null,
@@ -398,15 +411,16 @@ final class DietPlanLifecycleControllerProvider
 }
 
 String _$dietPlanLifecycleControllerHash() =>
-    r'235f9b5be80c2146bdb4c4be88475941daed37fe';
+    r'bb5e7e1917959b27965046f79b7d06d0dbbde9e7';
 
 /// Transizioni di stato disposte dalla schermata di gestione (7.1
-/// interfaccia.md, F10): ciascuna invalida [currentDietPlanProvider], così
-/// che la card rifletta lo stato realmente raggiunto — anche quando
-/// cambia identità (AS-11: il piano ritirato non è più "in corso";
-/// CV-5: il piano concluso lascia il posto, se esiste, al prossimo
-/// Programmato) — invece di aggiornare uno stato locale che dovrebbe
-/// replicare la stessa logica di priorità del server (PA-9).
+/// interfaccia.md, F10): ciascuna invalida [ownedDietPlansProvider], così
+/// che l'elenco rifletta lo stato realmente raggiunto — anche quando il
+/// piano "in corso" cambia identità (AS-11: il piano ritirato non è più
+/// "in corso"; CV-5: il piano concluso esce del tutto dall'elenco,
+/// lasciando il posto, se esiste, al prossimo Programmato) — invece di
+/// aggiornare uno stato locale che dovrebbe replicare la stessa logica
+/// di priorità del server.
 
 abstract class _$DietPlanLifecycleController
     extends $Notifier<AsyncValue<DietPlan>?> {

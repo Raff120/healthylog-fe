@@ -1,6 +1,5 @@
 import 'package:dio/dio.dart';
 
-import '../../../core/api/api_exception.dart';
 import 'diet_plan.dart';
 import 'diet_plan_requests.dart';
 import 'diet_plan_template.dart';
@@ -39,18 +38,11 @@ class DietPlanApi {
     return DietPlan.fromJson(response.data as Map<String, dynamic>);
   }
 
-  /// PA-8: il piano "in corso" — Attivo, altrimenti Sospeso, altrimenti
-  /// il prossimo Programmato. `null` se nessuno dei tre esiste
-  /// (`RESOURCE_NOT_FOUND`, ER-9): non un errore da propagare, lo stato
-  /// vuoto della card (7.1 interfaccia.md).
-  Future<DietPlan?> getCurrent() async {
-    try {
-      final response = await _dio.get('/diet-plans/current');
-      return DietPlan.fromJson(response.data as Map<String, dynamic>);
-    } on DioException catch (e) {
-      if (e.asApiException?.code == 'RESOURCE_NOT_FOUND') return null;
-      rethrow;
-    }
+  /// PA-9, 7.1 interfaccia.md: i piani non conclusi del proprietario —
+  /// Bozza compresa — ordinati per data di inizio decrescente.
+  Future<List<DietPlan>> list() async {
+    final response = await _dio.get('/diet-plans');
+    return (response.data as List).map((e) => DietPlan.fromJson(e as Map<String, dynamic>)).toList();
   }
 
   /// AS-11: da Programmato a Bozza.

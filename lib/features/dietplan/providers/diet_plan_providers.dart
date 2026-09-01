@@ -52,17 +52,21 @@ class ConfirmDietPlanController extends _$ConfirmDietPlanController {
   }
 }
 
-/// PA-8: il piano "in corso" (7.1 interfaccia.md).
+/// PA-9, 7.1 interfaccia.md: l'elenco dei piani non conclusi, Bozza
+/// compresa — a differenza del solo piano "in corso" di PA-8, che la
+/// schermata di gestione determina da questo stesso elenco (vedi
+/// `findCurrentPlan`), non con una richiesta separata.
 @riverpod
-Future<DietPlan?> currentDietPlan(Ref ref) => ref.watch(dietPlanApiProvider).getCurrent();
+Future<List<DietPlan>> ownedDietPlans(Ref ref) => ref.watch(dietPlanApiProvider).list();
 
 /// Transizioni di stato disposte dalla schermata di gestione (7.1
-/// interfaccia.md, F10): ciascuna invalida [currentDietPlanProvider], così
-/// che la card rifletta lo stato realmente raggiunto — anche quando
-/// cambia identità (AS-11: il piano ritirato non è più "in corso";
-/// CV-5: il piano concluso lascia il posto, se esiste, al prossimo
-/// Programmato) — invece di aggiornare uno stato locale che dovrebbe
-/// replicare la stessa logica di priorità del server (PA-9).
+/// interfaccia.md, F10): ciascuna invalida [ownedDietPlansProvider], così
+/// che l'elenco rifletta lo stato realmente raggiunto — anche quando il
+/// piano "in corso" cambia identità (AS-11: il piano ritirato non è più
+/// "in corso"; CV-5: il piano concluso esce del tutto dall'elenco,
+/// lasciando il posto, se esiste, al prossimo Programmato) — invece di
+/// aggiornare uno stato locale che dovrebbe replicare la stessa logica
+/// di priorità del server.
 @riverpod
 class DietPlanLifecycleController extends _$DietPlanLifecycleController {
   @override
@@ -71,7 +75,7 @@ class DietPlanLifecycleController extends _$DietPlanLifecycleController {
   Future<void> _run(Future<DietPlan> Function() action) async {
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(action);
-    ref.invalidate(currentDietPlanProvider);
+    ref.invalidate(ownedDietPlansProvider);
   }
 
   Future<void> withdraw(String planId) => _run(() => ref.read(dietPlanApiProvider).withdraw(planId));
