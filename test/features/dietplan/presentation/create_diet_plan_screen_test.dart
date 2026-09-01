@@ -48,6 +48,36 @@ DietPlanApi _apiReturning(int statusCode, String body) {
   return DietPlanApi(dio);
 }
 
+/// PA-8, PA-9: il conflitto respinge solo il primo tentativo — un
+/// secondo invio con un periodo diverso (qui simulato riproponendo la
+/// stessa richiesta, il conflitto risiede lato server) DEVE poter
+/// riuscire, non restare bloccato dal primo rifiuto.
+class _ConflictThenSuccessAdapter implements HttpClientAdapter {
+  int calls = 0;
+
+  @override
+  void close({bool force = false}) {}
+
+  @override
+  Future<ResponseBody> fetch(
+    RequestOptions options,
+    Stream<Uint8List>? requestStream,
+    Future<void>? cancelFuture,
+  ) async {
+    calls++;
+    final body = calls == 1
+        ? '{"code":"PLAN_PERIOD_OVERLAP","conflictingPlanId":"plan-x","conflictingPlanName":"Piano estate"}'
+        : _planJson;
+    return ResponseBody.fromString(
+      body,
+      calls == 1 ? 409 : 201,
+      headers: {
+        Headers.contentTypeHeader: [Headers.jsonContentType],
+      },
+    );
+  }
+}
+
 const _planJson = '{'
     '"id":"plan-1","ownerId":"user-1","authorId":"user-1","authorRole":"USER",'
     '"name":"Dieta di prova","status":"DRAFT","startDate":"2026-09-07","endDate":null,'
@@ -106,5 +136,24 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Si sovrappone a "Piano estate".'), findsOneWidget);
+  });
+
+  testWidgets('dopo un conflitto un secondo invio può ancora riuscire (PA-9)', (tester) async {
+    final dio = Dio(BaseOptions(baseUrl: 'http://example.test'));
+    dio.httpClientAdapter = _ConflictThenSuccessAdapter();
+    dio.interceptors.add(ApiErrorInterceptor());
+
+    await _pumpCreateScreen(tester, DietPlanApi(dio));
+
+    await tester.enterText(find.byType(TextField).first, 'Dieta di prova');
+    await tester.tap(find.text('Crea piano'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Si sovrappone a "Piano estate".'), findsOneWidget);
+
+    await tester.tap(find.text('Crea piano'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('schermata di redazione plan-1'), findsOneWidget);
   });
 }
