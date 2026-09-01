@@ -4,7 +4,10 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:healthylog/core/api/api_error_interceptor.dart';
 import 'package:healthylog/core/storage/secure_key_value_store.dart';
+import 'package:healthylog/features/dietplan/data/diet_plan_api.dart';
+import 'package:healthylog/features/dietplan/providers/diet_plan_providers.dart';
 import 'package:healthylog/features/identity/data/identity_api.dart';
 import 'package:healthylog/features/identity/data/profile_api.dart';
 import 'package:healthylog/features/identity/providers/identity_providers.dart';
@@ -74,12 +77,18 @@ Future<ProviderContainer> _pumpAuthenticatedApp(WidgetTester tester, {required S
     ..httpClientAdapter = _StatusCodeAdapter(200, '{"accessToken":"a","refreshToken":"r"}');
   final profileDio = Dio(BaseOptions(baseUrl: 'http://example.test'))
     ..httpClientAdapter = _StatusCodeAdapter(200, _profileJson(role));
+  // PA-8: nessun piano in corso, così la card di 7.1 non serve a questo
+  // banco di prova — solo che il tocco su "Piani" vi conduca davvero.
+  final dietPlanDio = Dio(BaseOptions(baseUrl: 'http://example.test'))
+    ..httpClientAdapter = _StatusCodeAdapter(404, '{"code":"RESOURCE_NOT_FOUND"}')
+    ..interceptors.add(ApiErrorInterceptor());
 
   final container = ProviderContainer(
     overrides: [
       secureKeyValueStoreProvider.overrideWithValue(store),
       identityApiProvider.overrideWithValue(IdentityApi(identityDio)),
       profileApiProvider.overrideWithValue(ProfileApi(profileDio)),
+      dietPlanApiProvider.overrideWithValue(DietPlanApi(dietPlanDio)),
     ],
   );
   addTearDown(container.dispose);
@@ -119,6 +128,17 @@ void main() {
     // La barra resta: le stesse quattro voci sono ancora presenti.
     expect(find.text('Piano'), findsOneWidget);
     expect(find.text('Profilo'), findsOneWidget);
+  });
+
+  testWidgets('il tocco su Piani apre la gestione del piano in corso (F10, 7.1)', (tester) async {
+    await _pumpAuthenticatedApp(tester, role: 'USER');
+
+    await tester.tap(find.text('Profilo'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Piani'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Inizia da qui'), findsOneWidget);
   });
 
   testWidgets('mostra le tre voci del Nutrizionista (3.1)', (tester) async {

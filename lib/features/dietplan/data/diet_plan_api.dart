@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 
+import '../../../core/api/api_exception.dart';
 import 'diet_plan.dart';
 import 'diet_plan_requests.dart';
 import 'diet_plan_template.dart';
@@ -35,6 +36,51 @@ class DietPlanApi {
   /// CV-2: da Bozza a Programmato.
   Future<DietPlan> confirm(String id) async {
     final response = await _dio.post('/diet-plans/$id/confirm');
+    return DietPlan.fromJson(response.data as Map<String, dynamic>);
+  }
+
+  /// PA-8: il piano "in corso" — Attivo, altrimenti Sospeso, altrimenti
+  /// il prossimo Programmato. `null` se nessuno dei tre esiste
+  /// (`RESOURCE_NOT_FOUND`, ER-9): non un errore da propagare, lo stato
+  /// vuoto della card (7.1 interfaccia.md).
+  Future<DietPlan?> getCurrent() async {
+    try {
+      final response = await _dio.get('/diet-plans/current');
+      return DietPlan.fromJson(response.data as Map<String, dynamic>);
+    } on DioException catch (e) {
+      if (e.asApiException?.code == 'RESOURCE_NOT_FOUND') return null;
+      rethrow;
+    }
+  }
+
+  /// AS-11: da Programmato a Bozza.
+  Future<DietPlan> withdraw(String id) async {
+    final response = await _dio.post('/diet-plans/$id/withdraw');
+    return DietPlan.fromJson(response.data as Map<String, dynamic>);
+  }
+
+  /// CV-4: attivazione anticipata, con spostamento della data di inizio.
+  Future<DietPlan> activate(String id) async {
+    final response = await _dio.post('/diet-plans/$id/activate');
+    return DietPlan.fromJson(response.data as Map<String, dynamic>);
+  }
+
+  /// CV-S1: sospensione.
+  Future<DietPlan> suspend(String id) async {
+    final response = await _dio.post('/diet-plans/$id/suspend');
+    return DietPlan.fromJson(response.data as Map<String, dynamic>);
+  }
+
+  /// CV-S6: ripresa.
+  Future<DietPlan> resume(String id) async {
+    final response = await _dio.post('/diet-plans/$id/resume');
+    return DietPlan.fromJson(response.data as Map<String, dynamic>);
+  }
+
+  /// CV-5: conclusione, con la data odierna (PA-7) — nessun corpo, come
+  /// previsto dal backend quando la data non è indicata esplicitamente.
+  Future<DietPlan> complete(String id) async {
+    final response = await _dio.post('/diet-plans/$id/complete');
     return DietPlan.fromJson(response.data as Map<String, dynamic>);
   }
 }

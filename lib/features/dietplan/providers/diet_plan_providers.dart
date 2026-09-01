@@ -51,3 +51,36 @@ class ConfirmDietPlanController extends _$ConfirmDietPlanController {
     state = await AsyncValue.guard(() => ref.read(dietPlanApiProvider).confirm(planId));
   }
 }
+
+/// PA-8: il piano "in corso" (7.1 interfaccia.md).
+@riverpod
+Future<DietPlan?> currentDietPlan(Ref ref) => ref.watch(dietPlanApiProvider).getCurrent();
+
+/// Transizioni di stato disposte dalla schermata di gestione (7.1
+/// interfaccia.md, F10): ciascuna invalida [currentDietPlanProvider], così
+/// che la card rifletta lo stato realmente raggiunto — anche quando
+/// cambia identità (AS-11: il piano ritirato non è più "in corso";
+/// CV-5: il piano concluso lascia il posto, se esiste, al prossimo
+/// Programmato) — invece di aggiornare uno stato locale che dovrebbe
+/// replicare la stessa logica di priorità del server (PA-9).
+@riverpod
+class DietPlanLifecycleController extends _$DietPlanLifecycleController {
+  @override
+  AsyncValue<DietPlan>? build() => null;
+
+  Future<void> _run(Future<DietPlan> Function() action) async {
+    state = const AsyncValue.loading();
+    state = await AsyncValue.guard(action);
+    ref.invalidate(currentDietPlanProvider);
+  }
+
+  Future<void> withdraw(String planId) => _run(() => ref.read(dietPlanApiProvider).withdraw(planId));
+
+  Future<void> activate(String planId) => _run(() => ref.read(dietPlanApiProvider).activate(planId));
+
+  Future<void> suspend(String planId) => _run(() => ref.read(dietPlanApiProvider).suspend(planId));
+
+  Future<void> resume(String planId) => _run(() => ref.read(dietPlanApiProvider).resume(planId));
+
+  Future<void> complete(String planId) => _run(() => ref.read(dietPlanApiProvider).complete(planId));
+}

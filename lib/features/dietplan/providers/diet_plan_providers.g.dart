@@ -297,3 +297,132 @@ abstract class _$ConfirmDietPlanController
     return element.handleCreate(ref, build);
   }
 }
+
+/// PA-8: il piano "in corso" (7.1 interfaccia.md).
+
+@ProviderFor(currentDietPlan)
+final currentDietPlanProvider = CurrentDietPlanProvider._();
+
+/// PA-8: il piano "in corso" (7.1 interfaccia.md).
+
+final class CurrentDietPlanProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<DietPlan?>,
+          DietPlan?,
+          FutureOr<DietPlan?>
+        >
+    with $FutureModifier<DietPlan?>, $FutureProvider<DietPlan?> {
+  /// PA-8: il piano "in corso" (7.1 interfaccia.md).
+  CurrentDietPlanProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'currentDietPlanProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$currentDietPlanHash();
+
+  @$internal
+  @override
+  $FutureProviderElement<DietPlan?> $createElement($ProviderPointer pointer) =>
+      $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<DietPlan?> create(Ref ref) {
+    return currentDietPlan(ref);
+  }
+}
+
+String _$currentDietPlanHash() => r'e0d082fd7d16910fe97cc87c2579466b6f0e75d6';
+
+/// Transizioni di stato disposte dalla schermata di gestione (7.1
+/// interfaccia.md, F10): ciascuna invalida [currentDietPlanProvider], così
+/// che la card rifletta lo stato realmente raggiunto — anche quando
+/// cambia identità (AS-11: il piano ritirato non è più "in corso";
+/// CV-5: il piano concluso lascia il posto, se esiste, al prossimo
+/// Programmato) — invece di aggiornare uno stato locale che dovrebbe
+/// replicare la stessa logica di priorità del server (PA-9).
+
+@ProviderFor(DietPlanLifecycleController)
+final dietPlanLifecycleControllerProvider =
+    DietPlanLifecycleControllerProvider._();
+
+/// Transizioni di stato disposte dalla schermata di gestione (7.1
+/// interfaccia.md, F10): ciascuna invalida [currentDietPlanProvider], così
+/// che la card rifletta lo stato realmente raggiunto — anche quando
+/// cambia identità (AS-11: il piano ritirato non è più "in corso";
+/// CV-5: il piano concluso lascia il posto, se esiste, al prossimo
+/// Programmato) — invece di aggiornare uno stato locale che dovrebbe
+/// replicare la stessa logica di priorità del server (PA-9).
+final class DietPlanLifecycleControllerProvider
+    extends
+        $NotifierProvider<DietPlanLifecycleController, AsyncValue<DietPlan>?> {
+  /// Transizioni di stato disposte dalla schermata di gestione (7.1
+  /// interfaccia.md, F10): ciascuna invalida [currentDietPlanProvider], così
+  /// che la card rifletta lo stato realmente raggiunto — anche quando
+  /// cambia identità (AS-11: il piano ritirato non è più "in corso";
+  /// CV-5: il piano concluso lascia il posto, se esiste, al prossimo
+  /// Programmato) — invece di aggiornare uno stato locale che dovrebbe
+  /// replicare la stessa logica di priorità del server (PA-9).
+  DietPlanLifecycleControllerProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'dietPlanLifecycleControllerProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$dietPlanLifecycleControllerHash();
+
+  @$internal
+  @override
+  DietPlanLifecycleController create() => DietPlanLifecycleController();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(AsyncValue<DietPlan>? value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<AsyncValue<DietPlan>?>(value),
+    );
+  }
+}
+
+String _$dietPlanLifecycleControllerHash() =>
+    r'235f9b5be80c2146bdb4c4be88475941daed37fe';
+
+/// Transizioni di stato disposte dalla schermata di gestione (7.1
+/// interfaccia.md, F10): ciascuna invalida [currentDietPlanProvider], così
+/// che la card rifletta lo stato realmente raggiunto — anche quando
+/// cambia identità (AS-11: il piano ritirato non è più "in corso";
+/// CV-5: il piano concluso lascia il posto, se esiste, al prossimo
+/// Programmato) — invece di aggiornare uno stato locale che dovrebbe
+/// replicare la stessa logica di priorità del server (PA-9).
+
+abstract class _$DietPlanLifecycleController
+    extends $Notifier<AsyncValue<DietPlan>?> {
+  AsyncValue<DietPlan>? build();
+  @$mustCallSuper
+  @override
+  WhenComplete runBuild() {
+    final ref = this.ref as $Ref<AsyncValue<DietPlan>?, AsyncValue<DietPlan>?>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<AsyncValue<DietPlan>?, AsyncValue<DietPlan>?>,
+              AsyncValue<DietPlan>?,
+              Object?,
+              Object?
+            >;
+    return element.handleCreate(ref, build);
+  }
+}

@@ -12,9 +12,10 @@ import '../providers/sessions_providers.dart';
 
 /// Profilo (12.1 interfaccia.md): intestazione personale, elenco delle
 /// sezioni, disconnessione in fondo. Le sole sezioni già realizzate
-/// compaiono: Piani, Gruppo e Nutrizionista appartengono a feature non
-/// ancora avviate e non sono quindi presenti (2.6: gli elementi per
-/// funzioni inesistenti non compaiono, non sono disabilitati).
+/// compaiono: Gruppo e Nutrizionista appartengono a feature non ancora
+/// avviate e non sono quindi presenti (2.6: gli elementi per funzioni
+/// inesistenti non compaiono, non sono disabilitati). "Piani" (7.1
+/// interfaccia.md, F10) apre la gestione del piano in corso.
 /// "Dispositivi collegati" appartiene propriamente a Impostazioni (12.2),
 /// non ancora realizzata (F29): resta qui finché non trova la propria
 /// sede definitiva, segnalato in decisioni.md.
@@ -114,6 +115,12 @@ class ProfileScreen extends ConsumerWidget {
                   icon: Icons.person_outline,
                   label: 'Dati personali',
                   onTap: () => context.push('/profile/personal-data'),
+                ),
+                const SizedBox(height: AppSpacing.sm),
+                _ProfileSection(
+                  icon: Icons.calendar_month_outlined,
+                  label: 'Piani',
+                  onTap: () => context.push('/profile/plans'),
                 ),
                 const SizedBox(height: AppSpacing.sm),
                 _ProfileSection(
