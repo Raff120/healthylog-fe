@@ -4,19 +4,38 @@ import 'weekday.dart';
 String _isoDate(DateTime date) =>
     '${date.year.toString().padLeft(4, '0')}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
 
-/// Corpo di `POST /diet-plans` (CD-1, CD-4).
+/// Corpo di `POST /diet-plans` (CD-1, CD-4; CT-1, CT-10 per la derivazione
+/// da template). `sourceTemplateId` assente crea da zero, valorizzato
+/// deriva da un template proprio.
 class CreateDietPlanRequest {
-  const CreateDietPlanRequest({required this.name, required this.startDate, this.endDate});
+  const CreateDietPlanRequest({
+    required this.name,
+    required this.startDate,
+    this.endDate,
+    this.sourceTemplateId,
+  });
 
   final String name;
   final DateTime startDate;
   final DateTime? endDate;
+  final String? sourceTemplateId;
 
   Map<String, dynamic> toJson() => {
         'name': name,
         'startDate': _isoDate(startDate),
         'endDate': endDate == null ? null : _isoDate(endDate!),
+        'sourceTemplateId': sourceTemplateId,
       };
+}
+
+/// Corpo di `POST /diet-plans/{id}/save-as-template` (TP-5, CD-18).
+class SaveDietPlanAsTemplateRequest {
+  const SaveDietPlanAsTemplateRequest({required this.name, this.description});
+
+  final String name;
+  final String? description;
+
+  Map<String, dynamic> toJson() => {'name': name, 'description': description};
 }
 
 /// Uno slot nel corpo di `PUT /diet-plans/{id}/schedule` (CD-7, CD-8).
