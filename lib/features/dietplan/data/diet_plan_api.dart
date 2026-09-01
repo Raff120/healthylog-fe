@@ -75,4 +75,8 @@ class DietPlanApi {
     final response = await _dio.post('/diet-plans/$id/complete');
     return DietPlan.fromJson(response.data as Map<String, dynamic>);
   }
+
+  /// CV-10, CV-11: eliminazione definitiva, rifiutata dal backend se il
+  /// piano è Attivo.
+  Future<void> delete(String id) => _dio.delete('/diet-plans/$id');
 }

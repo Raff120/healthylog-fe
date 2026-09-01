@@ -11,20 +11,22 @@ import '../data/diet_plan.dart';
 import '../data/plan_status.dart';
 import '../domain/current_diet_plan.dart';
 import '../providers/diet_plan_providers.dart';
+import 'widgets/delete_plan_dialog.dart';
 
 /// Gestione dei piani (7.1 interfaccia.md, raggiunta da Profilo → Piani):
 /// la card del piano in corso (Attivo, Sospeso o il prossimo Programmato,
 /// PA-8) con le azioni di stato di F10 (CV-2, AS-11, CV-4, CV-S1, CV-S6,
-/// CV-5), seguita dalle voci compatte degli altri piani non conclusi —
-/// Bozza compresa (PA-9). Pulsante di creazione sempre presente (7.1: "Il
-/// pulsante è assente al Paziente" — non ancora rilevante, il Paziente
-/// non esiste prima di F22).
+/// CV-5, MD-1), seguita dalle voci compatte degli altri piani — Bozza,
+/// altri Programmato (PA-9) e Conclusi. Pulsante di creazione sempre
+/// presente (7.1: "Il pulsante è assente al Paziente" — non ancora
+/// rilevante, il Paziente non esiste prima di F22).
 ///
-/// Non compare qui — assente dallo scopo di questa feature, vedi
-/// decisioni.md — l'elenco dei piani **conclusi** (ST-1, ST-2, F27, che
-/// dipende dall'aderenza di F25) né la loro riattivazione o eliminazione
-/// (CV-7, CV-10, CV-11: 7.5 interfaccia.md le colloca nel dettaglio del
-/// piano concluso, non qui).
+/// L'eliminazione (CV-10, CV-11) è offerta qui — dalla card per il
+/// Sospeso, dalle voci compatte per Bozza/Programmato/Concluso — mai per
+/// l'Attivo, che CV-11 esclude. Non compare invece qui, perché 7.5
+/// interfaccia.md la colloca nel dettaglio del piano concluso: la
+/// riattivazione (CV-7), raggiungibile dalla vista di sola lettura di un
+/// Concluso (`DietPlanViewScreen`) quando F27 la costruirà per intero.
 class DietPlanManagementScreen extends ConsumerWidget {
   const DietPlanManagementScreen({super.key});
 
@@ -94,7 +96,7 @@ class DietPlanManagementScreen extends ConsumerWidget {
   /// proseguire subito nella redazione, non restare nello stato
   /// ritirato: nessuna conferma propria, a differenza di "Ritira" da
   /// sola (4.5 interfaccia.md la riserva a quell'azione).
-  Future<void> _edit(BuildContext context, WidgetRef ref, String planId) async {
+  Future<void> _editScheduled(BuildContext context, WidgetRef ref, String planId) async {
     await ref.read(dietPlanLifecycleControllerProvider.notifier).withdraw(planId);
     if (!context.mounted) return;
     final state = ref.read(dietPlanLifecycleControllerProvider);
@@ -105,6 +107,20 @@ class DietPlanManagementScreen extends ConsumerWidget {
       return;
     }
     context.push('/diet-plans/$planId/schedule');
+  }
+
+  /// MD-1: un piano Attivo o Sospeso si modifica direttamente, senza
+  /// alcuna transizione di stato — a differenza del Programmato, resta
+  /// esattamente nello stesso stato mentre lo si redige.
+  void _editInPlace(BuildContext context, String planId) => context.push('/diet-plans/$planId/schedule');
+
+  /// CV-10: mai proposta per l'Attivo (CV-11 la esclude a monte, nessun
+  /// chiamante la offre in quel caso).
+  Future<void> _delete(BuildContext context, WidgetRef ref, String planId, PlanStatus status) async {
+    final confirmed = await confirmDeletePlan(context, status);
+    if (!confirmed) return;
+    if (!context.mounted) return;
+    await _act(context, ref, () => ref.read(dietPlanLifecycleControllerProvider.notifier).delete(planId));
   }
 
   Future<void> _act(BuildContext context, WidgetRef ref, Future<void> Function() action) async {
@@ -198,7 +214,9 @@ class DietPlanManagementScreen extends ConsumerWidget {
                     onComplete: () => _complete(context, ref, current.id),
                     onWithdraw: () => _withdraw(context, ref, current.id),
                     onActivateNow: () => _activateNow(context, ref, current.id),
-                    onEdit: () => _edit(context, ref, current.id),
+                    onEditScheduled: () => _editScheduled(context, ref, current.id),
+                    onEditInPlace: () => _editInPlace(context, current.id),
+                    onDelete: () => _delete(context, ref, current.id, current.status),
                   ),
                   if (others.isNotEmpty) const SizedBox(height: AppSpacing.md),
                 ],
@@ -208,7 +226,10 @@ class DietPlanManagementScreen extends ConsumerWidget {
                     child: _OtherPlanTile(
                       plan: plan,
                       formatDate: _formatDate,
-                      onTap: () => context.push('/diet-plans/${plan.id}/schedule'),
+                      onTap: () => context.push(plan.status == PlanStatus.completed
+                          ? '/diet-plans/${plan.id}'
+                          : '/diet-plans/${plan.id}/schedule'),
+                      onDelete: () => _delete(context, ref, plan.id, plan.status),
                     ),
                   ),
               ],
@@ -232,7 +253,9 @@ class _CurrentPlanCard extends StatelessWidget {
     required this.onComplete,
     required this.onWithdraw,
     required this.onActivateNow,
-    required this.onEdit,
+    required this.onEditScheduled,
+    required this.onEditInPlace,
+    required this.onDelete,
   });
 
   final DietPlan plan;
@@ -243,7 +266,9 @@ class _CurrentPlanCard extends StatelessWidget {
   final VoidCallback onComplete;
   final VoidCallback onWithdraw;
   final VoidCallback onActivateNow;
-  final VoidCallback onEdit;
+  final VoidCallback onEditScheduled;
+  final VoidCallback onEditInPlace;
+  final VoidCallback onDelete;
 
   String get _statusLabel => switch (plan.status) {
         PlanStatus.active => 'In corso',
@@ -279,6 +304,9 @@ class _CurrentPlanCard extends StatelessWidget {
               for (final action in _actionsFor(plan.status))
                 OutlinedButton(
                   onPressed: acting ? null : action.onPressed,
+                  style: action.destructive
+                      ? OutlinedButton.styleFrom(foregroundColor: colors.error, side: BorderSide(color: colors.error))
+                      : null,
                   child: Text(action.label),
                 ),
             ],
@@ -288,17 +316,23 @@ class _CurrentPlanCard extends StatelessWidget {
     );
   }
 
+  /// MD-1: Attivo e Sospeso si modificano ora direttamente (`onEditInPlace`),
+  /// non solo il Programmato (`onEditScheduled`, via ritiro). CV-10:
+  /// "Elimina" compare solo per il Sospeso — mai per l'Attivo (CV-11).
   List<_PlanAction> _actionsFor(PlanStatus status) => switch (status) {
         PlanStatus.active => [
+            _PlanAction('Modifica', onEditInPlace),
             _PlanAction('Sospendi', onSuspend),
             _PlanAction('Concludi', onComplete),
           ],
         PlanStatus.suspended => [
+            _PlanAction('Modifica', onEditInPlace),
             _PlanAction('Riprendi', onResume),
             _PlanAction('Concludi', onComplete),
+            _PlanAction('Elimina', onDelete, destructive: true),
           ],
         PlanStatus.scheduled => [
-            _PlanAction('Modifica', onEdit),
+            _PlanAction('Modifica', onEditScheduled),
             _PlanAction('Ritira', onWithdraw),
             _PlanAction('Attiva ora', onActivateNow),
           ],
@@ -307,37 +341,40 @@ class _CurrentPlanCard extends StatelessWidget {
 }
 
 class _PlanAction {
-  const _PlanAction(this.label, this.onPressed);
+  const _PlanAction(this.label, this.onPressed, {this.destructive = false});
 
   final String label;
   final VoidCallback onPressed;
+  final bool destructive;
 }
 
 /// Voce compatta di un piano diverso da quello in corso (7.1
-/// interfaccia.md, "Voci dell'elenco"): una Bozza da riprendere, o un
-/// altro Programmato oltre al più vicino (PA-9). Il tocco apre la
-/// redazione in entrambi i casi: per la Bozza è la sola azione utile,
-/// per un Programmato ulteriore non esiste ancora un'anteprima dedicata
-/// (assente da 7.1 per questo caso, non ancora incontrato in pratica).
+/// interfaccia.md, "Voci dell'elenco"): una Bozza da riprendere, un altro
+/// Programmato oltre al più vicino (PA-9), o un piano Concluso. Il tocco
+/// apre la redazione per Bozza/Programmato, la vista di sola lettura per
+/// il Concluso; per un Programmato ulteriore non esiste ancora
+/// un'anteprima dedicata (assente da 7.1 per questo caso, non ancora
+/// incontrato in pratica), apre comunque la redazione.
 class _OtherPlanTile extends StatelessWidget {
-  const _OtherPlanTile({required this.plan, required this.formatDate, required this.onTap});
+  const _OtherPlanTile({required this.plan, required this.formatDate, required this.onTap, required this.onDelete});
 
   final DietPlan plan;
   final String Function(DateTime) formatDate;
   final VoidCallback onTap;
+  final VoidCallback onDelete;
 
   String get _statusLabel => switch (plan.status) {
         PlanStatus.draft => 'Bozza',
         PlanStatus.scheduled => 'Programmato',
+        PlanStatus.completed => 'Concluso',
         _ => '',
       };
 
   Color _dotColor(BuildContext context) {
     final colors = context.colors;
-    // 7.1 interfaccia.md definisce il colore solo per Programmato
-    // (accento) e Concluso (terziario, mai presente in questo elenco);
-    // per la Bozza, non prevista lì, si usa lo stesso terziario per non
-    // introdurre un terzo significato cromatico non documentato.
+    // 7.1 interfaccia.md: accento se Programmato, terziario se Concluso
+    // — per la Bozza, non prevista lì, si usa lo stesso terziario per
+    // non introdurre un terzo significato cromatico non documentato.
     return plan.status == PlanStatus.scheduled ? colors.accent : colors.textTertiary;
   }
 
@@ -373,6 +410,11 @@ class _OtherPlanTile extends StatelessWidget {
                     ),
                   ],
                 ),
+              ),
+              IconButton(
+                icon: Icon(Icons.delete_outline, color: colors.textTertiary),
+                tooltip: 'Elimina',
+                onPressed: onDelete,
               ),
               Icon(Icons.chevron_right, color: colors.textTertiary),
             ],

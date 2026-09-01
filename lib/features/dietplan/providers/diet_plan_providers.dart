@@ -59,20 +59,22 @@ class ConfirmDietPlanController extends _$ConfirmDietPlanController {
 @riverpod
 Future<List<DietPlan>> ownedDietPlans(Ref ref) => ref.watch(dietPlanApiProvider).list();
 
-/// Transizioni di stato disposte dalla schermata di gestione (7.1
-/// interfaccia.md, F10): ciascuna invalida [ownedDietPlansProvider], così
-/// che l'elenco rifletta lo stato realmente raggiunto — anche quando il
-/// piano "in corso" cambia identità (AS-11: il piano ritirato non è più
-/// "in corso"; CV-5: il piano concluso esce del tutto dall'elenco,
-/// lasciando il posto, se esiste, al prossimo Programmato) — invece di
-/// aggiornare uno stato locale che dovrebbe replicare la stessa logica
-/// di priorità del server.
+/// Transizioni di stato ed eliminazione disposte dalla schermata di
+/// gestione (7.1 interfaccia.md, F10): ciascuna invalida
+/// [ownedDietPlansProvider], così che l'elenco rifletta lo stato
+/// realmente raggiunto — anche quando il piano "in corso" cambia
+/// identità (AS-11: il piano ritirato non è più "in corso"; CV-5: il
+/// piano concluso lascia il posto, se esiste, al prossimo Programmato,
+/// pur restando nell'elenco come Concluso) — invece di aggiornare uno
+/// stato locale che dovrebbe replicare la stessa logica di priorità del
+/// server. Il payload della risposta non serve a nessun chiamante:
+/// `AsyncValue<void>` invece di `AsyncValue<DietPlan>`.
 @riverpod
 class DietPlanLifecycleController extends _$DietPlanLifecycleController {
   @override
-  AsyncValue<DietPlan>? build() => null;
+  AsyncValue<void>? build() => null;
 
-  Future<void> _run(Future<DietPlan> Function() action) async {
+  Future<void> _run(Future<void> Function() action) async {
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(action);
     ref.invalidate(ownedDietPlansProvider);
@@ -87,4 +89,7 @@ class DietPlanLifecycleController extends _$DietPlanLifecycleController {
   Future<void> resume(String planId) => _run(() => ref.read(dietPlanApiProvider).resume(planId));
 
   Future<void> complete(String planId) => _run(() => ref.read(dietPlanApiProvider).complete(planId));
+
+  /// CV-10, CV-11.
+  Future<void> delete(String planId) => _run(() => ref.read(dietPlanApiProvider).delete(planId));
 }

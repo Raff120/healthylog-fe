@@ -351,38 +351,43 @@ final class OwnedDietPlansProvider
 
 String _$ownedDietPlansHash() => r'60286f0979b508c2d4e61d6f4c548d40b8fe1dbc';
 
-/// Transizioni di stato disposte dalla schermata di gestione (7.1
-/// interfaccia.md, F10): ciascuna invalida [ownedDietPlansProvider], così
-/// che l'elenco rifletta lo stato realmente raggiunto — anche quando il
-/// piano "in corso" cambia identità (AS-11: il piano ritirato non è più
-/// "in corso"; CV-5: il piano concluso esce del tutto dall'elenco,
-/// lasciando il posto, se esiste, al prossimo Programmato) — invece di
-/// aggiornare uno stato locale che dovrebbe replicare la stessa logica
-/// di priorità del server.
+/// Transizioni di stato ed eliminazione disposte dalla schermata di
+/// gestione (7.1 interfaccia.md, F10): ciascuna invalida
+/// [ownedDietPlansProvider], così che l'elenco rifletta lo stato
+/// realmente raggiunto — anche quando il piano "in corso" cambia
+/// identità (AS-11: il piano ritirato non è più "in corso"; CV-5: il
+/// piano concluso lascia il posto, se esiste, al prossimo Programmato,
+/// pur restando nell'elenco come Concluso) — invece di aggiornare uno
+/// stato locale che dovrebbe replicare la stessa logica di priorità del
+/// server. Il payload della risposta non serve a nessun chiamante:
+/// `AsyncValue<void>` invece di `AsyncValue<DietPlan>`.
 
 @ProviderFor(DietPlanLifecycleController)
 final dietPlanLifecycleControllerProvider =
     DietPlanLifecycleControllerProvider._();
 
-/// Transizioni di stato disposte dalla schermata di gestione (7.1
-/// interfaccia.md, F10): ciascuna invalida [ownedDietPlansProvider], così
-/// che l'elenco rifletta lo stato realmente raggiunto — anche quando il
-/// piano "in corso" cambia identità (AS-11: il piano ritirato non è più
-/// "in corso"; CV-5: il piano concluso esce del tutto dall'elenco,
-/// lasciando il posto, se esiste, al prossimo Programmato) — invece di
-/// aggiornare uno stato locale che dovrebbe replicare la stessa logica
-/// di priorità del server.
+/// Transizioni di stato ed eliminazione disposte dalla schermata di
+/// gestione (7.1 interfaccia.md, F10): ciascuna invalida
+/// [ownedDietPlansProvider], così che l'elenco rifletta lo stato
+/// realmente raggiunto — anche quando il piano "in corso" cambia
+/// identità (AS-11: il piano ritirato non è più "in corso"; CV-5: il
+/// piano concluso lascia il posto, se esiste, al prossimo Programmato,
+/// pur restando nell'elenco come Concluso) — invece di aggiornare uno
+/// stato locale che dovrebbe replicare la stessa logica di priorità del
+/// server. Il payload della risposta non serve a nessun chiamante:
+/// `AsyncValue<void>` invece di `AsyncValue<DietPlan>`.
 final class DietPlanLifecycleControllerProvider
-    extends
-        $NotifierProvider<DietPlanLifecycleController, AsyncValue<DietPlan>?> {
-  /// Transizioni di stato disposte dalla schermata di gestione (7.1
-  /// interfaccia.md, F10): ciascuna invalida [ownedDietPlansProvider], così
-  /// che l'elenco rifletta lo stato realmente raggiunto — anche quando il
-  /// piano "in corso" cambia identità (AS-11: il piano ritirato non è più
-  /// "in corso"; CV-5: il piano concluso esce del tutto dall'elenco,
-  /// lasciando il posto, se esiste, al prossimo Programmato) — invece di
-  /// aggiornare uno stato locale che dovrebbe replicare la stessa logica
-  /// di priorità del server.
+    extends $NotifierProvider<DietPlanLifecycleController, AsyncValue<void>?> {
+  /// Transizioni di stato ed eliminazione disposte dalla schermata di
+  /// gestione (7.1 interfaccia.md, F10): ciascuna invalida
+  /// [ownedDietPlansProvider], così che l'elenco rifletta lo stato
+  /// realmente raggiunto — anche quando il piano "in corso" cambia
+  /// identità (AS-11: il piano ritirato non è più "in corso"; CV-5: il
+  /// piano concluso lascia il posto, se esiste, al prossimo Programmato,
+  /// pur restando nell'elenco come Concluso) — invece di aggiornare uno
+  /// stato locale che dovrebbe replicare la stessa logica di priorità del
+  /// server. Il payload della risposta non serve a nessun chiamante:
+  /// `AsyncValue<void>` invece di `AsyncValue<DietPlan>`.
   DietPlanLifecycleControllerProvider._()
     : super(
         from: null,
@@ -402,38 +407,40 @@ final class DietPlanLifecycleControllerProvider
   DietPlanLifecycleController create() => DietPlanLifecycleController();
 
   /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(AsyncValue<DietPlan>? value) {
+  Override overrideWithValue(AsyncValue<void>? value) {
     return $ProviderOverride(
       origin: this,
-      providerOverride: $SyncValueProvider<AsyncValue<DietPlan>?>(value),
+      providerOverride: $SyncValueProvider<AsyncValue<void>?>(value),
     );
   }
 }
 
 String _$dietPlanLifecycleControllerHash() =>
-    r'bb5e7e1917959b27965046f79b7d06d0dbbde9e7';
+    r'e94942e605cac2c01827e20b2c6a4fe04aa85bc9';
 
-/// Transizioni di stato disposte dalla schermata di gestione (7.1
-/// interfaccia.md, F10): ciascuna invalida [ownedDietPlansProvider], così
-/// che l'elenco rifletta lo stato realmente raggiunto — anche quando il
-/// piano "in corso" cambia identità (AS-11: il piano ritirato non è più
-/// "in corso"; CV-5: il piano concluso esce del tutto dall'elenco,
-/// lasciando il posto, se esiste, al prossimo Programmato) — invece di
-/// aggiornare uno stato locale che dovrebbe replicare la stessa logica
-/// di priorità del server.
+/// Transizioni di stato ed eliminazione disposte dalla schermata di
+/// gestione (7.1 interfaccia.md, F10): ciascuna invalida
+/// [ownedDietPlansProvider], così che l'elenco rifletta lo stato
+/// realmente raggiunto — anche quando il piano "in corso" cambia
+/// identità (AS-11: il piano ritirato non è più "in corso"; CV-5: il
+/// piano concluso lascia il posto, se esiste, al prossimo Programmato,
+/// pur restando nell'elenco come Concluso) — invece di aggiornare uno
+/// stato locale che dovrebbe replicare la stessa logica di priorità del
+/// server. Il payload della risposta non serve a nessun chiamante:
+/// `AsyncValue<void>` invece di `AsyncValue<DietPlan>`.
 
 abstract class _$DietPlanLifecycleController
-    extends $Notifier<AsyncValue<DietPlan>?> {
-  AsyncValue<DietPlan>? build();
+    extends $Notifier<AsyncValue<void>?> {
+  AsyncValue<void>? build();
   @$mustCallSuper
   @override
   WhenComplete runBuild() {
-    final ref = this.ref as $Ref<AsyncValue<DietPlan>?, AsyncValue<DietPlan>?>;
+    final ref = this.ref as $Ref<AsyncValue<void>?, AsyncValue<void>?>;
     final element =
         ref.element
             as $ClassProviderElement<
-              AnyNotifier<AsyncValue<DietPlan>?, AsyncValue<DietPlan>?>,
-              AsyncValue<DietPlan>?,
+              AnyNotifier<AsyncValue<void>?, AsyncValue<void>?>,
+              AsyncValue<void>?,
               Object?,
               Object?
             >;
