@@ -21,12 +21,15 @@ import 'widgets/delete_plan_dialog.dart';
 /// presente (7.1: "Il pulsante è assente al Paziente" — non ancora
 /// rilevante, il Paziente non esiste prima di F22).
 ///
-/// L'eliminazione (CV-10, CV-11) è offerta qui — dalla card per il
-/// Sospeso, dalle voci compatte per Bozza/Programmato/Concluso — mai per
-/// l'Attivo, che CV-11 esclude. Non compare invece qui, perché 7.5
-/// interfaccia.md la colloca nel dettaglio del piano concluso: la
-/// riattivazione (CV-7), raggiungibile dalla vista di sola lettura di un
-/// Concluso (`DietPlanViewScreen`) quando F27 la costruirà per intero.
+/// L'eliminazione (CV-10, CV-11) è offerta qui solo dalla card, per il
+/// Sospeso — mai per l'Attivo, che CV-11 esclude. Non compare invece
+/// sulle voci compatte, dove il tocco che apre il piano l'avrebbe resa
+/// troppo facile da premere per errore (segnalato dall'utente, vedi
+/// decisioni.md): per Bozza, Programmato e Concluso resta raggiungibile
+/// dal menu della schermata che il tocco apre, redazione o
+/// (`DietPlanViewScreen`) la vista di sola lettura del Concluso — la cui
+/// riattivazione (CV-7) resta comunque a F27, che la costruirà per
+/// intero.
 class DietPlanManagementScreen extends ConsumerWidget {
   const DietPlanManagementScreen({super.key});
 
@@ -229,7 +232,6 @@ class DietPlanManagementScreen extends ConsumerWidget {
                       onTap: () => context.push(plan.status == PlanStatus.completed
                           ? '/diet-plans/${plan.id}'
                           : '/diet-plans/${plan.id}/schedule'),
-                      onDelete: () => _delete(context, ref, plan.id, plan.status),
                     ),
                   ),
               ],
@@ -355,13 +357,18 @@ class _PlanAction {
 /// il Concluso; per un Programmato ulteriore non esiste ancora
 /// un'anteprima dedicata (assente da 7.1 per questo caso, non ancora
 /// incontrato in pratica), apre comunque la redazione.
+///
+/// Nessun pulsante di eliminazione qui: accostato al tocco che apre il
+/// piano, il rischio di premerlo per errore era troppo alto (segnalato
+/// dall'utente, vedi decisioni.md). Resta raggiungibile dal menu della
+/// schermata che il tocco apre — redazione per Bozza/Programmato, vista
+/// di sola lettura per il Concluso — mai qui.
 class _OtherPlanTile extends StatelessWidget {
-  const _OtherPlanTile({required this.plan, required this.formatDate, required this.onTap, required this.onDelete});
+  const _OtherPlanTile({required this.plan, required this.formatDate, required this.onTap});
 
   final DietPlan plan;
   final String Function(DateTime) formatDate;
   final VoidCallback onTap;
-  final VoidCallback onDelete;
 
   String get _statusLabel => switch (plan.status) {
         PlanStatus.draft => 'Bozza',
@@ -410,11 +417,6 @@ class _OtherPlanTile extends StatelessWidget {
                     ),
                   ],
                 ),
-              ),
-              IconButton(
-                icon: Icon(Icons.delete_outline, color: colors.textTertiary),
-                tooltip: 'Elimina',
-                onPressed: onDelete,
               ),
               Icon(Icons.chevron_right, color: colors.textTertiary),
             ],

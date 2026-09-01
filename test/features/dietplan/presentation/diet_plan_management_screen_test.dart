@@ -324,38 +324,22 @@ void main() {
     expect(find.text('Vista plan-2'), findsOneWidget);
   });
 
-  testWidgets('l\'eliminazione di un piano Concluso dalla lista è rafforzata (CV-10)', (tester) async {
+  testWidgets('nessun pulsante di eliminazione sulle voci compatte, per evitare pressioni accidentali', (tester) async {
     final dio = Dio(BaseOptions(baseUrl: 'http://example.test'));
-    var deleteCalled = false;
-    var deleted = false;
     dio.httpClientAdapter = _JsonAdapter((options) {
-      if (options.method == 'DELETE') {
-        deleteCalled = true;
-        deleted = true;
-        return <String, dynamic>{};
-      }
       if (_isListRequest(options)) {
-        return deleted
-            ? [_planJson(status: 'ACTIVE', id: 'plan-1')]
-            : [
-                _planJson(status: 'ACTIVE', id: 'plan-1'),
-                _planJson(status: 'COMPLETED', id: 'plan-2', name: 'Dieta passata'),
-              ];
+        return [
+          _planJson(status: 'ACTIVE', id: 'plan-1', name: 'Dieta in corso', startDate: '2026-08-01'),
+          _planJson(status: 'COMPLETED', id: 'plan-2', name: 'Dieta passata', startDate: '2026-01-01'),
+        ];
       }
       return _planJson(status: 'ACTIVE');
     });
     dio.interceptors.add(ApiErrorInterceptor());
 
     await _pumpManagementScreen(tester, DietPlanApi(dio));
-    await tester.tap(find.byIcon(Icons.delete_outline));
-    await tester.pumpAndSettle();
 
-    expect(find.textContaining('perdute in modo definitivo'), findsOneWidget);
-    await tester.tap(find.descendant(of: find.byType(AlertDialog), matching: find.text('Elimina')));
-    await tester.pumpAndSettle();
-
-    expect(deleteCalled, isTrue);
-    expect(find.text('Dieta passata'), findsNothing);
+    expect(find.byIcon(Icons.delete_outline), findsNothing);
   });
 
   testWidgets('il pulsante di creazione compare anche quando l\'elenco non è vuoto (7.1)', (tester) async {
