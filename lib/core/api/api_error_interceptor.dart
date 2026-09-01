@@ -22,6 +22,7 @@ class ApiErrorInterceptor extends Interceptor {
         error: ApiException(
           statusCode: response?.statusCode ?? -1,
           code: code,
+          body: data is Map ? data : null,
         ),
       ),
     );

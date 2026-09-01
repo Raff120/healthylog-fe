@@ -6,10 +6,18 @@ import 'package:dio/dio.dart';
 /// codice, secondo la lingua selezionata (LO-1) — non dal corpo della
 /// risposta (ER-2).
 class ApiException implements Exception {
-  const ApiException({required this.statusCode, required this.code});
+  const ApiException({required this.statusCode, required this.code, this.body});
 
   final int statusCode;
   final String code;
+
+  /// Corpo grezzo della risposta (ER-1), oltre al solo `code`: alcuni
+  /// errori portano dati che servono a comporre il messaggio (es.
+  /// `PLAN_PERIOD_OVERLAP` indica il piano in conflitto, `VALIDATION_FAILED`
+  /// l'elenco dei campi, ER-12). Un `dynamic` grezzo, non un modello
+  /// dedicato: letto solo dalle poche schermate che ne hanno bisogno,
+  /// per uno specifico codice già noto.
+  final dynamic body;
 
   @override
   String toString() => 'ApiException($statusCode, $code)';

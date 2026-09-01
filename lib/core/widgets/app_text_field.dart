@@ -21,6 +21,8 @@ class AppTextField extends StatelessWidget {
     this.autofillHints,
     this.onChanged,
     this.focusNode,
+    this.minLines = 1,
+    this.maxLines = 1,
   });
 
   final String label;
@@ -35,57 +37,64 @@ class AppTextField extends StatelessWidget {
   final ValueChanged<String>? onChanged;
   final FocusNode? focusNode;
 
+  /// > 1 per un'area di testo estesa (GG-12: "andata a capo ed elenchi
+  /// puntati"), es. il contenuto di uno slot o il testo di una ricetta.
+  final int minLines;
+  final int maxLines;
+
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
     final typography = context.typography;
     final hasError = errorText != null && errorText!.isNotEmpty;
     final borderColor = hasError ? colors.error : colors.dividerStrong;
+    final isMultiline = maxLines > 1;
+
+    final field = TextField(
+      controller: controller,
+      focusNode: focusNode,
+      obscureText: obscureText,
+      keyboardType: keyboardType,
+      textCapitalization: textCapitalization,
+      inputFormatters: inputFormatters,
+      autofillHints: autofillHints,
+      onChanged: onChanged,
+      minLines: minLines,
+      maxLines: maxLines,
+      style: typography.bodyLarge.copyWith(color: colors.textPrimary),
+      decoration: InputDecoration(
+        labelText: label,
+        labelStyle: typography.bodyMedium.copyWith(
+          color: colors.textSecondary,
+        ),
+        filled: true,
+        fillColor: colors.surface,
+        suffixIcon: suffixIcon,
+        contentPadding: isMultiline
+            ? const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.sm)
+            : const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+          borderSide: BorderSide(color: borderColor),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+          borderSide: BorderSide(color: borderColor),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+          borderSide: BorderSide(
+            color: hasError ? colors.error : colors.accent,
+            width: 2,
+          ),
+        ),
+      ),
+    );
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        SizedBox(
-          height: AppSpacing.heightTextField,
-          child: TextField(
-            controller: controller,
-            focusNode: focusNode,
-            obscureText: obscureText,
-            keyboardType: keyboardType,
-            textCapitalization: textCapitalization,
-            inputFormatters: inputFormatters,
-            autofillHints: autofillHints,
-            onChanged: onChanged,
-            style: typography.bodyLarge.copyWith(color: colors.textPrimary),
-            decoration: InputDecoration(
-              labelText: label,
-              labelStyle: typography.bodyMedium.copyWith(
-                color: colors.textSecondary,
-              ),
-              filled: true,
-              fillColor: colors.surface,
-              suffixIcon: suffixIcon,
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.md,
-              ),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-                borderSide: BorderSide(color: borderColor),
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-                borderSide: BorderSide(color: borderColor),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-                borderSide: BorderSide(
-                  color: hasError ? colors.error : colors.accent,
-                  width: 2,
-                ),
-              ),
-            ),
-          ),
-        ),
+        isMultiline ? field : SizedBox(height: AppSpacing.heightTextField, child: field),
         if (hasError) ...[
           const SizedBox(height: AppSpacing.xxs),
           Text(
