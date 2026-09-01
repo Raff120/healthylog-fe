@@ -22,6 +22,7 @@ import '../features/identity/presentation/personal_data_screen.dart';
 import '../features/identity/presentation/profile_screen.dart';
 import '../features/identity/presentation/registration_details_screen.dart';
 import '../features/identity/presentation/role_selection_screen.dart';
+import 'navigation/main_shell.dart';
 import 'placeholder_home_screen.dart';
 import 'splash_screen.dart';
 
@@ -131,8 +132,14 @@ GoRouter goRouter(Ref ref) {
         builder: (context, state) =>
             PasswordResetConfirmScreen(token: state.uri.queryParameters['token'] ?? ''),
       ),
-      GoRoute(path: '/home', builder: (context, state) => const PlaceholderHomeScreen()),
-      GoRoute(path: '/profile', builder: (context, state) => const ProfileScreen()),
+      GoRoute(
+        path: '/home',
+        builder: (context, state) => const MainShell(child: PlaceholderHomeScreen()),
+      ),
+      GoRoute(
+        path: '/profile',
+        builder: (context, state) => const MainShell(child: ProfileScreen()),
+      ),
       GoRoute(
         path: '/profile/personal-data',
         builder: (context, state) => const PersonalDataScreen(),

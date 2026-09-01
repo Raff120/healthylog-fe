@@ -8,10 +8,10 @@ import 'theme/theme_context.dart';
 /// Destinazione temporanea dopo l'accesso, in attesa di *Piano* (F12,
 /// Fase 3): serve solo a rendere verificabile la protezione delle rotte
 /// (F06) prima che esista una destinazione reale. Da sostituire
-/// integralmente, non da ampliare. Il profilo (12.1 interfaccia.md,
-/// dove risiede la disconnessione) è già raggiungibile da qui, in
-/// assenza della barra di navigazione reale (compito di un task
-/// successivo).
+/// integralmente, non da ampliare. Il profilo (12.1 interfaccia.md, dove
+/// risiede la disconnessione) si raggiunge dalla barra di navigazione
+/// principale (`MainShell`, 3.2 interfaccia.md, che avvolge questa
+/// schermata) — non più da un pulsante proprio.
 ///
 /// I pulsanti "TEMP Nuovo piano" (verso `/diet-plans/new`) e "TEMP
 /// Template" (verso `/diet-plan-templates`) sono provvisori, per prova
@@ -45,10 +45,6 @@ class PlaceholderHomeScreen extends ConsumerWidget {
                   style: typography.bodyMedium.copyWith(color: colors.textSecondary),
                 ),
                 const SizedBox(height: AppSpacing.lg),
-                TextButton(
-                  onPressed: () => context.push('/profile'),
-                  child: const Text('Profilo'),
-                ),
                 TextButton(
                   onPressed: () => context.push('/diet-plans/new'),
                   child: const Text('TEMP Nuovo piano'),

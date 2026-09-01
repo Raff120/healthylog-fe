@@ -45,6 +45,8 @@ class AppSpacing {
 
   // Larghezze di componenti specifici.
   static const double widthDayNavigationSidebar = 200;
+  static const double widthNavigationRailCompact = 72;
+  static const double widthNavigationRailExpanded = 240;
 
   // Movimento.
   static const Duration motionImmediate = Duration(milliseconds: 120);

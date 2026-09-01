@@ -6,7 +6,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:healthylog/app/router.dart';
 import 'package:healthylog/core/storage/secure_key_value_store.dart';
 import 'package:healthylog/features/identity/data/identity_api.dart';
+import 'package:healthylog/features/identity/data/profile_api.dart';
 import 'package:healthylog/features/identity/providers/identity_providers.dart';
+import 'package:healthylog/features/identity/providers/profile_providers.dart';
 import 'package:healthylog/main.dart';
 
 /// Protezione delle rotte (5.2 interfaccia.md: "Chi ha una sessione
@@ -58,6 +60,18 @@ IdentityApi _identityApiReturning(int statusCode, String body) {
   return IdentityApi(dio);
 }
 
+const _profileJson = '{'
+    '"id":"user-1","email":"utente@esempio.test","username":"utente",'
+    '"firstName":"Nome","lastName":"Cognome","birthDate":"2000-01-01",'
+    '"birthPlace":"Roma","sex":"MALE","role":"USER","height":null'
+    '}';
+
+ProfileApi _profileApiReturning(int statusCode, String body) {
+  final dio = Dio(BaseOptions(baseUrl: 'http://example.test'));
+  dio.httpClientAdapter = _StatusCodeAdapter(statusCode, body);
+  return ProfileApi(dio);
+}
+
 void main() {
   testWidgets('una rotta protetta senza sessione reindirizza all\'accesso', (tester) async {
     final container = ProviderContainer(
@@ -87,6 +101,9 @@ void main() {
         identityApiProvider.overrideWithValue(
           _identityApiReturning(200, '{"accessToken":"a","refreshToken":"r"}'),
         ),
+        // MainShell (3.2 interfaccia.md) legge il ruolo dal profilo per
+        // comporre la barra di navigazione, avvolgendo ora anche /home.
+        profileApiProvider.overrideWithValue(_profileApiReturning(200, _profileJson)),
       ],
     );
     addTearDown(container.dispose);
