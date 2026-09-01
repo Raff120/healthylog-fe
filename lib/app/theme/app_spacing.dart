@@ -43,6 +43,9 @@ class AppSpacing {
   static const double maxWidthSingleColumn = 720;
   static const double maxWidthWide = 1280;
 
+  // Larghezze di componenti specifici.
+  static const double widthDayNavigationSidebar = 200;
+
   // Movimento.
   static const Duration motionImmediate = Duration(milliseconds: 120);
   static const Duration motionStateTransition = Duration(milliseconds: 200);
