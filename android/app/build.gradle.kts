@@ -6,7 +6,10 @@ plugins {
 
 android {
     namespace = "it.healthylog.healthylog"
-    compileSdk = flutter.compileSdkVersion
+    // flutter_secure_storage richiede compileSdk 37 o superiore (vedi
+    // decisioni.md): sovrascritto rispetto a flutter.compileSdkVersion,
+    // ancora fermo a 36 in questa versione dell'SDK Flutter.
+    compileSdk = 37
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
