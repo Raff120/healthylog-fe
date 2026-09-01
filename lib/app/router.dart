@@ -12,6 +12,7 @@ import '../features/dietplan/presentation/diet_plan_schedule_screen.dart';
 import '../features/dietplan/presentation/diet_plan_template_list_screen.dart';
 import '../features/dietplan/presentation/diet_plan_template_preview_screen.dart';
 import '../features/dietplan/presentation/diet_plan_template_schedule_screen.dart';
+import '../features/dietplan/presentation/diet_plan_view_screen.dart';
 import '../features/identity/data/account_role.dart';
 import '../features/identity/presentation/devices_screen.dart';
 import '../features/identity/presentation/email_verification_link_screen.dart';
@@ -155,6 +156,10 @@ GoRouter goRouter(Ref ref) {
       GoRoute(
         path: '/diet-plans/:id/schedule',
         builder: (context, state) => DietPlanScheduleScreen(planId: state.pathParameters['id']!),
+      ),
+      GoRoute(
+        path: '/diet-plans/:id',
+        builder: (context, state) => DietPlanViewScreen(planId: state.pathParameters['id']!),
       ),
       GoRoute(path: '/diet-plan-templates', builder: (context, state) => const DietPlanTemplateListScreen()),
       GoRoute(
