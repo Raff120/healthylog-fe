@@ -40,6 +40,12 @@ class AppPalette {
   static const Color mealSkippedLight = Color(0xFFC0392B);
   static const Color mealSkippedDark = Color(0xFFE0705F);
 
+  // Fondo tenue del pulsante di spunta attivo (4.1 interfaccia.md, F13).
+  static const Color mealConsumedBackgroundLight = Color(0xFFE7F3EC);
+  static const Color mealConsumedBackgroundDark = Color(0xFF1E3229);
+  static const Color mealSkippedBackgroundLight = Color(0xFFFBEAE8);
+  static const Color mealSkippedBackgroundDark = Color(0xFF3A211E);
+
   // Semantici.
   static const Color errorLight = Color(0xFFC0392B);
   static const Color errorDark = Color(0xFFE0705F);

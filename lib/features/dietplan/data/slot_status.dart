@@ -11,4 +11,11 @@ enum SlotStatus {
         'SKIPPED' => SlotStatus.skipped,
         _ => SlotStatus.toConsume,
       };
+
+  /// Corpo di `PATCH /plan-days/{date}/slots/{slotId}` (F13, SP-1).
+  String toJson() => switch (this) {
+        SlotStatus.toConsume => 'TO_CONSUME',
+        SlotStatus.consumed => 'CONSUMED',
+        SlotStatus.skipped => 'SKIPPED',
+      };
 }

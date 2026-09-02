@@ -1,30 +1,49 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../app/theme/app_spacing.dart';
 import '../../../../app/theme/theme_context.dart';
+import '../../../../core/api/api_error_messages.dart';
+import '../../../../core/api/api_exception.dart';
 import '../../data/plan_day.dart';
 import '../../data/slot_status.dart';
 import '../../data/slot_type.dart';
+import '../../domain/plan_day_date.dart';
+import '../../providers/plan_day_providers.dart';
 import '../slot_type_presentation.dart';
 
-/// Card di sola lettura di uno slot della giornata (4.1 interfaccia.md,
-/// VG-3, VG-4). A differenza di [SlotCard] (7.3, redazione) non consente
-/// modifiche: la spunta (SP-1, F13) e l'inversione (MS-1, F17) restano
-/// assenti.
-class MealCard extends StatefulWidget {
-  const MealCard({super.key, required this.slot});
+/// Card di uno slot della giornata (4.1 interfaccia.md, VG-3, VG-4), con
+/// la spunta (SP-1, F13). A differenza di [SlotCard] (7.3, redazione) non
+/// consente di modificarne il contenuto: l'inversione (MS-1, F17) resta
+/// assente.
+class MealCard extends ConsumerStatefulWidget {
+  const MealCard({super.key, required this.slot, required this.date, required this.canCheck});
 
   final PlanDaySlot slot;
 
+  /// Giornata a cui appartiene lo slot (SP-8, SP-10): determina se la
+  /// spunta va preceduta dall'avviso di data futura.
+  final DateTime date;
+
+  /// SP-11: false quando la giornata non è coperta da un piano Attivo —
+  /// i pulsanti restano visibili ma disabilitati (4.1 interfaccia.md).
+  final bool canCheck;
+
   @override
-  State<MealCard> createState() => _MealCardState();
+  ConsumerState<MealCard> createState() => _MealCardState();
 }
 
-class _MealCardState extends State<MealCard> {
+class _MealCardState extends ConsumerState<MealCard> {
   bool _expanded = false;
 
   @override
   Widget build(BuildContext context) {
+    // Tiene in vita il controller (autoDispose) per la durata della
+    // richiesta: senza un ascoltatore, verrebbe eliminato non appena il
+    // gestore del tocco restituisce il controllo, prima che la risposta
+    // asincrona possa scriverne lo stato (`UnmountedRefException`).
+    ref.watch(planDaySlotStatusControllerProvider);
+
     final colors = context.colors;
     final typography = context.typography;
     final consumption = context.consumptionColors;
@@ -148,6 +167,14 @@ class _MealCardState extends State<MealCard> {
                   ],
                 ),
               ),
+              if (hasContent) ...[
+                const SizedBox(width: AppSpacing.xs),
+                _SpuntaButtons(
+                  status: slot.status,
+                  enabled: widget.canCheck,
+                  onSelect: (status) => _updateStatus(context, status),
+                ),
+              ],
               AnimatedRotation(
                 turns: _expanded ? 0.5 : 0,
                 duration: AppSpacing.motionStateTransition,
@@ -159,6 +186,56 @@ class _MealCardState extends State<MealCard> {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  /// SP-1: ciascun pulsante alterna fra il proprio stato e *Da consumare*
+  /// (4.1 interfaccia.md) — non un ciclo fra i tre stati.
+  SlotStatus _nextStatus(SlotStatus target) => widget.slot.status == target ? SlotStatus.toConsume : target;
+
+  /// SP-10: la spunta su una giornata futura è una conferma semplice
+  /// (4.5 interfaccia.md), non un vincolo — SP-8 lascia invece il passato
+  /// senza alcuna limitazione.
+  Future<void> _updateStatus(BuildContext context, SlotStatus target) async {
+    final status = _nextStatus(target);
+    if (dateOnly(widget.date).isAfter(dateOnly(DateTime.now()))) {
+      final confirmed = await _confirmFutureDay(context);
+      if (confirmed != true) return;
+      if (!context.mounted) return;
+    }
+    await ref
+        .read(planDaySlotStatusControllerProvider.notifier)
+        .updateStatus(widget.date, widget.slot.slotId, status);
+    if (!context.mounted) return;
+    final state = ref.read(planDaySlotStatusControllerProvider);
+    state?.whenOrNull(
+      error: (error, _) => ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(describeApiError(error.asApiException?.code ?? ''))),
+      ),
+    );
+  }
+
+  /// "Spuntare un pasto su una data futura" — conferma semplice (4.5
+  /// interfaccia.md, SP-10).
+  Future<bool?> _confirmFutureDay(BuildContext context) {
+    final colors = context.colors;
+    return showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        backgroundColor: colors.surface,
+        title: const Text('Registrare un pasto futuro?'),
+        content: const Text('Questo giorno non è ancora arrivato.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: const Text('Annulla'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: const Text('Spunta'),
+          ),
+        ],
       ),
     );
   }
@@ -212,6 +289,94 @@ class _MealCardState extends State<MealCard> {
                 ),
               ],
             ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// SP-1, SP-5: due pulsanti distinti, non un controllo ciclico — ogni
+/// stato dista un tocco (4.1 interfaccia.md).
+class _SpuntaButtons extends StatelessWidget {
+  const _SpuntaButtons({
+    required this.status,
+    required this.enabled,
+    required this.onSelect,
+  });
+
+  final SlotStatus status;
+  final bool enabled;
+  final ValueChanged<SlotStatus> onSelect;
+
+  @override
+  Widget build(BuildContext context) {
+    final consumption = context.consumptionColors;
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        _SpuntaButton(
+          icon: Icons.check,
+          active: status == SlotStatus.consumed,
+          enabled: enabled,
+          color: consumption.consumed,
+          background: consumption.consumedBackground,
+          onTap: () => onSelect(SlotStatus.consumed),
+        ),
+        const SizedBox(height: AppSpacing.xxs),
+        _SpuntaButton(
+          icon: Icons.close,
+          active: status == SlotStatus.skipped,
+          enabled: enabled,
+          color: consumption.skipped,
+          background: consumption.skippedBackground,
+          onTap: () => onSelect(SlotStatus.skipped),
+        ),
+      ],
+    );
+  }
+}
+
+/// Riscontro immediato al tocco (2.6 interfaccia.md: 120 ms). Disabilitato
+/// e in colore terziario quando la spunta non è consentita (SP-11).
+class _SpuntaButton extends StatelessWidget {
+  const _SpuntaButton({
+    required this.icon,
+    required this.active,
+    required this.enabled,
+    required this.color,
+    required this.background,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final bool active;
+  final bool enabled;
+  final Color color;
+  final Color background;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    return Material(
+      color: Colors.transparent,
+      borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+      child: InkWell(
+        onTap: enabled ? onTap : null,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+        child: AnimatedContainer(
+          duration: AppSpacing.motionImmediate,
+          curve: AppSpacing.motionImmediateCurve,
+          padding: const EdgeInsets.all(AppSpacing.xs),
+          decoration: BoxDecoration(
+            color: active && enabled ? background : Colors.transparent,
+            borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+          ),
+          child: Icon(
+            icon,
+            size: 20,
+            color: active && enabled ? color : colors.textTertiary,
           ),
         ),
       ),

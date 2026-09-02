@@ -208,3 +208,80 @@ final class PlanDayFamily extends $Family
   @override
   String toString() => r'planDayProvider';
 }
+
+/// Transizione di stato dello slot (6.3 funzionale, SP-1, SP-4, SP-5),
+/// disposta dalla card del pasto. Nessuno stato locale da esporre: la
+/// risposta rinnova la cache di [planDayProvider] tramite invalidazione,
+/// sullo stesso criterio già seguito da `DietPlanLifecycleController`
+/// per l'elenco dei piani, invece di sostituirne il contenuto a mano.
+
+@ProviderFor(PlanDaySlotStatusController)
+final planDaySlotStatusControllerProvider =
+    PlanDaySlotStatusControllerProvider._();
+
+/// Transizione di stato dello slot (6.3 funzionale, SP-1, SP-4, SP-5),
+/// disposta dalla card del pasto. Nessuno stato locale da esporre: la
+/// risposta rinnova la cache di [planDayProvider] tramite invalidazione,
+/// sullo stesso criterio già seguito da `DietPlanLifecycleController`
+/// per l'elenco dei piani, invece di sostituirne il contenuto a mano.
+final class PlanDaySlotStatusControllerProvider
+    extends $NotifierProvider<PlanDaySlotStatusController, AsyncValue<void>?> {
+  /// Transizione di stato dello slot (6.3 funzionale, SP-1, SP-4, SP-5),
+  /// disposta dalla card del pasto. Nessuno stato locale da esporre: la
+  /// risposta rinnova la cache di [planDayProvider] tramite invalidazione,
+  /// sullo stesso criterio già seguito da `DietPlanLifecycleController`
+  /// per l'elenco dei piani, invece di sostituirne il contenuto a mano.
+  PlanDaySlotStatusControllerProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'planDaySlotStatusControllerProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$planDaySlotStatusControllerHash();
+
+  @$internal
+  @override
+  PlanDaySlotStatusController create() => PlanDaySlotStatusController();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(AsyncValue<void>? value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<AsyncValue<void>?>(value),
+    );
+  }
+}
+
+String _$planDaySlotStatusControllerHash() =>
+    r'ac8820d68aab42c31efadde1a47446d9d5381b0f';
+
+/// Transizione di stato dello slot (6.3 funzionale, SP-1, SP-4, SP-5),
+/// disposta dalla card del pasto. Nessuno stato locale da esporre: la
+/// risposta rinnova la cache di [planDayProvider] tramite invalidazione,
+/// sullo stesso criterio già seguito da `DietPlanLifecycleController`
+/// per l'elenco dei piani, invece di sostituirne il contenuto a mano.
+
+abstract class _$PlanDaySlotStatusController
+    extends $Notifier<AsyncValue<void>?> {
+  AsyncValue<void>? build();
+  @$mustCallSuper
+  @override
+  WhenComplete runBuild() {
+    final ref = this.ref as $Ref<AsyncValue<void>?, AsyncValue<void>?>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<AsyncValue<void>?, AsyncValue<void>?>,
+              AsyncValue<void>?,
+              Object?,
+              Object?
+            >;
+    return element.handleCreate(ref, build);
+  }
+}
