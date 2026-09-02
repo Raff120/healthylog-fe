@@ -168,6 +168,13 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Con parmigiano a parte'), findsOneWidget);
+
+    // GG-15, GG-18: "Vedi ricetta" apre il foglio con il testo integrale.
+    await tester.tap(find.text('Vedi ricetta'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Pasta al pomodoro fresca'), findsWidgets);
+    expect(find.text('Cuocere la pasta...'), findsOneWidget);
   });
 
   testWidgets('una giornata senza pasti previsti presenta lo stato vuoto (GG-7)', (tester) async {

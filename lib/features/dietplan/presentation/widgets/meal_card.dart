@@ -62,18 +62,29 @@ class _MealCardState extends State<MealCard> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(_headerLabel(slot), style: typography.overline.copyWith(color: colors.textSecondary)),
+                    Text(
+                      _headerLabel(slot),
+                      style: typography.overline.copyWith(
+                        color: colors.textSecondary,
+                      ),
+                    ),
                     if (hasRecipe) ...[
                       const SizedBox(height: AppSpacing.xxs),
                       Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Icon(Icons.soup_kitchen_outlined, size: 16, color: colors.textSecondary),
+                          Icon(
+                            Icons.soup_kitchen_outlined,
+                            size: 16,
+                            color: colors.textSecondary,
+                          ),
                           const SizedBox(width: AppSpacing.xxs),
                           Expanded(
                             child: Text(
                               slot.recipeName!.trim(),
-                              style: typography.titleMedium.copyWith(color: colors.textPrimary),
+                              style: typography.titleMedium.copyWith(
+                                color: colors.textPrimary,
+                              ),
                             ),
                           ),
                         ],
@@ -83,22 +94,52 @@ class _MealCardState extends State<MealCard> {
                     Text(
                       hasContent ? slot.content!.trim() : 'Da definire',
                       style: typography.bodyLarge.copyWith(
-                        color: hasContent ? colors.textPrimary : colors.textTertiary,
+                        color: hasContent
+                            ? colors.textPrimary
+                            : colors.textTertiary,
                       ),
                       maxLines: _expanded ? null : 2,
-                      overflow: _expanded ? TextOverflow.visible : TextOverflow.ellipsis,
+                      overflow: _expanded
+                          ? TextOverflow.visible
+                          : TextOverflow.ellipsis,
                     ),
+                    if (_expanded && hasRecipe) ...[
+                      const SizedBox(height: AppSpacing.sm),
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: TextButton.icon(
+                          onPressed: () => _openRecipeSheet(context, slot),
+                          icon: Icon(
+                            Icons.soup_kitchen_outlined,
+                            size: 18,
+                            color: colors.accent,
+                          ),
+                          label: Text(
+                            'Vedi ricetta',
+                            style: typography.label.copyWith(
+                              color: colors.accent,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
                     if (_expanded && hasNote) ...[
                       const SizedBox(height: AppSpacing.sm),
                       Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Icon(Icons.info_outline, size: 16, color: colors.textSecondary),
+                          Icon(
+                            Icons.info_outline,
+                            size: 16,
+                            color: colors.textSecondary,
+                          ),
                           const SizedBox(width: AppSpacing.xxs),
                           Expanded(
                             child: Text(
                               slot.note!.trim(),
-                              style: typography.bodyMedium.copyWith(color: colors.textSecondary),
+                              style: typography.bodyMedium.copyWith(
+                                color: colors.textSecondary,
+                              ),
                             ),
                           ),
                         ],
@@ -110,7 +151,10 @@ class _MealCardState extends State<MealCard> {
               AnimatedRotation(
                 turns: _expanded ? 0.5 : 0,
                 duration: AppSpacing.motionStateTransition,
-                child: Icon(Icons.keyboard_arrow_down, color: colors.textTertiary),
+                child: Icon(
+                  Icons.keyboard_arrow_down,
+                  color: colors.textTertiary,
+                ),
               ),
             ],
           ),
@@ -122,9 +166,55 @@ class _MealCardState extends State<MealCard> {
   /// GG-10: lo spuntino usa la denominazione descrittiva assegnata nel
   /// piano quando presente, non l'etichetta generica del tipo.
   String _headerLabel(PlanDaySlot slot) {
-    if (slot.type == SlotType.snack && (slot.label?.trim().isNotEmpty ?? false)) {
+    if (slot.type == SlotType.snack &&
+        (slot.label?.trim().isNotEmpty ?? false)) {
       return slot.label!.trim();
     }
     return slot.type.displayName;
+  }
+
+  /// GG-15, GG-18: foglio modale a tre quarti di schermo. Il testo è
+  /// libero e non strutturato: reso così com'è scritto (andate a capo ed
+  /// elenchi puntati eventualmente già presenti), senza dedurne sezioni
+  /// né alcuna interattività.
+  void _openRecipeSheet(BuildContext context, PlanDaySlot slot) {
+    final colors = context.colors;
+    final typography = context.typography;
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      builder: (context) => FractionallySizedBox(
+        heightFactor: 0.75,
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(AppSpacing.md),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  slot.recipeName!.trim(),
+                  style: typography.titleLarge.copyWith(
+                    color: colors.textPrimary,
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.md),
+                Expanded(
+                  child: SingleChildScrollView(
+                    child: Text(
+                      slot.recipeText?.trim().isNotEmpty == true
+                          ? slot.recipeText!.trim()
+                          : '',
+                      style: typography.bodyLarge.copyWith(
+                        color: colors.textPrimary,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }
