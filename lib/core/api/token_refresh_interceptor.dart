@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../auth/session.dart';
 import '../auth/session_controller.dart';
 
 /// Rinnovo trasparente (TK-13): intercetta `TOKEN_EXPIRED`, rinnova e
@@ -37,7 +38,19 @@ class TokenRefreshInterceptor extends Interceptor {
       return;
     }
 
-    final session = await _ref.read(sessionControllerProvider.notifier).refreshSession();
+    final AuthSession? session;
+    try {
+      session = await _ref.read(sessionControllerProvider.notifier).refreshSession();
+    } catch (_) {
+      // F14: un rinnovo fallito per assenza di rete (rilanciato da
+      // `SessionController._refreshWith`) non è un rifiuto del server:
+      // propaga l'errore originale, non quello del tentativo di
+      // rinnovo, cosicché il chiamante lo riconosca come `NETWORK_ERROR`
+      // e possa ricorrere alla cache locale (OF-19) invece di un
+      // messaggio di sessione scaduta.
+      handler.next(err);
+      return;
+    }
     if (session == null) {
       handler.next(err);
       return;

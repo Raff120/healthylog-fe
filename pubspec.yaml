@@ -21,6 +21,15 @@ version: 1.0.0+1
 environment:
   sdk: ^3.13.2
 
+# Cifratura della base dati locale (PL-13): configura gli hooks nativi di
+# `package:sqlite3` perché bundlino SQLite3MultipleCiphers invece di SQLite
+# semplice (6.1 tecnica, vedi decisioni.md — sostituisce il pacchetto
+# `sqlcipher_flutter_libs`, deprecato da drift 2.32.0 in avanti).
+hooks:
+  user_defines:
+    sqlite3:
+      source: sqlite3mc
+
 # Dependencies specify other packages that your package needs in order to work.
 # To automatically upgrade your package dependencies to the latest versions
 # consider running `flutter pub upgrade --major-versions`. Alternatively,
@@ -44,6 +53,10 @@ dependencies:
   dio: ^5.11.0
   flutter_secure_storage: ^11.0.0
   shared_preferences: ^2.5.5
+  drift: ^2.34.3
+  path_provider: ^2.1.6
+  path: ^1.9.1
+  sqlite3: ^3.5.2
 
 dev_dependencies:
   flutter_test:
@@ -57,6 +70,7 @@ dev_dependencies:
   flutter_lints: ^6.0.0
   riverpod_generator: ^4.0.8
   build_runner: ^2.16.0
+  drift_dev: ^2.34.5
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:healthylog/app/theme/app_theme.dart';
 import 'package:healthylog/core/api/api_error_interceptor.dart';
+import 'package:healthylog/core/api/connectivity_status.dart';
 import 'package:healthylog/features/dietplan/data/plan_day.dart';
 import 'package:healthylog/features/dietplan/data/plan_day_api.dart';
 import 'package:healthylog/features/dietplan/data/slot_status.dart';
@@ -83,6 +84,37 @@ Future<_RecordingAdapter> _pumpCard(
   );
   await tester.pumpAndSettle();
   return adapter;
+}
+
+/// Come [_pumpCard], ma restituisce anche il [ProviderContainer]: serve
+/// a forzare lo stato offline dopo il pompaggio, senza un secondo giro
+/// di rete (F14, OF-20, OF-21).
+Future<(_RecordingAdapter, ProviderContainer)> _pumpCardWithContainer(
+  WidgetTester tester, {
+  required PlanDaySlot slot,
+  required DateTime date,
+  required bool canCheck,
+}) async {
+  final adapter = _RecordingAdapter();
+  final dio = Dio(BaseOptions(baseUrl: 'http://example.test'));
+  dio.httpClientAdapter = adapter;
+  dio.interceptors.add(ApiErrorInterceptor());
+
+  final container = ProviderContainer(
+    overrides: [planDayApiProvider.overrideWithValue(PlanDayApi(dio))],
+  );
+
+  await tester.pumpWidget(
+    UncontrolledProviderScope(
+      container: container,
+      child: MaterialApp(
+        theme: AppTheme.light,
+        home: Scaffold(body: MealCard(slot: slot, date: date, canCheck: canCheck)),
+      ),
+    ),
+  );
+  await tester.pumpAndSettle();
+  return (adapter, container);
 }
 
 void main() {
@@ -163,5 +195,40 @@ void main() {
 
     expect(find.text('Registrare un pasto futuro?'), findsNothing);
     expect(adapter.requests, hasLength(1));
+  });
+
+  testWidgets('offline: i pulsanti si disabilitano e non dispongono alcuna richiesta (OF-20)', (tester) async {
+    final (adapter, container) = await _pumpCardWithContainer(
+      tester,
+      slot: _slot(SlotStatus.toConsume),
+      date: today,
+      canCheck: true,
+    );
+    addTearDown(container.dispose);
+    container.read(connectivityStatusProvider.notifier).markOffline();
+    await tester.pump();
+
+    await tester.tap(find.byIcon(Icons.check));
+    await tester.pumpAndSettle();
+
+    expect(adapter.requests, isEmpty);
+  });
+
+  testWidgets('offline: il tocco sul pulsante disabilitato spiega il motivo, distinto da SP-11 (OF-21)', (tester) async {
+    final (adapter, container) = await _pumpCardWithContainer(
+      tester,
+      slot: _slot(SlotStatus.toConsume),
+      date: today,
+      canCheck: true,
+    );
+    addTearDown(container.dispose);
+    container.read(connectivityStatusProvider.notifier).markOffline();
+    await tester.pump();
+
+    await tester.tap(find.byIcon(Icons.check));
+    await tester.pump();
+
+    expect(find.text('Non disponibile offline.'), findsOneWidget);
+    expect(adapter.requests, isEmpty);
   });
 }

@@ -17,16 +17,16 @@ class PlanDaySlot {
   });
 
   factory PlanDaySlot.fromJson(Map<String, dynamic> json) => PlanDaySlot(
-        slotId: json['slotId'] as String,
-        type: SlotType.fromJson(json['type'] as String),
-        label: json['label'] as String?,
-        order: json['order'] as int,
-        content: json['content'] as String?,
-        note: json['note'] as String?,
-        recipeName: json['recipeName'] as String?,
-        recipeText: json['recipeText'] as String?,
-        status: SlotStatus.fromJson(json['status'] as String),
-      );
+    slotId: json['slotId'] as String,
+    type: SlotType.fromJson(json['type'] as String),
+    label: json['label'] as String?,
+    order: json['order'] as int,
+    content: json['content'] as String?,
+    note: json['note'] as String?,
+    recipeName: json['recipeName'] as String?,
+    recipeText: json['recipeText'] as String?,
+    status: SlotStatus.fromJson(json['status'] as String),
+  );
 
   final String slotId;
   final SlotType type;
@@ -37,6 +37,21 @@ class PlanDaySlot {
   final String? recipeName;
   final String? recipeText;
   final SlotStatus status;
+
+  /// Per la cache locale di sola lettura (PL-6, F14): mai inviato al
+  /// backend, che ha le proprie rappresentazioni dedicate in scrittura
+  /// (`UpdatePlanDaySlotStatusRequest`).
+  Map<String, dynamic> toJson() => {
+    'slotId': slotId,
+    'type': type.toJson(),
+    'label': label,
+    'order': order,
+    'content': content,
+    'note': note,
+    'recipeName': recipeName,
+    'recipeText': recipeText,
+    'status': status.toJson(),
+  };
 }
 
 /// Rispecchia `PlanDayResponse` sul backend (6.1 funzionale, EP-3).
@@ -54,16 +69,20 @@ class PlanDay {
   });
 
   factory PlanDay.fromJson(Map<String, dynamic> json) => PlanDay(
-        date: DateTime.parse(json['date'] as String),
-        coverage: PlanDayCoverage.fromJson(json['coverage'] as String),
-        planId: json['planId'] as String?,
-        planName: json['planName'] as String?,
-        planStartDate:
-            json['planStartDate'] == null ? null : DateTime.parse(json['planStartDate'] as String),
-        planEndDate: json['planEndDate'] == null ? null : DateTime.parse(json['planEndDate'] as String),
-        slots:
-            (json['slots'] as List).map((e) => PlanDaySlot.fromJson(e as Map<String, dynamic>)).toList(),
-      );
+    date: DateTime.parse(json['date'] as String),
+    coverage: PlanDayCoverage.fromJson(json['coverage'] as String),
+    planId: json['planId'] as String?,
+    planName: json['planName'] as String?,
+    planStartDate: json['planStartDate'] == null
+        ? null
+        : DateTime.parse(json['planStartDate'] as String),
+    planEndDate: json['planEndDate'] == null
+        ? null
+        : DateTime.parse(json['planEndDate'] as String),
+    slots: (json['slots'] as List)
+        .map((e) => PlanDaySlot.fromJson(e as Map<String, dynamic>))
+        .toList(),
+  );
 
   final DateTime date;
   final PlanDayCoverage coverage;

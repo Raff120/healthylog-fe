@@ -4,6 +4,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../app/app_config.dart';
 import '../auth/session_controller.dart';
 import 'api_error_interceptor.dart';
+import 'connectivity_interceptor.dart';
 import 'token_refresh_interceptor.dart';
 
 part 'api_client.g.dart';
@@ -37,7 +38,7 @@ Dio _buildDio() {
 @Riverpod(keepAlive: true)
 Dio publicApiClient(Ref ref) {
   final dio = _buildDio();
-  dio.interceptors.add(ApiErrorInterceptor());
+  dio.interceptors.addAll([ConnectivityInterceptor(ref), ApiErrorInterceptor()]);
   return dio;
 }
 
@@ -49,10 +50,14 @@ Dio publicApiClient(Ref ref) {
 /// L'ordine degli intercettori è significativo: sia le richieste sia gli
 /// errori attraversano la coda nell'ordine di aggiunta (dio incatena gli
 /// `onError` con `Future.catchError` in quello stesso ordine).
-/// [TokenRefreshInterceptor] DEVE quindi precedere [ApiErrorInterceptor]
-/// per intercettare la risposta grezza prima che questo la traduca e la
-/// completi con `reject` — che, per impostazione predefinita, salta il
-/// resto della coda (vedi il commento su [TokenRefreshInterceptor]).
+/// [TokenRefreshInterceptor] e [ConnectivityInterceptor] DEVONO quindi
+/// precedere [ApiErrorInterceptor] per intercettare la risposta grezza
+/// prima che questo la traduca e la completi con `reject` — che, per
+/// impostazione predefinita, salta il resto della coda (vedi il
+/// commento su [TokenRefreshInterceptor]). [ConnectivityInterceptor]
+/// precede a sua volta [TokenRefreshInterceptor], per classificare
+/// sempre l'errore grezzo della richiesta originale (OF-6),
+/// indipendentemente da come quest'ultimo lo gestisca.
 @Riverpod(keepAlive: true)
 Dio apiClient(Ref ref) {
   final dio = _buildDio();
@@ -66,6 +71,7 @@ Dio apiClient(Ref ref) {
         handler.next(options);
       },
     ),
+    ConnectivityInterceptor(ref),
     TokenRefreshInterceptor(ref, dio),
     ApiErrorInterceptor(),
   ]);

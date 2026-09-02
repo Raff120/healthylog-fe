@@ -4,11 +4,13 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:drift/native.dart';
 import 'package:healthylog/app/router.dart';
 import 'package:healthylog/core/api/api_client.dart';
 import 'package:healthylog/core/api/api_error_interceptor.dart';
 import 'package:healthylog/core/api/token_refresh_interceptor.dart';
 import 'package:healthylog/core/auth/session_controller.dart';
+import 'package:healthylog/core/storage/app_database.dart';
 import 'package:healthylog/core/storage/secure_key_value_store.dart';
 import 'package:healthylog/features/identity/data/auth_models.dart';
 import 'package:healthylog/features/identity/data/identity_api.dart';
@@ -47,13 +49,19 @@ class _StubIdentityApi extends IdentityApi {
   @override
   Future<TokenPair> login(LoginRequest request) async {
     loginCalls++;
-    return const TokenPair(accessToken: 'access-scaduto', refreshToken: 'refresh-1');
+    return const TokenPair(
+      accessToken: 'access-scaduto',
+      refreshToken: 'refresh-1',
+    );
   }
 
   @override
   Future<TokenPair> refresh(String refreshToken) async {
     refreshCalls++;
-    return const TokenPair(accessToken: 'access-rinnovato', refreshToken: 'refresh-2');
+    return const TokenPair(
+      accessToken: 'access-rinnovato',
+      refreshToken: 'refresh-2',
+    );
   }
 }
 
@@ -75,7 +83,8 @@ const _profileJson = '''
 /// PA-10: `/home` è ora la vista giornaliera reale (F12), che alla prima
 /// composizione richiede subito `GET /plan-days` — risposta neutra, priva
 /// di copertura, non pertinente a ciò che questo test verifica.
-const _planDayJson = '{'
+const _planDayJson =
+    '{'
     '"date":"2026-01-01","coverage":"NONE","planId":null,"planName":null,'
     '"planStartDate":null,"planEndDate":null,"slots":[]'
     '}';
@@ -148,7 +157,9 @@ void main() {
 
       final container = ProviderContainer(
         overrides: [
-          secureKeyValueStoreProvider.overrideWithValue(_InMemorySecureKeyValueStore()),
+          secureKeyValueStoreProvider.overrideWithValue(
+            _InMemorySecureKeyValueStore(),
+          ),
           identityApiProvider.overrideWithValue(identityApi),
           // Stessa composizione di intercettori di `apiClientProvider`
           // (ordine incluso, vedi il relativo commento): solo il
@@ -160,7 +171,10 @@ void main() {
             dio.interceptors.addAll([
               InterceptorsWrapper(
                 onRequest: (options, handler) {
-                  final accessToken = ref.read(sessionControllerProvider).value?.accessToken;
+                  final accessToken = ref
+                      .read(sessionControllerProvider)
+                      .value
+                      ?.accessToken;
                   if (accessToken != null) {
                     options.headers['Authorization'] = 'Bearer $accessToken';
                   }
@@ -172,12 +186,20 @@ void main() {
             ]);
             return dio;
           }),
+          // F14: la base dati reale userebbe path_provider/flutter_secure_storage,
+          // assenti nella VM di test (sospensione indefinita, non un errore).
+          appDatabaseProvider.overrideWithValue(
+            AppDatabase(NativeDatabase.memory()),
+          ),
         ],
       );
       addTearDown(container.dispose);
 
       await tester.pumpWidget(
-        UncontrolledProviderScope(container: container, child: const HealthyLogApp()),
+        UncontrolledProviderScope(
+          container: container,
+          child: const HealthyLogApp(),
+        ),
       );
       await tester.pumpAndSettle();
       expect(find.text('Accedi'), findsOneWidget);

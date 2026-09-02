@@ -50,6 +50,53 @@ final class PlanDayApiProvider
 
 String _$planDayApiHash() => r'6939ecb8c3fca2f9e6ec355ff49592abad02da0a';
 
+@ProviderFor(planDayLocalCache)
+final planDayLocalCacheProvider = PlanDayLocalCacheProvider._();
+
+final class PlanDayLocalCacheProvider
+    extends
+        $FunctionalProvider<
+          PlanDayLocalCache,
+          PlanDayLocalCache,
+          PlanDayLocalCache
+        >
+    with $Provider<PlanDayLocalCache> {
+  PlanDayLocalCacheProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'planDayLocalCacheProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$planDayLocalCacheHash();
+
+  @$internal
+  @override
+  $ProviderElement<PlanDayLocalCache> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  PlanDayLocalCache create(Ref ref) {
+    return planDayLocalCache(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(PlanDayLocalCache value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<PlanDayLocalCache>(value),
+    );
+  }
+}
+
+String _$planDayLocalCacheHash() => r'9f40431f7944289fa9ea3ef16bec4d7971c5567b';
+
 /// Giornata selezionata nella vista giornaliera (VG-2: quella corrente
 /// all'apertura). La sola navigazione libera (VG-16, VG-17) e il ritorno
 /// a oggi (VG-19) sono task successivi, sullo stesso stato.
@@ -120,6 +167,13 @@ abstract class _$SelectedDay extends $Notifier<DateTime> {
 /// sola lettura). `family` per data: ogni giorno visitato ha una propria
 /// cache, così tornare a un giorno già consultato non richiede una nuova
 /// richiesta.
+///
+/// Popola la cache locale di sola lettura a ogni lettura online riuscita
+/// (PL-11, F14) e vi ricorre in sua assenza (OF-19): solo per un errore
+/// di rete genuino (`NETWORK_ERROR`, [ApiErrorInterceptor]), mai per un
+/// errore applicativo, che l'Utente deve continuare a vedere come tale.
+/// Un errore di rete senza copia locale per quella data si propaga
+/// invariato: non c'è nulla da mostrare, offline o online.
 
 @ProviderFor(planDay)
 final planDayProvider = PlanDayFamily._();
@@ -128,6 +182,13 @@ final planDayProvider = PlanDayFamily._();
 /// sola lettura). `family` per data: ogni giorno visitato ha una propria
 /// cache, così tornare a un giorno già consultato non richiede una nuova
 /// richiesta.
+///
+/// Popola la cache locale di sola lettura a ogni lettura online riuscita
+/// (PL-11, F14) e vi ricorre in sua assenza (OF-19): solo per un errore
+/// di rete genuino (`NETWORK_ERROR`, [ApiErrorInterceptor]), mai per un
+/// errore applicativo, che l'Utente deve continuare a vedere come tale.
+/// Un errore di rete senza copia locale per quella data si propaga
+/// invariato: non c'è nulla da mostrare, offline o online.
 
 final class PlanDayProvider
     extends $FunctionalProvider<AsyncValue<PlanDay>, PlanDay, FutureOr<PlanDay>>
@@ -136,6 +197,13 @@ final class PlanDayProvider
   /// sola lettura). `family` per data: ogni giorno visitato ha una propria
   /// cache, così tornare a un giorno già consultato non richiede una nuova
   /// richiesta.
+  ///
+  /// Popola la cache locale di sola lettura a ogni lettura online riuscita
+  /// (PL-11, F14) e vi ricorre in sua assenza (OF-19): solo per un errore
+  /// di rete genuino (`NETWORK_ERROR`, [ApiErrorInterceptor]), mai per un
+  /// errore applicativo, che l'Utente deve continuare a vedere come tale.
+  /// Un errore di rete senza copia locale per quella data si propaga
+  /// invariato: non c'è nulla da mostrare, offline o online.
   PlanDayProvider._({
     required PlanDayFamily super.from,
     required DateTime super.argument,
@@ -179,12 +247,19 @@ final class PlanDayProvider
   }
 }
 
-String _$planDayHash() => r'dc74d77c4d2ebff7fc5aa0a6a4ba2a058c49e575';
+String _$planDayHash() => r'234dab9c2c2acc5721e6f6db90e1918e183d7bdd';
 
 /// Contenuto della giornata richiesta (EP-3: mai materializzata dalla
 /// sola lettura). `family` per data: ogni giorno visitato ha una propria
 /// cache, così tornare a un giorno già consultato non richiede una nuova
 /// richiesta.
+///
+/// Popola la cache locale di sola lettura a ogni lettura online riuscita
+/// (PL-11, F14) e vi ricorre in sua assenza (OF-19): solo per un errore
+/// di rete genuino (`NETWORK_ERROR`, [ApiErrorInterceptor]), mai per un
+/// errore applicativo, che l'Utente deve continuare a vedere come tale.
+/// Un errore di rete senza copia locale per quella data si propaga
+/// invariato: non c'è nulla da mostrare, offline o online.
 
 final class PlanDayFamily extends $Family
     with $FunctionalFamilyOverride<FutureOr<PlanDay>, DateTime> {
@@ -201,6 +276,13 @@ final class PlanDayFamily extends $Family
   /// sola lettura). `family` per data: ogni giorno visitato ha una propria
   /// cache, così tornare a un giorno già consultato non richiede una nuova
   /// richiesta.
+  ///
+  /// Popola la cache locale di sola lettura a ogni lettura online riuscita
+  /// (PL-11, F14) e vi ricorre in sua assenza (OF-19): solo per un errore
+  /// di rete genuino (`NETWORK_ERROR`, [ApiErrorInterceptor]), mai per un
+  /// errore applicativo, che l'Utente deve continuare a vedere come tale.
+  /// Un errore di rete senza copia locale per quella data si propaga
+  /// invariato: non c'è nulla da mostrare, offline o online.
 
   PlanDayProvider call(DateTime date) =>
       PlanDayProvider._(argument: date, from: this);

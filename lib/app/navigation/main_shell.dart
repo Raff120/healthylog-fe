@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../core/widgets/offline_bar.dart';
 import '../../features/dietplan/providers/plan_day_providers.dart';
 import '../../features/identity/providers/profile_providers.dart';
 import '../app_breakpoints.dart';
@@ -110,7 +111,9 @@ class _BottomBarScaffold extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.colors;
     return Scaffold(
-      body: child,
+      body: Column(
+        children: [const OfflineBar(), Expanded(child: child)],
+      ),
       bottomNavigationBar: DecoratedBox(
         decoration: BoxDecoration(
           color: colors.surface,
@@ -196,7 +199,11 @@ class _RailScaffold extends StatelessWidget {
               ),
             ),
           ),
-          Expanded(child: child),
+          Expanded(
+            child: Column(
+              children: [const OfflineBar(), Expanded(child: child)],
+            ),
+          ),
         ],
       ),
     );
