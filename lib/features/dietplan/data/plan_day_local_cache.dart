@@ -17,19 +17,25 @@ class PlanDayLocalCache {
 
   final PlanDayLocalStore _store;
 
-  Future<void> save(PlanDay day) => _store.upsert(
-    LocalPlanDayRecord(
-      date: dateOnly(day.date),
-      coverage: day.coverage.toJson(),
-      planId: day.planId,
-      planName: day.planName,
-      planStartDate: day.planStartDate == null
-          ? null
-          : dateOnly(day.planStartDate!),
-      planEndDate: day.planEndDate == null ? null : dateOnly(day.planEndDate!),
-      slotsJson: jsonEncode(day.slots.map((slot) => slot.toJson()).toList()),
-    ),
-  );
+  /// Salva la giornata e rimuove nella stessa occasione ciò che è uscito
+  /// dall'orizzonte (PL-10): la settimana corrente al momento del
+  /// salvataggio, non quella di [day] — che può essere una data
+  /// qualunque, consultata navigando (VG-16, VG-17).
+  Future<void> save(PlanDay day) async {
+    await _store.upsert(
+      LocalPlanDayRecord(
+        date: dateOnly(day.date),
+        coverage: day.coverage.toJson(),
+        planId: day.planId,
+        planName: day.planName,
+        planStartDate: day.planStartDate == null ? null : dateOnly(day.planStartDate!),
+        planEndDate: day.planEndDate == null ? null : dateOnly(day.planEndDate!),
+        slotsJson: jsonEncode(day.slots.map((slot) => slot.toJson()).toList()),
+      ),
+    );
+    final monday = startOfWeek(DateTime.now());
+    await _store.deleteOutsideRange(monday, monday.add(const Duration(days: 6)));
+  }
 
   Future<PlanDay?> read(DateTime date) async {
     final rows = await _store.readRange(dateOnly(date), dateOnly(date));

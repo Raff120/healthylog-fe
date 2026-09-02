@@ -9,9 +9,7 @@ part 'plan_day_local_store.g.dart';
 /// Livello di astrazione per le occorrenze giornaliere locali (PL-5,
 /// PL-6). A differenza del piano, più righe convivono (la settimana
 /// corrente, PL-7): [upsert] sostituisce la sola riga con la stessa
-/// data, le altre restano intatte. La pulizia di quanto esce
-/// dall'orizzonte (PL-10) non è compito di questa classe — è il task
-/// dedicato della roadmap.
+/// data, le altre restano intatte.
 class PlanDayLocalStore {
   const PlanDayLocalStore(this._db);
 
@@ -43,6 +41,14 @@ class PlanDayLocalStore {
       ..where((t) => t.date.isBetweenValues(from, to))
       ..orderBy([(t) => OrderingTerm.asc(t.date)]);
     return query.watch().map((rows) => rows.map(_toRecord).toList());
+  }
+
+  /// Rimuove le occorrenze con data esterna a [from]..[to] (PL-10):
+  /// quanto esce dall'orizzonte conservato (PL-6, PL-7).
+  Future<void> deleteOutsideRange(DateTime from, DateTime to) {
+    return (_db.delete(_db.localPlanDays)
+          ..where((t) => t.date.isSmallerThanValue(from) | t.date.isBiggerThanValue(to)))
+        .go();
   }
 
   LocalPlanDaysCompanion _toCompanion(LocalPlanDayRecord record) => LocalPlanDaysCompanion.insert(
