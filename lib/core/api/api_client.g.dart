@@ -96,7 +96,7 @@ final class PublicApiClientProvider extends $FunctionalProvider<Dio, Dio, Dio>
   }
 }
 
-String _$publicApiClientHash() => r'a2ee654659265a6d935340bb924645361a667dd2';
+String _$publicApiClientHash() => r'2bc723a8476748ad16e7bea3eb191be770d71cca';
 
 /// Client HTTP che allega il token di accesso corrente quando presente
 /// (TK-6) e rinnova trasparentemente alla scadenza (TK-13, TK-14). Per
@@ -106,10 +106,14 @@ String _$publicApiClientHash() => r'a2ee654659265a6d935340bb924645361a667dd2';
 /// L'ordine degli intercettori è significativo: sia le richieste sia gli
 /// errori attraversano la coda nell'ordine di aggiunta (dio incatena gli
 /// `onError` con `Future.catchError` in quello stesso ordine).
-/// [TokenRefreshInterceptor] DEVE quindi precedere [ApiErrorInterceptor]
-/// per intercettare la risposta grezza prima che questo la traduca e la
-/// completi con `reject` — che, per impostazione predefinita, salta il
-/// resto della coda (vedi il commento su [TokenRefreshInterceptor]).
+/// [TokenRefreshInterceptor] e [ConnectivityInterceptor] DEVONO quindi
+/// precedere [ApiErrorInterceptor] per intercettare la risposta grezza
+/// prima che questo la traduca e la completi con `reject` — che, per
+/// impostazione predefinita, salta il resto della coda (vedi il
+/// commento su [TokenRefreshInterceptor]). [ConnectivityInterceptor]
+/// precede a sua volta [TokenRefreshInterceptor], per classificare
+/// sempre l'errore grezzo della richiesta originale (OF-6),
+/// indipendentemente da come quest'ultimo lo gestisca.
 
 @ProviderFor(apiClient)
 final apiClientProvider = ApiClientProvider._();
@@ -122,10 +126,14 @@ final apiClientProvider = ApiClientProvider._();
 /// L'ordine degli intercettori è significativo: sia le richieste sia gli
 /// errori attraversano la coda nell'ordine di aggiunta (dio incatena gli
 /// `onError` con `Future.catchError` in quello stesso ordine).
-/// [TokenRefreshInterceptor] DEVE quindi precedere [ApiErrorInterceptor]
-/// per intercettare la risposta grezza prima che questo la traduca e la
-/// completi con `reject` — che, per impostazione predefinita, salta il
-/// resto della coda (vedi il commento su [TokenRefreshInterceptor]).
+/// [TokenRefreshInterceptor] e [ConnectivityInterceptor] DEVONO quindi
+/// precedere [ApiErrorInterceptor] per intercettare la risposta grezza
+/// prima che questo la traduca e la completi con `reject` — che, per
+/// impostazione predefinita, salta il resto della coda (vedi il
+/// commento su [TokenRefreshInterceptor]). [ConnectivityInterceptor]
+/// precede a sua volta [TokenRefreshInterceptor], per classificare
+/// sempre l'errore grezzo della richiesta originale (OF-6),
+/// indipendentemente da come quest'ultimo lo gestisca.
 
 final class ApiClientProvider extends $FunctionalProvider<Dio, Dio, Dio>
     with $Provider<Dio> {
@@ -137,10 +145,14 @@ final class ApiClientProvider extends $FunctionalProvider<Dio, Dio, Dio>
   /// L'ordine degli intercettori è significativo: sia le richieste sia gli
   /// errori attraversano la coda nell'ordine di aggiunta (dio incatena gli
   /// `onError` con `Future.catchError` in quello stesso ordine).
-  /// [TokenRefreshInterceptor] DEVE quindi precedere [ApiErrorInterceptor]
-  /// per intercettare la risposta grezza prima che questo la traduca e la
-  /// completi con `reject` — che, per impostazione predefinita, salta il
-  /// resto della coda (vedi il commento su [TokenRefreshInterceptor]).
+  /// [TokenRefreshInterceptor] e [ConnectivityInterceptor] DEVONO quindi
+  /// precedere [ApiErrorInterceptor] per intercettare la risposta grezza
+  /// prima che questo la traduca e la completi con `reject` — che, per
+  /// impostazione predefinita, salta il resto della coda (vedi il
+  /// commento su [TokenRefreshInterceptor]). [ConnectivityInterceptor]
+  /// precede a sua volta [TokenRefreshInterceptor], per classificare
+  /// sempre l'errore grezzo della richiesta originale (OF-6),
+  /// indipendentemente da come quest'ultimo lo gestisca.
   ApiClientProvider._()
     : super(
         from: null,
@@ -174,4 +186,4 @@ final class ApiClientProvider extends $FunctionalProvider<Dio, Dio, Dio>
   }
 }
 
-String _$apiClientHash() => r'371123c0407cf85164e2b90b017edf97c310b93e';
+String _$apiClientHash() => r'6ce863ca50b20a87763922b2e0dbaed81506bcd5';

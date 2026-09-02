@@ -5,6 +5,7 @@ import '../../../../app/theme/app_spacing.dart';
 import '../../../../app/theme/theme_context.dart';
 import '../../../../core/api/api_error_messages.dart';
 import '../../../../core/api/api_exception.dart';
+import '../../../../core/api/connectivity_status.dart';
 import '../../data/plan_day.dart';
 import '../../data/slot_status.dart';
 import '../../data/slot_type.dart';
@@ -43,6 +44,9 @@ class _MealCardState extends ConsumerState<MealCard> {
     // gestore del tocco restituisce il controllo, prima che la risposta
     // asincrona possa scriverne lo stato (`UnmountedRefException`).
     ref.watch(planDaySlotStatusControllerProvider);
+
+    // OF-20: nessuna scrittura è disponibile offline nella v1.
+    final offline = !ref.watch(connectivityStatusProvider);
 
     final colors = context.colors;
     final typography = context.typography;
@@ -171,7 +175,16 @@ class _MealCardState extends ConsumerState<MealCard> {
                 const SizedBox(width: AppSpacing.xs),
                 _SpuntaButtons(
                   status: slot.status,
-                  enabled: widget.canCheck,
+                  enabled: widget.canCheck && !offline,
+                  // SP-11 (piano non Attivo) resta silenzioso al tocco,
+                  // come già: solo l'assenza di connessione, che
+                  // altrimenti non avrebbe alcuna spiegazione visibile
+                  // finché l'Utente non tenta la spunta (OF-21).
+                  onDisabledTap: widget.canCheck && offline
+                      ? () => ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Non disponibile offline.')),
+                          )
+                      : null,
                   onSelect: (status) => _updateStatus(context, status),
                 ),
               ],
@@ -302,11 +315,17 @@ class _SpuntaButtons extends StatelessWidget {
   const _SpuntaButtons({
     required this.status,
     required this.enabled,
+    this.onDisabledTap,
     required this.onSelect,
   });
 
   final SlotStatus status;
   final bool enabled;
+
+  /// OF-21: spiega la ragione al tocco quando disabilitato per assenza
+  /// di connessione — `null` per le altre ragioni (SP-11), che restano
+  /// silenziose al tocco come già.
+  final VoidCallback? onDisabledTap;
   final ValueChanged<SlotStatus> onSelect;
 
   @override
@@ -322,6 +341,7 @@ class _SpuntaButtons extends StatelessWidget {
           color: consumption.consumed,
           background: consumption.consumedBackground,
           onTap: () => onSelect(SlotStatus.consumed),
+          onDisabledTap: onDisabledTap,
         ),
         const SizedBox(height: AppSpacing.xxs),
         _SpuntaButton(
@@ -331,6 +351,7 @@ class _SpuntaButtons extends StatelessWidget {
           color: consumption.skipped,
           background: consumption.skippedBackground,
           onTap: () => onSelect(SlotStatus.skipped),
+          onDisabledTap: onDisabledTap,
         ),
       ],
     );
@@ -338,7 +359,8 @@ class _SpuntaButtons extends StatelessWidget {
 }
 
 /// Riscontro immediato al tocco (2.6 interfaccia.md: 120 ms). Disabilitato
-/// e in colore terziario quando la spunta non è consentita (SP-11).
+/// e in colore terziario quando la spunta non è consentita (SP-11) o
+/// non disponibile offline (OF-20).
 class _SpuntaButton extends StatelessWidget {
   const _SpuntaButton({
     required this.icon,
@@ -347,6 +369,7 @@ class _SpuntaButton extends StatelessWidget {
     required this.color,
     required this.background,
     required this.onTap,
+    this.onDisabledTap,
   });
 
   final IconData icon;
@@ -355,6 +378,7 @@ class _SpuntaButton extends StatelessWidget {
   final Color color;
   final Color background;
   final VoidCallback onTap;
+  final VoidCallback? onDisabledTap;
 
   @override
   Widget build(BuildContext context) {
@@ -363,7 +387,7 @@ class _SpuntaButton extends StatelessWidget {
       color: Colors.transparent,
       borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
       child: InkWell(
-        onTap: enabled ? onTap : null,
+        onTap: enabled ? onTap : onDisabledTap,
         borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
         child: AnimatedContainer(
           duration: AppSpacing.motionImmediate,

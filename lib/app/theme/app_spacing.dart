@@ -38,6 +38,7 @@ class AppSpacing {
   static const double heightButton = 48;
   static const double heightBottomNav = 56;
   static const double heightScreenHeader = 56;
+  static const double heightOfflineBar = 32;
 
   // Larghezza massima del contenuto.
   static const double maxWidthSingleColumn = 720;
