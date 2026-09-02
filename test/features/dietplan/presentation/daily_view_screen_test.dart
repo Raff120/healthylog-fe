@@ -8,6 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:healthylog/app/theme/app_theme.dart';
 import 'package:healthylog/core/api/api_error_interceptor.dart';
 import 'package:healthylog/features/dietplan/data/plan_day_api.dart';
+import 'package:healthylog/features/dietplan/domain/plan_day_date.dart';
 import 'package:healthylog/features/dietplan/presentation/daily_view_screen.dart';
 import 'package:healthylog/features/dietplan/providers/plan_day_providers.dart';
 
@@ -82,6 +83,58 @@ Map<String, dynamic> _dayJson() => {
       ],
     };
 
+/// VG-16, VG-17: risponde con un contenuto diverso a seconda della data
+/// richiesta, per verificare che la navigazione interroghi davvero il
+/// giorno atteso.
+class _ByDateAdapter implements HttpClientAdapter {
+  _ByDateAdapter(this._responseFor);
+
+  final Map<String, dynamic> Function(String date) _responseFor;
+  final requestedDates = <String>[];
+
+  @override
+  void close({bool force = false}) {}
+
+  @override
+  Future<ResponseBody> fetch(
+    RequestOptions options,
+    Stream<Uint8List>? requestStream,
+    Future<void>? cancelFuture,
+  ) async {
+    final date = options.queryParameters['date'] as String;
+    requestedDates.add(date);
+    return ResponseBody.fromString(
+      jsonEncode(_responseFor(date)),
+      200,
+      headers: {
+        Headers.contentTypeHeader: [Headers.jsonContentType],
+      },
+    );
+  }
+}
+
+Map<String, dynamic> _dayJsonFor(String date, String content) => {
+      'date': date,
+      'coverage': 'ACTIVE',
+      'planId': 'plan-1',
+      'planName': 'Dieta',
+      'planStartDate': '2026-01-01',
+      'planEndDate': null,
+      'slots': [
+        {
+          'slotId': 's1',
+          'type': 'LUNCH',
+          'label': null,
+          'order': 0,
+          'content': content,
+          'note': null,
+          'recipeName': null,
+          'recipeText': null,
+          'status': 'TO_CONSUME',
+        },
+      ],
+    };
+
 Future<void> _pumpDailyView(WidgetTester tester, Map<String, dynamic> dayJson) async {
   final dio = Dio(BaseOptions(baseUrl: 'http://example.test'));
   dio.httpClientAdapter = _JsonAdapter(dayJson);
@@ -124,5 +177,41 @@ void main() {
     await _pumpDailyView(tester, day);
 
     expect(find.text('Nessun pasto previsto'), findsOneWidget);
+  });
+
+  testWidgets('lo scorrimento orizzontale del contenuto naviga al giorno successivo e precedente (VG-16, 6.2)',
+      (tester) async {
+    final today = dateOnly(DateTime.now());
+    final tomorrow = today.add(const Duration(days: 1));
+    final adapter = _ByDateAdapter((date) {
+      if (date == isoDate(tomorrow)) return _dayJsonFor(date, 'Pesce al forno');
+      return _dayJsonFor(date, 'Pasta al pomodoro');
+    });
+    final dio = Dio(BaseOptions(baseUrl: 'http://example.test'));
+    dio.httpClientAdapter = adapter;
+    dio.interceptors.add(ApiErrorInterceptor());
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [planDayApiProvider.overrideWithValue(PlanDayApi(dio))],
+        child: MaterialApp(theme: AppTheme.light, home: const DailyViewScreen()),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Pasta al pomodoro'), findsOneWidget);
+    expect(adapter.requestedDates, [isoDate(today)]);
+
+    await tester.fling(find.byKey(const Key('dailyViewContentSwipe')), const Offset(-300, 0), 800);
+    await tester.pumpAndSettle();
+
+    expect(find.text('Pesce al forno'), findsOneWidget);
+    expect(adapter.requestedDates, [isoDate(today), isoDate(tomorrow)]);
+
+    await tester.fling(find.byKey(const Key('dailyViewContentSwipe')), const Offset(300, 0), 800);
+    await tester.pumpAndSettle();
+
+    expect(find.text('Pasta al pomodoro'), findsOneWidget);
+    expect(adapter.requestedDates, [isoDate(today), isoDate(tomorrow), isoDate(today)]);
   });
 }
