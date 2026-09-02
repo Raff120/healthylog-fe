@@ -7,11 +7,10 @@ import '../../../app/theme/theme_context.dart';
 import '../../../core/api/api_error_messages.dart';
 import '../../../core/api/api_exception.dart';
 import '../../../core/widgets/app_primary_button.dart';
-import '../data/diet_plan.dart';
 import '../data/diet_plan_template.dart';
 import '../data/diet_plan_template_requests.dart';
 import '../providers/diet_plan_template_providers.dart';
-import 'slot_type_presentation.dart';
+import 'widgets/day_preview.dart';
 import 'widgets/name_description_dialog.dart';
 
 /// Anteprima del template (7.4 interfaccia.md, CT-4, CT-5): schema
@@ -145,7 +144,7 @@ class DietPlanTemplatePreviewScreen extends ConsumerWidget {
                 child: ListView(
                   padding: const EdgeInsets.all(AppSpacing.md),
                   children: [
-                    for (final day in template.weeklySchedule) _DayPreview(day: day),
+                    for (final day in template.weeklySchedule) DayPreview(day: day),
                   ],
                 ),
               ),
@@ -176,61 +175,6 @@ class DietPlanTemplatePreviewScreen extends ConsumerWidget {
             ],
           ),
         ),
-      ),
-    );
-  }
-}
-
-class _DayPreview extends StatelessWidget {
-  const _DayPreview({required this.day});
-
-  final DietPlanWeekDay day;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    final typography = context.typography;
-
-    return Padding(
-      padding: const EdgeInsets.only(bottom: AppSpacing.md),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(day.dayOfWeek.label, style: typography.titleMedium.copyWith(color: colors.textPrimary)),
-          const SizedBox(height: AppSpacing.xs),
-          if (day.slots.isEmpty)
-            Text('Nessuno slot', style: typography.caption.copyWith(color: colors.textTertiary))
-          else
-            for (final slot in day.slots)
-              Padding(
-                padding: const EdgeInsets.only(bottom: AppSpacing.xs),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Icon(slot.type.icon, size: 18, color: colors.textSecondary),
-                    const SizedBox(width: AppSpacing.xs),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            slot.label?.isNotEmpty == true ? slot.label! : slot.type.displayName,
-                            style: typography.bodyMedium.copyWith(color: colors.textPrimary),
-                          ),
-                          if (slot.content != null && slot.content!.isNotEmpty)
-                            Text(
-                              slot.content!,
-                              style: typography.caption.copyWith(color: colors.textSecondary),
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-        ],
       ),
     );
   }

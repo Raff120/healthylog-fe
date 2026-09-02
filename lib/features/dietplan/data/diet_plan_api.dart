@@ -31,4 +31,52 @@ class DietPlanApi {
     final response = await _dio.post('/diet-plans/$id/save-as-template', data: request.toJson());
     return DietPlanTemplate.fromJson(response.data as Map<String, dynamic>);
   }
+
+  /// CV-2: da Bozza a Programmato.
+  Future<DietPlan> confirm(String id) async {
+    final response = await _dio.post('/diet-plans/$id/confirm');
+    return DietPlan.fromJson(response.data as Map<String, dynamic>);
+  }
+
+  /// PA-9, 7.1 interfaccia.md: i piani non conclusi del proprietario —
+  /// Bozza compresa — ordinati per data di inizio decrescente.
+  Future<List<DietPlan>> list() async {
+    final response = await _dio.get('/diet-plans');
+    return (response.data as List).map((e) => DietPlan.fromJson(e as Map<String, dynamic>)).toList();
+  }
+
+  /// AS-11: da Programmato a Bozza.
+  Future<DietPlan> withdraw(String id) async {
+    final response = await _dio.post('/diet-plans/$id/withdraw');
+    return DietPlan.fromJson(response.data as Map<String, dynamic>);
+  }
+
+  /// CV-4: attivazione anticipata, con spostamento della data di inizio.
+  Future<DietPlan> activate(String id) async {
+    final response = await _dio.post('/diet-plans/$id/activate');
+    return DietPlan.fromJson(response.data as Map<String, dynamic>);
+  }
+
+  /// CV-S1: sospensione.
+  Future<DietPlan> suspend(String id) async {
+    final response = await _dio.post('/diet-plans/$id/suspend');
+    return DietPlan.fromJson(response.data as Map<String, dynamic>);
+  }
+
+  /// CV-S6: ripresa.
+  Future<DietPlan> resume(String id) async {
+    final response = await _dio.post('/diet-plans/$id/resume');
+    return DietPlan.fromJson(response.data as Map<String, dynamic>);
+  }
+
+  /// CV-5: conclusione, con la data odierna (PA-7) — nessun corpo, come
+  /// previsto dal backend quando la data non è indicata esplicitamente.
+  Future<DietPlan> complete(String id) async {
+    final response = await _dio.post('/diet-plans/$id/complete');
+    return DietPlan.fromJson(response.data as Map<String, dynamic>);
+  }
+
+  /// CV-10, CV-11: eliminazione definitiva, rifiutata dal backend se il
+  /// piano è Attivo.
+  Future<void> delete(String id) => _dio.delete('/diet-plans/$id');
 }

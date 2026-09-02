@@ -236,3 +236,214 @@ abstract class _$DietPlanScheduleController extends $AsyncNotifier<DietPlan> {
     return element.handleCreate(ref, () => build(_$args));
   }
 }
+
+/// CV-2: conferma del piano in redazione.
+
+@ProviderFor(ConfirmDietPlanController)
+final confirmDietPlanControllerProvider = ConfirmDietPlanControllerProvider._();
+
+/// CV-2: conferma del piano in redazione.
+final class ConfirmDietPlanControllerProvider
+    extends
+        $NotifierProvider<ConfirmDietPlanController, AsyncValue<DietPlan>?> {
+  /// CV-2: conferma del piano in redazione.
+  ConfirmDietPlanControllerProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'confirmDietPlanControllerProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$confirmDietPlanControllerHash();
+
+  @$internal
+  @override
+  ConfirmDietPlanController create() => ConfirmDietPlanController();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(AsyncValue<DietPlan>? value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<AsyncValue<DietPlan>?>(value),
+    );
+  }
+}
+
+String _$confirmDietPlanControllerHash() =>
+    r'77ae868118f159cf316d0c196ef3c1e4dcb02010';
+
+/// CV-2: conferma del piano in redazione.
+
+abstract class _$ConfirmDietPlanController
+    extends $Notifier<AsyncValue<DietPlan>?> {
+  AsyncValue<DietPlan>? build();
+  @$mustCallSuper
+  @override
+  WhenComplete runBuild() {
+    final ref = this.ref as $Ref<AsyncValue<DietPlan>?, AsyncValue<DietPlan>?>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<AsyncValue<DietPlan>?, AsyncValue<DietPlan>?>,
+              AsyncValue<DietPlan>?,
+              Object?,
+              Object?
+            >;
+    return element.handleCreate(ref, build);
+  }
+}
+
+/// PA-9, 7.1 interfaccia.md: l'elenco dei piani non conclusi, Bozza
+/// compresa — a differenza del solo piano "in corso" di PA-8, che la
+/// schermata di gestione determina da questo stesso elenco (vedi
+/// `findCurrentPlan`), non con una richiesta separata.
+
+@ProviderFor(ownedDietPlans)
+final ownedDietPlansProvider = OwnedDietPlansProvider._();
+
+/// PA-9, 7.1 interfaccia.md: l'elenco dei piani non conclusi, Bozza
+/// compresa — a differenza del solo piano "in corso" di PA-8, che la
+/// schermata di gestione determina da questo stesso elenco (vedi
+/// `findCurrentPlan`), non con una richiesta separata.
+
+final class OwnedDietPlansProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<List<DietPlan>>,
+          List<DietPlan>,
+          FutureOr<List<DietPlan>>
+        >
+    with $FutureModifier<List<DietPlan>>, $FutureProvider<List<DietPlan>> {
+  /// PA-9, 7.1 interfaccia.md: l'elenco dei piani non conclusi, Bozza
+  /// compresa — a differenza del solo piano "in corso" di PA-8, che la
+  /// schermata di gestione determina da questo stesso elenco (vedi
+  /// `findCurrentPlan`), non con una richiesta separata.
+  OwnedDietPlansProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'ownedDietPlansProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$ownedDietPlansHash();
+
+  @$internal
+  @override
+  $FutureProviderElement<List<DietPlan>> $createElement(
+    $ProviderPointer pointer,
+  ) => $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<List<DietPlan>> create(Ref ref) {
+    return ownedDietPlans(ref);
+  }
+}
+
+String _$ownedDietPlansHash() => r'60286f0979b508c2d4e61d6f4c548d40b8fe1dbc';
+
+/// Transizioni di stato ed eliminazione disposte dalla schermata di
+/// gestione (7.1 interfaccia.md, F10): ciascuna invalida
+/// [ownedDietPlansProvider], così che l'elenco rifletta lo stato
+/// realmente raggiunto — anche quando il piano "in corso" cambia
+/// identità (AS-11: il piano ritirato non è più "in corso"; CV-5: il
+/// piano concluso lascia il posto, se esiste, al prossimo Programmato,
+/// pur restando nell'elenco come Concluso) — invece di aggiornare uno
+/// stato locale che dovrebbe replicare la stessa logica di priorità del
+/// server. Il payload della risposta non serve a nessun chiamante:
+/// `AsyncValue<void>` invece di `AsyncValue<DietPlan>`.
+
+@ProviderFor(DietPlanLifecycleController)
+final dietPlanLifecycleControllerProvider =
+    DietPlanLifecycleControllerProvider._();
+
+/// Transizioni di stato ed eliminazione disposte dalla schermata di
+/// gestione (7.1 interfaccia.md, F10): ciascuna invalida
+/// [ownedDietPlansProvider], così che l'elenco rifletta lo stato
+/// realmente raggiunto — anche quando il piano "in corso" cambia
+/// identità (AS-11: il piano ritirato non è più "in corso"; CV-5: il
+/// piano concluso lascia il posto, se esiste, al prossimo Programmato,
+/// pur restando nell'elenco come Concluso) — invece di aggiornare uno
+/// stato locale che dovrebbe replicare la stessa logica di priorità del
+/// server. Il payload della risposta non serve a nessun chiamante:
+/// `AsyncValue<void>` invece di `AsyncValue<DietPlan>`.
+final class DietPlanLifecycleControllerProvider
+    extends $NotifierProvider<DietPlanLifecycleController, AsyncValue<void>?> {
+  /// Transizioni di stato ed eliminazione disposte dalla schermata di
+  /// gestione (7.1 interfaccia.md, F10): ciascuna invalida
+  /// [ownedDietPlansProvider], così che l'elenco rifletta lo stato
+  /// realmente raggiunto — anche quando il piano "in corso" cambia
+  /// identità (AS-11: il piano ritirato non è più "in corso"; CV-5: il
+  /// piano concluso lascia il posto, se esiste, al prossimo Programmato,
+  /// pur restando nell'elenco come Concluso) — invece di aggiornare uno
+  /// stato locale che dovrebbe replicare la stessa logica di priorità del
+  /// server. Il payload della risposta non serve a nessun chiamante:
+  /// `AsyncValue<void>` invece di `AsyncValue<DietPlan>`.
+  DietPlanLifecycleControllerProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'dietPlanLifecycleControllerProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$dietPlanLifecycleControllerHash();
+
+  @$internal
+  @override
+  DietPlanLifecycleController create() => DietPlanLifecycleController();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(AsyncValue<void>? value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<AsyncValue<void>?>(value),
+    );
+  }
+}
+
+String _$dietPlanLifecycleControllerHash() =>
+    r'e94942e605cac2c01827e20b2c6a4fe04aa85bc9';
+
+/// Transizioni di stato ed eliminazione disposte dalla schermata di
+/// gestione (7.1 interfaccia.md, F10): ciascuna invalida
+/// [ownedDietPlansProvider], così che l'elenco rifletta lo stato
+/// realmente raggiunto — anche quando il piano "in corso" cambia
+/// identità (AS-11: il piano ritirato non è più "in corso"; CV-5: il
+/// piano concluso lascia il posto, se esiste, al prossimo Programmato,
+/// pur restando nell'elenco come Concluso) — invece di aggiornare uno
+/// stato locale che dovrebbe replicare la stessa logica di priorità del
+/// server. Il payload della risposta non serve a nessun chiamante:
+/// `AsyncValue<void>` invece di `AsyncValue<DietPlan>`.
+
+abstract class _$DietPlanLifecycleController
+    extends $Notifier<AsyncValue<void>?> {
+  AsyncValue<void>? build();
+  @$mustCallSuper
+  @override
+  WhenComplete runBuild() {
+    final ref = this.ref as $Ref<AsyncValue<void>?, AsyncValue<void>?>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<AsyncValue<void>?, AsyncValue<void>?>,
+              AsyncValue<void>?,
+              Object?,
+              Object?
+            >;
+    return element.handleCreate(ref, build);
+  }
+}
