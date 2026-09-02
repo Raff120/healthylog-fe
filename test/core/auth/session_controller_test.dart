@@ -5,6 +5,7 @@ import 'package:dio/dio.dart';
 import 'package:drift/native.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:healthylog/core/api/api_error_interceptor.dart';
 import 'package:healthylog/core/auth/session.dart';
 import 'package:healthylog/core/auth/session_controller.dart';
 import 'package:healthylog/core/storage/app_database.dart';
@@ -60,6 +61,31 @@ class _StubAdapter implements HttpClientAdapter {
 IdentityApi _stubIdentityApi(int statusCode, String body) {
   final dio = Dio(BaseOptions(baseUrl: 'http://example.test'));
   dio.httpClientAdapter = _StubAdapter(statusCode, body);
+  return IdentityApi(dio);
+}
+
+class _NetworkErrorAdapter implements HttpClientAdapter {
+  @override
+  void close({bool force = false}) {}
+
+  @override
+  Future<ResponseBody> fetch(
+    RequestOptions options,
+    Stream<Uint8List>? requestStream,
+    Future<void>? cancelFuture,
+  ) async {
+    throw DioException.connectionError(requestOptions: options, reason: 'no network');
+  }
+}
+
+/// F14: a differenza di [_stubIdentityApi], reca `ApiErrorInterceptor`
+/// — necessario perché `SessionController._refreshWith` riconosca
+/// `NETWORK_ERROR` (senza interpretazione, un errore di rete grezzo
+/// non è distinguibile da un rifiuto genuino).
+IdentityApi _networkErrorIdentityApi() {
+  final dio = Dio(BaseOptions(baseUrl: 'http://example.test'))
+    ..httpClientAdapter = _NetworkErrorAdapter()
+    ..interceptors.add(ApiErrorInterceptor());
   return IdentityApi(dio);
 }
 
@@ -242,6 +268,38 @@ void main() {
       final state = container.read(sessionControllerProvider).value;
       expect(state?.accessToken, 'nuovo-accesso');
       expect(store.values['refresh_token'], 'nuovo-rinnovo');
+    });
+
+    test('refreshSession: un errore di rete non ripulisce token né base dati, e si propaga (F14)', () async {
+      var wipeCalls = 0;
+      // Nessun token conservato all'avvio: altrimenti `build` tenterebbe
+      // subito il ripristino attraverso lo stesso identityApi di rete
+      // assente, che questo test riserva a `refreshSession`.
+      final store = _InMemorySecureKeyValueStore();
+      final container = ProviderContainer(
+        overrides: [
+          secureKeyValueStoreProvider.overrideWithValue(store),
+          identityApiProvider.overrideWithValue(_networkErrorIdentityApi()),
+          appDatabaseProvider.overrideWith((ref) => AppDatabase(NativeDatabase.memory())),
+          deleteDatabaseFileProvider.overrideWithValue(() async => wipeCalls++),
+        ],
+      );
+      addTearDown(container.dispose);
+      await container.read(sessionControllerProvider.future);
+      await container
+          .read(sessionControllerProvider.notifier)
+          .set(const AuthSession(accessToken: 'scaduto', refreshToken: 'refresh-1'));
+
+      Object? caught;
+      try {
+        await container.read(sessionControllerProvider.notifier).refreshSession();
+      } catch (error) {
+        caught = error;
+      }
+
+      expect(caught, isNotNull, reason: 'un errore di rete deve propagarsi, non risolvere a null in silenzio');
+      expect(store.values.containsKey('refresh_token'), isTrue, reason: 'PL-19 non si applica a un errore di rete');
+      expect(wipeCalls, 0, reason: 'PL-17 non si applica a un errore di rete');
     });
   });
 }
