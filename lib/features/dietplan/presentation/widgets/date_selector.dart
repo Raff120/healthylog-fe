@@ -49,20 +49,40 @@ class DateSelector extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        InkWell(
-          onTap: () => _openCalendar(context),
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(
-              AppSpacing.md,
-              AppSpacing.xs,
-              AppSpacing.md,
-              AppSpacing.xxs,
+        Row(
+          children: [
+            Expanded(
+              child: InkWell(
+                onTap: () => _openCalendar(context),
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(
+                    AppSpacing.md,
+                    AppSpacing.xs,
+                    AppSpacing.md,
+                    AppSpacing.xxs,
+                  ),
+                  child: Text(
+                    _monthYearLabel(selectedDate),
+                    style: typography.titleMedium.copyWith(
+                      color: colors.textPrimary,
+                    ),
+                  ),
+                ),
+              ),
             ),
-            child: Text(
-              _monthYearLabel(selectedDate),
-              style: typography.titleMedium.copyWith(color: colors.textPrimary),
-            ),
-          ),
+            // 4.3, VG-19: compare solo quando ci si trova altrove.
+            if (selectedDate != today)
+              Padding(
+                padding: const EdgeInsets.only(right: AppSpacing.md),
+                child: TextButton(
+                  onPressed: () => onSelect(today),
+                  child: Text(
+                    'Oggi',
+                    style: typography.label.copyWith(color: colors.accent),
+                  ),
+                ),
+              ),
+          ],
         ),
         GestureDetector(
           // 4.3: "lo scorrimento orizzontale della riga conduce alle

@@ -8,6 +8,7 @@ import 'package:healthylog/core/api/api_error_interceptor.dart';
 import 'package:healthylog/core/storage/secure_key_value_store.dart';
 import 'package:healthylog/features/dietplan/data/diet_plan_api.dart';
 import 'package:healthylog/features/dietplan/data/plan_day_api.dart';
+import 'package:healthylog/features/dietplan/domain/plan_day_date.dart';
 import 'package:healthylog/features/dietplan/providers/diet_plan_providers.dart';
 import 'package:healthylog/features/dietplan/providers/plan_day_providers.dart';
 import 'package:healthylog/features/identity/data/identity_api.dart';
@@ -53,6 +54,33 @@ class _StatusCodeAdapter implements HttpClientAdapter {
     return ResponseBody.fromString(
       body,
       statusCode,
+      headers: {
+        Headers.contentTypeHeader: [Headers.jsonContentType],
+      },
+    );
+  }
+}
+
+/// VG-19: risponde in base alla data richiesta, per verificare che il
+/// ritorno a oggi interroghi davvero la giornata corrente.
+class _RecordingDateAdapter implements HttpClientAdapter {
+  _RecordingDateAdapter(this._responseFor);
+
+  final String Function(String date) _responseFor;
+
+  @override
+  void close({bool force = false}) {}
+
+  @override
+  Future<ResponseBody> fetch(
+    RequestOptions options,
+    Stream<Uint8List>? requestStream,
+    Future<void>? cancelFuture,
+  ) async {
+    final date = options.queryParameters['date'] as String;
+    return ResponseBody.fromString(
+      _responseFor(date),
+      200,
       headers: {
         Headers.contentTypeHeader: [Headers.jsonContentType],
       },
@@ -155,6 +183,60 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Inizia da qui'), findsOneWidget);
+  });
+
+  testWidgets('il doppio tocco su Piano riporta alla giornata corrente (VG-19, 6.2)', (tester) async {
+    tester.view.physicalSize = const Size(400, 800);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.reset);
+
+    final requestedDates = <String>[];
+    final today = dateOnly(DateTime.now());
+    final tomorrow = today.add(const Duration(days: 1));
+
+    final store = _InMemorySecureKeyValueStore()..values['refresh_token'] = 'token-valido';
+    final identityDio = Dio(BaseOptions(baseUrl: 'http://example.test'))
+      ..httpClientAdapter = _StatusCodeAdapter(200, '{"accessToken":"a","refreshToken":"r"}');
+    final profileDio = Dio(BaseOptions(baseUrl: 'http://example.test'))
+      ..httpClientAdapter = _StatusCodeAdapter(200, _profileJson('USER'));
+    final dietPlanDio = Dio(BaseOptions(baseUrl: 'http://example.test'))
+      ..httpClientAdapter = _StatusCodeAdapter(200, '[]')
+      ..interceptors.add(ApiErrorInterceptor());
+    final planDayDio = Dio(BaseOptions(baseUrl: 'http://example.test'));
+    planDayDio.httpClientAdapter = _RecordingDateAdapter((date) {
+      requestedDates.add(date);
+      return '{'
+          '"date":"$date","coverage":"NONE","planId":null,"planName":null,'
+          '"planStartDate":null,"planEndDate":null,"slots":[]'
+          '}';
+    });
+
+    final container = ProviderContainer(
+      overrides: [
+        secureKeyValueStoreProvider.overrideWithValue(store),
+        identityApiProvider.overrideWithValue(IdentityApi(identityDio)),
+        profileApiProvider.overrideWithValue(ProfileApi(profileDio)),
+        dietPlanApiProvider.overrideWithValue(DietPlanApi(dietPlanDio)),
+        planDayApiProvider.overrideWithValue(PlanDayApi(planDayDio)),
+      ],
+    );
+    addTearDown(container.dispose);
+
+    await tester.pumpWidget(UncontrolledProviderScope(container: container, child: const HealthyLogApp()));
+    await tester.pumpAndSettle();
+
+    expect(requestedDates, [isoDate(today)]);
+
+    await tester.fling(find.byKey(const Key('dailyViewContentSwipe')), const Offset(-300, 0), 800);
+    await tester.pumpAndSettle();
+
+    expect(requestedDates, [isoDate(today), isoDate(tomorrow)]);
+
+    // 6.2: il doppio tocco è il secondo tocco sulla voce già selezionata.
+    await tester.tap(find.byKey(const Key('navItem-Piano')));
+    await tester.pumpAndSettle();
+
+    expect(requestedDates, [isoDate(today), isoDate(tomorrow), isoDate(today)]);
   });
 
   testWidgets('mostra le tre voci del Nutrizionista (3.1)', (tester) async {

@@ -288,6 +288,41 @@ void main() {
     expect(adapter.requestedDates, [isoDate(today), isoDate(tomorrow), isoDate(today)]);
   });
 
+  testWidgets('l\'azione "Oggi" compare solo altrove e riporta alla giornata corrente in un tocco (VG-19)',
+      (tester) async {
+    final today = dateOnly(DateTime.now());
+    final tomorrow = today.add(const Duration(days: 1));
+    final adapter = _ByDateAdapter((date) {
+      if (date == isoDate(tomorrow)) return _dayJsonFor(date, 'Pesce al forno');
+      return _dayJsonFor(date, 'Pasta al pomodoro');
+    });
+    final dio = Dio(BaseOptions(baseUrl: 'http://example.test'));
+    dio.httpClientAdapter = adapter;
+    dio.interceptors.add(ApiErrorInterceptor());
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [planDayApiProvider.overrideWithValue(PlanDayApi(dio))],
+        child: MaterialApp(theme: AppTheme.light, home: const DailyViewScreen()),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Oggi'), findsNothing);
+
+    await tester.fling(find.byKey(const Key('dailyViewContentSwipe')), const Offset(-300, 0), 800);
+    await tester.pumpAndSettle();
+
+    expect(find.text('Pesce al forno'), findsOneWidget);
+    expect(find.text('Oggi'), findsOneWidget);
+
+    await tester.tap(find.text('Oggi'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Pasta al pomodoro'), findsOneWidget);
+    expect(find.text('Oggi'), findsNothing);
+  });
+
   testWidgets('un piano Programmato mostra la striscia informativa e comunque il contenuto (VG-18)', (tester) async {
     final day = _dayJson();
     day['coverage'] = 'SCHEDULED';
