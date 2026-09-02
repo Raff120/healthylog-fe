@@ -1,16 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../app/theme/app_spacing.dart';
 import '../../../app/theme/theme_context.dart';
 import '../../../core/api/api_exception.dart';
 import '../../../core/api/api_error_messages.dart';
+import '../../../core/widgets/empty_state_view.dart';
 import '../data/plan_day.dart';
 import '../data/plan_day_coverage.dart';
 import '../domain/plan_day_date.dart';
+import '../providers/diet_plan_providers.dart';
 import '../providers/plan_day_providers.dart';
 import 'widgets/date_selector.dart';
 import 'widgets/meal_card.dart';
+import 'widgets/plan_status_banner.dart';
 
 /// *Piano*, vista giornaliera (6.1, 6.2 interfaccia.md; VG-1..VG-4):
 /// schermata principale dell'applicazione, destinazione di *Piano* nella
@@ -20,10 +24,7 @@ import 'widgets/meal_card.dart';
 /// Il segmented control *Giorno* · *Settimana* di 6.1 non compare ancora:
 /// la vista settimanale è compito di F16, e un controllo con un solo
 /// segmento funzionante sarebbe un'illusione di scelta. Il ritorno a
-/// oggi (VG-19) è un task successivo di questa stessa feature; la natura
-/// della giornata quando non ordinaria (VG-18, PA-10) è qui presentata in
-/// forma minima, da completare con la striscia informativa e gli stati
-/// vuoti previsti da 4.4/6.1 interfaccia.md.
+/// oggi (VG-19) è un task successivo di questa stessa feature.
 class DailyViewScreen extends ConsumerWidget {
   const DailyViewScreen({super.key});
 
@@ -101,37 +102,89 @@ class DailyViewScreen extends ConsumerWidget {
   }
 }
 
-class _DayContent extends StatelessWidget {
+/// VG-18, PA-10: natura della giornata quando non ordinaria. Sospensione
+/// e assenza di piano sostituiscono l'intero contenuto con lo stato
+/// vuoto previsto da 4.4 interfaccia.md; programmato e concluso restano
+/// visibili con la striscia informativa di 6.1 sopra il contenuto — non
+/// sono condizioni che impediscono la consultazione, solo che la
+/// segnalano.
+class _DayContent extends ConsumerWidget {
   const _DayContent({required this.day});
 
   final PlanDay day;
 
   @override
-  Widget build(BuildContext context) {
-    final typography = context.typography;
-    final colors = context.colors;
-
-    if (day.coverage == PlanDayCoverage.suspended ||
-        day.coverage == PlanDayCoverage.none) {
-      // VG-18, PA-10: sostituiti dagli stati vuoti previsti da 4.4
-      // interfaccia.md in un task successivo di questa feature.
-      final message = day.coverage == PlanDayCoverage.suspended
-          ? 'Piano sospeso'
-          : 'Nessun piano per questo giorno';
-      return Center(
-        child: Text(
-          message,
-          style: typography.bodyMedium.copyWith(color: colors.textSecondary),
-        ),
-      );
+  Widget build(BuildContext context, WidgetRef ref) {
+    switch (day.coverage) {
+      case PlanDayCoverage.suspended:
+        // ref.watch (non solo read) tiene vivo il controller autoDispose
+        // per la durata dell'operazione, oltre a pilotare l'indicatore
+        // di attesa del pulsante (2.6).
+        final resuming =
+            ref.watch(dietPlanLifecycleControllerProvider)?.isLoading ?? false;
+        return EmptyStateView(
+          icon: Icons.pause_circle_outline,
+          title: 'Piano sospeso',
+          text: 'Riprenderà quando lo deciderai',
+          // UT-8: l'unico caso possibile prima di F22 è l'Utente
+          // autonomo, sempre titolare del proprio piano.
+          actionLabel: 'Riprendi',
+          actionLoading: resuming,
+          onAction: () async {
+            await ref
+                .read(dietPlanLifecycleControllerProvider.notifier)
+                .resume(day.planId!);
+            ref.invalidate(planDayProvider(day.date));
+          },
+        );
+      case PlanDayCoverage.none:
+        final ownedPlans = ref.watch(ownedDietPlansProvider);
+        final everCreated = ownedPlans.value?.isNotEmpty ?? true;
+        return everCreated
+            ? const EmptyStateView(
+                icon: Icons.event_busy,
+                title: 'Nessun piano per questo giorno',
+              )
+            : EmptyStateView(
+                icon: Icons.calendar_month_outlined,
+                title: 'Inizia da qui',
+                text: 'Crea il tuo primo piano alimentare',
+                actionLabel: 'Crea piano',
+                onAction: () => context.push('/diet-plans/new'),
+              );
+      case PlanDayCoverage.scheduled:
+      case PlanDayCoverage.completed:
+      case PlanDayCoverage.active:
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            if (day.coverage == PlanDayCoverage.scheduled)
+              PlanStatusBanner(
+                text: 'Il piano inizia il ${_formatDate(day.planStartDate!)}',
+              )
+            else if (day.coverage == PlanDayCoverage.completed)
+              PlanStatusBanner(
+                text: 'Piano concluso il ${_formatDate(day.planEndDate!)}',
+              ),
+            Expanded(child: _SlotsOrEmpty(slots: day.slots)),
+          ],
+        );
     }
+  }
+}
 
-    if (day.slots.isEmpty) {
-      return Center(
-        child: Text(
-          'Nessun pasto previsto',
-          style: typography.bodyMedium.copyWith(color: colors.textSecondary),
-        ),
+class _SlotsOrEmpty extends StatelessWidget {
+  const _SlotsOrEmpty({required this.slots});
+
+  final List<PlanDaySlot> slots;
+
+  @override
+  Widget build(BuildContext context) {
+    if (slots.isEmpty) {
+      // GG-7: condizione legittima, non un errore — nessuna azione.
+      return const EmptyStateView(
+        icon: Icons.restaurant_outlined,
+        title: 'Nessun pasto previsto',
       );
     }
 
@@ -144,12 +197,17 @@ class _DayContent extends StatelessWidget {
         AppSpacing.md,
         AppSpacing.xxl,
       ),
-      itemCount: day.slots.length,
+      itemCount: slots.length,
       separatorBuilder: (context, index) =>
           const SizedBox(height: AppSpacing.xs),
       // VG-4: tutti gli slot restano sempre visibili, quale sia il loro
       // stato — nessun filtro qui.
-      itemBuilder: (context, index) => MealCard(slot: day.slots[index]),
+      itemBuilder: (context, index) => MealCard(slot: slots[index]),
     );
   }
+}
+
+String _formatDate(DateTime value) {
+  final local = value.toLocal();
+  return '${local.day.toString().padLeft(2, '0')}/${local.month.toString().padLeft(2, '0')}/${local.year}';
 }

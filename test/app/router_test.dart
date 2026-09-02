@@ -5,7 +5,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:healthylog/app/router.dart';
 import 'package:healthylog/core/storage/secure_key_value_store.dart';
+import 'package:healthylog/features/dietplan/data/diet_plan_api.dart';
 import 'package:healthylog/features/dietplan/data/plan_day_api.dart';
+import 'package:healthylog/features/dietplan/providers/diet_plan_providers.dart';
 import 'package:healthylog/features/dietplan/providers/plan_day_providers.dart';
 import 'package:healthylog/features/identity/data/identity_api.dart';
 import 'package:healthylog/features/identity/data/profile_api.dart';
@@ -81,10 +83,30 @@ const _planDayJson = '{'
     '"planStartDate":null,"planEndDate":null,"slots":[]'
     '}';
 
+const _dietPlanJson = '{'
+    '"id":"plan-1","ownerId":"user-1","authorId":"user-1","authorRole":"USER",'
+    '"name":"Dieta","status":"COMPLETED","startDate":"2026-01-01","endDate":"2026-03-01",'
+    '"weeklySchedule":['
+    '{"dayOfWeek":"MONDAY","slots":[]},{"dayOfWeek":"TUESDAY","slots":[]},'
+    '{"dayOfWeek":"WEDNESDAY","slots":[]},{"dayOfWeek":"THURSDAY","slots":[]},'
+    '{"dayOfWeek":"FRIDAY","slots":[]},{"dayOfWeek":"SATURDAY","slots":[]},'
+    '{"dayOfWeek":"SUNDAY","slots":[]}'
+    '],'
+    '"createdAt":"2026-01-01T00:00:00Z","updatedAt":"2026-01-01T00:00:00Z"'
+    '}';
+
 PlanDayApi _planDayApiReturning(int statusCode, String body) {
   final dio = Dio(BaseOptions(baseUrl: 'http://example.test'));
   dio.httpClientAdapter = _StatusCodeAdapter(statusCode, body);
   return PlanDayApi(dio);
+}
+
+/// PA-9: nessun piano — la vista giornaliera vi distingue "nessun piano
+/// mai creato" da "fuori piano" (PA-10, 4.4).
+DietPlanApi _dietPlanApiReturning(int statusCode, String body) {
+  final dio = Dio(BaseOptions(baseUrl: 'http://example.test'));
+  dio.httpClientAdapter = _StatusCodeAdapter(statusCode, body);
+  return DietPlanApi(dio);
 }
 
 void main() {
@@ -122,6 +144,9 @@ void main() {
         // /home è ora la vista giornaliera reale (F12), non più la
         // destinazione temporanea di F06.
         planDayApiProvider.overrideWithValue(_planDayApiReturning(200, _planDayJson)),
+        // Un piano già esistente, perché "fuori piano" (PA-10) e non
+        // "nessun piano mai creato" sia l'esito atteso qui.
+        dietPlanApiProvider.overrideWithValue(_dietPlanApiReturning(200, '[$_dietPlanJson]')),
       ],
     );
     addTearDown(container.dispose);

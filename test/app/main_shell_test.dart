@@ -128,8 +128,10 @@ void main() {
 
     expect(find.text('Statistiche: non ancora disponibile.'), findsOneWidget);
     // La destinazione resta quella di partenza (Piano, F12): il tocco su
-    // una voce disabilitata non naviga.
-    expect(find.text('Nessun piano per questo giorno'), findsOneWidget);
+    // una voce disabilitata non naviga. Nessun piano mai creato in
+    // questo banco di prova (dietPlanDio restituisce `[]`): l'invito a
+    // crearne uno, non il neutro "fuori piano" (PA-10, 4.4).
+    expect(find.text('Inizia da qui'), findsOneWidget);
   });
 
   testWidgets('il tocco su Profilo naviga e conserva la barra', (tester) async {
