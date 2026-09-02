@@ -2,10 +2,13 @@ import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
+import 'package:drift/native.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:healthylog/core/auth/session.dart';
 import 'package:healthylog/core/auth/session_controller.dart';
+import 'package:healthylog/core/storage/app_database.dart';
+import 'package:healthylog/core/storage/local_database_wipe_service.dart';
 import 'package:healthylog/core/storage/secure_key_value_store.dart';
 import 'package:healthylog/features/identity/data/auth_models.dart';
 import 'package:healthylog/features/identity/data/identity_api.dart';
@@ -122,6 +125,11 @@ void main() {
           identityApiProvider.overrideWithValue(
             _stubIdentityApi(401, '{"code":"REFRESH_TOKEN_INVALID"}'),
           ),
+          // PL-17, F14: la rimozione della base dati locale userebbe
+          // path_provider/flutter_secure_storage, assenti nella VM di
+          // test (sospensione indefinita, non un errore catturabile).
+          appDatabaseProvider.overrideWithValue(AppDatabase(NativeDatabase.memory())),
+          deleteDatabaseFileProvider.overrideWithValue(() async {}),
         ],
       );
       addTearDown(container.dispose);
@@ -135,7 +143,14 @@ void main() {
     test('set persiste il token di rinnovo e clear lo rimuove', () async {
       final store = _InMemorySecureKeyValueStore();
       final container = ProviderContainer(
-        overrides: [secureKeyValueStoreProvider.overrideWithValue(store)],
+        overrides: [
+          secureKeyValueStoreProvider.overrideWithValue(store),
+          // PL-17, F14: la rimozione della base dati locale userebbe
+          // path_provider/flutter_secure_storage, assenti nella VM di
+          // test (sospensione indefinita, non un errore catturabile).
+          appDatabaseProvider.overrideWithValue(AppDatabase(NativeDatabase.memory())),
+          deleteDatabaseFileProvider.overrideWithValue(() async {}),
+        ],
       );
       addTearDown(container.dispose);
       await container.read(sessionControllerProvider.future);
