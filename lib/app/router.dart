@@ -7,6 +7,7 @@ import '../core/auth/session.dart';
 import '../core/auth/session_controller.dart';
 import '../features/dietplan/data/diet_plan_template.dart';
 import '../features/dietplan/presentation/create_diet_plan_screen.dart';
+import '../features/dietplan/presentation/daily_view_screen.dart';
 import '../features/dietplan/presentation/diet_plan_management_screen.dart';
 import '../features/dietplan/presentation/diet_plan_schedule_screen.dart';
 import '../features/dietplan/presentation/diet_plan_template_list_screen.dart';
@@ -26,7 +27,6 @@ import '../features/identity/presentation/registration_details_screen.dart';
 import '../features/identity/presentation/role_selection_screen.dart';
 import '../features/identity/presentation/settings_screen.dart';
 import 'navigation/main_shell.dart';
-import 'placeholder_home_screen.dart';
 import 'splash_screen.dart';
 
 part 'router.g.dart';
@@ -137,7 +137,7 @@ GoRouter goRouter(Ref ref) {
       ),
       GoRoute(
         path: '/home',
-        builder: (context, state) => const MainShell(child: PlaceholderHomeScreen()),
+        builder: (context, state) => const MainShell(child: DailyViewScreen()),
       ),
       GoRoute(
         path: '/profile',

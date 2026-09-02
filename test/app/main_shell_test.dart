@@ -7,7 +7,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:healthylog/core/api/api_error_interceptor.dart';
 import 'package:healthylog/core/storage/secure_key_value_store.dart';
 import 'package:healthylog/features/dietplan/data/diet_plan_api.dart';
+import 'package:healthylog/features/dietplan/data/plan_day_api.dart';
 import 'package:healthylog/features/dietplan/providers/diet_plan_providers.dart';
+import 'package:healthylog/features/dietplan/providers/plan_day_providers.dart';
 import 'package:healthylog/features/identity/data/identity_api.dart';
 import 'package:healthylog/features/identity/data/profile_api.dart';
 import 'package:healthylog/features/identity/providers/identity_providers.dart';
@@ -82,6 +84,13 @@ Future<ProviderContainer> _pumpAuthenticatedApp(WidgetTester tester, {required S
   final dietPlanDio = Dio(BaseOptions(baseUrl: 'http://example.test'))
     ..httpClientAdapter = _StatusCodeAdapter(200, '[]')
     ..interceptors.add(ApiErrorInterceptor());
+  // PA-10: /home (F12) legge subito la giornata corrente — priva di
+  // copertura in questo banco di prova, non pertinente qui.
+  final planDayDio = Dio(BaseOptions(baseUrl: 'http://example.test'))
+    ..httpClientAdapter = _StatusCodeAdapter(200, '{'
+        '"date":"2026-01-01","coverage":"NONE","planId":null,"planName":null,'
+        '"planStartDate":null,"planEndDate":null,"slots":[]'
+        '}');
 
   final container = ProviderContainer(
     overrides: [
@@ -89,6 +98,7 @@ Future<ProviderContainer> _pumpAuthenticatedApp(WidgetTester tester, {required S
       identityApiProvider.overrideWithValue(IdentityApi(identityDio)),
       profileApiProvider.overrideWithValue(ProfileApi(profileDio)),
       dietPlanApiProvider.overrideWithValue(DietPlanApi(dietPlanDio)),
+      planDayApiProvider.overrideWithValue(PlanDayApi(planDayDio)),
     ],
   );
   addTearDown(container.dispose);
@@ -102,7 +112,9 @@ void main() {
   testWidgets('mostra le quattro voci dell\'Utente, due disabilitate (3.1, 2.6)', (tester) async {
     await _pumpAuthenticatedApp(tester, role: 'USER');
 
-    expect(find.text('Piano'), findsOneWidget);
+    // "Piano" compare due volte da F12: l'etichetta della barra e il
+    // titolo della vista giornaliera che vi si apre.
+    expect(find.text('Piano'), findsNWidgets(2));
     expect(find.text('Attività'), findsOneWidget);
     expect(find.text('Statistiche'), findsOneWidget);
     expect(find.text('Profilo'), findsOneWidget);
@@ -115,7 +127,9 @@ void main() {
     await tester.pump();
 
     expect(find.text('Statistiche: non ancora disponibile.'), findsOneWidget);
-    expect(find.text('Accesso effettuato'), findsOneWidget);
+    // La destinazione resta quella di partenza (Piano, F12): il tocco su
+    // una voce disabilitata non naviga.
+    expect(find.text('Nessun piano per questo giorno'), findsOneWidget);
   });
 
   testWidgets('il tocco su Profilo naviga e conserva la barra', (tester) async {

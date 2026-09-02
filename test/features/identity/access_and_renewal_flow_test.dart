@@ -72,10 +72,21 @@ const _profileJson = '''
 }
 ''';
 
+/// PA-10: `/home` è ora la vista giornaliera reale (F12), che alla prima
+/// composizione richiede subito `GET /plan-days` — risposta neutra, priva
+/// di copertura, non pertinente a ciò che questo test verifica.
+const _planDayJson = '{'
+    '"date":"2026-01-01","coverage":"NONE","planId":null,"planName":null,'
+    '"planStartDate":null,"planEndDate":null,"slots":[]'
+    '}';
+
 /// `GET /me`: rifiuta il token rilasciato dall'accesso con
 /// `TOKEN_EXPIRED` — come farebbe il backend con un token scaduto — e
 /// accetta solo la richiesta ripetuta dopo il rinnovo (segnalata da
-/// [TokenRefreshInterceptor] tramite `options.extra`).
+/// [TokenRefreshInterceptor] tramite `options.extra`). `GET /plan-days`,
+/// emessa nel frattempo dalla vista giornaliera, è servita a parte: non
+/// deve influire sul conteggio delle richieste di profilo verificato più
+/// sotto.
 class _MeAdapter implements HttpClientAdapter {
   int meRequests = 0;
 
@@ -88,6 +99,15 @@ class _MeAdapter implements HttpClientAdapter {
     Stream<Uint8List>? requestStream,
     Future<void>? cancelFuture,
   ) async {
+    if (options.path.contains('/plan-days')) {
+      return ResponseBody.fromString(
+        _planDayJson,
+        200,
+        headers: {
+          Headers.contentTypeHeader: [Headers.jsonContentType],
+        },
+      );
+    }
     meRequests++;
     final retried = options.extra['tokenRefreshRetried'] == true;
     if (!retried) {
@@ -158,9 +178,10 @@ void main() {
       await tester.pumpAndSettle();
 
       // AC-8, AC-11: l'accesso riuscito conduce a `/home`, non più a
-      // `/login` (protezione delle rotte, task 6).
+      // `/login` (protezione delle rotte, task 6): vi si trova ora la
+      // vista giornaliera reale (F12), priva di piano nella prova.
       expect(identityApi.loginCalls, 1);
-      expect(find.text('Accesso effettuato'), findsOneWidget);
+      expect(find.text('Nessun piano per questo giorno'), findsOneWidget);
 
       container.read(goRouterProvider).push('/profile');
       await tester.pumpAndSettle();
