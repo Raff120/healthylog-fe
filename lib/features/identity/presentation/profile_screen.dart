@@ -16,9 +16,8 @@ import '../providers/sessions_providers.dart';
 /// avviate e non sono quindi presenti (2.6: gli elementi per funzioni
 /// inesistenti non compaiono, non sono disabilitati). "Piani" (7.1
 /// interfaccia.md, F10) apre la gestione del piano in corso.
-/// "Dispositivi collegati" appartiene propriamente a Impostazioni (12.2),
-/// non ancora realizzata (F29): resta qui finché non trova la propria
-/// sede definitiva, segnalato in decisioni.md.
+/// "Impostazioni" (12.2, F11) raccoglie ora anche "Dispositivi
+/// collegati", che non compare più qui direttamente (vedi decisioni.md).
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
 
@@ -124,9 +123,9 @@ class ProfileScreen extends ConsumerWidget {
                 ),
                 const SizedBox(height: AppSpacing.sm),
                 _ProfileSection(
-                  icon: Icons.devices_outlined,
-                  label: 'Dispositivi collegati',
-                  onTap: () => context.push('/profile/devices'),
+                  icon: Icons.settings_outlined,
+                  label: 'Impostazioni',
+                  onTap: () => context.push('/profile/settings'),
                 ),
                 const Spacer(),
                 Center(

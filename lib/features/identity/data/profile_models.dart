@@ -2,6 +2,8 @@ import 'account_role.dart';
 
 /// Rispecchia `MeResponse` sul backend (PR-1, PR-6). Il ruolo è di sola
 /// presentazione (RG-1): non compare in [UpdateProfileRequest].
+/// `timezone` non vi compare neppure (LO-13, F11, deroga: vedi
+/// decisioni.md): si modifica dall'endpoint dedicato, come la password.
 class Profile {
   const Profile({
     required this.id,
@@ -14,6 +16,7 @@ class Profile {
     required this.sex,
     required this.role,
     required this.height,
+    required this.timezone,
   });
 
   factory Profile.fromJson(Map<String, dynamic> json) => Profile(
@@ -27,6 +30,7 @@ class Profile {
         sex: BiologicalSex.fromJson(json['sex'] as String),
         role: AccountRole.fromJson(json['role'] as String),
         height: json['height'] as int?,
+        timezone: json['timezone'] as String?,
       );
 
   final String id;
@@ -39,6 +43,7 @@ class Profile {
   final BiologicalSex sex;
   final AccountRole role;
   final int? height;
+  final String? timezone;
 }
 
 /// Corpo di `PATCH /me` (PR-1, PR-4, PR-6): rispecchia `UpdateProfileRequest`.
@@ -74,4 +79,13 @@ class UpdateProfileRequest {
         'sex': sex.toJson(),
         'height': height,
       };
+}
+
+/// Corpo di `PATCH /me/timezone` (LO-13, F11, deroga: vedi decisioni.md).
+class UpdateTimezoneRequest {
+  const UpdateTimezoneRequest(this.timezone);
+
+  final String timezone;
+
+  Map<String, dynamic> toJson() => {'timezone': timezone};
 }

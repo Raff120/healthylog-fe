@@ -19,4 +19,9 @@ class ProfileApi {
     final response = await _dio.patch('/me', data: request.toJson());
     return Profile.fromJson(response.data as Map<String, dynamic>);
   }
+
+  Future<Profile> updateTimezone(UpdateTimezoneRequest request) async {
+    final response = await _dio.patch('/me/timezone', data: request.toJson());
+    return Profile.fromJson(response.data as Map<String, dynamic>);
+  }
 }

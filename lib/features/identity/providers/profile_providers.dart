@@ -23,4 +23,11 @@ class ProfileController extends _$ProfileController {
     state = AsyncValue.data(profile);
     return profile;
   }
+
+  /// LO-13 (F11, deroga: vedi decisioni.md).
+  Future<Profile> saveTimezone(String timezone) async {
+    final profile = await ref.read(profileApiProvider).updateTimezone(UpdateTimezoneRequest(timezone));
+    state = AsyncValue.data(profile);
+    return profile;
+  }
 }
