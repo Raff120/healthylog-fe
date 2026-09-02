@@ -345,6 +345,20 @@ void main() {
     expect(find.text('Yogurt e cereali'), findsOneWidget);
   });
 
+  testWidgets(
+      'un piano Programmato o Concluso senza pasti in quel giorno mostra comunque la striscia informativa (VG-18, GG-7)',
+      (tester) async {
+    final scheduled = _dayJson();
+    scheduled['coverage'] = 'SCHEDULED';
+    scheduled['planStartDate'] = '2026-10-01';
+    scheduled['slots'] = <dynamic>[];
+
+    await _pumpDailyView(tester, scheduled);
+
+    expect(find.text('Il piano inizia il 01/10/2026'), findsOneWidget);
+    expect(find.text('Nessun pasto previsto'), findsOneWidget);
+  });
+
   testWidgets('una giornata sospesa non presenta alcuno slot e offre "Riprendi" (VG-18, CV-S3)', (tester) async {
     var suspended = true;
     // CV-S6: la giornata cambia esito dopo la ripresa, non un corpo fisso.
