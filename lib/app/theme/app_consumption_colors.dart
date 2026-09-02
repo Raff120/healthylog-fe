@@ -15,22 +15,34 @@ class AppConsumptionColors extends ThemeExtension<AppConsumptionColors> {
     required this.toConsume,
     required this.consumed,
     required this.skipped,
+    required this.consumedBackground,
+    required this.skippedBackground,
   });
 
   final Color? toConsume;
   final Color consumed;
   final Color skipped;
 
+  /// Fondo tenue del pulsante di spunta quando il proprio stato è quello
+  /// corrente (4.1 interfaccia.md). Nessuna voce per [toConsume]: quello
+  /// stato non ha un pulsante proprio (SP-1, due soli pulsanti).
+  final Color consumedBackground;
+  final Color skippedBackground;
+
   static const AppConsumptionColors light = AppConsumptionColors(
     toConsume: null,
     consumed: AppPalette.mealConsumedLight,
     skipped: AppPalette.mealSkippedLight,
+    consumedBackground: AppPalette.mealConsumedBackgroundLight,
+    skippedBackground: AppPalette.mealSkippedBackgroundLight,
   );
 
   static const AppConsumptionColors dark = AppConsumptionColors(
     toConsume: null,
     consumed: AppPalette.mealConsumedDark,
     skipped: AppPalette.mealSkippedDark,
+    consumedBackground: AppPalette.mealConsumedBackgroundDark,
+    skippedBackground: AppPalette.mealSkippedBackgroundDark,
   );
 
   @override
@@ -38,11 +50,15 @@ class AppConsumptionColors extends ThemeExtension<AppConsumptionColors> {
     Color? toConsume,
     Color? consumed,
     Color? skipped,
+    Color? consumedBackground,
+    Color? skippedBackground,
   }) {
     return AppConsumptionColors(
       toConsume: toConsume ?? this.toConsume,
       consumed: consumed ?? this.consumed,
       skipped: skipped ?? this.skipped,
+      consumedBackground: consumedBackground ?? this.consumedBackground,
+      skippedBackground: skippedBackground ?? this.skippedBackground,
     );
   }
 
@@ -53,6 +69,8 @@ class AppConsumptionColors extends ThemeExtension<AppConsumptionColors> {
       toConsume: Color.lerp(toConsume, other.toConsume, t),
       consumed: Color.lerp(consumed, other.consumed, t)!,
       skipped: Color.lerp(skipped, other.skipped, t)!,
+      consumedBackground: Color.lerp(consumedBackground, other.consumedBackground, t)!,
+      skippedBackground: Color.lerp(skippedBackground, other.skippedBackground, t)!,
     );
   }
 }

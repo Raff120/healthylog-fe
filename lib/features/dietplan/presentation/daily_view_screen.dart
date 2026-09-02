@@ -166,7 +166,13 @@ class _DayContent extends ConsumerWidget {
               PlanStatusBanner(
                 text: 'Piano concluso il ${_formatDate(day.planEndDate!)}',
               ),
-            Expanded(child: _SlotsOrEmpty(slots: day.slots)),
+            Expanded(
+              child: _SlotsOrEmpty(
+                slots: day.slots,
+                date: day.date,
+                canCheck: day.coverage == PlanDayCoverage.active,
+              ),
+            ),
           ],
         );
     }
@@ -174,9 +180,16 @@ class _DayContent extends ConsumerWidget {
 }
 
 class _SlotsOrEmpty extends StatelessWidget {
-  const _SlotsOrEmpty({required this.slots});
+  const _SlotsOrEmpty({required this.slots, required this.date, required this.canCheck});
 
   final List<PlanDaySlot> slots;
+  final DateTime date;
+
+  /// SP-11: false su Programmato e Concluso, gli unici casi in cui questo
+  /// widget è raggiunto con `coverage` diverso da Attivo (Sospeso e
+  /// assenza di piano sostituiscono l'intero contenuto, vedi
+  /// `_DayContent`).
+  final bool canCheck;
 
   @override
   Widget build(BuildContext context) {
@@ -202,7 +215,8 @@ class _SlotsOrEmpty extends StatelessWidget {
           const SizedBox(height: AppSpacing.xs),
       // VG-4: tutti gli slot restano sempre visibili, quale sia il loro
       // stato — nessun filtro qui.
-      itemBuilder: (context, index) => MealCard(slot: slots[index]),
+      itemBuilder: (context, index) =>
+          MealCard(slot: slots[index], date: date, canCheck: canCheck),
     );
   }
 }
