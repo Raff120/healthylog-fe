@@ -15,28 +15,32 @@ import '../providers/plan_day_providers.dart';
 import 'widgets/date_selector.dart';
 import 'widgets/meal_card.dart';
 import 'widgets/plan_status_banner.dart';
+import 'widgets/segmented_view_control.dart';
+import 'widgets/week_selector.dart';
+import 'widgets/weekly_view.dart';
 
-/// *Piano*, vista giornaliera (6.1, 6.2 interfaccia.md; VG-1..VG-4):
-/// schermata principale dell'applicazione, destinazione di *Piano* nella
-/// barra di navigazione. Sostituisce integralmente `PlaceholderHomeScreen`
-/// (F06).
-///
-/// Il segmented control *Giorno* · *Settimana* di 6.1 non compare ancora:
-/// la vista settimanale è compito di F16, e un controllo con un solo
-/// segmento funzionante sarebbe un'illusione di scelta. Il ritorno a
-/// oggi (VG-19) è un task successivo di questa stessa feature.
-class DailyViewScreen extends ConsumerWidget {
-  const DailyViewScreen({super.key});
+/// *Piano* (6.1 interfaccia.md; VG-1..VG-4, VS-1): schermata principale
+/// dell'applicazione, destinazione di *Piano* nella barra di
+/// navigazione. Raccoglie le due viste sul medesimo contenuto — giorno
+/// (6.2) e settimana (6.4) — dietro il segmented control
+/// dell'intestazione (6.1), condividendo un solo riferimento temporale
+/// (`selectedDayProvider`, VS-14).
+class PlanScreen extends ConsumerWidget {
+  const PlanScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final colors = context.colors;
-    final typography = context.typography;
+    final viewMode = ref.watch(selectedPlanViewProvider);
     final selectedDate = ref.watch(selectedDayProvider);
-    final dayState = ref.watch(planDayProvider(selectedDate));
 
-    void selectDate(DateTime date) =>
-        ref.read(selectedDayProvider.notifier).select(date);
+    void selectDate(DateTime date) => ref.read(selectedDayProvider.notifier).select(date);
+    void showDay(DateTime date) {
+      // VS-14: il tocco su un giorno della settimana conduce alla
+      // giornaliera di quel giorno, conservando il riferimento.
+      selectDate(date);
+      ref.read(selectedPlanViewProvider.notifier).select(PlanViewMode.day);
+    }
 
     return Scaffold(
       backgroundColor: colors.background,
@@ -44,60 +48,125 @@ class DailyViewScreen extends ConsumerWidget {
         backgroundColor: colors.background,
         elevation: 0,
         scrolledUnderElevation: 0,
-        title: Text(
-          'Piano',
-          style: typography.titleMedium.copyWith(color: colors.textPrimary),
+        centerTitle: true,
+        title: SegmentedViewControl(
+          value: viewMode,
+          onChanged: (mode) => ref.read(selectedPlanViewProvider.notifier).select(mode),
         ),
       ),
       body: SafeArea(
-        child: Column(
-          children: [
-            DateSelector(selectedDate: selectedDate, onSelect: selectDate),
-            Expanded(
-              // 6.2: "lo scorrimento orizzontale del contenuto cambia
-              // giorno" — lo stesso gesto della riga dei giorni, qui
-              // applicato al contenuto sottostante.
-              child: GestureDetector(
-                key: const Key('dailyViewContentSwipe'),
-                onHorizontalDragEnd: (details) {
-                  final velocity = details.primaryVelocity ?? 0;
-                  if (velocity < -200) {
-                    selectDate(selectedDate.add(const Duration(days: 1)));
-                  } else if (velocity > 200) {
-                    selectDate(selectedDate.subtract(const Duration(days: 1)));
-                  }
-                },
-                child: dayState.when(
-                  loading: () =>
-                      const Center(child: CircularProgressIndicator()),
-                  error: (error, _) => Center(
-                    child: Text(
-                      describeApiError(error.asApiException?.code ?? ''),
-                      style: typography.bodyMedium.copyWith(
-                        color: colors.textSecondary,
-                      ),
-                    ),
-                  ),
-                  data: (day) => AnimatedSwitcher(
-                    duration: AppSpacing.motionScreenTransition,
-                    transitionBuilder: (child, animation) => SlideTransition(
-                      position: Tween(
-                        begin: const Offset(0.05, 0),
-                        end: Offset.zero,
-                      ).animate(animation),
-                      child: FadeTransition(opacity: animation, child: child),
-                    ),
-                    child: KeyedSubtree(
-                      key: ValueKey(isoDate(day.date)),
-                      child: _DayContent(day: day),
-                    ),
-                  ),
+        child: AnimatedSwitcher(
+          duration: AppSpacing.motionScreenTransition,
+          transitionBuilder: (child, animation) => SlideTransition(
+            // 6.1: "Settimana entra da destra, Giorno da sinistra".
+            position: Tween(
+              begin: Offset(viewMode == PlanViewMode.week ? 0.05 : -0.05, 0),
+              end: Offset.zero,
+            ).animate(animation),
+            child: FadeTransition(opacity: animation, child: child),
+          ),
+          child: viewMode == PlanViewMode.day
+              ? _DailyView(key: const ValueKey('day'), selectedDate: selectedDate, onSelect: selectDate)
+              : _WeeklyTab(key: const ValueKey('week'), selectedDate: selectedDate, onNavigate: selectDate, onSelectDay: showDay),
+        ),
+      ),
+    );
+  }
+}
+
+class _DailyView extends ConsumerWidget {
+  const _DailyView({super.key, required this.selectedDate, required this.onSelect});
+
+  final DateTime selectedDate;
+  final ValueChanged<DateTime> onSelect;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final typography = context.typography;
+    final colors = context.colors;
+    final dayState = ref.watch(planDayProvider(selectedDate));
+
+    return Column(
+      children: [
+        DateSelector(selectedDate: selectedDate, onSelect: onSelect),
+        Expanded(
+          // 6.2: "lo scorrimento orizzontale del contenuto cambia
+          // giorno" — lo stesso gesto della riga dei giorni, qui
+          // applicato al contenuto sottostante.
+          child: GestureDetector(
+            key: const Key('dailyViewContentSwipe'),
+            onHorizontalDragEnd: (details) {
+              final velocity = details.primaryVelocity ?? 0;
+              if (velocity < -200) {
+                onSelect(selectedDate.add(const Duration(days: 1)));
+              } else if (velocity > 200) {
+                onSelect(selectedDate.subtract(const Duration(days: 1)));
+              }
+            },
+            child: dayState.when(
+              loading: () => const Center(child: CircularProgressIndicator()),
+              error: (error, _) => Center(
+                child: Text(
+                  describeApiError(error.asApiException?.code ?? ''),
+                  style: typography.bodyMedium.copyWith(color: colors.textSecondary),
+                ),
+              ),
+              data: (day) => AnimatedSwitcher(
+                duration: AppSpacing.motionScreenTransition,
+                transitionBuilder: (child, animation) => SlideTransition(
+                  position: Tween(
+                    begin: const Offset(0.05, 0),
+                    end: Offset.zero,
+                  ).animate(animation),
+                  child: FadeTransition(opacity: animation, child: child),
+                ),
+                child: KeyedSubtree(
+                  key: ValueKey(isoDate(day.date)),
+                  child: _DayContent(day: day),
                 ),
               ),
             ),
-          ],
+          ),
         ),
-      ),
+      ],
+    );
+  }
+}
+
+class _WeeklyTab extends StatelessWidget {
+  const _WeeklyTab({
+    super.key,
+    required this.selectedDate,
+    required this.onNavigate,
+    required this.onSelectDay,
+  });
+
+  final DateTime selectedDate;
+
+  /// Frecce e "Questa settimana" (VS-12, VS-13): sposta il riferimento
+  /// temporale senza lasciare la vista settimanale.
+  final ValueChanged<DateTime> onNavigate;
+
+  /// VS-14: tocco sull'intestazione di un giorno, passa alla vista
+  /// giornaliera di quel giorno.
+  final ValueChanged<DateTime> onSelectDay;
+
+  @override
+  Widget build(BuildContext context) {
+    final weekStart = startOfWeek(selectedDate);
+    final currentWeekStart = startOfWeek(dateOnly(DateTime.now()));
+    final isCurrentWeek = weekStart == currentWeekStart;
+
+    return Column(
+      children: [
+        WeekSelector(
+          weekStart: weekStart,
+          onPrevious: () => onNavigate(weekStart.subtract(const Duration(days: 7))),
+          onNext: () => onNavigate(weekStart.add(const Duration(days: 7))),
+          onCurrentWeek: isCurrentWeek ? null : () => onNavigate(currentWeekStart),
+        ),
+        Expanded(child: WeeklyView(weekStart: weekStart, onSelectDay: onSelectDay)),
+      ],
     );
   }
 }
