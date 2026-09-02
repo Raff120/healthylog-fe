@@ -38,6 +38,12 @@ class _MealCardState extends ConsumerState<MealCard> {
 
   @override
   Widget build(BuildContext context) {
+    // Tiene in vita il controller (autoDispose) per la durata della
+    // richiesta: senza un ascoltatore, verrebbe eliminato non appena il
+    // gestore del tocco restituisce il controllo, prima che la risposta
+    // asincrona possa scriverne lo stato (`UnmountedRefException`).
+    ref.watch(planDaySlotStatusControllerProvider);
+
     final colors = context.colors;
     final typography = context.typography;
     final consumption = context.consumptionColors;
