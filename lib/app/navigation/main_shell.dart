@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../features/dietplan/providers/plan_day_providers.dart';
 import '../../features/identity/providers/profile_providers.dart';
 import '../app_breakpoints.dart';
 import '../theme/app_spacing.dart';
@@ -34,17 +35,29 @@ class MainShell extends ConsumerWidget {
 
     final destinations = destinationsFor(role);
     final currentRoute = GoRouterState.of(context).matchedLocation;
-    final selectedIndex = destinations.indexWhere((d) => d.route == currentRoute);
+    final selectedIndex = destinations.indexWhere(
+      (d) => d.route == currentRoute,
+    );
 
     void onSelect(int index) {
       final destination = destinations[index];
       if (!destination.enabled) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('${destination.label}: non ancora disponibile.')),
+          SnackBar(
+            content: Text('${destination.label}: non ancora disponibile.'),
+          ),
         );
         return;
       }
-      if (destination.route == currentRoute) return;
+      if (destination.route == currentRoute) {
+        // 6.2, VG-19: il doppio tocco sulla voce già selezionata di
+        // *Piano* riporta alla giornata corrente, come l'azione "Oggi"
+        // del selettore della data.
+        if (destination.route == '/home') {
+          ref.read(selectedDayProvider.notifier).select(DateTime.now());
+        }
+        return;
+      }
       if (destination.route == '/home' || destination.route == '/profile') {
         context.go(destination.route!);
       } else {
@@ -112,6 +125,7 @@ class _BottomBarScaffold extends StatelessWidget {
                 for (var i = 0; i < destinations.length; i++)
                   Expanded(
                     child: _NavItem(
+                      key: ValueKey('navItem-${destinations[i].label}'),
                       destination: destinations[i],
                       selected: i == selectedIndex,
                       axis: Axis.vertical,
@@ -156,7 +170,9 @@ class _RailScaffold extends StatelessWidget {
               border: Border(right: BorderSide(color: colors.dividerStrong)),
             ),
             child: SizedBox(
-              width: extended ? AppSpacing.widthNavigationRailExpanded : AppSpacing.widthNavigationRailCompact,
+              width: extended
+                  ? AppSpacing.widthNavigationRailExpanded
+                  : AppSpacing.widthNavigationRailCompact,
               child: SafeArea(
                 left: false,
                 right: false,
@@ -167,6 +183,7 @@ class _RailScaffold extends StatelessWidget {
                     children: [
                       for (var i = 0; i < destinations.length; i++)
                         _NavItem(
+                          key: ValueKey('navItem-${destinations[i].label}'),
                           destination: destinations[i],
                           selected: i == selectedIndex,
                           axis: Axis.horizontal,
@@ -193,6 +210,7 @@ class _RailScaffold extends StatelessWidget {
 /// disposizioni.
 class _NavItem extends StatelessWidget {
   const _NavItem({
+    super.key,
     required this.destination,
     required this.selected,
     required this.axis,
@@ -224,10 +242,14 @@ class _NavItem extends StatelessWidget {
     final label = showLabel
         ? Text(
             destination.label,
-            style: (axis == Axis.vertical ? typography.caption : typography.bodyMedium).copyWith(
-              color: color,
-              fontWeight: selected ? FontWeight.w500 : FontWeight.w400,
-            ),
+            style:
+                (axis == Axis.vertical
+                        ? typography.caption
+                        : typography.bodyMedium)
+                    .copyWith(
+                      color: color,
+                      fontWeight: selected ? FontWeight.w500 : FontWeight.w400,
+                    ),
           )
         : null;
 
@@ -236,13 +258,28 @@ class _NavItem extends StatelessWidget {
             fit: BoxFit.scaleDown,
             child: Column(
               mainAxisSize: MainAxisSize.min,
-              children: [icon, if (label != null) ...[const SizedBox(height: AppSpacing.xxs), label]],
+              children: [
+                icon,
+                if (label != null) ...[
+                  const SizedBox(height: AppSpacing.xxs),
+                  label,
+                ],
+              ],
             ),
           )
         : Padding(
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.sm),
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.md,
+              vertical: AppSpacing.sm,
+            ),
             child: Row(
-              children: [icon, if (label != null) ...[const SizedBox(width: AppSpacing.sm), label]],
+              children: [
+                icon,
+                if (label != null) ...[
+                  const SizedBox(width: AppSpacing.sm),
+                  label,
+                ],
+              ],
             ),
           );
 
