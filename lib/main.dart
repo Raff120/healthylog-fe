@@ -5,6 +5,7 @@ import 'package:flutter_web_plugins/url_strategy.dart';
 
 import 'app/router.dart';
 import 'app/theme/app_theme.dart';
+import 'app/theme/theme_mode_controller.dart';
 
 void main() {
   // FE-3, CT-17: indirizzi senza `#`, come richiede il routing della
@@ -26,6 +27,11 @@ class HealthyLogApp extends ConsumerWidget {
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light,
       darkTheme: AppTheme.dark,
+      // 12.2 interfaccia.md: predefinito Sistema finché l'Utente non
+      // sceglie diversamente dalle Impostazioni. `.value` degrada al
+      // predefinito durante il breve caricamento della preferenza (mai
+      // un errore mostrato, sul modello di SessionController).
+      themeMode: ref.watch(themeModeControllerProvider).value ?? ThemeMode.system,
       routerConfig: ref.watch(goRouterProvider),
       // Comunicazione: l'applicazione è scritta in italiano fin da qui
       // (CN-1, CN-2) — questo fissa la sola lingua dei widget di
