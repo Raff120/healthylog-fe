@@ -113,7 +113,25 @@ class _WeekSlotRowState extends ConsumerState<WeekSlotRow> {
   void _onTap(BuildContext context, MealSwapOrigin? origin, MealSwapHighlight? highlight) {
     if (origin == null) {
       // VS-4: fuori dalla selezione, il tocco apre il contenuto integrale.
-      _openDetailSheet(context, widget.slot);
+      // 6.5 interfaccia.md, 3.3: il tocco prolungato non deve restare
+      // l'unica via all'inversione — qui l'azione "Sposta", se ammessa.
+      final eligible = isMealSwapOriginEligible(widget.day, widget.slot);
+      _openDetailSheet(
+        context,
+        widget.slot,
+        onMove: eligible
+            ? () {
+                Navigator.of(context).pop();
+                ref.read(mealSwapSelectionProvider.notifier).start(MealSwapOrigin(
+                      planId: widget.day.planId!,
+                      date: widget.day.date,
+                      slotId: widget.slot.slotId,
+                      type: widget.slot.type,
+                      status: widget.slot.status,
+                    ));
+              }
+            : null,
+      );
       return;
     }
     switch (highlight!) {
@@ -137,7 +155,9 @@ class _WeekSlotRowState extends ConsumerState<WeekSlotRow> {
 
 /// VS-4: il contenuto integrale, con nota e ricetta, senza abbandonare
 /// la vista settimanale — un foglio modale, non una nuova schermata.
-void _openDetailSheet(BuildContext context, PlanDaySlot slot) {
+/// [onMove] è l'azione di inversione (5, 6.5 interfaccia.md), assente
+/// (`null`) quando lo slot non è ammissibile come origine.
+void _openDetailSheet(BuildContext context, PlanDaySlot slot, {required VoidCallback? onMove}) {
   final colors = context.colors;
   final typography = context.typography;
   final hasContent = slot.content?.trim().isNotEmpty ?? false;
@@ -205,6 +225,17 @@ void _openDetailSheet(BuildContext context, PlanDaySlot slot) {
                   ),
                 ),
               ),
+              if (onMove != null) ...[
+                const SizedBox(height: AppSpacing.sm),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: TextButton.icon(
+                    onPressed: onMove,
+                    icon: Icon(Icons.swap_horiz, size: 18, color: colors.accent),
+                    label: Text('Sposta', style: typography.label.copyWith(color: colors.accent)),
+                  ),
+                ),
+              ],
             ],
           ),
         ),
