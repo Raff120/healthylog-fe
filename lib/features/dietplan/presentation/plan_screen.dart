@@ -255,6 +255,7 @@ class _DayContent extends ConsumerWidget {
                 slots: day.slots,
                 date: day.date,
                 canCheck: day.coverage == PlanDayCoverage.active,
+                planId: day.planId,
               ),
             ),
           ],
@@ -264,7 +265,7 @@ class _DayContent extends ConsumerWidget {
 }
 
 class _SlotsOrEmpty extends StatelessWidget {
-  const _SlotsOrEmpty({required this.slots, required this.date, required this.canCheck});
+  const _SlotsOrEmpty({required this.slots, required this.date, required this.canCheck, required this.planId});
 
   final List<PlanDaySlot> slots;
   final DateTime date;
@@ -274,6 +275,10 @@ class _SlotsOrEmpty extends StatelessWidget {
   /// assenza di piano sostituiscono l'intero contenuto, vedi
   /// `_DayContent`).
   final bool canCheck;
+
+  /// Piano che copre la giornata, per l'avvio dell'inversione (6.5
+  /// interfaccia.md) dalla card espansa.
+  final String? planId;
 
   @override
   Widget build(BuildContext context) {
@@ -300,7 +305,7 @@ class _SlotsOrEmpty extends StatelessWidget {
       // VG-4: tutti gli slot restano sempre visibili, quale sia il loro
       // stato — nessun filtro qui.
       itemBuilder: (context, index) =>
-          MealCard(slot: slots[index], date: date, canCheck: canCheck),
+          MealCard(slot: slots[index], date: date, canCheck: canCheck, planId: planId),
     );
   }
 }

@@ -318,6 +318,43 @@ void main() {
   );
 
   testWidgets(
+    'l\'azione "Sposta" nella card espansa conduce alla vista settimanale in modalità di selezione (6.5 interfaccia.md)',
+    (tester) async {
+      final today = dateOnly(DateTime.now());
+      final weekStart = startOfWeek(today);
+      final adapter = _DayOrRangeAdapter(
+        dayResponseFor: (date) => _dayJson(),
+        rangeResponseFor: (from, to) => _weekJson(weekStart),
+      );
+      final dio = Dio(BaseOptions(baseUrl: 'http://example.test'));
+      dio.httpClientAdapter = adapter;
+      dio.interceptors.add(ApiErrorInterceptor());
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            planDayApiProvider.overrideWithValue(PlanDayApi(dio)),
+            appDatabaseProvider.overrideWithValue(
+              AppDatabase(NativeDatabase.memory()),
+            ),
+          ],
+          child: MaterialApp(theme: AppTheme.light, home: const PlanScreen()),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // s1 (Yogurt e cereali) è "Da consumare": ammissibile come origine.
+      await tester.tap(find.text('Yogurt e cereali'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Sposta'));
+      await tester.pumpAndSettle();
+
+      // VS-8: la scelta della destinazione avviene sempre in settimanale.
+      expect(find.text('Scegli dove spostarlo'), findsOneWidget);
+    },
+  );
+
+  testWidgets(
     'una giornata senza pasti previsti presenta lo stato vuoto (GG-7)',
     (tester) async {
       final day = _dayJson();
