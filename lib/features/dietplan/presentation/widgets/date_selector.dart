@@ -4,26 +4,8 @@ import '../../../../app/theme/app_spacing.dart';
 import '../../../../app/theme/theme_context.dart';
 import '../../domain/plan_day_date.dart';
 
-const _italianMonths = [
-  'gennaio',
-  'febbraio',
-  'marzo',
-  'aprile',
-  'maggio',
-  'giugno',
-  'luglio',
-  'agosto',
-  'settembre',
-  'ottobre',
-  'novembre',
-  'dicembre',
-];
-
-/// La localizzazione vera (LO-1, formati per lingua) è compito di F29:
-/// qui, come nel resto del client prima di quella feature, i nomi sono
-/// cablati in italiano.
 String _monthYearLabel(DateTime date) =>
-    '${_italianMonths[date.month - 1]} ${date.year}';
+    '${italianMonths[date.month - 1]} ${date.year}';
 
 /// Selettore della data della vista giornaliera (4.3 interfaccia.md,
 /// VG-16, VG-17): intestazione mese/anno che apre il calendario e riga

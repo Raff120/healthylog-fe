@@ -12,7 +12,7 @@ import 'package:healthylog/core/storage/app_database.dart';
 import 'package:healthylog/features/dietplan/data/diet_plan_api.dart';
 import 'package:healthylog/features/dietplan/data/plan_day_api.dart';
 import 'package:healthylog/features/dietplan/domain/plan_day_date.dart';
-import 'package:healthylog/features/dietplan/presentation/daily_view_screen.dart';
+import 'package:healthylog/features/dietplan/presentation/plan_screen.dart';
 import 'package:healthylog/features/dietplan/providers/diet_plan_providers.dart';
 import 'package:healthylog/features/dietplan/providers/plan_day_providers.dart';
 
@@ -120,6 +120,64 @@ class _ByDateAdapter implements HttpClientAdapter {
   }
 }
 
+/// Risponde sia a `GET /plan-days?date=` sia a `GET
+/// /plan-days?from=&to=` (6.1, 6.2 funzionale): la vista settimanale
+/// (VS-1) e quella giornaliera condividono lo stesso client nello
+/// stesso banco di prova.
+class _DayOrRangeAdapter implements HttpClientAdapter {
+  _DayOrRangeAdapter({required this.dayResponseFor, required this.rangeResponseFor});
+
+  final Map<String, dynamic> Function(String date) dayResponseFor;
+  final List<Map<String, dynamic>> Function(String from, String to) rangeResponseFor;
+
+  @override
+  void close({bool force = false}) {}
+
+  @override
+  Future<ResponseBody> fetch(
+    RequestOptions options,
+    Stream<Uint8List>? requestStream,
+    Future<void>? cancelFuture,
+  ) async {
+    final params = options.queryParameters;
+    final Object body = params.containsKey('from')
+        ? rangeResponseFor(params['from'] as String, params['to'] as String)
+        : dayResponseFor(params['date'] as String);
+    return ResponseBody.fromString(
+      jsonEncode(body),
+      200,
+      headers: {
+        Headers.contentTypeHeader: [Headers.jsonContentType],
+      },
+    );
+  }
+}
+
+const _weekdayLabels = ['lunedì', 'martedì', 'mercoledì', 'giovedì', 'venerdì', 'sabato', 'domenica'];
+
+/// Le sette giornate di una settimana (VS-1), ciascuna con un contenuto
+/// distinto per riconoscerle nelle prove. `outOfPlan` marca gli
+/// scostamenti (indice 0-6) con la copertura indicata, priva di slot
+/// (VS-7).
+List<Map<String, dynamic>> _weekJson(DateTime weekStart, {Map<int, String> outOfPlan = const {}}) {
+  return List.generate(7, (i) {
+    final date = weekStart.add(Duration(days: i));
+    final coverage = outOfPlan[i];
+    final day = _dayJsonFor(isoDate(date), 'Pasto di ${_weekdayLabels[i]}');
+    if (coverage != null) {
+      day['coverage'] = coverage;
+      day['slots'] = <dynamic>[];
+      if (coverage == 'NONE') {
+        day['planId'] = null;
+        day['planName'] = null;
+        day['planStartDate'] = null;
+        day['planEndDate'] = null;
+      }
+    }
+    return day;
+  });
+}
+
 /// Come [_JsonAdapter], ma calcola il corpo al momento della richiesta:
 /// serve dove l'esito dipende da uno stato mutabile del banco di prova
 /// (es. CV-S6, la ripresa che cambia la giornata successiva).
@@ -185,7 +243,7 @@ Future<void> _pumpDailyView(
           AppDatabase(NativeDatabase.memory()),
         ),
       ],
-      child: MaterialApp(theme: AppTheme.light, home: const DailyViewScreen()),
+      child: MaterialApp(theme: AppTheme.light, home: const PlanScreen()),
     ),
   );
   await tester.pumpAndSettle();
@@ -212,7 +270,7 @@ Future<void> _pumpDailyViewWithOwnedPlans(
           AppDatabase(NativeDatabase.memory()),
         ),
       ],
-      child: MaterialApp(theme: AppTheme.light, home: const DailyViewScreen()),
+      child: MaterialApp(theme: AppTheme.light, home: const PlanScreen()),
     ),
   );
   await tester.pumpAndSettle();
@@ -296,7 +354,7 @@ void main() {
           ],
           child: MaterialApp(
             theme: AppTheme.light,
-            home: const DailyViewScreen(),
+            home: const PlanScreen(),
           ),
         ),
       );
@@ -356,7 +414,7 @@ void main() {
           ],
           child: MaterialApp(
             theme: AppTheme.light,
-            home: const DailyViewScreen(),
+            home: const PlanScreen(),
           ),
         ),
       );
@@ -482,7 +540,7 @@ void main() {
           ],
           child: MaterialApp(
             theme: AppTheme.light,
-            home: const DailyViewScreen(),
+            home: const PlanScreen(),
           ),
         ),
       );
@@ -564,4 +622,173 @@ void main() {
       expect(find.text('Crea piano'), findsNothing);
     },
   );
+
+  group('vista settimanale (6.2, 6.4 interfaccia.md)', () {
+    Future<void> pumpPlanScreen(WidgetTester tester, _DayOrRangeAdapter adapter) async {
+      // I sette pannelli della settimana eccedono la superficie di prova
+      // predefinita: qui serve vederli tutti insieme, non scorrere.
+      tester.view.physicalSize = const Size(800, 2400);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      final dio = Dio(BaseOptions(baseUrl: 'http://example.test'));
+      dio.httpClientAdapter = adapter;
+      dio.interceptors.add(ApiErrorInterceptor());
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            planDayApiProvider.overrideWithValue(PlanDayApi(dio)),
+            appDatabaseProvider.overrideWithValue(AppDatabase(NativeDatabase.memory())),
+          ],
+          child: MaterialApp(theme: AppTheme.light, home: const PlanScreen()),
+        ),
+      );
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets(
+      'il segmented control passa dalla vista giornaliera a quella settimanale, con tutti e sette i giorni (VS-1)',
+      (tester) async {
+        final today = dateOnly(DateTime.now());
+        final weekStart = startOfWeek(today);
+        final adapter = _DayOrRangeAdapter(
+          dayResponseFor: (date) => _dayJsonFor(date, 'Pasta al pomodoro'),
+          rangeResponseFor: (from, to) => _weekJson(weekStart),
+        );
+
+        await pumpPlanScreen(tester, adapter);
+        expect(find.text('Pasta al pomodoro'), findsOneWidget);
+
+        await tester.tap(find.text('Settimana'));
+        await tester.pumpAndSettle();
+
+        for (final label in _weekdayLabels) {
+          expect(find.text('Pasto di $label'), findsOneWidget);
+        }
+        expect(find.text('Pasta al pomodoro'), findsNothing);
+      },
+    );
+
+    testWidgets(
+      'un giorno fuori dal piano attivo mostra una constatazione al posto delle righe (VS-7)',
+      (tester) async {
+        final weekStart = startOfWeek(dateOnly(DateTime.now()));
+        final adapter = _DayOrRangeAdapter(
+          dayResponseFor: (date) => _dayJsonFor(date, 'Pasta al pomodoro'),
+          rangeResponseFor: (from, to) =>
+              _weekJson(weekStart, outOfPlan: {0: 'SUSPENDED', 1: 'NONE'}),
+        );
+
+        await pumpPlanScreen(tester, adapter);
+        await tester.tap(find.text('Settimana'));
+        await tester.pumpAndSettle();
+
+        expect(find.text('Piano sospeso'), findsOneWidget);
+        expect(find.text('Nessun piano'), findsOneWidget);
+        expect(find.text('Pasto di ${_weekdayLabels[0]}'), findsNothing);
+        expect(find.text('Pasto di ${_weekdayLabels[1]}'), findsNothing);
+        // I restanti cinque giorni sono ordinari.
+        for (var i = 2; i < 7; i++) {
+          expect(find.text('Pasto di ${_weekdayLabels[i]}'), findsOneWidget);
+        }
+      },
+    );
+
+    testWidgets(
+      'le frecce passano alla settimana adiacente e "Questa settimana" torna a quella corrente (VS-12, VS-13)',
+      (tester) async {
+        final today = dateOnly(DateTime.now());
+        final thisWeek = startOfWeek(today);
+        final nextWeek = thisWeek.add(const Duration(days: 7));
+        final requestedRanges = <String>[];
+        final adapter = _DayOrRangeAdapter(
+          dayResponseFor: (date) => _dayJsonFor(date, 'Pasta al pomodoro'),
+          rangeResponseFor: (from, to) {
+            requestedRanges.add(from);
+            return _weekJson(DateTime.parse(from));
+          },
+        );
+
+        await pumpPlanScreen(tester, adapter);
+        await tester.tap(find.text('Settimana'));
+        await tester.pumpAndSettle();
+
+        expect(find.text('Questa settimana'), findsNothing);
+        expect(requestedRanges, [isoDate(thisWeek)]);
+
+        await tester.tap(find.byTooltip('Settimana successiva'));
+        await tester.pumpAndSettle();
+
+        expect(requestedRanges, [isoDate(thisWeek), isoDate(nextWeek)]);
+        expect(find.text('Questa settimana'), findsOneWidget);
+
+        await tester.tap(find.text('Questa settimana'));
+        await tester.pumpAndSettle();
+
+        expect(requestedRanges, [isoDate(thisWeek), isoDate(nextWeek), isoDate(thisWeek)]);
+        expect(find.text('Questa settimana'), findsNothing);
+      },
+    );
+
+    testWidgets(
+      'il tocco sull\'intestazione di un giorno passa alla vista giornaliera di quel giorno, conservando il riferimento (VS-14)',
+      (tester) async {
+        final weekStart = startOfWeek(dateOnly(DateTime.now()));
+        final wednesday = weekStart.add(const Duration(days: 2));
+        final adapter = _DayOrRangeAdapter(
+          dayResponseFor: (date) => _dayJsonFor(date, 'Contenuto di $date'),
+          rangeResponseFor: (from, to) => _weekJson(weekStart),
+        );
+
+        await pumpPlanScreen(tester, adapter);
+        await tester.tap(find.text('Settimana'));
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.text('Mercoledì'));
+        await tester.pumpAndSettle();
+
+        expect(find.text('Giorno'), findsOneWidget);
+        expect(find.text('Contenuto di ${isoDate(wednesday)}'), findsOneWidget);
+      },
+    );
+
+    testWidgets(
+      'il tocco su una riga apre il contenuto integrale, con nota e ricetta, senza lasciare la vista (VS-4)',
+      (tester) async {
+        final weekStart = startOfWeek(dateOnly(DateTime.now()));
+        final adapter = _DayOrRangeAdapter(
+          dayResponseFor: (date) => _dayJsonFor(date, 'Pasta al pomodoro'),
+          rangeResponseFor: (from, to) {
+            final days = _weekJson(weekStart);
+            days[0]
+              ..['recipeName'] = 'Pasta al pomodoro fresca'
+              ..['recipeText'] = 'Cuocere la pasta...'
+              ..['note'] = 'Con parmigiano a parte';
+            days[0]['slots'][0]
+              ..['recipeName'] = 'Pasta al pomodoro fresca'
+              ..['recipeText'] = 'Cuocere la pasta...'
+              ..['note'] = 'Con parmigiano a parte';
+            return days;
+          },
+        );
+
+        await pumpPlanScreen(tester, adapter);
+        await tester.tap(find.text('Settimana'));
+        await tester.pumpAndSettle();
+
+        expect(find.text('Con parmigiano a parte'), findsNothing);
+
+        await tester.tap(find.text('Pasto di lunedì').first);
+        await tester.pumpAndSettle();
+
+        expect(find.text('Pasta al pomodoro fresca'), findsOneWidget);
+        expect(find.text('Cuocere la pasta...'), findsOneWidget);
+        expect(find.text('Con parmigiano a parte'), findsOneWidget);
+        // La vista settimanale resta sotto il foglio, non sostituita (VS-4).
+        expect(find.text('Settimana'), findsOneWidget);
+      },
+    );
+  });
 }

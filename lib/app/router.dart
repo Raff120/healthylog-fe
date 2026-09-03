@@ -7,13 +7,13 @@ import '../core/auth/session.dart';
 import '../core/auth/session_controller.dart';
 import '../features/dietplan/data/diet_plan_template.dart';
 import '../features/dietplan/presentation/create_diet_plan_screen.dart';
-import '../features/dietplan/presentation/daily_view_screen.dart';
 import '../features/dietplan/presentation/diet_plan_management_screen.dart';
 import '../features/dietplan/presentation/diet_plan_schedule_screen.dart';
 import '../features/dietplan/presentation/diet_plan_template_list_screen.dart';
 import '../features/dietplan/presentation/diet_plan_template_preview_screen.dart';
 import '../features/dietplan/presentation/diet_plan_template_schedule_screen.dart';
 import '../features/dietplan/presentation/diet_plan_view_screen.dart';
+import '../features/dietplan/presentation/plan_screen.dart';
 import '../features/identity/data/account_role.dart';
 import '../features/identity/presentation/devices_screen.dart';
 import '../features/identity/presentation/email_verification_link_screen.dart';
@@ -137,7 +137,7 @@ GoRouter goRouter(Ref ref) {
       ),
       GoRoute(
         path: '/home',
-        builder: (context, state) => const MainShell(child: DailyViewScreen()),
+        builder: (context, state) => const MainShell(child: PlanScreen()),
       ),
       GoRoute(
         path: '/profile',

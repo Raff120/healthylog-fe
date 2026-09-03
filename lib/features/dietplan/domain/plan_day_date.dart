@@ -1,9 +1,28 @@
 /// Formattazione e normalizzazione della sola data (senza orario) usata
-/// dalla vista giornaliera (6.1 funzionale): parametro `date` di `GET
-/// /plan-days` e chiave dei provider per data.
+/// dalla vista giornaliera e settimanale (6.1, 6.2 funzionale): parametro
+/// `date`/`from`/`to` di `GET /plan-days` e chiave dei provider per data.
 library;
 
 import '../data/weekday.dart';
+
+/// La localizzazione vera (LO-1, formati per lingua) è compito di F29:
+/// qui, come nel resto del client prima di quella feature, i nomi sono
+/// cablati in italiano. Condiviso fra il selettore giornaliero e quello
+/// settimanale (4.3 interfaccia.md), invece di due elenchi identici.
+const italianMonths = [
+  'gennaio',
+  'febbraio',
+  'marzo',
+  'aprile',
+  'maggio',
+  'giugno',
+  'luglio',
+  'agosto',
+  'settembre',
+  'ottobre',
+  'novembre',
+  'dicembre',
+];
 
 /// Formato ISO (`AAAA-MM-GG`) atteso dal backend (`@DateTimeFormat`).
 String isoDate(DateTime date) {

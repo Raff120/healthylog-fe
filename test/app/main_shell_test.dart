@@ -165,9 +165,12 @@ void main() {
     (tester) async {
       await _pumpAuthenticatedApp(tester, role: 'USER');
 
-      // "Piano" compare due volte da F12: l'etichetta della barra e il
-      // titolo della vista giornaliera che vi si apre.
-      expect(find.text('Piano'), findsNWidgets(2));
+      // F16: il titolo della vista giornaliera ("Piano") è sostituito dal
+      // segmented control Giorno/Settimana (6.1 interfaccia.md) —
+      // "Piano" compare quindi una sola volta, come etichetta della barra.
+      expect(find.text('Piano'), findsOneWidget);
+      expect(find.text('Giorno'), findsOneWidget);
+      expect(find.text('Settimana'), findsOneWidget);
       expect(find.text('Attività'), findsOneWidget);
       expect(find.text('Statistiche'), findsOneWidget);
       expect(find.text('Profilo'), findsOneWidget);
