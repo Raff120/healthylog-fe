@@ -33,24 +33,34 @@ class DateSelector extends StatelessWidget {
       children: [
         Row(
           children: [
+            // VG-16, VG-17: passaggio alle settimane adiacenti anche a
+            // tocco singolo, non solo con lo scorrimento della riga
+            // sottostante — segnalato dall'utente come altrimenti privo
+            // di un modo diretto per raggiungerle (vedi decisioni.md).
+            IconButton(
+              onPressed: () => onSelect(weekStart.subtract(const Duration(days: 7))),
+              icon: Icon(Icons.chevron_left, color: colors.textSecondary),
+              tooltip: 'Settimana precedente',
+            ),
             Expanded(
               child: InkWell(
                 onTap: () => _openCalendar(context),
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(
-                    AppSpacing.md,
-                    AppSpacing.xs,
-                    AppSpacing.md,
-                    AppSpacing.xxs,
-                  ),
+                  padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
                   child: Text(
                     _monthYearLabel(selectedDate),
+                    textAlign: TextAlign.center,
                     style: typography.titleMedium.copyWith(
                       color: colors.textPrimary,
                     ),
                   ),
                 ),
               ),
+            ),
+            IconButton(
+              onPressed: () => onSelect(weekStart.add(const Duration(days: 7))),
+              icon: Icon(Icons.chevron_right, color: colors.textSecondary),
+              tooltip: 'Settimana successiva',
             ),
             // 4.3, VG-19: compare solo quando ci si trova altrove.
             if (selectedDate != today)

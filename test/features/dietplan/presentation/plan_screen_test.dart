@@ -427,6 +427,53 @@ void main() {
   );
 
   testWidgets(
+    'le frecce del selettore passano alla settimana adiacente anche nella vista giornaliera (VG-16, VG-17)',
+    (tester) async {
+      final today = dateOnly(DateTime.now());
+      final weekStart = startOfWeek(today);
+      final nextWeekStart = weekStart.add(const Duration(days: 7));
+      final adapter = _ByDateAdapter((date) {
+        if (date == isoDate(nextWeekStart)) {
+          return _dayJsonFor(date, 'Pesce al forno');
+        }
+        return _dayJsonFor(date, 'Pasta al pomodoro');
+      });
+      final dio = Dio(BaseOptions(baseUrl: 'http://example.test'));
+      dio.httpClientAdapter = adapter;
+      dio.interceptors.add(ApiErrorInterceptor());
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            planDayApiProvider.overrideWithValue(PlanDayApi(dio)),
+            appDatabaseProvider.overrideWithValue(
+              AppDatabase(NativeDatabase.memory()),
+            ),
+          ],
+          child: MaterialApp(theme: AppTheme.light, home: const PlanScreen()),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Pasta al pomodoro'), findsOneWidget);
+
+      await tester.tap(find.byTooltip('Settimana successiva'));
+      await tester.pumpAndSettle();
+
+      // Salta al lunedì della settimana successiva, come lo scorrimento
+      // orizzontale della riga (stesso criterio, VG-16).
+      expect(find.text('Pesce al forno'), findsOneWidget);
+      expect(adapter.requestedDates.last, isoDate(nextWeekStart));
+
+      await tester.tap(find.byTooltip('Settimana precedente'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Pasta al pomodoro'), findsOneWidget);
+      expect(adapter.requestedDates.last, isoDate(weekStart));
+    },
+  );
+
+  testWidgets(
     'l\'azione "Oggi" compare solo altrove e riporta alla giornata corrente in un tocco (VG-19)',
     (tester) async {
       final today = dateOnly(DateTime.now());
