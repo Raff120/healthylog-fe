@@ -9,6 +9,7 @@ import '../../../../core/api/api_exception.dart';
 import '../../data/plan_day.dart';
 import '../../data/plan_day_coverage.dart';
 import '../../domain/plan_day_date.dart';
+import '../../providers/meal_swap_providers.dart';
 import '../../providers/plan_day_providers.dart';
 import 'week_slot_row.dart';
 
@@ -38,6 +39,21 @@ class WeeklyView extends ConsumerWidget {
     final to = weekStart.add(const Duration(days: 6));
     final rangeState = ref.watch(planDayRangeProvider(weekStart, to));
     final today = dateOnly(DateTime.now());
+
+    // Tiene in vita il controller (autoDispose) per la durata della
+    // richiesta, sullo stesso criterio di MealCard per la spunta.
+    ref.watch(mealSwapControllerProvider);
+    // CF-9/CF-12 non si applicano (F15 fuori ambito): un rifiuto del
+    // server (MS-21, es. per uno stato mutato nel frattempo) è comunque
+    // un esito ordinario, non un errore dell'Utente — barra temporanea
+    // neutra, non un avviso allarmante.
+    ref.listen(mealSwapControllerProvider, (previous, next) {
+      next?.whenOrNull(
+        error: (error, _) => ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(describeApiError(error.asApiException?.code ?? ''))),
+        ),
+      );
+    });
 
     return rangeState.when(
       loading: () => const Center(child: CircularProgressIndicator()),
@@ -159,7 +175,7 @@ class _DayCard extends StatelessWidget {
                 ? _Caption(text: _outOfPlanCaption(day.coverage))
                 : day.slots.isEmpty
                     ? const _Caption(text: 'Nessun pasto previsto')
-                    : Column(children: [for (final slot in day.slots) WeekSlotRow(slot: slot)]),
+                    : Column(children: [for (final slot in day.slots) WeekSlotRow(day: day, slot: slot)]),
           ),
           const SizedBox(height: AppSpacing.xxs),
         ],
