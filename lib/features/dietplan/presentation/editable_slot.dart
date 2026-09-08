@@ -2,6 +2,7 @@ import 'package:flutter/widgets.dart';
 
 import '../data/diet_plan.dart';
 import '../data/diet_plan_requests.dart';
+import '../data/plan_day.dart';
 import '../data/slot_type.dart';
 import '../data/weekday.dart';
 
@@ -36,6 +37,25 @@ class EditableSlot {
         recipeName: slot.recipeName ?? '',
         recipeText: slot.recipeText ?? '',
         adherenceWeight: slot.adherenceWeight,
+      );
+
+  /// MD-8: lo slot di un'occorrenza giornaliera, per la modifica della
+  /// sola giornata — stessi campi dello schema, più lo stato di consumo
+  /// che la modifica non tocca (MD-3, MD-4).
+  factory EditableSlot.fromPlanDaySlot(PlanDaySlot slot) => EditableSlot(
+        slotId: slot.slotId,
+        type: slot.type,
+        label: slot.label ?? '',
+        content: slot.content ?? '',
+        note: slot.note ?? '',
+        recipeName: slot.recipeName ?? '',
+        recipeText: slot.recipeText ?? '',
+        // AD-5: il peso dell'occorrenza non transita nella risposta della
+        // giornata e la modifica della sola giornata non lo tocca: il
+        // backend conserva quello dello slot esistente e applica il
+        // predefinito a uno nuovo — il valore inviato qui è ignorato per
+        // gli slot esistenti.
+        adherenceWeight: slot.type == SlotType.snack ? 0.5 : 1.0,
       );
 
   /// GG-3, AD-5bis: un nuovo spuntino/pasto riceve lo stesso peso

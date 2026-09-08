@@ -865,3 +865,75 @@ abstract class _$PlanDaySlotStatusController
     return element.handleCreate(ref, build);
   }
 }
+
+/// MD-8: modifica della singola occorrenza. A salvataggio riuscito la
+/// giornata in cache è sostituita per intero con quella restituita —
+/// stesso criterio della spunta — così la vista giornaliera la riflette
+/// senza una nuova lettura.
+
+@ProviderFor(UpdatePlanDayController)
+final updatePlanDayControllerProvider = UpdatePlanDayControllerProvider._();
+
+/// MD-8: modifica della singola occorrenza. A salvataggio riuscito la
+/// giornata in cache è sostituita per intero con quella restituita —
+/// stesso criterio della spunta — così la vista giornaliera la riflette
+/// senza una nuova lettura.
+final class UpdatePlanDayControllerProvider
+    extends $NotifierProvider<UpdatePlanDayController, AsyncValue<PlanDay>?> {
+  /// MD-8: modifica della singola occorrenza. A salvataggio riuscito la
+  /// giornata in cache è sostituita per intero con quella restituita —
+  /// stesso criterio della spunta — così la vista giornaliera la riflette
+  /// senza una nuova lettura.
+  UpdatePlanDayControllerProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'updatePlanDayControllerProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$updatePlanDayControllerHash();
+
+  @$internal
+  @override
+  UpdatePlanDayController create() => UpdatePlanDayController();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(AsyncValue<PlanDay>? value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<AsyncValue<PlanDay>?>(value),
+    );
+  }
+}
+
+String _$updatePlanDayControllerHash() =>
+    r'b92d488949759ce3be8eabdf4887a2d8a752229a';
+
+/// MD-8: modifica della singola occorrenza. A salvataggio riuscito la
+/// giornata in cache è sostituita per intero con quella restituita —
+/// stesso criterio della spunta — così la vista giornaliera la riflette
+/// senza una nuova lettura.
+
+abstract class _$UpdatePlanDayController
+    extends $Notifier<AsyncValue<PlanDay>?> {
+  AsyncValue<PlanDay>? build();
+  @$mustCallSuper
+  @override
+  WhenComplete runBuild() {
+    final ref = this.ref as $Ref<AsyncValue<PlanDay>?, AsyncValue<PlanDay>?>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<AsyncValue<PlanDay>?, AsyncValue<PlanDay>?>,
+              AsyncValue<PlanDay>?,
+              Object?,
+              Object?
+            >;
+    return element.handleCreate(ref, build);
+  }
+}

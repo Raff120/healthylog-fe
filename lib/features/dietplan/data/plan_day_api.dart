@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 
+import 'diet_plan_requests.dart';
 import 'group_plan_day.dart';
 import 'plan_day.dart';
 import 'slot_status.dart';
@@ -67,6 +68,18 @@ class PlanDayApi {
     final response = await _dio.patch(
       '/plan-days/${isoDate(date)}/slots/$slotId',
       data: {'status': status.toJson(), 'replacementNote': replacementNote},
+      queryParameters: {if (userId != null) 'userId': userId},
+    );
+    return PlanDay.fromJson(response.data as Map<String, dynamic>);
+  }
+
+  /// MD-8, EP-2: modifica della singola occorrenza. [userId] designa il
+  /// Paziente su cui il Nutrizionista opera (F22). La risposta è la
+  /// giornata aggiornata, nello stesso formato di [getDay].
+  Future<PlanDay> updateOccurrence(DateTime date, UpdatePlanDayRequest request, {String? userId}) async {
+    final response = await _dio.put(
+      '/plan-days/${isoDate(date)}',
+      data: request.toJson(),
       queryParameters: {if (userId != null) 'userId': userId},
     );
     return PlanDay.fromJson(response.data as Map<String, dynamic>);
