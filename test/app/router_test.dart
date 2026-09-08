@@ -9,6 +9,7 @@ import 'package:healthylog/core/storage/app_database.dart';
 import 'package:healthylog/core/storage/secure_key_value_store.dart';
 import 'package:healthylog/features/dietplan/data/diet_plan_api.dart';
 import 'package:healthylog/features/dietplan/data/plan_day_api.dart';
+import 'package:healthylog/features/care/providers/care_providers.dart';
 import 'package:healthylog/features/dietplan/providers/diet_plan_providers.dart';
 import 'package:healthylog/features/dietplan/providers/plan_day_providers.dart';
 import 'package:healthylog/features/identity/data/identity_api.dart';
@@ -16,6 +17,8 @@ import 'package:healthylog/features/identity/data/profile_api.dart';
 import 'package:healthylog/features/identity/providers/identity_providers.dart';
 import 'package:healthylog/features/identity/providers/profile_providers.dart';
 import 'package:healthylog/main.dart';
+
+import '../support/care_api_stub.dart';
 
 /// Protezione delle rotte (5.2 interfaccia.md: "Chi ha una sessione
 /// attiva non incontra questa schermata"; task 6 di F06). Verificato
@@ -171,6 +174,8 @@ void main() {
           dietPlanApiProvider.overrideWithValue(
             _dietPlanApiReturning(200, '[$_dietPlanJson]'),
           ),
+          // F21/F22: nessun collegamento professionale (RG-5).
+          careApiProvider.overrideWithValue(stubCareApi()),
           // F14: la base dati reale userebbe path_provider/flutter_secure_storage,
           // assenti nella VM di test (sospensione indefinita, non un errore).
           appDatabaseProvider.overrideWithValue(

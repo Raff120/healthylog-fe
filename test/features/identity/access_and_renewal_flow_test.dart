@@ -128,7 +128,8 @@ class _MeAdapter implements HttpClientAdapter {
         },
       );
     }
-    if (options.path.contains('/cooking-groups/current')) {
+    // F21/F22: *Piano* osserva il collegamento professionale (UT-8) — assente qui (RG-5).
+    if (options.path.contains('/care-links/current') || options.path.contains('/cooking-groups/current')) {
       return ResponseBody.fromString(
         '{"code":"RESOURCE_NOT_FOUND"}',
         404,

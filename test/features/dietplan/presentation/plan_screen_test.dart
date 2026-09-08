@@ -13,12 +13,15 @@ import 'package:healthylog/features/dietplan/data/diet_plan_api.dart';
 import 'package:healthylog/features/dietplan/data/plan_day_api.dart';
 import 'package:healthylog/features/dietplan/domain/plan_day_date.dart';
 import 'package:healthylog/features/dietplan/presentation/plan_screen.dart';
+import 'package:healthylog/features/care/providers/care_providers.dart';
 import 'package:healthylog/features/dietplan/providers/diet_plan_providers.dart';
 import 'package:healthylog/features/dietplan/providers/plan_day_providers.dart';
 import 'package:healthylog/features/group/data/cooking_group_api.dart';
 import 'package:healthylog/features/group/providers/cooking_group_providers.dart';
 import 'package:healthylog/features/identity/data/profile_api.dart';
 import 'package:healthylog/features/identity/providers/profile_providers.dart';
+
+import '../../../support/care_api_stub.dart';
 
 /// VG-3, VG-4: tutti gli slot della giornata restano sempre visibili,
 /// quale sia il loro stato di consumo — nessuno nascosto né evidenziato
@@ -397,6 +400,7 @@ Future<void> _pumpDailyView(
   await tester.pumpWidget(
     ProviderScope(
       overrides: [
+        careApiProvider.overrideWithValue(stubCareApi()),
         planDayApiProvider.overrideWithValue(PlanDayApi(dio)),
         cookingGroupApiProvider.overrideWithValue(_noGroupCookingGroupApi()),
         appDatabaseProvider.overrideWithValue(
@@ -424,6 +428,7 @@ Future<void> _pumpDailyViewWithOwnedPlans(
   await tester.pumpWidget(
     ProviderScope(
       overrides: [
+        careApiProvider.overrideWithValue(stubCareApi()),
         planDayApiProvider.overrideWithValue(PlanDayApi(dio)),
         cookingGroupApiProvider.overrideWithValue(_noGroupCookingGroupApi()),
         dietPlanApiProvider.overrideWithValue(ownedPlansApi),
@@ -519,6 +524,7 @@ Future<_MemberAwareAdapter> _pumpWithGroup(WidgetTester tester, {bool compact = 
   await tester.pumpWidget(
     ProviderScope(
       overrides: [
+        careApiProvider.overrideWithValue(stubCareApi()),
         planDayApiProvider.overrideWithValue(PlanDayApi(planDayDio)),
         profileApiProvider.overrideWithValue(ProfileApi(profileDio)),
         cookingGroupApiProvider.overrideWithValue(CookingGroupApi(groupDio)),
@@ -578,6 +584,7 @@ void main() {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
+        careApiProvider.overrideWithValue(stubCareApi()),
             planDayApiProvider.overrideWithValue(PlanDayApi(dio)),
             cookingGroupApiProvider.overrideWithValue(_noGroupCookingGroupApi()),
             appDatabaseProvider.overrideWithValue(
@@ -630,6 +637,7 @@ void main() {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
+        careApiProvider.overrideWithValue(stubCareApi()),
             planDayApiProvider.overrideWithValue(PlanDayApi(dio)),
             cookingGroupApiProvider.overrideWithValue(_noGroupCookingGroupApi()),
             appDatabaseProvider.overrideWithValue(
@@ -692,6 +700,7 @@ void main() {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
+        careApiProvider.overrideWithValue(stubCareApi()),
             planDayApiProvider.overrideWithValue(PlanDayApi(dio)),
             cookingGroupApiProvider.overrideWithValue(_noGroupCookingGroupApi()),
             appDatabaseProvider.overrideWithValue(
@@ -739,6 +748,7 @@ void main() {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
+        careApiProvider.overrideWithValue(stubCareApi()),
             planDayApiProvider.overrideWithValue(PlanDayApi(dio)),
             cookingGroupApiProvider.overrideWithValue(_noGroupCookingGroupApi()),
             appDatabaseProvider.overrideWithValue(
@@ -865,6 +875,7 @@ void main() {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
+        careApiProvider.overrideWithValue(stubCareApi()),
             planDayApiProvider.overrideWithValue(PlanDayApi(planDayDio)),
             cookingGroupApiProvider.overrideWithValue(_noGroupCookingGroupApi()),
             dietPlanApiProvider.overrideWithValue(DietPlanApi(dietPlanDio)),
@@ -973,6 +984,7 @@ void main() {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
+        careApiProvider.overrideWithValue(stubCareApi()),
             planDayApiProvider.overrideWithValue(PlanDayApi(dio)),
             cookingGroupApiProvider.overrideWithValue(_noGroupCookingGroupApi()),
             appDatabaseProvider.overrideWithValue(AppDatabase(NativeDatabase.memory())),
