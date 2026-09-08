@@ -42,6 +42,13 @@ String describeApiError(String code) {
     'INVITE_CODE_INVALID' => 'Il codice inserito non è valido.',
     'OWNER_COOK_PRIVILEGE_INSEPARABLE' =>
       'Il Proprietario non può rinunciare al privilegio di Cuoco: trasferisci prima la proprietà.',
+    // 4.3 e 5.3 funzionale, F21/F22: collegamento professionale e Paziente.
+    'ALREADY_LINKED' => 'La persona è già collegata a un nutrizionista: serve prima la revoca di quel collegamento.',
+    'CARE_LINK_REQUEST_NOT_PENDING' => 'Questa richiesta non è più in attesa.',
+    'CARE_LINK_REQUEST_ALREADY_PENDING' => 'Hai già una richiesta in attesa verso questa persona.',
+    'CARE_LINK_NOT_ACTIVE' => 'Il collegamento è già stato revocato.',
+    'PATIENT_PLAN_LOCKED' => 'Il piano è a cura del tuo nutrizionista: puoi spuntare e invertire, non modificarne il contenuto.',
+    'PAST_DAY_NOT_EDITABLE' => 'Le giornate trascorse non si possono modificare.',
     _ => 'Qualcosa non ha funzionato. Riprova.',
   };
 }
