@@ -13,6 +13,7 @@ import '../../dietplan/providers/diet_plan_providers.dart';
 import '../data/care_models.dart';
 import '../providers/care_providers.dart';
 import 'widgets/care_confirmations.dart';
+import 'widgets/patient_activity_section.dart';
 
 /// Dettaglio del Paziente (9.2 interfaccia.md; VA-7, NU-2, NU-6):
 /// intestazione con nome e data del collegamento, card del piano in
@@ -200,6 +201,9 @@ class PatientDetailScreen extends ConsumerWidget {
                   ),
                 ),
             ],
+            // 9.2: misurazioni e allenamenti del Paziente, con la
+            // registrazione delle rilevazioni proprie (NU-12).
+            PatientActivitySection(patientId: patientId),
             const SizedBox(height: AppSpacing.lg),
             if (current != null)
               Center(
