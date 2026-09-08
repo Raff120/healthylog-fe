@@ -7,15 +7,17 @@ import '../../../app/theme/theme_context.dart';
 import '../../../core/api/api_error_messages.dart';
 import '../../../core/api/api_exception.dart';
 import '../../../core/auth/session_controller.dart';
+import '../data/account_role.dart';
 import '../providers/profile_providers.dart';
 import '../providers/sessions_providers.dart';
 
 /// Profilo (12.1 interfaccia.md): intestazione personale, elenco delle
 /// sezioni, disconnessione in fondo. Le sole sezioni già realizzate
-/// compaiono: Gruppo e Nutrizionista appartengono a feature non ancora
-/// avviate e non sono quindi presenti (2.6: gli elementi per funzioni
-/// inesistenti non compaiono, non sono disabilitati). "Piani" (7.1
-/// interfaccia.md, F10) apre la gestione del piano in corso.
+/// compaiono: Nutrizionista appartiene a una feature non ancora avviata
+/// e non è quindi presente (2.6: gli elementi per funzioni inesistenti
+/// non compaiono, non sono disabilitati). "Piani" (7.1 interfaccia.md,
+/// F10) apre la gestione del piano in corso. "Gruppo" (8.1, 8.2
+/// interfaccia.md, F19) apre la sua gestione e composizione.
 /// "Impostazioni" (12.2, F11) raccoglie ora anche "Dispositivi
 /// collegati", che non compare più qui direttamente (vedi decisioni.md).
 class ProfileScreen extends ConsumerWidget {
@@ -121,6 +123,15 @@ class ProfileScreen extends ConsumerWidget {
                   label: 'Piani',
                   onTap: () => context.push('/profile/plans'),
                 ),
+                // GE-4, NU-10: il Nutrizionista non può appartenere ad alcun Gruppo.
+                if (profile.role == AccountRole.user) ...[
+                  const SizedBox(height: AppSpacing.sm),
+                  _ProfileSection(
+                    icon: Icons.groups_outlined,
+                    label: 'Gruppo',
+                    onTap: () => context.push('/group'),
+                  ),
+                ],
                 const SizedBox(height: AppSpacing.sm),
                 _ProfileSection(
                   icon: Icons.settings_outlined,
