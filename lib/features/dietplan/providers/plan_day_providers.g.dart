@@ -525,7 +525,7 @@ final class PlanDaySlotStatusControllerProvider
 }
 
 String _$planDaySlotStatusControllerHash() =>
-    r'ac8820d68aab42c31efadde1a47446d9d5381b0f';
+    r'83043b82b4af3a6f9bc6c7395b23dfa30327464b';
 
 /// Transizione di stato dello slot (6.3 funzionale, SP-1, SP-4, SP-5),
 /// disposta dalla card del pasto. Nessuno stato locale da esporre: la

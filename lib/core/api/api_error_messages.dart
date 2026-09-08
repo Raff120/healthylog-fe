@@ -36,6 +36,12 @@ String describeApiError(String code) {
     'SWAP_TYPE_NOT_ALLOWED' => 'Questi pasti non sono invertibili tra loro.',
     'SWAP_DIFFERENT_WEEKS' => 'Appartengono a settimane diverse.',
     'SWAP_DIFFERENT_DAYS' => 'Devono appartenere allo stesso giorno.',
+    // 4.4 funzionale, F19: gruppo, inviti e membri.
+    'ALREADY_IN_GROUP' => 'Fai già parte di un gruppo: esci prima di crearne uno nuovo.',
+    'NUTRITIONIST_CANNOT_JOIN_GROUP' => 'Un Nutrizionista non può appartenere a un gruppo.',
+    'INVITE_CODE_INVALID' => 'Il codice inserito non è valido.',
+    'OWNER_COOK_PRIVILEGE_INSEPARABLE' =>
+      'Il Proprietario non può rinunciare al privilegio di Cuoco: trasferisci prima la proprietà.',
     _ => 'Qualcosa non ha funzionato. Riprova.',
   };
 }

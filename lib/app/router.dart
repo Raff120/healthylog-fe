@@ -26,6 +26,7 @@ import '../features/identity/presentation/profile_screen.dart';
 import '../features/identity/presentation/registration_details_screen.dart';
 import '../features/identity/presentation/role_selection_screen.dart';
 import '../features/identity/presentation/settings_screen.dart';
+import '../features/group/presentation/group_screen.dart';
 import 'navigation/main_shell.dart';
 import 'splash_screen.dart';
 
@@ -150,6 +151,7 @@ GoRouter goRouter(Ref ref) {
       GoRoute(path: '/profile/devices', builder: (context, state) => const DevicesScreen()),
       GoRoute(path: '/profile/settings', builder: (context, state) => const SettingsScreen()),
       GoRoute(path: '/profile/plans', builder: (context, state) => const DietPlanManagementScreen()),
+      GoRoute(path: '/group', builder: (context, state) => const GroupScreen()),
       GoRoute(
         path: '/diet-plans/new',
         builder: (context, state) =>
