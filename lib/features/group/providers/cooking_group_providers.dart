@@ -16,11 +16,21 @@ CookingGroupApi cookingGroupApi(Ref ref) => CookingGroupApi(ref.watch(apiClientP
 /// segnalare — la schermata lo distingue leggendo il codice dell'errore.
 /// Ricaricato dopo ogni azione che modifica composizione o denominazione
 /// (`ref.invalidateSelf`, tramite `ref.invalidate` dai controller sotto).
-@riverpod
+///
+/// `retry: null` (F20): l'assenza di Gruppo è l'esito più comune, non un
+/// guasto transitorio — il ritentativo automatico di Riverpod (backoff
+/// fino a 6,4 s, illimitato) interrogherebbe il server all'infinito in
+/// sottofondo per ogni Utente privo di Gruppo, da quando `MemberSelector`
+/// osserva questo provider a ogni apertura di *Piano* (VG-7), non più
+/// solo dalla schermata Gruppo — scoperto verificando F20 dal vivo, vedi
+/// decisioni.md.
+@Riverpod(retry: _noRetry)
 class CurrentCookingGroup extends _$CurrentCookingGroup {
   @override
   Future<CookingGroup> build() => ref.read(cookingGroupApiProvider).getCurrent();
 }
+
+Duration? _noRetry(int retryCount, Object error) => null;
 
 /// GE-5: i codici di invito vigenti del Gruppo, consultabili dal solo
 /// Proprietario — la schermata non invoca questo provider per un
