@@ -37,7 +37,8 @@ class WeeklyView extends ConsumerWidget {
     final colors = context.colors;
     final typography = context.typography;
     final to = weekStart.add(const Duration(days: 6));
-    final rangeState = ref.watch(planDayRangeProvider(weekStart, to));
+    final member = ref.watch(selectedGroupMemberProvider);
+    final rangeState = ref.watch(planDayRangeProvider(weekStart, to, userId: member));
     final today = dateOnly(DateTime.now());
 
     // Tiene in vita il controller (autoDispose) per la durata della

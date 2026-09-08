@@ -48,10 +48,22 @@ class SelectedPlanView extends _$SelectedPlanView {
   void select(PlanViewMode mode) => state = mode;
 }
 
+/// VG-7, VG-11: il membro del Gruppo di cui si consulta la giornata,
+/// `null` per il proprio piano — il selettore dell'intestazione (4.2
+/// interfaccia.md) è l'unico comando. Condiviso fra vista giornaliera e
+/// settimanale, sullo stesso criterio di [SelectedDay].
+@riverpod
+class SelectedGroupMember extends _$SelectedGroupMember {
+  @override
+  String? build() => null;
+
+  void select(String? userId) => state = userId;
+}
+
 /// Contenuto della giornata richiesta (EP-3: mai materializzata dalla
-/// sola lettura). `family` per data: ogni giorno visitato ha una propria
-/// cache, così tornare a un giorno già consultato non richiede una nuova
-/// richiesta.
+/// sola lettura). `family` per data e, VG-7, per membro: ogni giorno
+/// visitato ha una propria cache, così tornare a un giorno già
+/// consultato non richiede una nuova richiesta.
 ///
 /// Popola la cache locale di sola lettura a ogni lettura online riuscita
 /// (PL-11, F14) e vi ricorre in sua assenza (OF-19): solo per un errore
@@ -59,8 +71,15 @@ class SelectedPlanView extends _$SelectedPlanView {
 /// errore applicativo, che l'Utente deve continuare a vedere come tale.
 /// Un errore di rete senza copia locale per quella data si propaga
 /// invariato: non c'è nulla da mostrare, offline o online.
+///
+/// [userId]: PL-6 riserva la cache al proprio piano — la giornata di un
+/// altro membro del Gruppo (F20) non vi transita mai, né in scrittura né
+/// in lettura, e un errore di rete si propaga senza alcun ripiego.
 @riverpod
-Future<PlanDay> planDay(Ref ref, DateTime date) async {
+Future<PlanDay> planDay(Ref ref, DateTime date, {String? userId}) async {
+  if (userId != null) {
+    return ref.watch(planDayApiProvider).getDay(date, userId: userId);
+  }
   final cache = ref.watch(planDayLocalCacheProvider);
   try {
     final day = await ref.watch(planDayApiProvider).getDay(date);
@@ -79,9 +98,11 @@ Future<PlanDay> planDay(Ref ref, DateTime date) async {
 /// lettura dalla cache locale: l'offline della v1 copre la sola
 /// consultazione della vista giornaliera già scaricata (4.6, 6.1
 /// interfaccia.md), non quella settimanale — vedi decisioni.md.
+///
+/// [userId]: come in [planDay] (VG-7, VS-17).
 @riverpod
-Future<List<PlanDay>> planDayRange(Ref ref, DateTime from, DateTime to) {
-  return ref.watch(planDayApiProvider).getRange(from, to);
+Future<List<PlanDay>> planDayRange(Ref ref, DateTime from, DateTime to, {String? userId}) {
+  return ref.watch(planDayApiProvider).getRange(from, to, userId: userId);
 }
 
 /// Transizione di stato dello slot (6.3 funzionale, SP-1, SP-4, SP-5),

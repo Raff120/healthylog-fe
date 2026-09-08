@@ -15,6 +15,10 @@ import 'package:healthylog/features/dietplan/domain/plan_day_date.dart';
 import 'package:healthylog/features/dietplan/presentation/plan_screen.dart';
 import 'package:healthylog/features/dietplan/providers/diet_plan_providers.dart';
 import 'package:healthylog/features/dietplan/providers/plan_day_providers.dart';
+import 'package:healthylog/features/group/data/cooking_group_api.dart';
+import 'package:healthylog/features/group/providers/cooking_group_providers.dart';
+import 'package:healthylog/features/identity/data/profile_api.dart';
+import 'package:healthylog/features/identity/providers/profile_providers.dart';
 
 /// VG-3, VG-4: tutti gli slot della giornata restano sempre visibili,
 /// quale sia il loro stato di consumo — nessuno nascosto né evidenziato
@@ -153,6 +157,89 @@ class _DayOrRangeAdapter implements HttpClientAdapter {
   }
 }
 
+/// VG-8: nessun Gruppo di appartenenza, la condizione di ogni prova di
+/// questo file salvo quelle dedicate al selettore del membro (F20) —
+/// senza questa risposta il selettore interrogherebbe un client HTTP
+/// reale, non presente nel banco di prova.
+class _NotFoundAdapter implements HttpClientAdapter {
+  @override
+  void close({bool force = false}) {}
+
+  @override
+  Future<ResponseBody> fetch(
+    RequestOptions options,
+    Stream<Uint8List>? requestStream,
+    Future<void>? cancelFuture,
+  ) async {
+    return ResponseBody.fromString(
+      jsonEncode({'code': 'RESOURCE_NOT_FOUND'}),
+      404,
+      headers: {
+        Headers.contentTypeHeader: [Headers.jsonContentType],
+      },
+    );
+  }
+}
+
+CookingGroupApi _noGroupCookingGroupApi() {
+  final dio = Dio(BaseOptions(baseUrl: 'http://example.test'))
+    ..httpClientAdapter = _NotFoundAdapter()
+    ..interceptors.add(ApiErrorInterceptor());
+  return CookingGroupApi(dio);
+}
+
+/// VG-7: distingue il piano proprio da quello di un membro tramite il
+/// parametro `userId` (EP-1) e conta le PATCH ricevute, per verificare
+/// che la spunta non raggiunga mai il server quando si consulta il
+/// piano altrui (VG-9).
+class _MemberAwareAdapter implements HttpClientAdapter {
+  int patchCount = 0;
+
+  @override
+  void close({bool force = false}) {}
+
+  @override
+  Future<ResponseBody> fetch(
+    RequestOptions options,
+    Stream<Uint8List>? requestStream,
+    Future<void>? cancelFuture,
+  ) async {
+    if (options.method == 'PATCH') {
+      patchCount++;
+    }
+    final userId = options.queryParameters['userId'] as String?;
+    final content = userId == 'user-2' ? 'Pasta di Maria' : 'Yogurt e cereali';
+    final status = userId == 'user-2' ? 'CONSUMED' : 'TO_CONSUME';
+    return ResponseBody.fromString(
+      jsonEncode({
+        'date': isoDate(dateOnly(DateTime.now())),
+        'coverage': 'ACTIVE',
+        'planId': 'plan-1',
+        'planName': 'Dieta',
+        'planStartDate': '2026-09-01',
+        'planEndDate': null,
+        'slots': [
+          {
+            'slotId': 's1',
+            'type': 'BREAKFAST',
+            'label': null,
+            'order': 0,
+            'content': content,
+            'note': null,
+            'recipeName': null,
+            'recipeText': null,
+            'status': status,
+          },
+        ],
+      }),
+      200,
+      headers: {
+        Headers.contentTypeHeader: [Headers.jsonContentType],
+      },
+    );
+  }
+}
+
 const _weekdayLabels = ['lunedì', 'martedì', 'mercoledì', 'giovedì', 'venerdì', 'sabato', 'domenica'];
 
 /// Le sette giornate di una settimana (VS-1), ciascuna con un contenuto
@@ -239,6 +326,7 @@ Future<void> _pumpDailyView(
     ProviderScope(
       overrides: [
         planDayApiProvider.overrideWithValue(PlanDayApi(dio)),
+        cookingGroupApiProvider.overrideWithValue(_noGroupCookingGroupApi()),
         appDatabaseProvider.overrideWithValue(
           AppDatabase(NativeDatabase.memory()),
         ),
@@ -265,6 +353,7 @@ Future<void> _pumpDailyViewWithOwnedPlans(
     ProviderScope(
       overrides: [
         planDayApiProvider.overrideWithValue(PlanDayApi(dio)),
+        cookingGroupApiProvider.overrideWithValue(_noGroupCookingGroupApi()),
         dietPlanApiProvider.overrideWithValue(ownedPlansApi),
         appDatabaseProvider.overrideWithValue(
           AppDatabase(NativeDatabase.memory()),
@@ -334,6 +423,7 @@ void main() {
         ProviderScope(
           overrides: [
             planDayApiProvider.overrideWithValue(PlanDayApi(dio)),
+            cookingGroupApiProvider.overrideWithValue(_noGroupCookingGroupApi()),
             appDatabaseProvider.overrideWithValue(
               AppDatabase(NativeDatabase.memory()),
             ),
@@ -385,6 +475,7 @@ void main() {
         ProviderScope(
           overrides: [
             planDayApiProvider.overrideWithValue(PlanDayApi(dio)),
+            cookingGroupApiProvider.overrideWithValue(_noGroupCookingGroupApi()),
             appDatabaseProvider.overrideWithValue(
               AppDatabase(NativeDatabase.memory()),
             ),
@@ -446,6 +537,7 @@ void main() {
         ProviderScope(
           overrides: [
             planDayApiProvider.overrideWithValue(PlanDayApi(dio)),
+            cookingGroupApiProvider.overrideWithValue(_noGroupCookingGroupApi()),
             appDatabaseProvider.overrideWithValue(
               AppDatabase(NativeDatabase.memory()),
             ),
@@ -492,6 +584,7 @@ void main() {
         ProviderScope(
           overrides: [
             planDayApiProvider.overrideWithValue(PlanDayApi(dio)),
+            cookingGroupApiProvider.overrideWithValue(_noGroupCookingGroupApi()),
             appDatabaseProvider.overrideWithValue(
               AppDatabase(NativeDatabase.memory()),
             ),
@@ -617,6 +710,7 @@ void main() {
         ProviderScope(
           overrides: [
             planDayApiProvider.overrideWithValue(PlanDayApi(planDayDio)),
+            cookingGroupApiProvider.overrideWithValue(_noGroupCookingGroupApi()),
             dietPlanApiProvider.overrideWithValue(DietPlanApi(dietPlanDio)),
             appDatabaseProvider.overrideWithValue(
               AppDatabase(NativeDatabase.memory()),
@@ -724,6 +818,7 @@ void main() {
         ProviderScope(
           overrides: [
             planDayApiProvider.overrideWithValue(PlanDayApi(dio)),
+            cookingGroupApiProvider.overrideWithValue(_noGroupCookingGroupApi()),
             appDatabaseProvider.overrideWithValue(AppDatabase(NativeDatabase.memory())),
           ],
           child: MaterialApp(theme: AppTheme.light, home: const PlanScreen()),
@@ -872,6 +967,106 @@ void main() {
         expect(find.text('Con parmigiano a parte'), findsOneWidget);
         // La vista settimanale resta sotto il foglio, non sostituita (VS-4).
         expect(find.text('Settimana'), findsOneWidget);
+      },
+    );
+  });
+
+  group('selettore del membro (4.2 interfaccia.md; VG-7, VG-9, VG-11)', () {
+    Map<String, dynamic> profileJson() => {
+          'id': 'user-1',
+          'email': 'utente@esempio.test',
+          'username': 'utente',
+          'firstName': 'Io',
+          'lastName': 'Stesso',
+          'birthDate': '2000-01-01',
+          'birthPlace': 'Roma',
+          'sex': 'MALE',
+          'role': 'USER',
+          'height': null,
+          'timezone': 'Europe/Rome',
+        };
+
+    Map<String, dynamic> groupJson() => {
+          'id': 'group-1',
+          'name': 'Casa',
+          'ownerId': 'user-1',
+          'members': [
+            {
+              'userId': 'user-1',
+              'firstName': 'Io',
+              'lastName': 'Stesso',
+              'owner': true,
+              'cook': true,
+              'joinedAt': '2026-09-01T00:00:00Z',
+            },
+            {
+              'userId': 'user-2',
+              'firstName': 'Maria',
+              'lastName': 'Verdi',
+              'owner': false,
+              'cook': false,
+              'joinedAt': '2026-09-02T00:00:00Z',
+            },
+          ],
+          'createdAt': '2026-09-01T00:00:00Z',
+        };
+
+    Future<_MemberAwareAdapter> pumpWithGroup(WidgetTester tester) async {
+      final planDayAdapter = _MemberAwareAdapter();
+      final planDayDio = Dio(BaseOptions(baseUrl: 'http://example.test'))
+        ..httpClientAdapter = planDayAdapter
+        ..interceptors.add(ApiErrorInterceptor());
+      final profileDio = Dio(BaseOptions(baseUrl: 'http://example.test'))
+        ..httpClientAdapter = _JsonAdapter(profileJson())
+        ..interceptors.add(ApiErrorInterceptor());
+      final groupDio = Dio(BaseOptions(baseUrl: 'http://example.test'))
+        ..httpClientAdapter = _JsonAdapter(groupJson())
+        ..interceptors.add(ApiErrorInterceptor());
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            planDayApiProvider.overrideWithValue(PlanDayApi(planDayDio)),
+            profileApiProvider.overrideWithValue(ProfileApi(profileDio)),
+            cookingGroupApiProvider.overrideWithValue(CookingGroupApi(groupDio)),
+            appDatabaseProvider.overrideWithValue(AppDatabase(NativeDatabase.memory())),
+          ],
+          child: MaterialApp(theme: AppTheme.light, home: const PlanScreen()),
+        ),
+      );
+      await tester.pumpAndSettle();
+      return planDayAdapter;
+    }
+
+    testWidgets(
+      'il tocco su un altro membro presenta il suo piano con la riga di contesto, in sola consultazione (VG-9, VG-11)',
+      (tester) async {
+        await pumpWithGroup(tester);
+
+        expect(find.text('Yogurt e cereali'), findsOneWidget);
+        expect(find.text('Stai vedendo il piano di Maria'), findsNothing);
+
+        await tester.tap(find.byTooltip('Maria Verdi'));
+        await tester.pumpAndSettle();
+
+        expect(find.text('Pasta di Maria'), findsOneWidget);
+        expect(find.text('Stai vedendo il piano di Maria'), findsOneWidget);
+      },
+    );
+
+    testWidgets(
+      'la spunta è disattivata sul piano di un altro membro, senza raggiungere il server (VG-9)',
+      (tester) async {
+        final adapter = await pumpWithGroup(tester);
+
+        await tester.tap(find.byTooltip('Maria Verdi'));
+        await tester.pumpAndSettle();
+        expect(find.text('Pasta di Maria'), findsOneWidget);
+
+        await tester.tap(find.byIcon(Icons.check));
+        await tester.pumpAndSettle();
+
+        expect(adapter.patchCount, 0);
       },
     );
   });

@@ -10,20 +10,31 @@ class PlanDayApi {
 
   final Dio _dio;
 
-  /// EP-3: la lettura non materializza mai la giornata.
-  Future<PlanDay> getDay(DateTime date) async {
-    final response = await _dio.get('/plan-days', queryParameters: {'date': isoDate(date)});
+  /// EP-3: la lettura non materializza mai la giornata. EP-1, VG-7:
+  /// [userId] facoltativo, per la giornata di un membro del Gruppo
+  /// diverso da sé (F20) — la risposta omette semplicemente
+  /// `replacementNote` (SC-12, SC-13), che [PlanDay.fromJson] legge come
+  /// assente.
+  Future<PlanDay> getDay(DateTime date, {String? userId}) async {
+    final response = await _dio.get(
+      '/plan-days',
+      queryParameters: {'date': isoDate(date), if (userId != null) 'userId': userId},
+    );
     return PlanDay.fromJson(response.data as Map<String, dynamic>);
   }
 
   /// 6.2 funzionale, VS-1: intervallo inclusivo, per la vista
   /// settimanale. Elenco semplice, senza involucro di paginazione — lo
   /// stesso schema già in uso da `/diet-plan-templates` (F09, F16: vedi
-  /// decisioni.md).
-  Future<List<PlanDay>> getRange(DateTime from, DateTime to) async {
+  /// decisioni.md). EP-1, VG-7: [userId] facoltativo, come in [getDay].
+  Future<List<PlanDay>> getRange(DateTime from, DateTime to, {String? userId}) async {
     final response = await _dio.get(
       '/plan-days',
-      queryParameters: {'from': isoDate(from), 'to': isoDate(to)},
+      queryParameters: {
+        'from': isoDate(from),
+        'to': isoDate(to),
+        if (userId != null) 'userId': userId,
+      },
     );
     return (response.data as List).map((e) => PlanDay.fromJson(e as Map<String, dynamic>)).toList();
   }

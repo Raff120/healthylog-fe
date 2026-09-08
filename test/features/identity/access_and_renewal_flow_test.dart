@@ -92,9 +92,10 @@ const _planDayJson =
 /// `GET /me`: rifiuta il token rilasciato dall'accesso con
 /// `TOKEN_EXPIRED` — come farebbe il backend con un token scaduto — e
 /// accetta solo la richiesta ripetuta dopo il rinnovo (segnalata da
-/// [TokenRefreshInterceptor] tramite `options.extra`). `GET /plan-days`
-/// e `GET /diet-plans`, emesse nel frattempo dalla vista giornaliera
-/// (quest'ultima per distinguere PA-10 da "nessun piano mai creato"),
+/// [TokenRefreshInterceptor] tramite `options.extra`). `GET /plan-days`,
+/// `GET /diet-plans` (quest'ultima per distinguere PA-10 da "nessun
+/// piano mai creato") e `GET /cooking-groups/current` (VG-7,
+/// `MemberSelector`, F20), emesse nel frattempo dalla vista giornaliera,
 /// sono servite a parte: non devono influire sul conteggio delle
 /// richieste di profilo verificato più sotto.
 class _MeAdapter implements HttpClientAdapter {
@@ -122,6 +123,15 @@ class _MeAdapter implements HttpClientAdapter {
       return ResponseBody.fromString(
         '[]',
         200,
+        headers: {
+          Headers.contentTypeHeader: [Headers.jsonContentType],
+        },
+      );
+    }
+    if (options.path.contains('/cooking-groups/current')) {
+      return ResponseBody.fromString(
+        '{"code":"RESOURCE_NOT_FOUND"}',
+        404,
         headers: {
           Headers.contentTypeHeader: [Headers.jsonContentType],
         },
