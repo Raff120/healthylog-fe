@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -17,6 +19,11 @@ const double _labelColumnWidth = 72;
 const double _memberColumnWidth = 140;
 const double _headerHeight = 56;
 const double _rowHeight = 96;
+
+/// SY-20, 10 tecnica: unico contesto in cui più persone operano sui
+/// medesimi dati — il client si aggiorna a questo intervallo mentre la
+/// vista resta aperta.
+const _sideBySideRefreshInterval = Duration(seconds: 60);
 
 /// Una riga della griglia (VG-14): un momento della giornata comune a
 /// tutti i membri, individuato dall'ordine dello slot nel piano (GG-8) —
@@ -75,17 +82,46 @@ PlanDaySlot? _slotAt(MemberPlanDay member, int order) {
 /// per tipo di slot. Nessun allenamento, nota di sostituzione,
 /// misurazione o indicatore aggregato — solo ciò che chi cucina deve
 /// sapere.
-class GroupDayGridView extends ConsumerWidget {
+///
+/// SY-20: mentre resta montata, un timer periodico rinnova
+/// silenziosamente i dati (`AsyncValue.when` non mostra l'indicatore di
+/// caricamento durante un refresh con un valore già presente, per
+/// costruzione — nessun codice ulteriore necessario per la dissolvenza
+/// silenziosa di 6.3 interfaccia.md). Il timer si ferma alla chiusura
+/// della vista (`dispose`), mai altrove.
+class GroupDayGridView extends ConsumerStatefulWidget {
   const GroupDayGridView({super.key, required this.date, required this.currentUserId});
 
   final DateTime date;
   final String currentUserId;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<GroupDayGridView> createState() => _GroupDayGridViewState();
+}
+
+class _GroupDayGridViewState extends ConsumerState<GroupDayGridView> {
+  Timer? _refreshTimer;
+
+  @override
+  void initState() {
+    super.initState();
+    _refreshTimer = Timer.periodic(
+      _sideBySideRefreshInterval,
+      (_) => ref.invalidate(groupPlanDayProvider(widget.date)),
+    );
+  }
+
+  @override
+  void dispose() {
+    _refreshTimer?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final typography = context.typography;
     final colors = context.colors;
-    final groupDayState = ref.watch(groupPlanDayProvider(date));
+    final groupDayState = ref.watch(groupPlanDayProvider(widget.date));
     // CU-2, CU-3: il Cuoco può spuntare su ogni colonna, non solo la
     // propria.
     final isCook = ref.watch(isCookProvider);
@@ -99,7 +135,7 @@ class GroupDayGridView extends ConsumerWidget {
         ),
       ),
       data: (groupDay) =>
-          _Grid(groupDay: groupDay, date: date, currentUserId: currentUserId, isCook: isCook),
+          _Grid(groupDay: groupDay, date: widget.date, currentUserId: widget.currentUserId, isCook: isCook),
     );
   }
 }

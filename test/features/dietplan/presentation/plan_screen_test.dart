@@ -1236,6 +1236,34 @@ void main() {
     );
 
     testWidgets(
+      'si aggiorna automaticamente ogni 60 secondi mentre resta aperta, e si ferma alla chiusura (SY-20)',
+      (tester) async {
+        final adapter = await _pumpWithGroup(tester);
+        await tester.tap(find.byTooltip('Vista affiancata'));
+        await tester.pumpAndSettle();
+        final afterOpen = adapter.groupRequestCount;
+
+        await tester.pump(const Duration(seconds: 60));
+        await tester.pump();
+        expect(adapter.groupRequestCount, afterOpen + 1);
+
+        await tester.pump(const Duration(seconds: 60));
+        await tester.pump();
+        expect(adapter.groupRequestCount, afterOpen + 2);
+
+        // La chiusura della vista ferma il timer: nessuna ulteriore
+        // richiesta, anche trascorso l'intervallo.
+        await tester.tap(find.byTooltip('Vista singola'));
+        await tester.pumpAndSettle();
+        final afterClose = adapter.groupRequestCount;
+
+        await tester.pump(const Duration(seconds: 60));
+        await tester.pump();
+        expect(adapter.groupRequestCount, afterClose);
+      },
+    );
+
+    testWidgets(
       'il secondo tocco sull\'icona columns torna alla vista del singolo membro',
       (tester) async {
         await _pumpWithGroup(tester);
