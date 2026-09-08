@@ -104,7 +104,16 @@ class MealSwapController extends _$MealSwapController {
   @override
   AsyncValue<void>? build() => null;
 
-  Future<void> swap(MealSwapOrigin origin, DateTime destinationDate, String destinationSlotId) async {
+  /// CU-2: [userId] facoltativo, per l'inversione disposta dal Cuoco sul
+  /// piano di un membro del proprio Gruppo — determina quale cache
+  /// rinnovare, dato che l'autorizzazione stessa è già risolta lato
+  /// server tramite `origin.planId`.
+  Future<void> swap(
+    MealSwapOrigin origin,
+    DateTime destinationDate,
+    String destinationSlotId, {
+    String? userId,
+  }) async {
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(() => ref.read(mealSwapApiProvider).swap(
           planId: origin.planId,
@@ -115,8 +124,10 @@ class MealSwapController extends _$MealSwapController {
         ));
     ref.read(mealSwapSelectionProvider.notifier).cancel();
     final weekStart = startOfWeek(origin.date);
-    ref.invalidate(planDayRangeProvider(weekStart, weekStart.add(const Duration(days: 6))));
-    ref.invalidate(planDayProvider(origin.date));
-    ref.invalidate(planDayProvider(destinationDate));
+    ref.invalidate(planDayRangeProvider(weekStart, weekStart.add(const Duration(days: 6)), userId: userId));
+    ref.invalidate(planDayProvider(origin.date, userId: userId));
+    ref.invalidate(planDayProvider(destinationDate, userId: userId));
+    ref.invalidate(groupPlanDayProvider(origin.date));
+    ref.invalidate(groupPlanDayProvider(destinationDate));
   }
 }

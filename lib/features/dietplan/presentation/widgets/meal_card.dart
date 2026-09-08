@@ -28,6 +28,7 @@ class MealCard extends ConsumerStatefulWidget {
     required this.date,
     required this.canCheck,
     required this.planId,
+    this.member,
   });
 
   final PlanDaySlot slot;
@@ -43,6 +44,12 @@ class MealCard extends ConsumerStatefulWidget {
   /// Piano che copre la giornata, `null` se [canCheck] è `false`
   /// (nessuna inversione possibile senza un piano Attivo, IN-16).
   final String? planId;
+
+  /// CU-3, EP-2: identificativo del membro su cui il Cuoco sta operando,
+  /// `null` per il proprio piano. SC-5: quando valorizzato, la nota di
+  /// sostituzione non è né mostrata né scrivibile — il Cuoco non vi ha
+  /// accesso (SC-12).
+  final String? member;
 
   @override
   ConsumerState<MealCard> createState() => _MealCardState();
@@ -93,6 +100,7 @@ class _MealCardState extends ConsumerState<MealCard> {
           widget.slot.slotId,
           SlotStatus.skipped,
           replacementNote: text.isEmpty ? null : text,
+          userId: widget.member,
         );
   }
 
@@ -238,7 +246,7 @@ class _MealCardState extends ConsumerState<MealCard> {
                         ],
                       ),
                     ],
-                    if (_expanded && widget.slot.status == SlotStatus.skipped) ...[
+                    if (_expanded && widget.slot.status == SlotStatus.skipped && widget.member == null) ...[
                       const SizedBox(height: AppSpacing.sm),
                       GestureDetector(
                         onTap: offline
@@ -344,7 +352,7 @@ class _MealCardState extends ConsumerState<MealCard> {
     }
     await ref
         .read(planDaySlotStatusControllerProvider.notifier)
-        .updateStatus(widget.date, widget.slot.slotId, status);
+        .updateStatus(widget.date, widget.slot.slotId, status, userId: widget.member);
     if (!context.mounted) return;
     final state = ref.read(planDaySlotStatusControllerProvider);
     state?.whenOrNull(

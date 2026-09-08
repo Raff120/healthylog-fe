@@ -384,6 +384,57 @@ abstract class _$SideBySideMode extends $Notifier<bool> {
   }
 }
 
+/// CU-2, CU-3: se l'Utente autenticato è Cuoco del proprio Gruppo —
+/// `false` in assenza di Gruppo o finché profilo e Gruppo non sono
+/// ancora caricati, mai un errore da propagare qui.
+
+@ProviderFor(isCook)
+final isCookProvider = IsCookProvider._();
+
+/// CU-2, CU-3: se l'Utente autenticato è Cuoco del proprio Gruppo —
+/// `false` in assenza di Gruppo o finché profilo e Gruppo non sono
+/// ancora caricati, mai un errore da propagare qui.
+
+final class IsCookProvider extends $FunctionalProvider<bool, bool, bool>
+    with $Provider<bool> {
+  /// CU-2, CU-3: se l'Utente autenticato è Cuoco del proprio Gruppo —
+  /// `false` in assenza di Gruppo o finché profilo e Gruppo non sono
+  /// ancora caricati, mai un errore da propagare qui.
+  IsCookProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'isCookProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$isCookHash();
+
+  @$internal
+  @override
+  $ProviderElement<bool> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  bool create(Ref ref) {
+    return isCook(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(bool value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<bool>(value),
+    );
+  }
+}
+
+String _$isCookHash() => r'52a1db8b379e43eb312182cd691c425a591df649';
+
 /// Contenuto della giornata richiesta (EP-3: mai materializzata dalla
 /// sola lettura). `family` per data e, VG-7, per membro: ogni giorno
 /// visitato ha una propria cache, così tornare a un giorno già
@@ -788,7 +839,7 @@ final class PlanDaySlotStatusControllerProvider
 }
 
 String _$planDaySlotStatusControllerHash() =>
-    r'b5bf61150f32bcf6d14f0caa0868b2af572de009';
+    r'11720fa8d8719aa8f47cfdf8eef518c7b7092f3e';
 
 /// Transizione di stato dello slot (6.3 funzionale, SP-1, SP-4, SP-5),
 /// disposta dalla card del pasto. Nessuno stato locale da esporre: la

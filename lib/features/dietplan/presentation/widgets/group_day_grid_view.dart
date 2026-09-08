@@ -86,6 +86,9 @@ class GroupDayGridView extends ConsumerWidget {
     final typography = context.typography;
     final colors = context.colors;
     final groupDayState = ref.watch(groupPlanDayProvider(date));
+    // CU-2, CU-3: il Cuoco può spuntare su ogni colonna, non solo la
+    // propria.
+    final isCook = ref.watch(isCookProvider);
 
     return groupDayState.when(
       loading: () => const Center(child: CircularProgressIndicator()),
@@ -95,17 +98,19 @@ class GroupDayGridView extends ConsumerWidget {
           style: typography.bodyMedium.copyWith(color: colors.textSecondary),
         ),
       ),
-      data: (groupDay) => _Grid(groupDay: groupDay, date: date, currentUserId: currentUserId),
+      data: (groupDay) =>
+          _Grid(groupDay: groupDay, date: date, currentUserId: currentUserId, isCook: isCook),
     );
   }
 }
 
 class _Grid extends StatelessWidget {
-  const _Grid({required this.groupDay, required this.date, required this.currentUserId});
+  const _Grid({required this.groupDay, required this.date, required this.currentUserId, required this.isCook});
 
   final GroupPlanDay groupDay;
   final DateTime date;
   final String currentUserId;
+  final bool isCook;
 
   @override
   Widget build(BuildContext context) {
@@ -146,6 +151,7 @@ class _Grid extends StatelessWidget {
                           date: date,
                           currentUserId: currentUserId,
                           columnWidth: columnWidth,
+                          isCook: isCook,
                         ),
                     ],
                   ),
@@ -256,6 +262,7 @@ class _DataRow extends StatelessWidget {
     required this.date,
     required this.currentUserId,
     required this.columnWidth,
+    required this.isCook,
   });
 
   final _GroupRow row;
@@ -263,6 +270,7 @@ class _DataRow extends StatelessWidget {
   final DateTime date;
   final String currentUserId;
   final double columnWidth;
+  final bool isCook;
 
   @override
   Widget build(BuildContext context) {
@@ -285,7 +293,10 @@ class _DataRow extends StatelessWidget {
                     child: _GroupSlotCell(
                       slot: _slotAt(member, row.order),
                       date: date,
-                      canCheck: member.userId == currentUserId,
+                      // CU-2, CU-3: sempre sulla propria colonna, o su
+                      // qualunque altra se Cuoco.
+                      canCheck: member.userId == currentUserId || isCook,
+                      memberUserId: member.userId == currentUserId ? null : member.userId,
                     ),
                   ),
                 ),
@@ -331,14 +342,18 @@ class _RowLabel extends StatelessWidget {
 /// Card compatta e non espandibile (4.1, 6.3 interfaccia.md): le colonne
 /// sono strette e l'espansione di una sfalserebbe le altre.
 class _GroupSlotCell extends ConsumerWidget {
-  const _GroupSlotCell({required this.slot, required this.date, required this.canCheck});
+  const _GroupSlotCell({required this.slot, required this.date, required this.canCheck, this.memberUserId});
 
   final PlanDaySlot? slot;
   final DateTime date;
 
-  /// VG-9, CU-3: il proprio piano sempre; quello altrui non ancora — le
-  /// operazioni del Cuoco sono task successivo di F20.
+  /// CU-2, CU-3: il proprio piano sempre; quello di un altro membro solo
+  /// se si è Cuoco del Gruppo.
   final bool canCheck;
+
+  /// `null` per il proprio piano; altrimenti l'identificativo del
+  /// membro su cui il Cuoco sta operando (CU-3, EP-2).
+  final String? memberUserId;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -425,7 +440,9 @@ class _GroupSlotCell extends ConsumerWidget {
 
   void _updateStatus(WidgetRef ref, PlanDaySlot slot, SlotStatus tapped) {
     final next = slot.status == tapped ? SlotStatus.toConsume : tapped;
-    ref.read(planDaySlotStatusControllerProvider.notifier).updateStatus(date, slot.slotId, next);
+    ref
+        .read(planDaySlotStatusControllerProvider.notifier)
+        .updateStatus(date, slot.slotId, next, userId: memberUserId);
   }
 
   void _openRecipeSheet(BuildContext context, PlanDaySlot slot) {

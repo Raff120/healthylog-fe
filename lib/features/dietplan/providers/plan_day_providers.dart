@@ -4,6 +4,8 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../../core/api/api_client.dart';
 import '../../../core/api/api_exception.dart';
 import '../../../core/storage/plan_day_local_store.dart';
+import '../../group/providers/cooking_group_providers.dart';
+import '../../identity/providers/profile_providers.dart';
 import '../data/group_plan_day.dart';
 import '../data/plan_day.dart';
 import '../data/plan_day_api.dart';
@@ -84,6 +86,20 @@ class SideBySideMode extends _$SideBySideMode {
   void disable() => state = false;
 }
 
+/// CU-2, CU-3: se l'Utente autenticato è Cuoco del proprio Gruppo —
+/// `false` in assenza di Gruppo o finché profilo e Gruppo non sono
+/// ancora caricati, mai un errore da propagare qui.
+@riverpod
+bool isCook(Ref ref) {
+  final group = ref.watch(currentCookingGroupProvider).value;
+  final currentUserId = ref.watch(profileControllerProvider).value?.id;
+  if (group == null || currentUserId == null) return false;
+  for (final member in group.members) {
+    if (member.userId == currentUserId) return member.cook;
+  }
+  return false;
+}
+
 /// Contenuto della giornata richiesta (EP-3: mai materializzata dalla
 /// sola lettura). `family` per data e, VG-7, per membro: ogni giorno
 /// visitato ha una propria cache, così tornare a un giorno già
@@ -145,21 +161,24 @@ class PlanDaySlotStatusController extends _$PlanDaySlotStatusController {
   @override
   AsyncValue<void>? build() => null;
 
+  /// CU-3, EP-2: [userId] facoltativo, per la spunta del Cuoco sul piano
+  /// di un membro del proprio Gruppo (F20).
   Future<void> updateStatus(
     DateTime date,
     String slotId,
     SlotStatus status, {
     String? replacementNote,
+    String? userId,
   }) async {
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(
       () => ref
           .read(planDayApiProvider)
-          .updateSlotStatus(date, slotId, status, replacementNote: replacementNote),
+          .updateSlotStatus(date, slotId, status, replacementNote: replacementNote, userId: userId),
     );
-    ref.invalidate(planDayProvider(date));
-    // VG-12: la spunta dalla modalità affiancata (la propria colonna,
-    // per ora) deve rinnovare anche quella vista.
+    ref.invalidate(planDayProvider(date, userId: userId));
+    // VG-12: la modalità affiancata deve rinnovarsi con qualunque
+    // spunta, propria o di un membro disposta dal Cuoco (CU-3).
     ref.invalidate(groupPlanDayProvider(date));
   }
 }

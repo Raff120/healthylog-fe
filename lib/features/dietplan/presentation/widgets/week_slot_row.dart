@@ -41,10 +41,11 @@ class _WeekSlotRowState extends ConsumerState<WeekSlotRow> {
     final slot = widget.slot;
     final hasContent = slot.content?.trim().isNotEmpty ?? false;
 
-    // VG-9, CU-9: la giornata di un altro membro del Gruppo non consente
-    // ancora l'inversione (CU-2, task successivo di F20) — solo
-    // consultazione, come la spunta nella vista giornaliera.
-    final readOnly = ref.watch(selectedGroupMemberProvider) != null;
+    // CU-2, VS-17: il Cuoco può disporre l'inversione anche sul piano di
+    // un membro del proprio Gruppo; il membro semplice resta in sola
+    // consultazione (UT-12).
+    final member = ref.watch(selectedGroupMemberProvider);
+    final readOnly = member != null && !ref.watch(isCookProvider);
     final origin = ref.watch(mealSwapSelectionProvider);
     if (origin == null) {
       _incompatibleTapped = false;
@@ -146,7 +147,12 @@ class _WeekSlotRowState extends ConsumerState<WeekSlotRow> {
         // tocco sulla stessa origine non ha altra azione sensata.
         ref.read(mealSwapSelectionProvider.notifier).cancel();
       case MealSwapHighlight.compatible:
-        ref.read(mealSwapControllerProvider.notifier).swap(origin, widget.day.date, widget.slot.slotId);
+        ref.read(mealSwapControllerProvider.notifier).swap(
+              origin,
+              widget.day.date,
+              widget.slot.slotId,
+              userId: ref.read(selectedGroupMemberProvider),
+            );
       case MealSwapHighlight.incompatible:
         if (_incompatibleTapped) {
           // Sempre non nullo qui: `highlight` è già incompatibile.

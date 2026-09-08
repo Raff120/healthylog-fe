@@ -196,6 +196,10 @@ class _MemberAwareAdapter implements HttpClientAdapter {
   int patchCount = 0;
   int groupRequestCount = 0;
 
+  /// CU-3, EP-2: l'ultimo `userId` inviato con una PATCH, per verificare
+  /// che la spunta del Cuoco raggiunga il membro giusto.
+  String? lastPatchUserId;
+
   @override
   void close({bool force = false}) {}
 
@@ -207,6 +211,7 @@ class _MemberAwareAdapter implements HttpClientAdapter {
   ) async {
     if (options.method == 'PATCH') {
       patchCount++;
+      lastPatchUserId = options.queryParameters['userId'] as String?;
     }
     if (options.path.contains('/plan-days/group')) {
       groupRequestCount++;
@@ -455,7 +460,12 @@ Map<String, dynamic> _memberSelectorProfileJson() => {
       'timezone': 'Europe/Rome',
     };
 
-Map<String, dynamic> _memberSelectorGroupJson() => {
+/// [cook]: "Io Stesso" è sempre il Proprietario (owner: true) — nel
+/// dominio reale il Proprietario è sempre anche Cuoco (CU-1), quindi
+/// [cook]: false rappresenta qui solo il caso di prova "membro semplice
+/// non Cuoco" per UT-12/CC-23, non uno stato raggiungibile davvero da un
+/// Proprietario.
+Map<String, dynamic> _memberSelectorGroupJson({bool cook = true}) => {
       'id': 'group-1',
       'name': 'Casa',
       'ownerId': 'user-1',
@@ -465,7 +475,7 @@ Map<String, dynamic> _memberSelectorGroupJson() => {
           'firstName': 'Io',
           'lastName': 'Stesso',
           'owner': true,
-          'cook': true,
+          'cook': cook,
           'joinedAt': '2026-09-01T00:00:00Z',
         },
         {
@@ -483,7 +493,9 @@ Map<String, dynamic> _memberSelectorGroupJson() => {
 /// `compact` (< 600, app_breakpoints.dart): riproduce il selettore a
 /// menu a discesa di uno smartphone, a differenza della riga di avatar
 /// usata dagli altri banchi di prova alla larghezza predefinita.
-Future<_MemberAwareAdapter> _pumpWithGroup(WidgetTester tester, {bool compact = false}) async {
+/// [cook]: se "Io Stesso" è Cuoco del Gruppo (CU-2, CU-3) — vero di
+/// default, come lo è sempre il Proprietario nel dominio reale.
+Future<_MemberAwareAdapter> _pumpWithGroup(WidgetTester tester, {bool compact = false, bool cook = true}) async {
   if (compact) {
     tester.view.physicalSize = const Size(400, 800);
     tester.view.devicePixelRatio = 1.0;
@@ -497,7 +509,7 @@ Future<_MemberAwareAdapter> _pumpWithGroup(WidgetTester tester, {bool compact = 
     ..httpClientAdapter = _JsonAdapter(_memberSelectorProfileJson())
     ..interceptors.add(ApiErrorInterceptor());
   final groupDio = Dio(BaseOptions(baseUrl: 'http://example.test'))
-    ..httpClientAdapter = _JsonAdapter(_memberSelectorGroupJson())
+    ..httpClientAdapter = _JsonAdapter(_memberSelectorGroupJson(cook: cook))
     ..interceptors.add(ApiErrorInterceptor());
 
   await tester.pumpWidget(
@@ -1129,7 +1141,23 @@ void main() {
     );
 
     testWidgets(
-      'la spunta è disattivata sul piano di un altro membro, senza raggiungere il server (VG-9)',
+      'la spunta è disattivata sul piano di un altro membro per chi non è Cuoco, senza raggiungere il server (UT-12, CC-23)',
+      (tester) async {
+        final adapter = await _pumpWithGroup(tester, cook: false);
+
+        await tester.tap(find.byTooltip('Maria Verdi'));
+        await tester.pumpAndSettle();
+        expect(find.text('Pasta di Maria'), findsOneWidget);
+
+        await tester.tap(find.byIcon(Icons.check));
+        await tester.pumpAndSettle();
+
+        expect(adapter.patchCount, 0);
+      },
+    );
+
+    testWidgets(
+      'la spunta è disponibile sul piano di un membro per il Cuoco, e raggiunge il server con il suo identificativo (CU-3, EP-2, CC-22)',
       (tester) async {
         final adapter = await _pumpWithGroup(tester);
 
@@ -1140,7 +1168,8 @@ void main() {
         await tester.tap(find.byIcon(Icons.check));
         await tester.pumpAndSettle();
 
-        expect(adapter.patchCount, 0);
+        expect(adapter.patchCount, 1);
+        expect(adapter.lastPatchUserId, 'user-2');
       },
     );
 
@@ -1208,21 +1237,39 @@ void main() {
     );
 
     testWidgets(
-      'la spunta sul proprio pasto nella griglia raggiunge il server e non tocca quello altrui',
+      'il membro non Cuoco vede la spunta solo sulla propria colonna nella griglia (UT-12, CC-23)',
       (tester) async {
-        final adapter = await _pumpWithGroup(tester);
+        final adapter = await _pumpWithGroup(tester, cook: false);
         await tester.tap(find.byTooltip('Vista affiancata'));
         await tester.pumpAndSettle();
 
-        // La sola spunta presente è quella sulla propria colonna
-        // (VG-9, CU-3 non ancora implementato per il Cuoco): un solo
-        // pulsante "check" in tutta la griglia.
+        // Un solo pulsante "check" in tutta la griglia: quello sulla
+        // propria colonna.
         expect(find.byIcon(Icons.check), findsOneWidget);
 
         await tester.tap(find.byIcon(Icons.check));
         await tester.pumpAndSettle();
 
         expect(adapter.patchCount, 1);
+        expect(adapter.lastPatchUserId, isNull);
+      },
+    );
+
+    testWidgets(
+      'il Cuoco vede e usa la spunta su tutte le colonne della griglia (CU-3, EP-2, CC-22)',
+      (tester) async {
+        final adapter = await _pumpWithGroup(tester);
+        await tester.tap(find.byTooltip('Vista affiancata'));
+        await tester.pumpAndSettle();
+
+        // Un pulsante "check" per colonna: la propria e quella di Maria.
+        expect(find.byIcon(Icons.check), findsNWidgets(2));
+
+        await tester.tap(find.byIcon(Icons.check).last);
+        await tester.pumpAndSettle();
+
+        expect(adapter.patchCount, 1);
+        expect(adapter.lastPatchUserId, 'user-2');
       },
     );
 

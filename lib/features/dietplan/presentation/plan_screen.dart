@@ -242,11 +242,15 @@ class _DayContent extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // VG-9, CU-9: la giornata di un altro membro del Gruppo non offre
-    // alcuna azione sul piano stesso — solo consultazione, in attesa
-    // della spunta e dell'inversione del Cuoco (CU-2, CU-3, task
-    // successivo di F20).
-    final readOnly = ref.watch(selectedGroupMemberProvider) != null;
+    final member = ref.watch(selectedGroupMemberProvider);
+    // CU-9: la giornata di un altro membro del Gruppo non offre mai
+    // azioni sulla gestione del piano stesso (ripresa, creazione) — il
+    // Cuoco riorganizza quando un pasto è consumato, non decide del
+    // piano (CU-2, CU-3 riguardano solo spunta e inversione).
+    final readOnly = member != null;
+    // CU-2, CU-3: il Cuoco può invece spuntare e invertire sul piano di
+    // un membro del proprio Gruppo.
+    final canOperate = member == null || ref.watch(isCookProvider);
     switch (day.coverage) {
       case PlanDayCoverage.suspended:
         // ref.watch (non solo read) tiene vivo il controller autoDispose
@@ -304,8 +308,9 @@ class _DayContent extends ConsumerWidget {
               child: _SlotsOrEmpty(
                 slots: day.slots,
                 date: day.date,
-                canCheck: day.coverage == PlanDayCoverage.active && !readOnly,
+                canCheck: day.coverage == PlanDayCoverage.active && canOperate,
                 planId: day.planId,
+                member: member,
               ),
             ),
           ],
@@ -315,7 +320,13 @@ class _DayContent extends ConsumerWidget {
 }
 
 class _SlotsOrEmpty extends StatelessWidget {
-  const _SlotsOrEmpty({required this.slots, required this.date, required this.canCheck, required this.planId});
+  const _SlotsOrEmpty({
+    required this.slots,
+    required this.date,
+    required this.canCheck,
+    required this.planId,
+    required this.member,
+  });
 
   final List<PlanDaySlot> slots;
   final DateTime date;
@@ -323,12 +334,15 @@ class _SlotsOrEmpty extends StatelessWidget {
   /// SP-11: false su Programmato e Concluso, gli unici casi in cui questo
   /// widget è raggiunto con `coverage` diverso da Attivo (Sospeso e
   /// assenza di piano sostituiscono l'intero contenuto, vedi
-  /// `_DayContent`).
+  /// `_DayContent`). CU-2, CU-3: anche false per un membro non Cuoco.
   final bool canCheck;
 
   /// Piano che copre la giornata, per l'avvio dell'inversione (6.5
   /// interfaccia.md) dalla card espansa.
   final String? planId;
+
+  /// CU-3: il membro su cui si sta operando, `null` per il proprio piano.
+  final String? member;
 
   @override
   Widget build(BuildContext context) {
@@ -355,7 +369,7 @@ class _SlotsOrEmpty extends StatelessWidget {
       // VG-4: tutti gli slot restano sempre visibili, quale sia il loro
       // stato — nessun filtro qui.
       itemBuilder: (context, index) =>
-          MealCard(slot: slots[index], date: date, canCheck: canCheck, planId: planId),
+          MealCard(slot: slots[index], date: date, canCheck: canCheck, planId: planId, member: member),
     );
   }
 }

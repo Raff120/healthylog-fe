@@ -53,15 +53,21 @@ class PlanDayApi {
   /// comunque (SC-8), a prescindere da [replacementNote]. La risposta è
   /// la giornata intera aggiornata, sullo stesso formato di [getDay]
   /// (comodo per sostituire per intero la cache del provider).
+  ///
+  /// CU-3, EP-2: [userId] facoltativo, per la spunta del Cuoco sul piano
+  /// di un membro del proprio Gruppo (F20) — SC-5, la nota inviata è
+  /// ignorata dal backend quando non si è il proprietario del piano.
   Future<PlanDay> updateSlotStatus(
     DateTime date,
     String slotId,
     SlotStatus status, {
     String? replacementNote,
+    String? userId,
   }) async {
     final response = await _dio.patch(
       '/plan-days/${isoDate(date)}/slots/$slotId',
       data: {'status': status.toJson(), 'replacementNote': replacementNote},
+      queryParameters: {if (userId != null) 'userId': userId},
     );
     return PlanDay.fromJson(response.data as Map<String, dynamic>);
   }
