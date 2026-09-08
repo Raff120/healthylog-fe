@@ -28,13 +28,21 @@ class PlanDayApi {
     return (response.data as List).map((e) => PlanDay.fromJson(e as Map<String, dynamic>)).toList();
   }
 
-  /// 6.3 funzionale, SP-1, SP-5: transizione di stato dello slot. La
-  /// risposta è la giornata intera aggiornata, sullo stesso formato di
-  /// [getDay] (comodo per sostituire per intero la cache del provider).
-  Future<PlanDay> updateSlotStatus(DateTime date, String slotId, SlotStatus status) async {
+  /// 6.3 funzionale, SP-1, SP-5: transizione di stato dello slot, e SC-4:
+  /// nota di sostituzione, significativa solo quando [status] è
+  /// [SlotStatus.skipped] — negli altri casi il backend la cancella
+  /// comunque (SC-8), a prescindere da [replacementNote]. La risposta è
+  /// la giornata intera aggiornata, sullo stesso formato di [getDay]
+  /// (comodo per sostituire per intero la cache del provider).
+  Future<PlanDay> updateSlotStatus(
+    DateTime date,
+    String slotId,
+    SlotStatus status, {
+    String? replacementNote,
+  }) async {
     final response = await _dio.patch(
       '/plan-days/${isoDate(date)}/slots/$slotId',
-      data: {'status': status.toJson()},
+      data: {'status': status.toJson(), 'replacementNote': replacementNote},
     );
     return PlanDay.fromJson(response.data as Map<String, dynamic>);
   }

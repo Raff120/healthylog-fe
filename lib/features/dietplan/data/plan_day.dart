@@ -14,6 +14,7 @@ class PlanDaySlot {
     required this.recipeName,
     required this.recipeText,
     required this.status,
+    required this.replacementNote,
   });
 
   factory PlanDaySlot.fromJson(Map<String, dynamic> json) => PlanDaySlot(
@@ -26,6 +27,7 @@ class PlanDaySlot {
     recipeName: json['recipeName'] as String?,
     recipeText: json['recipeText'] as String?,
     status: SlotStatus.fromJson(json['status'] as String),
+    replacementNote: json['replacementNote'] as String?,
   );
 
   final String slotId;
@@ -37,6 +39,12 @@ class PlanDaySlot {
   final String? recipeName;
   final String? recipeText;
   final SlotStatus status;
+
+  /// Valorizzata solo se [status] è [SlotStatus.skipped] (SC-4). Assente
+  /// nella proiezione che il backend riserva a Cuoco e Nutrizionista
+  /// (SC-12, SC-13): qui presente perché questo modello rispecchia solo
+  /// la vista del proprietario, l'unica esistente prima di F20/F22.
+  final String? replacementNote;
 
   /// Per la cache locale di sola lettura (PL-6, F14): mai inviato al
   /// backend, che ha le proprie rappresentazioni dedicate in scrittura
@@ -51,6 +59,7 @@ class PlanDaySlot {
     'recipeName': recipeName,
     'recipeText': recipeText,
     'status': status.toJson(),
+    'replacementNote': replacementNote,
   };
 }
 

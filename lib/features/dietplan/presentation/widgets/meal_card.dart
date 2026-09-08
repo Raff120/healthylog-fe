@@ -6,6 +6,7 @@ import '../../../../app/theme/theme_context.dart';
 import '../../../../core/api/api_error_messages.dart';
 import '../../../../core/api/api_exception.dart';
 import '../../../../core/api/connectivity_status.dart';
+import '../../../../core/widgets/app_text_field.dart';
 import '../../data/plan_day.dart';
 import '../../data/slot_status.dart';
 import '../../data/slot_type.dart';
@@ -49,6 +50,51 @@ class MealCard extends ConsumerStatefulWidget {
 
 class _MealCardState extends ConsumerState<MealCard> {
   bool _expanded = false;
+
+  late final TextEditingController _replacementNoteController =
+      TextEditingController(text: widget.slot.replacementNote ?? '');
+  late final FocusNode _replacementNoteFocusNode = FocusNode()
+    ..addListener(_onReplacementNoteFocusChange);
+
+  @override
+  void didUpdateWidget(covariant MealCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Il testo digitato non va sovrascritto mentre il campo ha il fuoco
+    // (F14/OF-19: la giornata può rinnovarsi dietro le quinte per una
+    // rilettura, non solo per il salvataggio di questa stessa nota).
+    if (!_replacementNoteFocusNode.hasFocus &&
+        widget.slot.replacementNote != oldWidget.slot.replacementNote) {
+      _replacementNoteController.text = widget.slot.replacementNote ?? '';
+    }
+  }
+
+  @override
+  void dispose() {
+    _replacementNoteFocusNode.removeListener(_onReplacementNoteFocusChange);
+    _replacementNoteFocusNode.dispose();
+    _replacementNoteController.dispose();
+    super.dispose();
+  }
+
+  void _onReplacementNoteFocusChange() {
+    if (!_replacementNoteFocusNode.hasFocus) {
+      _saveReplacementNote();
+    }
+  }
+
+  /// SC-4, SC-5, 4.5 interfaccia.md: salvata all'uscita dal campo, non a
+  /// ogni carattere. Nessuna richiesta se il testo non è cambiato.
+  Future<void> _saveReplacementNote() async {
+    final text = _replacementNoteController.text.trim();
+    final current = widget.slot.replacementNote?.trim() ?? '';
+    if (text == current) return;
+    await ref.read(planDaySlotStatusControllerProvider.notifier).updateStatus(
+          widget.date,
+          widget.slot.slotId,
+          SlotStatus.skipped,
+          replacementNote: text.isEmpty ? null : text,
+        );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -192,6 +238,27 @@ class _MealCardState extends ConsumerState<MealCard> {
                         ],
                       ),
                     ],
+                    if (_expanded && widget.slot.status == SlotStatus.skipped) ...[
+                      const SizedBox(height: AppSpacing.sm),
+                      GestureDetector(
+                        onTap: offline
+                            ? () => ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(content: Text('Non disponibile offline.')),
+                                )
+                            : null,
+                        child: AbsorbPointer(
+                          absorbing: offline,
+                          child: AppTextField(
+                            label: 'Nota di sostituzione',
+                            controller: _replacementNoteController,
+                            focusNode: _replacementNoteFocusNode,
+                            enabled: !offline,
+                            minLines: 1,
+                            maxLines: 3,
+                          ),
+                        ),
+                      ),
+                    ],
                   ],
                 ),
               ),
@@ -258,9 +325,18 @@ class _MealCardState extends ConsumerState<MealCard> {
 
   /// SP-10: la spunta su una giornata futura è una conferma semplice
   /// (4.5 interfaccia.md), non un vincolo — SP-8 lascia invece il passato
-  /// senza alcuna limitazione.
+  /// senza alcuna limitazione. SC-8: il passaggio da Saltato a un altro
+  /// stato, con una nota di sostituzione presente, chiede prima una
+  /// conferma rafforzata (4.5 interfaccia.md, tabella delle conferme).
   Future<void> _updateStatus(BuildContext context, SlotStatus target) async {
     final status = _nextStatus(target);
+    if (widget.slot.status == SlotStatus.skipped &&
+        status != SlotStatus.skipped &&
+        (widget.slot.replacementNote?.trim().isNotEmpty ?? false)) {
+      final confirmed = await _confirmDiscardReplacementNote(context);
+      if (confirmed != true) return;
+      if (!context.mounted) return;
+    }
     if (dateOnly(widget.date).isAfter(dateOnly(DateTime.now()))) {
       final confirmed = await _confirmFutureDay(context);
       if (confirmed != true) return;
@@ -296,6 +372,30 @@ class _MealCardState extends ConsumerState<MealCard> {
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(true),
             child: const Text('Spunta'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// "Cambiare stato a uno slot con nota di sostituzione" — conferma
+  /// rafforzata: perdita definitiva di dati (SC-8, 4.5 interfaccia.md).
+  Future<bool?> _confirmDiscardReplacementNote(BuildContext context) {
+    final colors = context.colors;
+    return showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        backgroundColor: colors.surface,
+        title: const Text('Cambiare stato?'),
+        content: const Text('La nota di sostituzione andrà perduta in modo definitivo.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: const Text('Annulla'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: Text('Cambia', style: TextStyle(color: colors.error)),
           ),
         ],
       ),
