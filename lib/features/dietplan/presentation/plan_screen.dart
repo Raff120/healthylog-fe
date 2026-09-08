@@ -8,6 +8,8 @@ import '../../../core/api/api_exception.dart';
 import '../../../core/api/api_error_messages.dart';
 import '../../../core/widgets/empty_state_view.dart';
 import '../../care/domain/plan_competence.dart';
+import '../../workout/presentation/widgets/day_workouts_section.dart';
+import '../../workout/presentation/widgets/workout_sheet.dart';
 import '../../care/providers/care_providers.dart';
 import '../../identity/providers/profile_providers.dart';
 import '../data/plan_day.dart';
@@ -83,6 +85,22 @@ class PlanScreen extends ConsumerWidget {
                 ),
               ],
       ),
+      // 10.2 interfaccia.md: pulsante mobile in *Piano* per la
+      // registrazione di un allenamento, con il foglio completo. 6.2: è
+      // assente sulla giornata di un altro membro e in modalità
+      // affiancata (CU-10, VG-10), e mentre si sceglie dove spostare un
+      // pasto — l'intestazione stessa è allora dedicata all'inversione.
+      floatingActionButton: swapSelection == null &&
+              ref.watch(selectedGroupMemberProvider) == null &&
+              !ref.watch(sideBySideModeProvider)
+          ? FloatingActionButton(
+              onPressed: () => showWorkoutSheet(context, date: selectedDate),
+              backgroundColor: colors.accent,
+              foregroundColor: colors.surface,
+              tooltip: 'Registra allenamento',
+              child: const Icon(Icons.add),
+            )
+          : null,
       body: SafeArea(
         child: AnimatedSwitcher(
           duration: AppSpacing.motionScreenTransition,
@@ -243,6 +261,38 @@ class _WeeklyTab extends StatelessWidget {
 /// segnalano.
 class _DayContent extends ConsumerWidget {
   const _DayContent({required this.day});
+
+  final PlanDay day;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final member = ref.watch(selectedGroupMemberProvider);
+    // AL-12, VG-6: gli allenamenti previsti e registrati compaiono sopra
+    // i pasti, in una sezione distinta. CU-10, VG-10: assente sulla
+    // giornata di un altro membro del Gruppo, cui sono riservati.
+    //
+    // La sezione precede il contenuto in ogni condizione di copertura,
+    // sospensione e assenza di piano comprese: l'attività fisica è
+    // indipendente dal piano alimentare e non è preclusa quando questo è
+    // interrotto (AL-8, RA-8, SA-14) — 6.2 lo dice per la giornata senza
+    // pasti, e la ragione vale identica per le altre (vedi decisioni.md).
+    if (member == null) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          DayWorkoutsSection(date: day.date),
+          Expanded(child: _MealsContent(day: day)),
+        ],
+      );
+    }
+    return _MealsContent(day: day);
+  }
+}
+
+/// La parte alimentare della giornata, che la sezione degli allenamenti
+/// sovrasta senza mescolarvisi (AL-12: "chiaramente distinti").
+class _MealsContent extends ConsumerWidget {
+  const _MealsContent({required this.day});
 
   final PlanDay day;
 

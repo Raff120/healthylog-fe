@@ -20,8 +20,10 @@ import 'package:healthylog/features/group/data/cooking_group_api.dart';
 import 'package:healthylog/features/group/providers/cooking_group_providers.dart';
 import 'package:healthylog/features/identity/data/profile_api.dart';
 import 'package:healthylog/features/identity/providers/profile_providers.dart';
+import 'package:healthylog/features/workout/providers/workout_providers.dart';
 
 import '../../../support/care_api_stub.dart';
+import '../../../support/workout_api_stub.dart';
 
 /// VG-3, VG-4: tutti gli slot della giornata restano sempre visibili,
 /// quale sia il loro stato di consumo — nessuno nascosto né evidenziato
@@ -401,6 +403,7 @@ Future<void> _pumpDailyView(
     ProviderScope(
       overrides: [
         careApiProvider.overrideWithValue(stubCareApi()),
+        workoutApiProvider.overrideWithValue(stubWorkoutApi()),
         planDayApiProvider.overrideWithValue(PlanDayApi(dio)),
         cookingGroupApiProvider.overrideWithValue(_noGroupCookingGroupApi()),
         appDatabaseProvider.overrideWithValue(
@@ -429,6 +432,7 @@ Future<void> _pumpDailyViewWithOwnedPlans(
     ProviderScope(
       overrides: [
         careApiProvider.overrideWithValue(stubCareApi()),
+        workoutApiProvider.overrideWithValue(stubWorkoutApi()),
         planDayApiProvider.overrideWithValue(PlanDayApi(dio)),
         cookingGroupApiProvider.overrideWithValue(_noGroupCookingGroupApi()),
         dietPlanApiProvider.overrideWithValue(ownedPlansApi),
@@ -525,6 +529,7 @@ Future<_MemberAwareAdapter> _pumpWithGroup(WidgetTester tester, {bool compact = 
     ProviderScope(
       overrides: [
         careApiProvider.overrideWithValue(stubCareApi()),
+        workoutApiProvider.overrideWithValue(stubWorkoutApi()),
         planDayApiProvider.overrideWithValue(PlanDayApi(planDayDio)),
         profileApiProvider.overrideWithValue(ProfileApi(profileDio)),
         cookingGroupApiProvider.overrideWithValue(CookingGroupApi(groupDio)),
@@ -585,6 +590,7 @@ void main() {
         ProviderScope(
           overrides: [
         careApiProvider.overrideWithValue(stubCareApi()),
+        workoutApiProvider.overrideWithValue(stubWorkoutApi()),
             planDayApiProvider.overrideWithValue(PlanDayApi(dio)),
             cookingGroupApiProvider.overrideWithValue(_noGroupCookingGroupApi()),
             appDatabaseProvider.overrideWithValue(
@@ -638,6 +644,7 @@ void main() {
         ProviderScope(
           overrides: [
         careApiProvider.overrideWithValue(stubCareApi()),
+        workoutApiProvider.overrideWithValue(stubWorkoutApi()),
             planDayApiProvider.overrideWithValue(PlanDayApi(dio)),
             cookingGroupApiProvider.overrideWithValue(_noGroupCookingGroupApi()),
             appDatabaseProvider.overrideWithValue(
@@ -701,6 +708,7 @@ void main() {
         ProviderScope(
           overrides: [
         careApiProvider.overrideWithValue(stubCareApi()),
+        workoutApiProvider.overrideWithValue(stubWorkoutApi()),
             planDayApiProvider.overrideWithValue(PlanDayApi(dio)),
             cookingGroupApiProvider.overrideWithValue(_noGroupCookingGroupApi()),
             appDatabaseProvider.overrideWithValue(
@@ -749,6 +757,7 @@ void main() {
         ProviderScope(
           overrides: [
         careApiProvider.overrideWithValue(stubCareApi()),
+        workoutApiProvider.overrideWithValue(stubWorkoutApi()),
             planDayApiProvider.overrideWithValue(PlanDayApi(dio)),
             cookingGroupApiProvider.overrideWithValue(_noGroupCookingGroupApi()),
             appDatabaseProvider.overrideWithValue(
@@ -876,6 +885,7 @@ void main() {
         ProviderScope(
           overrides: [
         careApiProvider.overrideWithValue(stubCareApi()),
+        workoutApiProvider.overrideWithValue(stubWorkoutApi()),
             planDayApiProvider.overrideWithValue(PlanDayApi(planDayDio)),
             cookingGroupApiProvider.overrideWithValue(_noGroupCookingGroupApi()),
             dietPlanApiProvider.overrideWithValue(DietPlanApi(dietPlanDio)),
@@ -985,6 +995,7 @@ void main() {
         ProviderScope(
           overrides: [
         careApiProvider.overrideWithValue(stubCareApi()),
+        workoutApiProvider.overrideWithValue(stubWorkoutApi()),
             planDayApiProvider.overrideWithValue(PlanDayApi(dio)),
             cookingGroupApiProvider.overrideWithValue(_noGroupCookingGroupApi()),
             appDatabaseProvider.overrideWithValue(AppDatabase(NativeDatabase.memory())),

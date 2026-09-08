@@ -6,6 +6,7 @@ import '../../../../app/theme/app_spacing.dart';
 import '../../../../app/theme/theme_context.dart';
 import '../../../../core/api/api_error_messages.dart';
 import '../../../../core/api/api_exception.dart';
+import '../../../workout/presentation/widgets/week_day_workouts.dart';
 import '../../data/plan_day.dart';
 import '../../data/plan_day_coverage.dart';
 import '../../domain/plan_day_date.dart';
@@ -123,7 +124,7 @@ class _WeekGrid extends StatelessWidget {
 /// giorno, data, fondo in accento tenue se corrente — VS-5) e, sotto,
 /// le righe sintetiche degli slot (VS-3) ovvero una constatazione in
 /// `caption` per un giorno fuori dal piano attivo (VS-7).
-class _DayCard extends StatelessWidget {
+class _DayCard extends ConsumerWidget {
   const _DayCard({required this.day, required this.isToday, required this.onSelectDay});
 
   final PlanDay day;
@@ -131,7 +132,7 @@ class _DayCard extends StatelessWidget {
   final ValueChanged<DateTime> onSelectDay;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final colors = context.colors;
     final typography = context.typography;
     final outOfPlan = day.coverage != PlanDayCoverage.active;
@@ -178,6 +179,11 @@ class _DayCard extends StatelessWidget {
                     ? const _Caption(text: 'Nessun pasto previsto')
                     : Column(children: [for (final slot in day.slots) WeekSlotRow(day: day, slot: slot)]),
           ),
+          // VS-6, 6.4: gli allenamenti in coda al pannello, in sola
+          // presentazione. CU-10: assenti sulla settimana di un altro
+          // membro del Gruppo.
+          if (ref.watch(selectedGroupMemberProvider) == null)
+            WeekDayWorkouts(weekStart: startOfWeek(day.date), date: day.date),
           const SizedBox(height: AppSpacing.xxs),
         ],
       ),

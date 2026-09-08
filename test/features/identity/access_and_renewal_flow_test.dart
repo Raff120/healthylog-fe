@@ -15,7 +15,10 @@ import 'package:healthylog/core/storage/secure_key_value_store.dart';
 import 'package:healthylog/features/identity/data/auth_models.dart';
 import 'package:healthylog/features/identity/data/identity_api.dart';
 import 'package:healthylog/features/identity/providers/identity_providers.dart';
+import 'package:healthylog/features/workout/providers/workout_providers.dart';
 import 'package:healthylog/main.dart';
+
+import '../../support/workout_api_stub.dart';
 
 /// Task 7 di F06: il flusso di accesso (AC-8) e di rinnovo trasparente
 /// (TK-13, TK-14) attraversati per intero, come li percorrerebbe
@@ -172,6 +175,9 @@ void main() {
             _InMemorySecureKeyValueStore(),
           ),
           identityApiProvider.overrideWithValue(identityApi),
+          // AL-12: la vista giornaliera osserva ora anche gli allenamenti
+          // — qui nessuno, come nel resto del banco.
+          workoutApiProvider.overrideWithValue(stubWorkoutApi()),
           // Stessa composizione di intercettori di `apiClientProvider`
           // (ordine incluso, vedi il relativo commento): solo il
           // trasporto è sostituito, per non ripetere sotto la logica
