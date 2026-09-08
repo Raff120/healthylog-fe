@@ -7,6 +7,7 @@ import '../../../app/theme/theme_context.dart';
 import '../../../core/api/api_exception.dart';
 import '../../../core/api/api_error_messages.dart';
 import '../../../core/widgets/empty_state_view.dart';
+import '../../identity/providers/profile_providers.dart';
 import '../data/plan_day.dart';
 import '../data/plan_day_coverage.dart';
 import '../domain/plan_day_date.dart';
@@ -14,6 +15,7 @@ import '../providers/diet_plan_providers.dart';
 import '../providers/meal_swap_providers.dart';
 import '../providers/plan_day_providers.dart';
 import 'widgets/date_selector.dart';
+import 'widgets/group_day_grid_view.dart';
 import 'widgets/meal_card.dart';
 import 'widgets/member_selector.dart';
 import 'widgets/plan_status_banner.dart';
@@ -57,7 +59,7 @@ class PlanScreen extends ConsumerWidget {
         // Gruppo (MemberSelector non presenta nulla in quel caso) e in
         // modalità di selezione dell'inversione.
         leading: swapSelection == null ? const MemberSelector() : null,
-        leadingWidth: swapSelection == null ? 160 : null,
+        leadingWidth: swapSelection == null ? 190 : null,
         // 6.5 interfaccia.md: in modalità di selezione l'intestazione è
         // sostituita da "Scegli dove spostarlo" e l'azione Annulla.
         title: swapSelection == null
@@ -103,55 +105,87 @@ class _DailyView extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final typography = context.typography;
-    final colors = context.colors;
     final member = ref.watch(selectedGroupMemberProvider);
-    final dayState = ref.watch(planDayProvider(selectedDate, userId: member));
+    final sideBySide = ref.watch(sideBySideModeProvider);
 
     return Column(
       children: [
         DateSelector(selectedDate: selectedDate, onSelect: onSelect),
-        const MemberContextBanner(),
+        // VG-11: la riga di contesto non ha senso mentre si consultano
+        // tutti i membri insieme (VG-12).
+        if (!sideBySide) const MemberContextBanner(),
         Expanded(
-          // 6.2: "lo scorrimento orizzontale del contenuto cambia
-          // giorno" — lo stesso gesto della riga dei giorni, qui
-          // applicato al contenuto sottostante.
-          child: GestureDetector(
-            key: const Key('dailyViewContentSwipe'),
-            onHorizontalDragEnd: (details) {
-              final velocity = details.primaryVelocity ?? 0;
-              if (velocity < -200) {
-                onSelect(selectedDate.add(const Duration(days: 1)));
-              } else if (velocity > 200) {
-                onSelect(selectedDate.subtract(const Duration(days: 1)));
-              }
-            },
-            child: dayState.when(
-              loading: () => const Center(child: CircularProgressIndicator()),
-              error: (error, _) => Center(
-                child: Text(
-                  describeApiError(error.asApiException?.code ?? ''),
-                  style: typography.bodyMedium.copyWith(color: colors.textSecondary),
-                ),
-              ),
-              data: (day) => AnimatedSwitcher(
-                duration: AppSpacing.motionScreenTransition,
-                transitionBuilder: (child, animation) => SlideTransition(
-                  position: Tween(
-                    begin: const Offset(0.05, 0),
-                    end: Offset.zero,
-                  ).animate(animation),
-                  child: FadeTransition(opacity: animation, child: child),
-                ),
-                child: KeyedSubtree(
-                  key: ValueKey(isoDate(day.date)),
-                  child: _DayContent(day: day),
-                ),
-              ),
-            ),
-          ),
+          child: sideBySide
+              ? _SideBySideContent(date: selectedDate)
+              : _SingleMemberContent(selectedDate: selectedDate, member: member, onSelect: onSelect),
         ),
       ],
+    );
+  }
+}
+
+class _SideBySideContent extends ConsumerWidget {
+  const _SideBySideContent({required this.date});
+
+  final DateTime date;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final currentUserId = ref.watch(profileControllerProvider).value?.id;
+    if (currentUserId == null) return const SizedBox.shrink();
+    return GroupDayGridView(date: date, currentUserId: currentUserId);
+  }
+}
+
+class _SingleMemberContent extends ConsumerWidget {
+  const _SingleMemberContent({required this.selectedDate, required this.member, required this.onSelect});
+
+  final DateTime selectedDate;
+  final String? member;
+  final ValueChanged<DateTime> onSelect;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final typography = context.typography;
+    final colors = context.colors;
+    final dayState = ref.watch(planDayProvider(selectedDate, userId: member));
+
+    // 6.2: "lo scorrimento orizzontale del contenuto cambia giorno" — lo
+    // stesso gesto della riga dei giorni, qui applicato al contenuto
+    // sottostante.
+    return GestureDetector(
+      key: const Key('dailyViewContentSwipe'),
+      onHorizontalDragEnd: (details) {
+        final velocity = details.primaryVelocity ?? 0;
+        if (velocity < -200) {
+          onSelect(selectedDate.add(const Duration(days: 1)));
+        } else if (velocity > 200) {
+          onSelect(selectedDate.subtract(const Duration(days: 1)));
+        }
+      },
+      child: dayState.when(
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (error, _) => Center(
+          child: Text(
+            describeApiError(error.asApiException?.code ?? ''),
+            style: typography.bodyMedium.copyWith(color: colors.textSecondary),
+          ),
+        ),
+        data: (day) => AnimatedSwitcher(
+          duration: AppSpacing.motionScreenTransition,
+          transitionBuilder: (child, animation) => SlideTransition(
+            position: Tween(
+              begin: const Offset(0.05, 0),
+              end: Offset.zero,
+            ).animate(animation),
+            child: FadeTransition(opacity: animation, child: child),
+          ),
+          child: KeyedSubtree(
+            key: ValueKey(isoDate(day.date)),
+            child: _DayContent(day: day),
+          ),
+        ),
+      ),
     );
   }
 }

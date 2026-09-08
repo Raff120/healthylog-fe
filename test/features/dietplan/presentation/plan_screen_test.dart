@@ -194,6 +194,7 @@ CookingGroupApi _noGroupCookingGroupApi() {
 /// piano altrui (VG-9).
 class _MemberAwareAdapter implements HttpClientAdapter {
   int patchCount = 0;
+  int groupRequestCount = 0;
 
   @override
   void close({bool force = false}) {}
@@ -206,6 +207,68 @@ class _MemberAwareAdapter implements HttpClientAdapter {
   ) async {
     if (options.method == 'PATCH') {
       patchCount++;
+    }
+    if (options.path.contains('/plan-days/group')) {
+      groupRequestCount++;
+      return ResponseBody.fromString(
+        jsonEncode({
+          'date': isoDate(dateOnly(DateTime.now())),
+          'members': [
+            {
+              'userId': 'user-1',
+              'firstName': 'Io',
+              'lastName': 'Stesso',
+              'date': isoDate(dateOnly(DateTime.now())),
+              'coverage': 'ACTIVE',
+              'planId': 'plan-1',
+              'planName': 'Dieta',
+              'planStartDate': '2026-09-01',
+              'planEndDate': null,
+              'slots': [
+                {
+                  'slotId': 's1',
+                  'type': 'BREAKFAST',
+                  'label': null,
+                  'order': 0,
+                  'content': 'Yogurt e cereali',
+                  'note': null,
+                  'recipeName': null,
+                  'recipeText': null,
+                  'status': 'TO_CONSUME',
+                },
+              ],
+            },
+            {
+              'userId': 'user-2',
+              'firstName': 'Maria',
+              'lastName': 'Verdi',
+              'date': isoDate(dateOnly(DateTime.now())),
+              'coverage': 'ACTIVE',
+              'planId': 'plan-2',
+              'planName': 'Dieta di Maria',
+              'planStartDate': '2026-09-01',
+              'planEndDate': null,
+              'slots': [
+                {
+                  'slotId': 's2',
+                  'type': 'BREAKFAST',
+                  'label': null,
+                  'order': 0,
+                  'content': 'Pasta di Maria',
+                  'note': null,
+                  'recipeName': null,
+                  'recipeText': null,
+                  'status': 'CONSUMED',
+                },
+              ],
+            },
+          ],
+        }),
+        200,
+        headers: {
+          Headers.contentTypeHeader: [Headers.jsonContentType],
+        },
+      );
     }
     final userId = options.queryParameters['userId'] as String?;
     final content = userId == 'user-2' ? 'Pasta di Maria' : 'Yogurt e cereali';
@@ -373,6 +436,83 @@ DietPlanApi _ownedPlansApi(List<Map<String, dynamic>> plans) {
   dio.httpClientAdapter = _JsonAdapter(plans);
   dio.interceptors.add(ApiErrorInterceptor());
   return DietPlanApi(dio);
+}
+
+/// Condiviso dai gruppi "selettore del membro" e "modalità affiancata"
+/// (4.2, 6.3 interfaccia.md): un Gruppo di due membri, io ("Io Stesso")
+/// e "Maria Verdi".
+Map<String, dynamic> _memberSelectorProfileJson() => {
+      'id': 'user-1',
+      'email': 'utente@esempio.test',
+      'username': 'utente',
+      'firstName': 'Io',
+      'lastName': 'Stesso',
+      'birthDate': '2000-01-01',
+      'birthPlace': 'Roma',
+      'sex': 'MALE',
+      'role': 'USER',
+      'height': null,
+      'timezone': 'Europe/Rome',
+    };
+
+Map<String, dynamic> _memberSelectorGroupJson() => {
+      'id': 'group-1',
+      'name': 'Casa',
+      'ownerId': 'user-1',
+      'members': [
+        {
+          'userId': 'user-1',
+          'firstName': 'Io',
+          'lastName': 'Stesso',
+          'owner': true,
+          'cook': true,
+          'joinedAt': '2026-09-01T00:00:00Z',
+        },
+        {
+          'userId': 'user-2',
+          'firstName': 'Maria',
+          'lastName': 'Verdi',
+          'owner': false,
+          'cook': false,
+          'joinedAt': '2026-09-02T00:00:00Z',
+        },
+      ],
+      'createdAt': '2026-09-01T00:00:00Z',
+    };
+
+/// `compact` (< 600, app_breakpoints.dart): riproduce il selettore a
+/// menu a discesa di uno smartphone, a differenza della riga di avatar
+/// usata dagli altri banchi di prova alla larghezza predefinita.
+Future<_MemberAwareAdapter> _pumpWithGroup(WidgetTester tester, {bool compact = false}) async {
+  if (compact) {
+    tester.view.physicalSize = const Size(400, 800);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.reset);
+  }
+  final planDayAdapter = _MemberAwareAdapter();
+  final planDayDio = Dio(BaseOptions(baseUrl: 'http://example.test'))
+    ..httpClientAdapter = planDayAdapter
+    ..interceptors.add(ApiErrorInterceptor());
+  final profileDio = Dio(BaseOptions(baseUrl: 'http://example.test'))
+    ..httpClientAdapter = _JsonAdapter(_memberSelectorProfileJson())
+    ..interceptors.add(ApiErrorInterceptor());
+  final groupDio = Dio(BaseOptions(baseUrl: 'http://example.test'))
+    ..httpClientAdapter = _JsonAdapter(_memberSelectorGroupJson())
+    ..interceptors.add(ApiErrorInterceptor());
+
+  await tester.pumpWidget(
+    ProviderScope(
+      overrides: [
+        planDayApiProvider.overrideWithValue(PlanDayApi(planDayDio)),
+        profileApiProvider.overrideWithValue(ProfileApi(profileDio)),
+        cookingGroupApiProvider.overrideWithValue(CookingGroupApi(groupDio)),
+        appDatabaseProvider.overrideWithValue(AppDatabase(NativeDatabase.memory())),
+      ],
+      child: MaterialApp(theme: AppTheme.light, home: const PlanScreen()),
+    ),
+  );
+  await tester.pumpAndSettle();
+  return planDayAdapter;
 }
 
 void main() {
@@ -972,85 +1112,10 @@ void main() {
   });
 
   group('selettore del membro (4.2 interfaccia.md; VG-7, VG-9, VG-11)', () {
-    Map<String, dynamic> profileJson() => {
-          'id': 'user-1',
-          'email': 'utente@esempio.test',
-          'username': 'utente',
-          'firstName': 'Io',
-          'lastName': 'Stesso',
-          'birthDate': '2000-01-01',
-          'birthPlace': 'Roma',
-          'sex': 'MALE',
-          'role': 'USER',
-          'height': null,
-          'timezone': 'Europe/Rome',
-        };
-
-    Map<String, dynamic> groupJson() => {
-          'id': 'group-1',
-          'name': 'Casa',
-          'ownerId': 'user-1',
-          'members': [
-            {
-              'userId': 'user-1',
-              'firstName': 'Io',
-              'lastName': 'Stesso',
-              'owner': true,
-              'cook': true,
-              'joinedAt': '2026-09-01T00:00:00Z',
-            },
-            {
-              'userId': 'user-2',
-              'firstName': 'Maria',
-              'lastName': 'Verdi',
-              'owner': false,
-              'cook': false,
-              'joinedAt': '2026-09-02T00:00:00Z',
-            },
-          ],
-          'createdAt': '2026-09-01T00:00:00Z',
-        };
-
-    /// `compact` (< 600, app_breakpoints.dart): riproduce il selettore a
-    /// menu a discesa di uno smartphone, a differenza della riga di
-    /// avatar usata dagli altri banchi di prova di questo gruppo alla
-    /// larghezza predefinita.
-    Future<_MemberAwareAdapter> pumpWithGroup(WidgetTester tester, {bool compact = false}) async {
-      if (compact) {
-        tester.view.physicalSize = const Size(400, 800);
-        tester.view.devicePixelRatio = 1.0;
-        addTearDown(tester.view.reset);
-      }
-      final planDayAdapter = _MemberAwareAdapter();
-      final planDayDio = Dio(BaseOptions(baseUrl: 'http://example.test'))
-        ..httpClientAdapter = planDayAdapter
-        ..interceptors.add(ApiErrorInterceptor());
-      final profileDio = Dio(BaseOptions(baseUrl: 'http://example.test'))
-        ..httpClientAdapter = _JsonAdapter(profileJson())
-        ..interceptors.add(ApiErrorInterceptor());
-      final groupDio = Dio(BaseOptions(baseUrl: 'http://example.test'))
-        ..httpClientAdapter = _JsonAdapter(groupJson())
-        ..interceptors.add(ApiErrorInterceptor());
-
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            planDayApiProvider.overrideWithValue(PlanDayApi(planDayDio)),
-            profileApiProvider.overrideWithValue(ProfileApi(profileDio)),
-            cookingGroupApiProvider.overrideWithValue(CookingGroupApi(groupDio)),
-            appDatabaseProvider.overrideWithValue(AppDatabase(NativeDatabase.memory())),
-          ],
-          child: MaterialApp(theme: AppTheme.light, home: const PlanScreen()),
-        ),
-      );
-      await tester.pumpAndSettle();
-      return planDayAdapter;
-    }
-
     testWidgets(
       'il tocco su un altro membro presenta il suo piano con la riga di contesto, in sola consultazione (VG-9, VG-11)',
       (tester) async {
-        await pumpWithGroup(tester);
+        await _pumpWithGroup(tester);
 
         expect(find.text('Yogurt e cereali'), findsOneWidget);
         expect(find.text('Stai vedendo il piano di Maria'), findsNothing);
@@ -1066,7 +1131,7 @@ void main() {
     testWidgets(
       'la spunta è disattivata sul piano di un altro membro, senza raggiungere il server (VG-9)',
       (tester) async {
-        final adapter = await pumpWithGroup(tester);
+        final adapter = await _pumpWithGroup(tester);
 
         await tester.tap(find.byTooltip('Maria Verdi'));
         await tester.pumpAndSettle();
@@ -1082,7 +1147,7 @@ void main() {
     testWidgets(
       'dal menu a discesa di uno schermo stretto, il ritorno al proprio piano funziona dopo aver consultato un membro (VG-7)',
       (tester) async {
-        await pumpWithGroup(tester, compact: true);
+        await _pumpWithGroup(tester, compact: true);
         expect(find.text('Yogurt e cereali'), findsOneWidget);
 
         // 4.2 interfaccia.md: su schermo stretto il selettore è un menu
@@ -1103,6 +1168,61 @@ void main() {
         expect(find.text('Yogurt e cereali'), findsOneWidget);
         expect(find.text('Pasta di Maria'), findsNothing);
         expect(find.text('Stai vedendo il piano di Maria'), findsNothing);
+      },
+    );
+  });
+
+  group('modalità affiancata (6.3 interfaccia.md; VG-12, VG-13, VG-14)', () {
+    testWidgets(
+      'l\'icona columns mostra i pasti di tutti i membri, raggruppati per slot',
+      (tester) async {
+        final adapter = await _pumpWithGroup(tester);
+        expect(find.text('Yogurt e cereali'), findsOneWidget);
+
+        await tester.tap(find.byTooltip('Vista affiancata'));
+        await tester.pumpAndSettle();
+
+        expect(find.text('Yogurt e cereali'), findsOneWidget);
+        expect(find.text('Pasta di Maria'), findsOneWidget);
+        // VG-11: nessuna riga di contesto mentre si guardano tutti insieme.
+        expect(find.text('Stai vedendo il piano di Maria'), findsNothing);
+        expect(adapter.groupRequestCount, greaterThan(0));
+      },
+    );
+
+    testWidgets(
+      'il secondo tocco sull\'icona columns torna alla vista del singolo membro',
+      (tester) async {
+        await _pumpWithGroup(tester);
+
+        await tester.tap(find.byTooltip('Vista affiancata'));
+        await tester.pumpAndSettle();
+        expect(find.text('Pasta di Maria'), findsOneWidget);
+
+        await tester.tap(find.byTooltip('Vista singola'));
+        await tester.pumpAndSettle();
+
+        expect(find.text('Yogurt e cereali'), findsOneWidget);
+        expect(find.text('Pasta di Maria'), findsNothing);
+      },
+    );
+
+    testWidgets(
+      'la spunta sul proprio pasto nella griglia raggiunge il server e non tocca quello altrui',
+      (tester) async {
+        final adapter = await _pumpWithGroup(tester);
+        await tester.tap(find.byTooltip('Vista affiancata'));
+        await tester.pumpAndSettle();
+
+        // La sola spunta presente è quella sulla propria colonna
+        // (VG-9, CU-3 non ancora implementato per il Cuoco): un solo
+        // pulsante "check" in tutta la griglia.
+        expect(find.byIcon(Icons.check), findsOneWidget);
+
+        await tester.tap(find.byIcon(Icons.check));
+        await tester.pumpAndSettle();
+
+        expect(adapter.patchCount, 1);
       },
     );
   });

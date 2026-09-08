@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 
+import 'group_plan_day.dart';
 import 'plan_day.dart';
 import 'slot_status.dart';
 import '../domain/plan_day_date.dart';
@@ -37,6 +38,13 @@ class PlanDayApi {
       },
     );
     return (response.data as List).map((e) => PlanDay.fromJson(e as Map<String, dynamic>)).toList();
+  }
+
+  /// VG-12, VG-14: la giornata di tutti i membri del proprio Gruppo, per
+  /// la modalità affiancata.
+  Future<GroupPlanDay> getGroupDay(DateTime date) async {
+    final response = await _dio.get('/plan-days/group', queryParameters: {'date': isoDate(date)});
+    return GroupPlanDay.fromJson(response.data as Map<String, dynamic>);
   }
 
   /// 6.3 funzionale, SP-1, SP-5: transizione di stato dello slot, e SC-4:

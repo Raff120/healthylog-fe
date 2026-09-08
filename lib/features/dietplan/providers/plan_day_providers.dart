@@ -4,6 +4,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../../core/api/api_client.dart';
 import '../../../core/api/api_exception.dart';
 import '../../../core/storage/plan_day_local_store.dart';
+import '../data/group_plan_day.dart';
 import '../data/plan_day.dart';
 import '../data/plan_day_api.dart';
 import '../data/plan_day_local_cache.dart';
@@ -60,6 +61,29 @@ class SelectedGroupMember extends _$SelectedGroupMember {
   void select(String? userId) => state = userId;
 }
 
+/// VG-12: la modalità affiancata, indipendente da [SelectedGroupMember]
+/// — disattivandola si torna esattamente al membro che era selezionato
+/// prima (4.2 interfaccia.md: "il ritorno al membro singolo ripristina
+/// l'ultimo selezionato"), senza alcuno stato aggiuntivo: la selezione
+/// del singolo membro non viene mai toccata da questo notifier.
+@riverpod
+class SideBySideMode extends _$SideBySideMode {
+  @override
+  bool build() => false;
+
+  /// VS-16: la modalità affiancata non è disponibile nella vista
+  /// settimanale — l'attivazione forza il passaggio a quella
+  /// giornaliera.
+  void toggle() {
+    state = !state;
+    if (state) {
+      ref.read(selectedPlanViewProvider.notifier).select(PlanViewMode.day);
+    }
+  }
+
+  void disable() => state = false;
+}
+
 /// Contenuto della giornata richiesta (EP-3: mai materializzata dalla
 /// sola lettura). `family` per data e, VG-7, per membro: ogni giorno
 /// visitato ha una propria cache, così tornare a un giorno già
@@ -105,6 +129,12 @@ Future<List<PlanDay>> planDayRange(Ref ref, DateTime from, DateTime to, {String?
   return ref.watch(planDayApiProvider).getRange(from, to, userId: userId);
 }
 
+/// VG-12, VG-14: la giornata affiancata di tutti i membri del Gruppo.
+@riverpod
+Future<GroupPlanDay> groupPlanDay(Ref ref, DateTime date) {
+  return ref.watch(planDayApiProvider).getGroupDay(date);
+}
+
 /// Transizione di stato dello slot (6.3 funzionale, SP-1, SP-4, SP-5),
 /// disposta dalla card del pasto. Nessuno stato locale da esporre: la
 /// risposta rinnova la cache di [planDayProvider] tramite invalidazione,
@@ -128,5 +158,8 @@ class PlanDaySlotStatusController extends _$PlanDaySlotStatusController {
           .updateSlotStatus(date, slotId, status, replacementNote: replacementNote),
     );
     ref.invalidate(planDayProvider(date));
+    // VG-12: la spunta dalla modalità affiancata (la propria colonna,
+    // per ora) deve rinnovare anche quella vista.
+    ref.invalidate(groupPlanDayProvider(date));
   }
 }

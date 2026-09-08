@@ -49,12 +49,19 @@ class _MemberRow extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final selected = ref.watch(selectedGroupMemberProvider);
+    final sideBySide = ref.watch(sideBySideModeProvider);
     // GE-13: lo stesso criterio già seguito da GroupScreen (F19) per
     // riconoscere la propria voce fra i membri.
     final currentUserId = ref.watch(profileControllerProvider).value?.id;
     final compact = context.breakpoint.isCompact || group.members.length > _maxInlineAvatars;
 
-    void select(String? userId) => ref.read(selectedGroupMemberProvider.notifier).select(userId);
+    // VG-9: scegliere esplicitamente un membro è l'azione "torna alla
+    // vista del singolo" — disattiva sempre la modalità affiancata,
+    // qualunque fosse il suo stato.
+    void select(String? userId) {
+      ref.read(sideBySideModeProvider.notifier).disable();
+      ref.read(selectedGroupMemberProvider.notifier).select(userId);
+    }
 
     if (currentUserId == null) {
       // Profilo non ancora caricato: nessuna voce sarebbe riconoscibile
@@ -64,9 +71,55 @@ class _MemberRow extends ConsumerWidget {
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
-      child: compact
-          ? _MemberDropdown(group: group, currentUserId: currentUserId, selected: selected, onSelect: select)
-          : _MemberAvatarRow(group: group, currentUserId: currentUserId, selected: selected, onSelect: select),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Flexible(
+            child: compact
+                ? _MemberDropdown(
+                    group: group,
+                    currentUserId: currentUserId,
+                    selected: selected,
+                    sideBySide: sideBySide,
+                    onSelect: select,
+                  )
+                : _MemberAvatarRow(
+                    group: group,
+                    currentUserId: currentUserId,
+                    selected: selected,
+                    sideBySide: sideBySide,
+                    onSelect: select,
+                  ),
+          ),
+          const SizedBox(width: AppSpacing.sm),
+          _SideBySideToggle(active: sideBySide),
+        ],
+      ),
+    );
+  }
+}
+
+/// 4.2 interfaccia.md: icona `columns`, dopo l'ultimo avatar. VG-12: la
+/// modalità è accessibile a tutti i membri del Gruppo, non ai soli
+/// Cuochi.
+class _SideBySideToggle extends ConsumerWidget {
+  const _SideBySideToggle({required this.active});
+
+  final bool active;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final colors = context.colors;
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: active ? colors.accentSubtle : Colors.transparent,
+        shape: BoxShape.circle,
+      ),
+      child: IconButton(
+        icon: Icon(Icons.view_column_outlined, size: 20, color: active ? colors.accent : colors.textSecondary),
+        tooltip: active ? 'Vista singola' : 'Vista affiancata',
+        onPressed: () => ref.read(sideBySideModeProvider.notifier).toggle(),
+      ),
     );
   }
 }
@@ -76,6 +129,7 @@ class _MemberAvatarRow extends StatelessWidget {
     required this.group,
     required this.currentUserId,
     required this.selected,
+    required this.sideBySide,
     required this.onSelect,
   });
 
@@ -84,6 +138,10 @@ class _MemberAvatarRow extends StatelessWidget {
 
   /// `null`: il proprio piano.
   final String? selected;
+
+  /// VG-12: nessun avatar è selezionato mentre la modalità affiancata è
+  /// attiva — "li si sta guardando tutti" (4.2 interfaccia.md).
+  final bool sideBySide;
   final ValueChanged<String?> onSelect;
 
   @override
@@ -101,7 +159,8 @@ class _MemberAvatarRow extends StatelessWidget {
             if (i > 0) const SizedBox(width: AppSpacing.xs),
             _MemberAvatar(
               member: ordered[i],
-              isSelected: ordered[i].userId == currentUserId ? selected == null : selected == ordered[i].userId,
+              isSelected: !sideBySide &&
+                  (ordered[i].userId == currentUserId ? selected == null : selected == ordered[i].userId),
               onTap: () => onSelect(ordered[i].userId == currentUserId ? null : ordered[i].userId),
             ),
           ],
@@ -152,12 +211,17 @@ class _MemberDropdown extends StatelessWidget {
     required this.group,
     required this.currentUserId,
     required this.selected,
+    required this.sideBySide,
     required this.onSelect,
   });
 
   final CookingGroup group;
   final String currentUserId;
   final String? selected;
+
+  /// VG-12: nessun membro è "il corrente" mentre la modalità affiancata
+  /// è attiva.
+  final bool sideBySide;
   final ValueChanged<String?> onSelect;
 
   @override
@@ -165,6 +229,7 @@ class _MemberDropdown extends StatelessWidget {
     final colors = context.colors;
     final typography = context.typography;
     final current = group.members.firstWhere((member) => member.userId == (selected ?? currentUserId));
+    final label = sideBySide ? 'Tutti' : current.firstName;
 
     return PopupMenuButton<String>(
       color: colors.surface,
@@ -191,7 +256,14 @@ class _MemberDropdown extends StatelessWidget {
             child: Icon(Icons.person_outline, size: 16, color: colors.textSecondary),
           ),
           const SizedBox(width: AppSpacing.xxs),
-          Text(current.firstName, style: typography.label.copyWith(color: colors.textPrimary)),
+          Flexible(
+            child: Text(
+              label,
+              style: typography.label.copyWith(color: colors.textPrimary),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
           Icon(Icons.keyboard_arrow_down, size: 18, color: colors.textSecondary),
         ],
       ),

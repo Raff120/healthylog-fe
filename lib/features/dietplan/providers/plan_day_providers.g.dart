@@ -310,6 +310,80 @@ abstract class _$SelectedGroupMember extends $Notifier<String?> {
   }
 }
 
+/// VG-12: la modalità affiancata, indipendente da [SelectedGroupMember]
+/// — disattivandola si torna esattamente al membro che era selezionato
+/// prima (4.2 interfaccia.md: "il ritorno al membro singolo ripristina
+/// l'ultimo selezionato"), senza alcuno stato aggiuntivo: la selezione
+/// del singolo membro non viene mai toccata da questo notifier.
+
+@ProviderFor(SideBySideMode)
+final sideBySideModeProvider = SideBySideModeProvider._();
+
+/// VG-12: la modalità affiancata, indipendente da [SelectedGroupMember]
+/// — disattivandola si torna esattamente al membro che era selezionato
+/// prima (4.2 interfaccia.md: "il ritorno al membro singolo ripristina
+/// l'ultimo selezionato"), senza alcuno stato aggiuntivo: la selezione
+/// del singolo membro non viene mai toccata da questo notifier.
+final class SideBySideModeProvider
+    extends $NotifierProvider<SideBySideMode, bool> {
+  /// VG-12: la modalità affiancata, indipendente da [SelectedGroupMember]
+  /// — disattivandola si torna esattamente al membro che era selezionato
+  /// prima (4.2 interfaccia.md: "il ritorno al membro singolo ripristina
+  /// l'ultimo selezionato"), senza alcuno stato aggiuntivo: la selezione
+  /// del singolo membro non viene mai toccata da questo notifier.
+  SideBySideModeProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'sideBySideModeProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$sideBySideModeHash();
+
+  @$internal
+  @override
+  SideBySideMode create() => SideBySideMode();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(bool value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<bool>(value),
+    );
+  }
+}
+
+String _$sideBySideModeHash() => r'054a04e34c82532889afbe25b3767dca667125a4';
+
+/// VG-12: la modalità affiancata, indipendente da [SelectedGroupMember]
+/// — disattivandola si torna esattamente al membro che era selezionato
+/// prima (4.2 interfaccia.md: "il ritorno al membro singolo ripristina
+/// l'ultimo selezionato"), senza alcuno stato aggiuntivo: la selezione
+/// del singolo membro non viene mai toccata da questo notifier.
+
+abstract class _$SideBySideMode extends $Notifier<bool> {
+  bool build();
+  @$mustCallSuper
+  @override
+  WhenComplete runBuild() {
+    final ref = this.ref as $Ref<bool, bool>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<bool, bool>,
+              bool,
+              Object?,
+              Object?
+            >;
+    return element.handleCreate(ref, build);
+  }
+}
+
 /// Contenuto della giornata richiesta (EP-3: mai materializzata dalla
 /// sola lettura). `family` per data e, VG-7, per membro: ogni giorno
 /// visitato ha una propria cache, così tornare a un giorno già
@@ -580,6 +654,90 @@ final class PlanDayRangeFamily extends $Family
   String toString() => r'planDayRangeProvider';
 }
 
+/// VG-12, VG-14: la giornata affiancata di tutti i membri del Gruppo.
+
+@ProviderFor(groupPlanDay)
+final groupPlanDayProvider = GroupPlanDayFamily._();
+
+/// VG-12, VG-14: la giornata affiancata di tutti i membri del Gruppo.
+
+final class GroupPlanDayProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<GroupPlanDay>,
+          GroupPlanDay,
+          FutureOr<GroupPlanDay>
+        >
+    with $FutureModifier<GroupPlanDay>, $FutureProvider<GroupPlanDay> {
+  /// VG-12, VG-14: la giornata affiancata di tutti i membri del Gruppo.
+  GroupPlanDayProvider._({
+    required GroupPlanDayFamily super.from,
+    required DateTime super.argument,
+  }) : super(
+         retry: null,
+         name: r'groupPlanDayProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$groupPlanDayHash();
+
+  @override
+  String toString() {
+    return r'groupPlanDayProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  $FutureProviderElement<GroupPlanDay> $createElement(
+    $ProviderPointer pointer,
+  ) => $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<GroupPlanDay> create(Ref ref) {
+    final argument = this.argument as DateTime;
+    return groupPlanDay(ref, argument);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is GroupPlanDayProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$groupPlanDayHash() => r'e51c56599c00a77f727d04c15a6390f29c5f2b96';
+
+/// VG-12, VG-14: la giornata affiancata di tutti i membri del Gruppo.
+
+final class GroupPlanDayFamily extends $Family
+    with $FunctionalFamilyOverride<FutureOr<GroupPlanDay>, DateTime> {
+  GroupPlanDayFamily._()
+    : super(
+        retry: null,
+        name: r'groupPlanDayProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  /// VG-12, VG-14: la giornata affiancata di tutti i membri del Gruppo.
+
+  GroupPlanDayProvider call(DateTime date) =>
+      GroupPlanDayProvider._(argument: date, from: this);
+
+  @override
+  String toString() => r'groupPlanDayProvider';
+}
+
 /// Transizione di stato dello slot (6.3 funzionale, SP-1, SP-4, SP-5),
 /// disposta dalla card del pasto. Nessuno stato locale da esporre: la
 /// risposta rinnova la cache di [planDayProvider] tramite invalidazione,
@@ -630,7 +788,7 @@ final class PlanDaySlotStatusControllerProvider
 }
 
 String _$planDaySlotStatusControllerHash() =>
-    r'83043b82b4af3a6f9bc6c7395b23dfa30327464b';
+    r'b5bf61150f32bcf6d14f0caa0868b2af572de009';
 
 /// Transizione di stato dello slot (6.3 funzionale, SP-1, SP-4, SP-5),
 /// disposta dalla card del pasto. Nessuno stato locale da esporre: la
