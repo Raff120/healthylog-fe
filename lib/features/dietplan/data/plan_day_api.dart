@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 
+import 'group_plan_day.dart';
 import 'plan_day.dart';
 import 'slot_status.dart';
 import '../domain/plan_day_date.dart';
@@ -10,22 +11,40 @@ class PlanDayApi {
 
   final Dio _dio;
 
-  /// EP-3: la lettura non materializza mai la giornata.
-  Future<PlanDay> getDay(DateTime date) async {
-    final response = await _dio.get('/plan-days', queryParameters: {'date': isoDate(date)});
+  /// EP-3: la lettura non materializza mai la giornata. EP-1, VG-7:
+  /// [userId] facoltativo, per la giornata di un membro del Gruppo
+  /// diverso da sé (F20) — la risposta omette semplicemente
+  /// `replacementNote` (SC-12, SC-13), che [PlanDay.fromJson] legge come
+  /// assente.
+  Future<PlanDay> getDay(DateTime date, {String? userId}) async {
+    final response = await _dio.get(
+      '/plan-days',
+      queryParameters: {'date': isoDate(date), if (userId != null) 'userId': userId},
+    );
     return PlanDay.fromJson(response.data as Map<String, dynamic>);
   }
 
   /// 6.2 funzionale, VS-1: intervallo inclusivo, per la vista
   /// settimanale. Elenco semplice, senza involucro di paginazione — lo
   /// stesso schema già in uso da `/diet-plan-templates` (F09, F16: vedi
-  /// decisioni.md).
-  Future<List<PlanDay>> getRange(DateTime from, DateTime to) async {
+  /// decisioni.md). EP-1, VG-7: [userId] facoltativo, come in [getDay].
+  Future<List<PlanDay>> getRange(DateTime from, DateTime to, {String? userId}) async {
     final response = await _dio.get(
       '/plan-days',
-      queryParameters: {'from': isoDate(from), 'to': isoDate(to)},
+      queryParameters: {
+        'from': isoDate(from),
+        'to': isoDate(to),
+        if (userId != null) 'userId': userId,
+      },
     );
     return (response.data as List).map((e) => PlanDay.fromJson(e as Map<String, dynamic>)).toList();
+  }
+
+  /// VG-12, VG-14: la giornata di tutti i membri del proprio Gruppo, per
+  /// la modalità affiancata.
+  Future<GroupPlanDay> getGroupDay(DateTime date) async {
+    final response = await _dio.get('/plan-days/group', queryParameters: {'date': isoDate(date)});
+    return GroupPlanDay.fromJson(response.data as Map<String, dynamic>);
   }
 
   /// 6.3 funzionale, SP-1, SP-5: transizione di stato dello slot, e SC-4:
@@ -34,15 +53,21 @@ class PlanDayApi {
   /// comunque (SC-8), a prescindere da [replacementNote]. La risposta è
   /// la giornata intera aggiornata, sullo stesso formato di [getDay]
   /// (comodo per sostituire per intero la cache del provider).
+  ///
+  /// CU-3, EP-2: [userId] facoltativo, per la spunta del Cuoco sul piano
+  /// di un membro del proprio Gruppo (F20) — SC-5, la nota inviata è
+  /// ignorata dal backend quando non si è il proprietario del piano.
   Future<PlanDay> updateSlotStatus(
     DateTime date,
     String slotId,
     SlotStatus status, {
     String? replacementNote,
+    String? userId,
   }) async {
     final response = await _dio.patch(
       '/plan-days/${isoDate(date)}/slots/$slotId',
       data: {'status': status.toJson(), 'replacementNote': replacementNote},
+      queryParameters: {if (userId != null) 'userId': userId},
     );
     return PlanDay.fromJson(response.data as Map<String, dynamic>);
   }

@@ -8,6 +8,7 @@ import '../../data/plan_day.dart';
 import '../../data/slot_status.dart';
 import '../../data/slot_type.dart';
 import '../../providers/meal_swap_providers.dart';
+import '../../providers/plan_day_providers.dart';
 import '../slot_type_presentation.dart';
 
 /// Riga sintetica di uno slot nella vista settimanale (VS-3, 6.4
@@ -40,6 +41,11 @@ class _WeekSlotRowState extends ConsumerState<WeekSlotRow> {
     final slot = widget.slot;
     final hasContent = slot.content?.trim().isNotEmpty ?? false;
 
+    // CU-2, VS-17: il Cuoco può disporre l'inversione anche sul piano di
+    // un membro del proprio Gruppo; il membro semplice resta in sola
+    // consultazione (UT-12).
+    final member = ref.watch(selectedGroupMemberProvider);
+    final readOnly = member != null && !ref.watch(isCookProvider);
     final origin = ref.watch(mealSwapSelectionProvider);
     if (origin == null) {
       _incompatibleTapped = false;
@@ -67,8 +73,8 @@ class _WeekSlotRowState extends ConsumerState<WeekSlotRow> {
           color: highlight == MealSwapHighlight.origin ? colors.accentSubtle : null,
         ),
         child: InkWell(
-          onTap: () => _onTap(context, origin, highlight),
-          onLongPress: origin == null && isMealSwapOriginEligible(widget.day, slot)
+          onTap: () => _onTap(context, readOnly, origin, highlight),
+          onLongPress: !readOnly && origin == null && isMealSwapOriginEligible(widget.day, slot)
               ? () => ref.read(mealSwapSelectionProvider.notifier).start(MealSwapOrigin(
                     planId: widget.day.planId!,
                     date: widget.day.date,
@@ -110,12 +116,12 @@ class _WeekSlotRowState extends ConsumerState<WeekSlotRow> {
     );
   }
 
-  void _onTap(BuildContext context, MealSwapOrigin? origin, MealSwapHighlight? highlight) {
+  void _onTap(BuildContext context, bool readOnly, MealSwapOrigin? origin, MealSwapHighlight? highlight) {
     if (origin == null) {
       // VS-4: fuori dalla selezione, il tocco apre il contenuto integrale.
       // 6.5 interfaccia.md, 3.3: il tocco prolungato non deve restare
       // l'unica via all'inversione — qui l'azione "Sposta", se ammessa.
-      final eligible = isMealSwapOriginEligible(widget.day, widget.slot);
+      final eligible = !readOnly && isMealSwapOriginEligible(widget.day, widget.slot);
       _openDetailSheet(
         context,
         widget.slot,
@@ -141,7 +147,12 @@ class _WeekSlotRowState extends ConsumerState<WeekSlotRow> {
         // tocco sulla stessa origine non ha altra azione sensata.
         ref.read(mealSwapSelectionProvider.notifier).cancel();
       case MealSwapHighlight.compatible:
-        ref.read(mealSwapControllerProvider.notifier).swap(origin, widget.day.date, widget.slot.slotId);
+        ref.read(mealSwapControllerProvider.notifier).swap(
+              origin,
+              widget.day.date,
+              widget.slot.slotId,
+              userId: ref.read(selectedGroupMemberProvider),
+            );
       case MealSwapHighlight.incompatible:
         if (_incompatibleTapped) {
           // Sempre non nullo qui: `highlight` è già incompatibile.

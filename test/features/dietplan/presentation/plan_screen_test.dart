@@ -15,6 +15,10 @@ import 'package:healthylog/features/dietplan/domain/plan_day_date.dart';
 import 'package:healthylog/features/dietplan/presentation/plan_screen.dart';
 import 'package:healthylog/features/dietplan/providers/diet_plan_providers.dart';
 import 'package:healthylog/features/dietplan/providers/plan_day_providers.dart';
+import 'package:healthylog/features/group/data/cooking_group_api.dart';
+import 'package:healthylog/features/group/providers/cooking_group_providers.dart';
+import 'package:healthylog/features/identity/data/profile_api.dart';
+import 'package:healthylog/features/identity/providers/profile_providers.dart';
 
 /// VG-3, VG-4: tutti gli slot della giornata restano sempre visibili,
 /// quale sia il loro stato di consumo — nessuno nascosto né evidenziato
@@ -153,6 +157,161 @@ class _DayOrRangeAdapter implements HttpClientAdapter {
   }
 }
 
+/// VG-8: nessun Gruppo di appartenenza, la condizione di ogni prova di
+/// questo file salvo quelle dedicate al selettore del membro (F20) —
+/// senza questa risposta il selettore interrogherebbe un client HTTP
+/// reale, non presente nel banco di prova.
+class _NotFoundAdapter implements HttpClientAdapter {
+  @override
+  void close({bool force = false}) {}
+
+  @override
+  Future<ResponseBody> fetch(
+    RequestOptions options,
+    Stream<Uint8List>? requestStream,
+    Future<void>? cancelFuture,
+  ) async {
+    return ResponseBody.fromString(
+      jsonEncode({'code': 'RESOURCE_NOT_FOUND'}),
+      404,
+      headers: {
+        Headers.contentTypeHeader: [Headers.jsonContentType],
+      },
+    );
+  }
+}
+
+CookingGroupApi _noGroupCookingGroupApi() {
+  final dio = Dio(BaseOptions(baseUrl: 'http://example.test'))
+    ..httpClientAdapter = _NotFoundAdapter()
+    ..interceptors.add(ApiErrorInterceptor());
+  return CookingGroupApi(dio);
+}
+
+/// VG-7: distingue il piano proprio da quello di un membro tramite il
+/// parametro `userId` (EP-1) e conta le PATCH ricevute, per verificare
+/// che la spunta non raggiunga mai il server quando si consulta il
+/// piano altrui (VG-9).
+class _MemberAwareAdapter implements HttpClientAdapter {
+  int patchCount = 0;
+  int groupRequestCount = 0;
+
+  /// CU-3, EP-2: l'ultimo `userId` inviato con una PATCH, per verificare
+  /// che la spunta del Cuoco raggiunga il membro giusto.
+  String? lastPatchUserId;
+
+  @override
+  void close({bool force = false}) {}
+
+  @override
+  Future<ResponseBody> fetch(
+    RequestOptions options,
+    Stream<Uint8List>? requestStream,
+    Future<void>? cancelFuture,
+  ) async {
+    if (options.method == 'PATCH') {
+      patchCount++;
+      lastPatchUserId = options.queryParameters['userId'] as String?;
+    }
+    if (options.path.contains('/plan-days/group')) {
+      groupRequestCount++;
+      return ResponseBody.fromString(
+        jsonEncode({
+          'date': isoDate(dateOnly(DateTime.now())),
+          'members': [
+            {
+              'userId': 'user-1',
+              'firstName': 'Io',
+              'lastName': 'Stesso',
+              'date': isoDate(dateOnly(DateTime.now())),
+              'coverage': 'ACTIVE',
+              'planId': 'plan-1',
+              'planName': 'Dieta',
+              'planStartDate': '2026-09-01',
+              'planEndDate': null,
+              'slots': [
+                {
+                  'slotId': 's1',
+                  'type': 'BREAKFAST',
+                  'label': null,
+                  'order': 0,
+                  'content': 'Yogurt e cereali',
+                  'note': null,
+                  'recipeName': null,
+                  'recipeText': null,
+                  'status': 'TO_CONSUME',
+                },
+              ],
+            },
+            {
+              'userId': 'user-2',
+              'firstName': 'Maria',
+              'lastName': 'Verdi',
+              'date': isoDate(dateOnly(DateTime.now())),
+              'coverage': 'ACTIVE',
+              'planId': 'plan-2',
+              'planName': 'Dieta di Maria',
+              'planStartDate': '2026-09-01',
+              'planEndDate': null,
+              'slots': [
+                {
+                  'slotId': 's2',
+                  'type': 'BREAKFAST',
+                  'label': null,
+                  'order': 0,
+                  'content': 'Pasta di Maria',
+                  'note': null,
+                  'recipeName': null,
+                  'recipeText': null,
+                  'status': 'CONSUMED',
+                },
+              ],
+            },
+          ],
+        }),
+        200,
+        headers: {
+          Headers.contentTypeHeader: [Headers.jsonContentType],
+        },
+      );
+    }
+    final userId = options.queryParameters['userId'] as String?;
+    final content = userId == 'user-2' ? 'Pasta di Maria' : 'Yogurt e cereali';
+    final status = userId == 'user-2' ? 'CONSUMED' : 'TO_CONSUME';
+    return ResponseBody.fromString(
+      jsonEncode({
+        'date': isoDate(dateOnly(DateTime.now())),
+        'coverage': 'ACTIVE',
+        'planId': 'plan-1',
+        'planName': 'Dieta',
+        'planStartDate': '2026-09-01',
+        'planEndDate': null,
+        'slots': [
+          {
+            'slotId': 's1',
+            'type': 'BREAKFAST',
+            'label': null,
+            'order': 0,
+            'content': content,
+            'note': null,
+            'recipeName': null,
+            'recipeText': null,
+            'status': status,
+            // CU-4: sul proprio piano, l'ultima spunta risulta apposta
+            // da Maria — assente nella proiezione del piano altrui
+            // (SC-12), che il backend non espone comunque.
+            if (userId == null) 'statusChangedBy': 'user-2',
+          },
+        ],
+      }),
+      200,
+      headers: {
+        Headers.contentTypeHeader: [Headers.jsonContentType],
+      },
+    );
+  }
+}
+
 const _weekdayLabels = ['lunedì', 'martedì', 'mercoledì', 'giovedì', 'venerdì', 'sabato', 'domenica'];
 
 /// Le sette giornate di una settimana (VS-1), ciascuna con un contenuto
@@ -239,6 +398,7 @@ Future<void> _pumpDailyView(
     ProviderScope(
       overrides: [
         planDayApiProvider.overrideWithValue(PlanDayApi(dio)),
+        cookingGroupApiProvider.overrideWithValue(_noGroupCookingGroupApi()),
         appDatabaseProvider.overrideWithValue(
           AppDatabase(NativeDatabase.memory()),
         ),
@@ -265,6 +425,7 @@ Future<void> _pumpDailyViewWithOwnedPlans(
     ProviderScope(
       overrides: [
         planDayApiProvider.overrideWithValue(PlanDayApi(dio)),
+        cookingGroupApiProvider.overrideWithValue(_noGroupCookingGroupApi()),
         dietPlanApiProvider.overrideWithValue(ownedPlansApi),
         appDatabaseProvider.overrideWithValue(
           AppDatabase(NativeDatabase.memory()),
@@ -284,6 +445,90 @@ DietPlanApi _ownedPlansApi(List<Map<String, dynamic>> plans) {
   dio.httpClientAdapter = _JsonAdapter(plans);
   dio.interceptors.add(ApiErrorInterceptor());
   return DietPlanApi(dio);
+}
+
+/// Condiviso dai gruppi "selettore del membro" e "modalità affiancata"
+/// (4.2, 6.3 interfaccia.md): un Gruppo di due membri, io ("Io Stesso")
+/// e "Maria Verdi".
+Map<String, dynamic> _memberSelectorProfileJson() => {
+      'id': 'user-1',
+      'email': 'utente@esempio.test',
+      'username': 'utente',
+      'firstName': 'Io',
+      'lastName': 'Stesso',
+      'birthDate': '2000-01-01',
+      'birthPlace': 'Roma',
+      'sex': 'MALE',
+      'role': 'USER',
+      'height': null,
+      'timezone': 'Europe/Rome',
+    };
+
+/// [cook]: "Io Stesso" è sempre il Proprietario (owner: true) — nel
+/// dominio reale il Proprietario è sempre anche Cuoco (CU-1), quindi
+/// [cook]: false rappresenta qui solo il caso di prova "membro semplice
+/// non Cuoco" per UT-12/CC-23, non uno stato raggiungibile davvero da un
+/// Proprietario.
+Map<String, dynamic> _memberSelectorGroupJson({bool cook = true}) => {
+      'id': 'group-1',
+      'name': 'Casa',
+      'ownerId': 'user-1',
+      'members': [
+        {
+          'userId': 'user-1',
+          'firstName': 'Io',
+          'lastName': 'Stesso',
+          'owner': true,
+          'cook': cook,
+          'joinedAt': '2026-09-01T00:00:00Z',
+        },
+        {
+          'userId': 'user-2',
+          'firstName': 'Maria',
+          'lastName': 'Verdi',
+          'owner': false,
+          'cook': false,
+          'joinedAt': '2026-09-02T00:00:00Z',
+        },
+      ],
+      'createdAt': '2026-09-01T00:00:00Z',
+    };
+
+/// `compact` (< 600, app_breakpoints.dart): riproduce il selettore a
+/// menu a discesa di uno smartphone, a differenza della riga di avatar
+/// usata dagli altri banchi di prova alla larghezza predefinita.
+/// [cook]: se "Io Stesso" è Cuoco del Gruppo (CU-2, CU-3) — vero di
+/// default, come lo è sempre il Proprietario nel dominio reale.
+Future<_MemberAwareAdapter> _pumpWithGroup(WidgetTester tester, {bool compact = false, bool cook = true}) async {
+  if (compact) {
+    tester.view.physicalSize = const Size(400, 800);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.reset);
+  }
+  final planDayAdapter = _MemberAwareAdapter();
+  final planDayDio = Dio(BaseOptions(baseUrl: 'http://example.test'))
+    ..httpClientAdapter = planDayAdapter
+    ..interceptors.add(ApiErrorInterceptor());
+  final profileDio = Dio(BaseOptions(baseUrl: 'http://example.test'))
+    ..httpClientAdapter = _JsonAdapter(_memberSelectorProfileJson())
+    ..interceptors.add(ApiErrorInterceptor());
+  final groupDio = Dio(BaseOptions(baseUrl: 'http://example.test'))
+    ..httpClientAdapter = _JsonAdapter(_memberSelectorGroupJson(cook: cook))
+    ..interceptors.add(ApiErrorInterceptor());
+
+  await tester.pumpWidget(
+    ProviderScope(
+      overrides: [
+        planDayApiProvider.overrideWithValue(PlanDayApi(planDayDio)),
+        profileApiProvider.overrideWithValue(ProfileApi(profileDio)),
+        cookingGroupApiProvider.overrideWithValue(CookingGroupApi(groupDio)),
+        appDatabaseProvider.overrideWithValue(AppDatabase(NativeDatabase.memory())),
+      ],
+      child: MaterialApp(theme: AppTheme.light, home: const PlanScreen()),
+    ),
+  );
+  await tester.pumpAndSettle();
+  return planDayAdapter;
 }
 
 void main() {
@@ -334,6 +579,7 @@ void main() {
         ProviderScope(
           overrides: [
             planDayApiProvider.overrideWithValue(PlanDayApi(dio)),
+            cookingGroupApiProvider.overrideWithValue(_noGroupCookingGroupApi()),
             appDatabaseProvider.overrideWithValue(
               AppDatabase(NativeDatabase.memory()),
             ),
@@ -385,6 +631,7 @@ void main() {
         ProviderScope(
           overrides: [
             planDayApiProvider.overrideWithValue(PlanDayApi(dio)),
+            cookingGroupApiProvider.overrideWithValue(_noGroupCookingGroupApi()),
             appDatabaseProvider.overrideWithValue(
               AppDatabase(NativeDatabase.memory()),
             ),
@@ -446,6 +693,7 @@ void main() {
         ProviderScope(
           overrides: [
             planDayApiProvider.overrideWithValue(PlanDayApi(dio)),
+            cookingGroupApiProvider.overrideWithValue(_noGroupCookingGroupApi()),
             appDatabaseProvider.overrideWithValue(
               AppDatabase(NativeDatabase.memory()),
             ),
@@ -492,6 +740,7 @@ void main() {
         ProviderScope(
           overrides: [
             planDayApiProvider.overrideWithValue(PlanDayApi(dio)),
+            cookingGroupApiProvider.overrideWithValue(_noGroupCookingGroupApi()),
             appDatabaseProvider.overrideWithValue(
               AppDatabase(NativeDatabase.memory()),
             ),
@@ -617,6 +866,7 @@ void main() {
         ProviderScope(
           overrides: [
             planDayApiProvider.overrideWithValue(PlanDayApi(planDayDio)),
+            cookingGroupApiProvider.overrideWithValue(_noGroupCookingGroupApi()),
             dietPlanApiProvider.overrideWithValue(DietPlanApi(dietPlanDio)),
             appDatabaseProvider.overrideWithValue(
               AppDatabase(NativeDatabase.memory()),
@@ -724,6 +974,7 @@ void main() {
         ProviderScope(
           overrides: [
             planDayApiProvider.overrideWithValue(PlanDayApi(dio)),
+            cookingGroupApiProvider.overrideWithValue(_noGroupCookingGroupApi()),
             appDatabaseProvider.overrideWithValue(AppDatabase(NativeDatabase.memory())),
           ],
           child: MaterialApp(theme: AppTheme.light, home: const PlanScreen()),
@@ -872,6 +1123,225 @@ void main() {
         expect(find.text('Con parmigiano a parte'), findsOneWidget);
         // La vista settimanale resta sotto il foglio, non sostituita (VS-4).
         expect(find.text('Settimana'), findsOneWidget);
+      },
+    );
+  });
+
+  group('selettore del membro (4.2 interfaccia.md; VG-7, VG-9, VG-11)', () {
+    testWidgets(
+      'il tocco su un altro membro presenta il suo piano con la riga di contesto, in sola consultazione (VG-9, VG-11)',
+      (tester) async {
+        await _pumpWithGroup(tester);
+
+        expect(find.text('Yogurt e cereali'), findsOneWidget);
+        expect(find.text('Stai vedendo il piano di Maria'), findsNothing);
+
+        await tester.tap(find.byTooltip('Maria Verdi'));
+        await tester.pumpAndSettle();
+
+        expect(find.text('Pasta di Maria'), findsOneWidget);
+        expect(find.text('Stai vedendo il piano di Maria'), findsOneWidget);
+      },
+    );
+
+    testWidgets(
+      'la spunta è disattivata sul piano di un altro membro per chi non è Cuoco, senza raggiungere il server (UT-12, CC-23)',
+      (tester) async {
+        final adapter = await _pumpWithGroup(tester, cook: false);
+
+        await tester.tap(find.byTooltip('Maria Verdi'));
+        await tester.pumpAndSettle();
+        expect(find.text('Pasta di Maria'), findsOneWidget);
+
+        await tester.tap(find.byIcon(Icons.check));
+        await tester.pumpAndSettle();
+
+        expect(adapter.patchCount, 0);
+      },
+    );
+
+    testWidgets(
+      'la spunta è disponibile sul piano di un membro per il Cuoco, e raggiunge il server con il suo identificativo (CU-3, EP-2, CC-22)',
+      (tester) async {
+        final adapter = await _pumpWithGroup(tester);
+
+        await tester.tap(find.byTooltip('Maria Verdi'));
+        await tester.pumpAndSettle();
+        expect(find.text('Pasta di Maria'), findsOneWidget);
+
+        await tester.tap(find.byIcon(Icons.check));
+        await tester.pumpAndSettle();
+
+        expect(adapter.patchCount, 1);
+        expect(adapter.lastPatchUserId, 'user-2');
+      },
+    );
+
+    testWidgets(
+      'dal menu a discesa di uno schermo stretto, il ritorno al proprio piano funziona dopo aver consultato un membro (VG-7)',
+      (tester) async {
+        await _pumpWithGroup(tester, compact: true);
+        expect(find.text('Yogurt e cereali'), findsOneWidget);
+
+        // 4.2 interfaccia.md: su schermo stretto il selettore è un menu
+        // a discesa, non la riga di avatar.
+        await tester.tap(find.text('Io'));
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('Maria Verdi'));
+        await tester.pumpAndSettle();
+        expect(find.text('Pasta di Maria'), findsOneWidget);
+
+        // Il ritorno al proprio piano è la prima voce del menu, quella
+        // che rappresenta l'Utente stesso.
+        await tester.tap(find.text('Maria'));
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('Io Stesso'));
+        await tester.pumpAndSettle();
+
+        expect(find.text('Yogurt e cereali'), findsOneWidget);
+        expect(find.text('Pasta di Maria'), findsNothing);
+        expect(find.text('Stai vedendo il piano di Maria'), findsNothing);
+      },
+    );
+
+    testWidgets(
+      'la card espansa mostra l\'autore dell\'ultima spunta sul proprio piano (CU-4)',
+      (tester) async {
+        await _pumpWithGroup(tester);
+
+        await tester.tap(find.text('Yogurt e cereali'));
+        await tester.pumpAndSettle();
+
+        expect(find.text('Ripristinato da Maria'), findsOneWidget);
+      },
+    );
+  });
+
+  group('modalità affiancata (6.3 interfaccia.md; VG-12, VG-13, VG-14)', () {
+    testWidgets(
+      'l\'icona columns mostra i pasti di tutti i membri, raggruppati per slot',
+      (tester) async {
+        final adapter = await _pumpWithGroup(tester);
+        expect(find.text('Yogurt e cereali'), findsOneWidget);
+
+        await tester.tap(find.byTooltip('Vista affiancata'));
+        await tester.pumpAndSettle();
+
+        expect(find.text('Yogurt e cereali'), findsOneWidget);
+        expect(find.text('Pasta di Maria'), findsOneWidget);
+        // VG-11: nessuna riga di contesto mentre si guardano tutti insieme.
+        expect(find.text('Stai vedendo il piano di Maria'), findsNothing);
+        expect(adapter.groupRequestCount, greaterThan(0));
+      },
+    );
+
+    testWidgets(
+      'si aggiorna automaticamente ogni 60 secondi mentre resta aperta, e si ferma alla chiusura (SY-20)',
+      (tester) async {
+        final adapter = await _pumpWithGroup(tester);
+        await tester.tap(find.byTooltip('Vista affiancata'));
+        await tester.pumpAndSettle();
+        final afterOpen = adapter.groupRequestCount;
+
+        await tester.pump(const Duration(seconds: 60));
+        await tester.pump();
+        expect(adapter.groupRequestCount, afterOpen + 1);
+
+        await tester.pump(const Duration(seconds: 60));
+        await tester.pump();
+        expect(adapter.groupRequestCount, afterOpen + 2);
+
+        // La chiusura della vista ferma il timer: nessuna ulteriore
+        // richiesta, anche trascorso l'intervallo.
+        await tester.tap(find.byTooltip('Vista singola'));
+        await tester.pumpAndSettle();
+        final afterClose = adapter.groupRequestCount;
+
+        await tester.pump(const Duration(seconds: 60));
+        await tester.pump();
+        expect(adapter.groupRequestCount, afterClose);
+      },
+    );
+
+    testWidgets(
+      'il secondo tocco sull\'icona columns torna alla vista del singolo membro',
+      (tester) async {
+        await _pumpWithGroup(tester);
+
+        await tester.tap(find.byTooltip('Vista affiancata'));
+        await tester.pumpAndSettle();
+        expect(find.text('Pasta di Maria'), findsOneWidget);
+
+        await tester.tap(find.byTooltip('Vista singola'));
+        await tester.pumpAndSettle();
+
+        expect(find.text('Yogurt e cereali'), findsOneWidget);
+        expect(find.text('Pasta di Maria'), findsNothing);
+      },
+    );
+
+    testWidgets(
+      'il membro non Cuoco vede la spunta solo sulla propria colonna nella griglia (UT-12, CC-23)',
+      (tester) async {
+        final adapter = await _pumpWithGroup(tester, cook: false);
+        await tester.tap(find.byTooltip('Vista affiancata'));
+        await tester.pumpAndSettle();
+
+        // Un solo pulsante "check" in tutta la griglia: quello sulla
+        // propria colonna.
+        expect(find.byIcon(Icons.check), findsOneWidget);
+
+        await tester.tap(find.byIcon(Icons.check));
+        await tester.pumpAndSettle();
+
+        expect(adapter.patchCount, 1);
+        expect(adapter.lastPatchUserId, isNull);
+      },
+    );
+
+    testWidgets(
+      'il Cuoco vede e usa la spunta su tutte le colonne della griglia (CU-3, EP-2, CC-22)',
+      (tester) async {
+        final adapter = await _pumpWithGroup(tester);
+        await tester.tap(find.byTooltip('Vista affiancata'));
+        await tester.pumpAndSettle();
+
+        // Un pulsante "check" per colonna: la propria e quella di Maria.
+        expect(find.byIcon(Icons.check), findsNWidgets(2));
+
+        await tester.tap(find.byIcon(Icons.check).last);
+        await tester.pumpAndSettle();
+
+        expect(adapter.patchCount, 1);
+        expect(adapter.lastPatchUserId, 'user-2');
+      },
+    );
+
+    testWidgets(
+      'resta utilizzabile senza sovrapposizioni sia su schermo stretto sia ampio (VG-15)',
+      (tester) async {
+        // `compact` (< 600, app_breakpoints.dart): due colonne visibili,
+        // con scorrimento per le restanti (6.3 interfaccia.md).
+        tester.view.physicalSize = const Size(400, 800);
+        tester.view.devicePixelRatio = 1.0;
+        addTearDown(tester.view.reset);
+
+        await _pumpWithGroup(tester);
+        await tester.tap(find.byTooltip('Vista affiancata'));
+        await tester.pumpAndSettle();
+
+        expect(find.text('Yogurt e cereali'), findsOneWidget);
+        expect(find.text('Pasta di Maria'), findsOneWidget);
+        expect(tester.takeException(), isNull);
+
+        // `expanded` e oltre: tutte le colonne visibili, larghezza
+        // distribuita, senza scorrimento necessario.
+        tester.view.physicalSize = const Size(1200, 800);
+        await tester.pumpAndSettle();
+
+        expect(find.text('Yogurt e cereali'), findsOneWidget);
+        expect(find.text('Pasta di Maria'), findsOneWidget);
+        expect(tester.takeException(), isNull);
       },
     );
   });

@@ -13,6 +13,8 @@ import 'package:healthylog/features/dietplan/data/plan_day_api.dart';
 import 'package:healthylog/features/dietplan/domain/plan_day_date.dart';
 import 'package:healthylog/features/dietplan/providers/diet_plan_providers.dart';
 import 'package:healthylog/features/dietplan/providers/plan_day_providers.dart';
+import 'package:healthylog/features/group/data/cooking_group_api.dart';
+import 'package:healthylog/features/group/providers/cooking_group_providers.dart';
 import 'package:healthylog/features/identity/data/identity_api.dart';
 import 'package:healthylog/features/identity/data/profile_api.dart';
 import 'package:healthylog/features/identity/providers/identity_providers.dart';
@@ -132,6 +134,13 @@ Future<ProviderContainer> _pumpAuthenticatedApp(
       '"planStartDate":null,"planEndDate":null,"slots":[]'
       '}',
     );
+  // VG-8: nessun Gruppo di appartenenza, così MemberSelector (F20) non
+  // presenta nulla nell'intestazione di *Piano* — senza questa risposta
+  // interrogherebbe un client HTTP reale, non presente in questo banco
+  // di prova.
+  final cookingGroupDio = Dio(BaseOptions(baseUrl: 'http://example.test'))
+    ..httpClientAdapter = _StatusCodeAdapter(404, '{"code":"RESOURCE_NOT_FOUND"}')
+    ..interceptors.add(ApiErrorInterceptor());
 
   final container = ProviderContainer(
     overrides: [
@@ -140,6 +149,7 @@ Future<ProviderContainer> _pumpAuthenticatedApp(
       profileApiProvider.overrideWithValue(ProfileApi(profileDio)),
       dietPlanApiProvider.overrideWithValue(DietPlanApi(dietPlanDio)),
       planDayApiProvider.overrideWithValue(PlanDayApi(planDayDio)),
+      cookingGroupApiProvider.overrideWithValue(CookingGroupApi(cookingGroupDio)),
       // F14: la base dati reale userebbe path_provider/flutter_secure_storage,
       // assenti nella VM di test (sospensione indefinita, non un errore).
       appDatabaseProvider.overrideWithValue(
@@ -250,6 +260,9 @@ void main() {
             '"planStartDate":null,"planEndDate":null,"slots":[]'
             '}';
       });
+      final cookingGroupDio = Dio(BaseOptions(baseUrl: 'http://example.test'))
+        ..httpClientAdapter = _StatusCodeAdapter(404, '{"code":"RESOURCE_NOT_FOUND"}')
+        ..interceptors.add(ApiErrorInterceptor());
 
       final container = ProviderContainer(
         overrides: [
@@ -258,6 +271,7 @@ void main() {
           profileApiProvider.overrideWithValue(ProfileApi(profileDio)),
           dietPlanApiProvider.overrideWithValue(DietPlanApi(dietPlanDio)),
           planDayApiProvider.overrideWithValue(PlanDayApi(planDayDio)),
+          cookingGroupApiProvider.overrideWithValue(CookingGroupApi(cookingGroupDio)),
           appDatabaseProvider.overrideWithValue(
             AppDatabase(NativeDatabase.memory()),
           ),

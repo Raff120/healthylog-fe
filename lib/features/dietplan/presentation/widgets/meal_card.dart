@@ -7,6 +7,8 @@ import '../../../../core/api/api_error_messages.dart';
 import '../../../../core/api/api_exception.dart';
 import '../../../../core/api/connectivity_status.dart';
 import '../../../../core/widgets/app_text_field.dart';
+import '../../../group/providers/cooking_group_providers.dart';
+import '../../../identity/providers/profile_providers.dart';
 import '../../data/plan_day.dart';
 import '../../data/slot_status.dart';
 import '../../data/slot_type.dart';
@@ -28,6 +30,7 @@ class MealCard extends ConsumerStatefulWidget {
     required this.date,
     required this.canCheck,
     required this.planId,
+    this.member,
   });
 
   final PlanDaySlot slot;
@@ -43,6 +46,12 @@ class MealCard extends ConsumerStatefulWidget {
   /// Piano che copre la giornata, `null` se [canCheck] è `false`
   /// (nessuna inversione possibile senza un piano Attivo, IN-16).
   final String? planId;
+
+  /// CU-3, EP-2: identificativo del membro su cui il Cuoco sta operando,
+  /// `null` per il proprio piano. SC-5: quando valorizzato, la nota di
+  /// sostituzione non è né mostrata né scrivibile — il Cuoco non vi ha
+  /// accesso (SC-12).
+  final String? member;
 
   @override
   ConsumerState<MealCard> createState() => _MealCardState();
@@ -82,6 +91,27 @@ class _MealCardState extends ConsumerState<MealCard> {
     }
   }
 
+  /// CU-4: risolve l'autore al nome del membro del Gruppo, `null` se
+  /// coincide con l'Utente stesso (spunta ordinaria, la più comune) o se
+  /// profilo e Gruppo non sono ancora disponibili.
+  String? _cookAttributionName(WidgetRef ref, String? statusChangedBy) {
+    if (statusChangedBy == null) return null;
+    final currentUserId = ref.watch(profileControllerProvider).value?.id;
+    if (currentUserId == null || statusChangedBy == currentUserId) return null;
+    final group = ref.watch(currentCookingGroupProvider).value;
+    if (group == null) return null;
+    for (final member in group.members) {
+      if (member.userId == statusChangedBy) return member.firstName;
+    }
+    return null;
+  }
+
+  String _statusVerb(SlotStatus status) => switch (status) {
+    SlotStatus.consumed => 'Consumato',
+    SlotStatus.skipped => 'Saltato',
+    SlotStatus.toConsume => 'Ripristinato',
+  };
+
   /// SC-4, SC-5, 4.5 interfaccia.md: salvata all'uscita dal campo, non a
   /// ogni carattere. Nessuna richiesta se il testo non è cambiato.
   Future<void> _saveReplacementNote() async {
@@ -93,6 +123,7 @@ class _MealCardState extends ConsumerState<MealCard> {
           widget.slot.slotId,
           SlotStatus.skipped,
           replacementNote: text.isEmpty ? null : text,
+          userId: widget.member,
         );
   }
 
@@ -115,6 +146,11 @@ class _MealCardState extends ConsumerState<MealCard> {
     final hasContent = slot.content?.trim().isNotEmpty ?? false;
     final hasRecipe = slot.recipeName?.trim().isNotEmpty ?? false;
     final hasNote = slot.note?.trim().isNotEmpty ?? false;
+    // CU-4: il nome del Cuoco che ha spuntato al posto proprio, quando
+    // diverso da sé — mai per la propria spunta ordinaria, né per una
+    // giornata già in sola consultazione (il campo non arriva comunque
+    // in quella proiezione, SC-12).
+    final cookAttributionName = widget.member == null ? _cookAttributionName(ref, slot.statusChangedBy) : null;
 
     // "Da consumare" non ha colore proprio (2.2): il bordo resta nel
     // divisore forte, non in un accento di stato.
@@ -238,7 +274,23 @@ class _MealCardState extends ConsumerState<MealCard> {
                         ],
                       ),
                     ],
-                    if (_expanded && widget.slot.status == SlotStatus.skipped) ...[
+                    if (_expanded && cookAttributionName != null) ...[
+                      const SizedBox(height: AppSpacing.sm),
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Icon(Icons.person_outline, size: 16, color: colors.textSecondary),
+                          const SizedBox(width: AppSpacing.xxs),
+                          Expanded(
+                            child: Text(
+                              '${_statusVerb(slot.status)} da $cookAttributionName',
+                              style: typography.caption.copyWith(color: colors.textSecondary),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                    if (_expanded && widget.slot.status == SlotStatus.skipped && widget.member == null) ...[
                       const SizedBox(height: AppSpacing.sm),
                       GestureDetector(
                         onTap: offline
@@ -344,7 +396,7 @@ class _MealCardState extends ConsumerState<MealCard> {
     }
     await ref
         .read(planDaySlotStatusControllerProvider.notifier)
-        .updateStatus(widget.date, widget.slot.slotId, status);
+        .updateStatus(widget.date, widget.slot.slotId, status, userId: widget.member);
     if (!context.mounted) return;
     final state = ref.read(planDaySlotStatusControllerProvider);
     state?.whenOrNull(

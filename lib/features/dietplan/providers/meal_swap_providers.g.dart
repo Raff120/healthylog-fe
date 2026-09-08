@@ -158,7 +158,7 @@ final class MealSwapControllerProvider
 }
 
 String _$mealSwapControllerHash() =>
-    r'99f2f763a37200133f482061084910ba062ec7ba';
+    r'7d5d60c73abde930750d35aa5f3b3fd51100f152';
 
 /// Esecuzione dello scambio (AP-11). Nessuno stato da esporre oltre
 /// all'esito: la giornata aggiornata si ottiene invalidando la cache di

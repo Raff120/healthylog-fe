@@ -56,6 +56,14 @@ String _$cookingGroupApiHash() => r'0501c778b08b7e9e5fef8ad5529b0eb5867c1639';
 /// segnalare — la schermata lo distingue leggendo il codice dell'errore.
 /// Ricaricato dopo ogni azione che modifica composizione o denominazione
 /// (`ref.invalidateSelf`, tramite `ref.invalidate` dai controller sotto).
+///
+/// `retry: null` (F20): l'assenza di Gruppo è l'esito più comune, non un
+/// guasto transitorio — il ritentativo automatico di Riverpod (backoff
+/// fino a 6,4 s, illimitato) interrogherebbe il server all'infinito in
+/// sottofondo per ogni Utente privo di Gruppo, da quando `MemberSelector`
+/// osserva questo provider a ogni apertura di *Piano* (VG-7), non più
+/// solo dalla schermata Gruppo — scoperto verificando F20 dal vivo, vedi
+/// decisioni.md.
 
 @ProviderFor(CurrentCookingGroup)
 final currentCookingGroupProvider = CurrentCookingGroupProvider._();
@@ -65,6 +73,14 @@ final currentCookingGroupProvider = CurrentCookingGroupProvider._();
 /// segnalare — la schermata lo distingue leggendo il codice dell'errore.
 /// Ricaricato dopo ogni azione che modifica composizione o denominazione
 /// (`ref.invalidateSelf`, tramite `ref.invalidate` dai controller sotto).
+///
+/// `retry: null` (F20): l'assenza di Gruppo è l'esito più comune, non un
+/// guasto transitorio — il ritentativo automatico di Riverpod (backoff
+/// fino a 6,4 s, illimitato) interrogherebbe il server all'infinito in
+/// sottofondo per ogni Utente privo di Gruppo, da quando `MemberSelector`
+/// osserva questo provider a ogni apertura di *Piano* (VG-7), non più
+/// solo dalla schermata Gruppo — scoperto verificando F20 dal vivo, vedi
+/// decisioni.md.
 final class CurrentCookingGroupProvider
     extends $AsyncNotifierProvider<CurrentCookingGroup, CookingGroup> {
   /// RG-3: il Gruppo dell'Utente autenticato. Un `RESOURCE_NOT_FOUND` (404)
@@ -72,11 +88,19 @@ final class CurrentCookingGroupProvider
   /// segnalare — la schermata lo distingue leggendo il codice dell'errore.
   /// Ricaricato dopo ogni azione che modifica composizione o denominazione
   /// (`ref.invalidateSelf`, tramite `ref.invalidate` dai controller sotto).
+  ///
+  /// `retry: null` (F20): l'assenza di Gruppo è l'esito più comune, non un
+  /// guasto transitorio — il ritentativo automatico di Riverpod (backoff
+  /// fino a 6,4 s, illimitato) interrogherebbe il server all'infinito in
+  /// sottofondo per ogni Utente privo di Gruppo, da quando `MemberSelector`
+  /// osserva questo provider a ogni apertura di *Piano* (VG-7), non più
+  /// solo dalla schermata Gruppo — scoperto verificando F20 dal vivo, vedi
+  /// decisioni.md.
   CurrentCookingGroupProvider._()
     : super(
         from: null,
         argument: null,
-        retry: null,
+        retry: _noRetry,
         name: r'currentCookingGroupProvider',
         isAutoDispose: true,
         dependencies: null,
@@ -92,13 +116,21 @@ final class CurrentCookingGroupProvider
 }
 
 String _$currentCookingGroupHash() =>
-    r'826c977a5d3251428af5971a647fc84a97c1e9be';
+    r'3598454ad14de654c518bf3e3e42efc3fbe317e7';
 
 /// RG-3: il Gruppo dell'Utente autenticato. Un `RESOURCE_NOT_FOUND` (404)
 /// significa assenza di Gruppo (8.1 interfaccia.md), non un errore da
 /// segnalare — la schermata lo distingue leggendo il codice dell'errore.
 /// Ricaricato dopo ogni azione che modifica composizione o denominazione
 /// (`ref.invalidateSelf`, tramite `ref.invalidate` dai controller sotto).
+///
+/// `retry: null` (F20): l'assenza di Gruppo è l'esito più comune, non un
+/// guasto transitorio — il ritentativo automatico di Riverpod (backoff
+/// fino a 6,4 s, illimitato) interrogherebbe il server all'infinito in
+/// sottofondo per ogni Utente privo di Gruppo, da quando `MemberSelector`
+/// osserva questo provider a ogni apertura di *Piano* (VG-7), non più
+/// solo dalla schermata Gruppo — scoperto verificando F20 dal vivo, vedi
+/// decisioni.md.
 
 abstract class _$CurrentCookingGroup extends $AsyncNotifier<CookingGroup> {
   FutureOr<CookingGroup> build();
