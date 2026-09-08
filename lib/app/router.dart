@@ -185,7 +185,14 @@ GoRouter goRouter(Ref ref) {
         path: '/diet-plans/:id',
         builder: (context, state) => DietPlanViewScreen(planId: state.pathParameters['id']!),
       ),
-      GoRoute(path: '/diet-plan-templates', builder: (context, state) => const DietPlanTemplateListScreen()),
+      GoRoute(
+        path: '/diet-plan-templates',
+        // 3.1 interfaccia.md: *Template* è una destinazione principale del
+        // Nutrizionista, con la barra persistente; per l'Utente, che vi
+        // arriva dalla creazione del piano (CT-1), la shell si ritrae da
+        // sola (vedi `MainShell`).
+        builder: (context, state) => const MainShell(child: DietPlanTemplateListScreen()),
+      ),
       GoRoute(
         path: '/diet-plan-templates/:id',
         builder: (context, state) => DietPlanTemplatePreviewScreen(templateId: state.pathParameters['id']!),

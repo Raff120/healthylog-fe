@@ -16,14 +16,16 @@ import 'app_destination.dart';
 /// dell'intera applicazione (`app_breakpoints.dart`), non una soglia
 /// propria.
 ///
-/// Le sole voci *Piano*/*Pazienti* e *Profilo* sono avvolte da questo
-/// involucro: le altre destinazioni abilitate (*Template* per il
-/// Nutrizionista) si raggiungono con una normale navigazione in avanti
-/// (schermo pieno, freccia di ritorno), non ancora integrate nella
-/// stessa barra persistente — un'integrazione completa (`StatefulShellRoute`
-/// di go_router, con conservazione dello stato di ciascuna destinazione,
-/// 3.2) è rinviata a quando le destinazioni avranno un contenuto reale
-/// da conservare (F23+, F25+), vedi decisioni.md.
+/// Ogni destinazione abilitata del ruolo è avvolta da questo involucro
+/// (*Piano*/*Pazienti*, *Template* per il Nutrizionista, *Profilo*). Una
+/// rotta avvolta che per il ruolo corrente non sia una destinazione —
+/// *Template* per l'Utente, raggiunta dalla creazione del piano (CT-1)
+/// — è resa senza barra, come una normale schermata in avanti: la
+/// stessa rotta serve così entrambi i ruoli (F22, vedi decisioni.md).
+/// Un'integrazione completa (`StatefulShellRoute` di go_router, con
+/// conservazione dello stato di ciascuna destinazione, 3.2) resta
+/// rinviata a quando le destinazioni avranno un contenuto reale da
+/// conservare (F23+, F25+).
 class MainShell extends ConsumerWidget {
   const MainShell({super.key, required this.child});
 
@@ -39,6 +41,7 @@ class MainShell extends ConsumerWidget {
     final selectedIndex = destinations.indexWhere(
       (d) => d.route == currentRoute,
     );
+    if (selectedIndex == -1) return child;
 
     void onSelect(int index) {
       final destination = destinations[index];
@@ -59,11 +62,9 @@ class MainShell extends ConsumerWidget {
         }
         return;
       }
-      if (destination.route == '/home' || destination.route == '/profile') {
-        context.go(destination.route!);
-      } else {
-        context.push(destination.route!);
-      }
+      // Le destinazioni della barra si sostituiscono a vicenda (3.2), non
+      // si impilano: nessuna freccia di ritorno tra l'una e l'altra.
+      context.go(destination.route!);
     }
 
     final breakpoint = context.breakpoint;
