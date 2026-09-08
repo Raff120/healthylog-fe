@@ -29,6 +29,7 @@ import '../features/identity/presentation/registration_details_screen.dart';
 import '../features/identity/presentation/role_selection_screen.dart';
 import '../features/identity/presentation/settings_screen.dart';
 import '../features/group/presentation/group_screen.dart';
+import '../features/workout/presentation/activity_screen.dart';
 import 'navigation/main_shell.dart';
 import 'navigation/role_home_screen.dart';
 import 'splash_screen.dart';
@@ -143,6 +144,12 @@ GoRouter goRouter(Ref ref) {
         path: '/home',
         // 3.1 interfaccia.md: *Piano* per l'Utente, *Pazienti* per il Nutrizionista (F22).
         builder: (context, state) => const MainShell(child: RoleHomeScreen()),
+      ),
+      GoRoute(
+        // 10.1 interfaccia.md: destinazione principale dell'Utente, con
+        // allenamenti e misure dietro il segmented control.
+        path: '/activity',
+        builder: (context, state) => const MainShell(child: ActivityScreen()),
       ),
       GoRoute(
         path: '/profile',
