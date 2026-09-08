@@ -10,7 +10,11 @@ import 'package:healthylog/app/theme/app_theme.dart';
 import 'package:healthylog/core/api/api_error_interceptor.dart';
 import 'package:healthylog/features/dietplan/data/diet_plan_api.dart';
 import 'package:healthylog/features/dietplan/presentation/diet_plan_management_screen.dart';
+import 'package:healthylog/features/care/data/care_api.dart';
+import 'package:healthylog/features/care/providers/care_providers.dart';
 import 'package:healthylog/features/dietplan/providers/diet_plan_providers.dart';
+
+import '../../../support/care_api_stub.dart';
 
 /// 7.1 interfaccia.md: card del piano in corso, voci compatte per gli
 /// altri piani (Bozza compresa, PA-9) e azioni di stato (F10).
@@ -77,7 +81,7 @@ Map<String, dynamic> _planJson({
 /// lettura dell'elenco.
 bool _isListRequest(RequestOptions options) => options.method == 'GET' && options.path == '/diet-plans';
 
-Future<void> _pumpManagementScreen(WidgetTester tester, DietPlanApi api) async {
+Future<void> _pumpManagementScreen(WidgetTester tester, DietPlanApi api, {CareApi? careApi}) async {
   final router = GoRouter(
     initialLocation: '/profile/plans',
     routes: [
@@ -96,7 +100,11 @@ Future<void> _pumpManagementScreen(WidgetTester tester, DietPlanApi api) async {
 
   await tester.pumpWidget(
     ProviderScope(
-      overrides: [dietPlanApiProvider.overrideWithValue(api)],
+      overrides: [
+        dietPlanApiProvider.overrideWithValue(api),
+        // F22: nessun collegamento (Utente autonomo), salvo indicazione contraria.
+        careApiProvider.overrideWithValue(careApi ?? stubCareApi()),
+      ],
       child: MaterialApp.router(theme: AppTheme.light, routerConfig: router),
     ),
   );
@@ -356,5 +364,66 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Nuovo piano'), findsOneWidget);
+  });
+
+  /// UT-8, TR-17, 7.1 interfaccia.md (F22): al Paziente non compaiono le
+  /// azioni sul piano redatto dal proprio Nutrizionista né il pulsante di
+  /// creazione; la card indica "Redatto da".
+  testWidgets('il Paziente non dispone del piano redatto dal Nutrizionista (UT-8)', (tester) async {
+    final dio = Dio(BaseOptions(baseUrl: 'http://example.test'));
+    dio.httpClientAdapter = _JsonAdapter((options) {
+      final plan = _planJson(status: 'ACTIVE');
+      plan['authorId'] = 'nutri-1';
+      plan['authorRole'] = 'NUTRITIONIST';
+      return _isListRequest(options) ? [plan] : plan;
+    });
+    dio.interceptors.add(ApiErrorInterceptor());
+    final careApi = stubCareApi(currentLink: {
+      'id': 'link-1',
+      'nutritionistId': 'nutri-1',
+      'nutritionistFirstName': 'Anna',
+      'nutritionistLastName': 'Verdi',
+      'patientId': 'user-1',
+      'patientFirstName': 'Mario',
+      'patientLastName': 'Rossi',
+      'status': 'ACTIVE',
+      'createdAt': '2026-09-01T00:00:00Z',
+      'revokedAt': null,
+    });
+
+    await _pumpManagementScreen(tester, DietPlanApi(dio), careApi: careApi);
+
+    expect(find.text('IN CORSO'), findsOneWidget);
+    expect(find.text('Redatto da Anna Verdi'), findsOneWidget);
+    expect(find.text('Sospendi'), findsNothing);
+    expect(find.text('Concludi'), findsNothing);
+    expect(find.text('Modifica'), findsNothing);
+    expect(find.byType(FloatingActionButton), findsNothing);
+  });
+
+  /// PZ-9, CP-12: il piano redatto dal Paziente stesso resta di sua competenza anche da collegato.
+  testWidgets('il Paziente conserva le azioni sul piano redatto da sé (PZ-9)', (tester) async {
+    final dio = Dio(BaseOptions(baseUrl: 'http://example.test'));
+    dio.httpClientAdapter = _JsonAdapter((options) => _isListRequest(options) ? [_planJson(status: 'ACTIVE')] : _planJson(status: 'ACTIVE'));
+    dio.interceptors.add(ApiErrorInterceptor());
+    final careApi = stubCareApi(currentLink: {
+      'id': 'link-1',
+      'nutritionistId': 'nutri-1',
+      'nutritionistFirstName': 'Anna',
+      'nutritionistLastName': 'Verdi',
+      'patientId': 'user-1',
+      'patientFirstName': 'Mario',
+      'patientLastName': 'Rossi',
+      'status': 'ACTIVE',
+      'createdAt': '2026-09-01T00:00:00Z',
+      'revokedAt': null,
+    });
+
+    await _pumpManagementScreen(tester, DietPlanApi(dio), careApi: careApi);
+
+    expect(find.text('Sospendi'), findsOneWidget);
+    expect(find.text('Redatto da Anna Verdi'), findsNothing);
+    // UT-8: ma non crea piani nuovi finché il collegamento è vigente.
+    expect(find.byType(FloatingActionButton), findsNothing);
   });
 }
