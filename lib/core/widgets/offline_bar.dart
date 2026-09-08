@@ -42,9 +42,16 @@ class OfflineBar extends ConsumerWidget {
                   children: [
                     Icon(Icons.wifi_off, size: 16, color: colors.textSecondary),
                     const SizedBox(width: AppSpacing.xs),
-                    Text(
-                      'Sei offline. Puoi consultare il piano già scaricato.',
-                      style: typography.caption.copyWith(color: colors.textSecondary),
+                    // MP-2: la barra occupa l'intera larghezza disponibile,
+                    // qualunque essa sia — il testo si tronca invece di
+                    // eccedere il riquadro sugli schermi più stretti.
+                    Flexible(
+                      child: Text(
+                        'Sei offline. Puoi consultare il piano già scaricato.',
+                        style: typography.caption.copyWith(color: colors.textSecondary),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
                   ],
                 ),
