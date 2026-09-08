@@ -46,6 +46,7 @@ class _MeasurementAdapter implements HttpClientAdapter {
 
   final List<Map<String, dynamic>> measurements;
   final posted = <Map<String, dynamic>>[];
+  final deleted = <String>[];
 
   @override
   void close({bool force = false}) {}
@@ -56,6 +57,10 @@ class _MeasurementAdapter implements HttpClientAdapter {
     Stream<Uint8List>? requestStream,
     Future<void>? cancelFuture,
   ) async {
+    if (options.method == 'DELETE') {
+      deleted.add(options.path);
+      return _json(204, const <String, Object>{});
+    }
     if (options.method == 'POST') {
       posted.add(Map<String, dynamic>.from(options.data as Map));
       return _json(201, measurements.isEmpty ? _measurement(id: 'm-new', date: DateTime.now()) : measurements.first);
@@ -195,6 +200,44 @@ void main() {
     // Nessun modulo: né campi né salvataggio.
     expect(find.widgetWithText(ElevatedButton, 'Salva'), findsNothing);
     expect(find.widgetWithText(TextField, 'Peso (kg)'), findsNothing);
+  });
+
+  testWidgets('la misurazione propria si elimina dal foglio, previa conferma (PR-16)', (tester) async {
+    final adapter = await _pumpView(tester, [
+      _measurement(id: 'm-1', date: DateTime.now(), weightKg: 70),
+    ]);
+
+    await tester.tap(find.byType(InkWell).last);
+    await tester.pumpAndSettle();
+    final delete = find.widgetWithText(TextButton, 'Elimina');
+    await tester.ensureVisible(delete);
+    await tester.pumpAndSettle();
+    await tester.tap(delete);
+    await tester.pumpAndSettle();
+
+    expect(find.text('Eliminare questa misurazione?'), findsOneWidget);
+    await tester.tap(find.widgetWithText(TextButton, 'Elimina').last);
+    await tester.pumpAndSettle();
+
+    expect(adapter.deleted, ['/body-measurements/m-1']);
+  });
+
+  testWidgets('la misurazione del professionista non offre l\'eliminazione al Paziente (PR-17)',
+      (tester) async {
+    await _pumpView(tester, [
+      _measurement(
+        id: 'm-1',
+        date: DateTime.now(),
+        weightKg: 70,
+        role: 'NUTRITIONIST',
+        editable: false,
+      ),
+    ]);
+
+    await tester.tap(find.byType(InkWell).last);
+    await tester.pumpAndSettle();
+
+    expect(find.widgetWithText(TextButton, 'Elimina'), findsNothing);
   });
 
   testWidgets('la card dell\'ultima misurazione non presenta variazioni né confronti (AN-11)',

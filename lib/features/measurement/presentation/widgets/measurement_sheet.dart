@@ -9,6 +9,7 @@ import '../../../../core/widgets/app_text_field.dart';
 import '../../data/measurement_models.dart';
 import '../../data/measurement_requests.dart';
 import '../../providers/measurement_providers.dart';
+import 'measurement_confirmations.dart';
 
 /// Registrazione e modifica di una misurazione (10.3 interfaccia.md).
 ///
@@ -114,6 +115,19 @@ class _MeasurementSheetState extends ConsumerState<_MeasurementSheet> {
     Navigator.of(context).pop();
   }
 
+  /// PR-16: eliminabile senza limiti temporali da chi l'ha registrata.
+  /// PR-17: il foglio di modifica non si apre affatto sulle rilevazioni
+  /// altrui, sicché l'azione non vi compare mai.
+  Future<void> _delete() async {
+    if (!await confirmDeleteMeasurement(context)) return;
+    await ref
+        .read(measurementControllerProvider.notifier)
+        .delete(widget.existing!.id, patientId: widget.patientId);
+    if (!mounted) return;
+    if (ref.read(measurementControllerProvider)?.hasError ?? false) return;
+    Navigator.of(context).pop();
+  }
+
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
@@ -170,6 +184,13 @@ class _MeasurementSheetState extends ConsumerState<_MeasurementSheet> {
                 ],
                 const SizedBox(height: AppSpacing.lg),
                 AppPrimaryButton(label: 'Salva', loading: saving, onPressed: _submit),
+                if (widget.existing != null) ...[
+                  const SizedBox(height: AppSpacing.xs),
+                  TextButton(
+                    onPressed: saving ? null : _delete,
+                    child: Text('Elimina', style: TextStyle(color: colors.error)),
+                  ),
+                ],
                 const SizedBox(height: AppSpacing.xs),
               ],
             ),

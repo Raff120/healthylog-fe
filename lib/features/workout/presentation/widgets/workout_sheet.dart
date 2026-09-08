@@ -131,6 +131,18 @@ class _WorkoutSheetState extends ConsumerState<_WorkoutSheet> {
     Navigator.of(context).pop();
   }
 
+  /// RA-15, RA-16: eliminazione dall'elenco, previa conferma semplice.
+  /// RA-17: non elimina la pianificazione sottostante — l'allenamento
+  /// torna previsto e non svolto (AL-14).
+  Future<void> _delete() async {
+    final workout = widget.existing!;
+    if (!await confirmDeleteWorkout(context, fromPlanning: workout.fromPlanning)) return;
+    await ref.read(workoutControllerProvider.notifier).delete(workout.id);
+    if (!mounted) return;
+    if (ref.read(workoutControllerProvider)?.hasError ?? false) return;
+    Navigator.of(context).pop();
+  }
+
   Future<bool> _confirmDuplicateIfNeeded() async {
     final sameDay = await ref.read(workoutApiProvider).listByDate(_date);
     if (sameDay.isEmpty || !mounted) return true;
@@ -214,6 +226,16 @@ class _WorkoutSheetState extends ConsumerState<_WorkoutSheet> {
                   loading: saving,
                   onPressed: _submit,
                 ),
+                // RA-15: l'eliminazione è possibile senza limiti temporali,
+                // e vive accanto alla modifica perché vi si accede dallo
+                // stesso tocco sulla voce d'elenco (RA-14).
+                if (_isEdit) ...[
+                  const SizedBox(height: AppSpacing.xs),
+                  TextButton(
+                    onPressed: saving ? null : _delete,
+                    child: Text('Elimina', style: TextStyle(color: colors.error)),
+                  ),
+                ],
                 const SizedBox(height: AppSpacing.xs),
               ],
             ),

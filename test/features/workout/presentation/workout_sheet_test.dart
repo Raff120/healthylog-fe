@@ -27,6 +27,7 @@ class _WorkoutAdapter implements HttpClientAdapter {
 
   final List<Map<String, dynamic>> existingToday;
   final posted = <Map<String, dynamic>>[];
+  final deleted = <String>[];
 
   @override
   void close({bool force = false}) {}
@@ -48,6 +49,10 @@ class _WorkoutAdapter implements HttpClientAdapter {
         'note': null,
         'plannedWorkoutId': null,
       });
+    }
+    if (options.method == 'DELETE') {
+      deleted.add(options.path);
+      return _json(204, const <String, Object>{});
     }
     if (options.path == '/workouts' && options.queryParameters.containsKey('date')) {
       return _json(200, existingToday);
@@ -71,6 +76,7 @@ Future<_WorkoutAdapter> _pumpSheet(
   WidgetTester tester, {
   List<Map<String, dynamic>> existingToday = const [],
   PlannedWorkout? planned,
+  Workout? existing,
 }) async {
   final adapter = _WorkoutAdapter(existingToday: existingToday);
   final dio = Dio(BaseOptions(baseUrl: 'http://example.test'))
@@ -86,7 +92,7 @@ Future<_WorkoutAdapter> _pumpSheet(
           builder: (context) => Scaffold(
             body: Center(
               child: ElevatedButton(
-                onPressed: () => showWorkoutSheet(context, planned: planned),
+                onPressed: () => showWorkoutSheet(context, planned: planned, existing: existing),
                 child: const Text('Apri'),
               ),
             ),
@@ -99,6 +105,16 @@ Future<_WorkoutAdapter> _pumpSheet(
   await tester.pumpAndSettle();
   return adapter;
 }
+
+Workout _recorded({String? plannedWorkoutId}) => Workout(
+      id: 'w-1',
+      userId: 'user-1',
+      date: DateTime.now(),
+      activityType: 'Corsa',
+      caloriesBurned: 300,
+      note: null,
+      plannedWorkoutId: plannedWorkoutId,
+    );
 
 PlannedWorkout _planned() => PlannedWorkout(
       id: 'pw-1',
@@ -195,6 +211,45 @@ void main() {
     expect(adapter.posted.single['plannedWorkoutId'], 'pw-1');
     // Il tipo non è inviato: lo eredita il server dalla pianificazione.
     expect(adapter.posted.single['activityType'], isNull);
+  });
+
+  testWidgets('offre l\'eliminazione sul solo allenamento già registrato, previa conferma (RA-15, RA-16)',
+      (tester) async {
+    final adapter = await _pumpSheet(tester, existing: _recorded());
+
+    await tester.tap(find.widgetWithText(TextButton, 'Elimina'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Eliminare questo allenamento?'), findsOneWidget);
+    await tester.tap(find.widgetWithText(TextButton, 'Annulla'));
+    await tester.pumpAndSettle();
+    expect(adapter.deleted, isEmpty);
+
+    await tester.tap(find.widgetWithText(TextButton, 'Elimina'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.widgetWithText(TextButton, 'Elimina').last);
+    await tester.pumpAndSettle();
+    expect(adapter.deleted, ['/workouts/w-1']);
+  });
+
+  testWidgets('in registrazione l\'eliminazione non compare: non c\'è nulla da eliminare (RA-15)',
+      (tester) async {
+    await _pumpSheet(tester);
+
+    expect(find.widgetWithText(TextButton, 'Elimina'), findsNothing);
+  });
+
+  testWidgets('sull\'allenamento svolto a fronte di pianificazione la conferma dichiara che la pianificazione resta (RA-17)',
+      (tester) async {
+    await _pumpSheet(tester, existing: _recorded(plannedWorkoutId: 'pw-1'));
+
+    await tester.tap(find.widgetWithText(TextButton, 'Elimina'));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.text('La pianificazione resta: l\'allenamento tornerà previsto e non svolto.'),
+      findsOneWidget,
+    );
   });
 
   testWidgets('la spunta di un allenamento previsto non chiede conferma di duplicato (AL-13)',
