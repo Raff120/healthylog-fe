@@ -1,6 +1,7 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../core/api/api_client.dart';
+import '../../care/providers/care_providers.dart';
 import '../data/diet_plan.dart';
 import '../data/diet_plan_api.dart';
 import '../data/diet_plan_requests.dart';
@@ -21,6 +22,8 @@ class CreateDietPlanController extends _$CreateDietPlanController {
   Future<void> create(CreateDietPlanRequest request) async {
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(() => ref.read(dietPlanApiProvider).create(request));
+    // F22: il dettaglio del Paziente elenca i piani redatti dal Nutrizionista.
+    if (state?.hasError == false) ref.invalidate(patientDetailControllerProvider);
   }
 }
 
@@ -49,6 +52,12 @@ class ConfirmDietPlanController extends _$ConfirmDietPlanController {
   Future<void> confirm(String planId) async {
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(() => ref.read(dietPlanApiProvider).confirm(planId));
+    if (state?.hasError == false) {
+      ref.invalidate(ownedDietPlansProvider);
+      // F22: il Nutrizionista rientra nel dettaglio del Paziente.
+      ref.invalidate(patientDetailControllerProvider);
+      ref.invalidate(patientsProvider);
+    }
   }
 }
 
@@ -78,6 +87,10 @@ class DietPlanLifecycleController extends _$DietPlanLifecycleController {
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(action);
     ref.invalidate(ownedDietPlansProvider);
+    // F22: le stesse transizioni disposte dal Nutrizionista dal dettaglio
+    // del Paziente (NU-2), che elenca i piani per stato.
+    ref.invalidate(patientDetailControllerProvider);
+    ref.invalidate(patientsProvider);
   }
 
   Future<void> withdraw(String planId) => _run(() => ref.read(dietPlanApiProvider).withdraw(planId));

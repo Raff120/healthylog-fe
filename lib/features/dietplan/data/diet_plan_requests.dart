@@ -13,6 +13,7 @@ class CreateDietPlanRequest {
     required this.startDate,
     this.endDate,
     this.sourceTemplateId,
+    this.patientId,
   });
 
   final String name;
@@ -20,11 +21,15 @@ class CreateDietPlanRequest {
   final DateTime? endDate;
   final String? sourceTemplateId;
 
+  /// CD-2, CT-8 (F22): il Paziente destinatario, solo per il Nutrizionista.
+  final String? patientId;
+
   Map<String, dynamic> toJson() => {
         'name': name,
         'startDate': _isoDate(startDate),
         'endDate': endDate == null ? null : _isoDate(endDate!),
         'sourceTemplateId': sourceTemplateId,
+        'patientId': patientId,
       };
 }
 
@@ -93,4 +98,16 @@ class UpdateWeeklyScheduleRequest {
   final List<UpdateDietPlanWeekDayRequest> days;
 
   Map<String, dynamic> toJson() => {'days': days.map((e) => e.toJson()).toList()};
+}
+
+/// Corpo di `PUT /plan-days/{date}` (MD-8): sostituzione del contenuto
+/// della singola occorrenza, con la stessa forma degli slot dello schema.
+/// `slotId` conserva identità e stato di uno slot esistente, assente per
+/// uno slot aggiunto alla sola giornata.
+class UpdatePlanDayRequest {
+  const UpdatePlanDayRequest({required this.slots});
+
+  final List<UpdateDietPlanSlotRequest> slots;
+
+  Map<String, dynamic> toJson() => {'slots': slots.map((e) => e.toJson()).toList()};
 }
