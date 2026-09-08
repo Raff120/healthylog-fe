@@ -30,6 +30,10 @@ class _PersonalDataScreenState extends ConsumerState<PersonalDataScreen> {
   final _email = TextEditingController();
   final _birthPlace = TextEditingController();
   final _height = TextEditingController();
+  // PR-8: peso obiettivo, facoltativo. Sta nel profilo e non fra le
+  // misurazioni (10.3 interfaccia.md): non è un dato rilevato ma un
+  // riferimento che l'Utente si dà.
+  final _targetWeight = TextEditingController();
 
   DateTime? _birthDate;
   BiologicalSex? _sex;
@@ -48,6 +52,7 @@ class _PersonalDataScreenState extends ConsumerState<PersonalDataScreen> {
     _email.dispose();
     _birthPlace.dispose();
     _height.dispose();
+    _targetWeight.dispose();
     super.dispose();
   }
 
@@ -60,6 +65,11 @@ class _PersonalDataScreenState extends ConsumerState<PersonalDataScreen> {
     _email.text = profile.email;
     _birthPlace.text = profile.birthPlace;
     _height.text = profile.height?.toString() ?? '';
+    _targetWeight.text = profile.targetWeightKg == null
+        ? ''
+        : (profile.targetWeightKg! == profile.targetWeightKg!.roundToDouble()
+            ? profile.targetWeightKg!.round().toString()
+            : profile.targetWeightKg!.toString());
     _birthDate = profile.birthDate;
     _sex = profile.sex;
     _originalUsername = profile.username;
@@ -97,6 +107,11 @@ class _PersonalDataScreenState extends ConsumerState<PersonalDataScreen> {
       'birthDate': _birthDate == null ? 'REQUIRED' : null,
       'sex': _sex == null ? 'REQUIRED' : null,
       'height': heightText.isEmpty ? null : (int.tryParse(heightText) == null ? 'INVALID_FORMAT' : null),
+      // PR-9: nessun giudizio sulla congruità del valore, solo la sua
+      // leggibilità come numero.
+      'targetWeightKg': _targetWeightValue() == null && _targetWeight.text.trim().isNotEmpty
+          ? 'INVALID_FORMAT'
+          : null,
     };
     final availability = ref.read(usernameAvailabilityControllerProvider);
     if (errors['username'] == null &&
@@ -110,6 +125,11 @@ class _PersonalDataScreenState extends ConsumerState<PersonalDataScreen> {
         ..addAll(errors);
     });
     return errors.values.every((error) => error == null);
+  }
+
+  double? _targetWeightValue() {
+    final text = _targetWeight.text.trim().replaceAll(',', '.');
+    return text.isEmpty ? null : double.tryParse(text);
   }
 
   Future<void> _submit() async {
@@ -128,6 +148,8 @@ class _PersonalDataScreenState extends ConsumerState<PersonalDataScreen> {
               birthPlace: _birthPlace.text.trim(),
               sex: _sex!,
               height: _height.text.trim().isEmpty ? null : int.parse(_height.text.trim()),
+              // PR-10: il campo lasciato vuoto rimuove il peso obiettivo.
+              targetWeightKg: _targetWeightValue(),
             ),
           );
     } catch (error) {
@@ -280,6 +302,13 @@ class _PersonalDataScreenState extends ConsumerState<PersonalDataScreen> {
                         value: _sex,
                         onChanged: (value) => setState(() => _sex = value),
                         errorText: _errorFor('sex'),
+                      ),
+                      const SizedBox(height: AppSpacing.sm),
+                      AppTextField(
+                        label: 'Peso obiettivo (kg)',
+                        controller: _targetWeight,
+                        keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                        errorText: _errorFor('targetWeightKg'),
                       ),
                       const SizedBox(height: AppSpacing.sm),
                       AppTextField(
