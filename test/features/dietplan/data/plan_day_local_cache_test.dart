@@ -27,6 +27,7 @@ PlanDay _day(DateTime date) => PlanDay(
           recipeName: 'Pasta fresca',
           recipeText: 'Cuocere...',
           status: SlotStatus.consumed,
+          replacementNote: 'Pizza al volo',
         ),
       ],
     );
@@ -66,6 +67,7 @@ void main() {
     expect(slot.recipeName, 'Pasta fresca');
     expect(slot.recipeText, 'Cuocere...');
     expect(slot.status, SlotStatus.consumed);
+    expect(slot.replacementNote, 'Pizza al volo');
   });
 
   test('read su una data mai salvata restituisce null', () async {

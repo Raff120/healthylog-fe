@@ -23,6 +23,7 @@ class AppTextField extends StatelessWidget {
     this.focusNode,
     this.minLines = 1,
     this.maxLines = 1,
+    this.enabled = true,
   });
 
   final String label;
@@ -36,6 +37,7 @@ class AppTextField extends StatelessWidget {
   final Iterable<String>? autofillHints;
   final ValueChanged<String>? onChanged;
   final FocusNode? focusNode;
+  final bool enabled;
 
   /// > 1 per un'area di testo estesa (GG-12: "andata a capo ed elenchi
   /// puntati"), es. il contenuto di uno slot o il testo di una ricetta.
@@ -53,6 +55,7 @@ class AppTextField extends StatelessWidget {
     final field = TextField(
       controller: controller,
       focusNode: focusNode,
+      enabled: enabled,
       obscureText: obscureText,
       keyboardType: keyboardType,
       textCapitalization: textCapitalization,

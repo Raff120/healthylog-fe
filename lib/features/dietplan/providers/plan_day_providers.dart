@@ -97,11 +97,14 @@ class PlanDaySlotStatusController extends _$PlanDaySlotStatusController {
   Future<void> updateStatus(
     DateTime date,
     String slotId,
-    SlotStatus status,
-  ) async {
+    SlotStatus status, {
+    String? replacementNote,
+  }) async {
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(
-      () => ref.read(planDayApiProvider).updateSlotStatus(date, slotId, status),
+      () => ref
+          .read(planDayApiProvider)
+          .updateSlotStatus(date, slotId, status, replacementNote: replacementNote),
     );
     ref.invalidate(planDayProvider(date));
   }

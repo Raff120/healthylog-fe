@@ -65,5 +65,6 @@ class PlanDayLocalCache {
     recipeName: json['recipeName'] as String?,
     recipeText: json['recipeText'] as String?,
     status: SlotStatus.fromJson(json['status'] as String),
+    replacementNote: json['replacementNote'] as String?,
   );
 }
