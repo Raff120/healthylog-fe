@@ -166,13 +166,19 @@ class _MemberDropdown extends StatelessWidget {
     final typography = context.typography;
     final current = group.members.firstWhere((member) => member.userId == (selected ?? currentUserId));
 
-    return PopupMenuButton<String?>(
+    return PopupMenuButton<String>(
       color: colors.surface,
-      onSelected: onSelect,
+      // `PopupMenuButton` tratta un valore `null` restituito dal menu
+      // come "chiuso senza selezione" (chiama `onCanceled`, non
+      // `onSelected`), indistinguibile dal tocco fuori dal menu: il
+      // valore dell'item non può quindi mai essere `null`. Il ritorno
+      // al proprio piano usa perciò sempre `member.userId`, tradotto in
+      // `null` solo qui, dopo che la selezione è già avvenuta.
+      onSelected: (userId) => onSelect(userId == currentUserId ? null : userId),
       itemBuilder: (menuContext) => [
         for (final member in group.members)
           PopupMenuItem(
-            value: member.userId == currentUserId ? null : member.userId,
+            value: member.userId,
             child: Text('${member.firstName} ${member.lastName}'),
           ),
       ],

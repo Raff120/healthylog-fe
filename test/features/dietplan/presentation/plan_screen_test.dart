@@ -1011,7 +1011,16 @@ void main() {
           'createdAt': '2026-09-01T00:00:00Z',
         };
 
-    Future<_MemberAwareAdapter> pumpWithGroup(WidgetTester tester) async {
+    /// `compact` (< 600, app_breakpoints.dart): riproduce il selettore a
+    /// menu a discesa di uno smartphone, a differenza della riga di
+    /// avatar usata dagli altri banchi di prova di questo gruppo alla
+    /// larghezza predefinita.
+    Future<_MemberAwareAdapter> pumpWithGroup(WidgetTester tester, {bool compact = false}) async {
+      if (compact) {
+        tester.view.physicalSize = const Size(400, 800);
+        tester.view.devicePixelRatio = 1.0;
+        addTearDown(tester.view.reset);
+      }
       final planDayAdapter = _MemberAwareAdapter();
       final planDayDio = Dio(BaseOptions(baseUrl: 'http://example.test'))
         ..httpClientAdapter = planDayAdapter
@@ -1067,6 +1076,33 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(adapter.patchCount, 0);
+      },
+    );
+
+    testWidgets(
+      'dal menu a discesa di uno schermo stretto, il ritorno al proprio piano funziona dopo aver consultato un membro (VG-7)',
+      (tester) async {
+        await pumpWithGroup(tester, compact: true);
+        expect(find.text('Yogurt e cereali'), findsOneWidget);
+
+        // 4.2 interfaccia.md: su schermo stretto il selettore è un menu
+        // a discesa, non la riga di avatar.
+        await tester.tap(find.text('Io'));
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('Maria Verdi'));
+        await tester.pumpAndSettle();
+        expect(find.text('Pasta di Maria'), findsOneWidget);
+
+        // Il ritorno al proprio piano è la prima voce del menu, quella
+        // che rappresenta l'Utente stesso.
+        await tester.tap(find.text('Maria'));
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('Io Stesso'));
+        await tester.pumpAndSettle();
+
+        expect(find.text('Yogurt e cereali'), findsOneWidget);
+        expect(find.text('Pasta di Maria'), findsNothing);
+        expect(find.text('Stai vedendo il piano di Maria'), findsNothing);
       },
     );
   });
