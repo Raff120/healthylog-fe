@@ -1225,5 +1225,33 @@ void main() {
         expect(adapter.patchCount, 1);
       },
     );
+
+    testWidgets(
+      'resta utilizzabile senza sovrapposizioni sia su schermo stretto sia ampio (VG-15)',
+      (tester) async {
+        // `compact` (< 600, app_breakpoints.dart): due colonne visibili,
+        // con scorrimento per le restanti (6.3 interfaccia.md).
+        tester.view.physicalSize = const Size(400, 800);
+        tester.view.devicePixelRatio = 1.0;
+        addTearDown(tester.view.reset);
+
+        await _pumpWithGroup(tester);
+        await tester.tap(find.byTooltip('Vista affiancata'));
+        await tester.pumpAndSettle();
+
+        expect(find.text('Yogurt e cereali'), findsOneWidget);
+        expect(find.text('Pasta di Maria'), findsOneWidget);
+        expect(tester.takeException(), isNull);
+
+        // `expanded` e oltre: tutte le colonne visibili, larghezza
+        // distribuita, senza scorrimento necessario.
+        tester.view.physicalSize = const Size(1200, 800);
+        await tester.pumpAndSettle();
+
+        expect(find.text('Yogurt e cereali'), findsOneWidget);
+        expect(find.text('Pasta di Maria'), findsOneWidget);
+        expect(tester.takeException(), isNull);
+      },
+    );
   });
 }

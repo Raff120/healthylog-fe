@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../app/app_breakpoints.dart';
 import '../../../../app/theme/app_spacing.dart';
 import '../../../../app/theme/theme_context.dart';
 import '../../../../core/api/api_error_messages.dart';
@@ -110,7 +111,6 @@ class _Grid extends StatelessWidget {
   Widget build(BuildContext context) {
     final members = groupDay.members;
     final rows = _buildRows(members);
-    final totalWidth = _labelColumnWidth + members.length * _memberColumnWidth;
 
     if (rows.isEmpty) {
       final typography = context.typography;
@@ -120,38 +120,72 @@ class _Grid extends StatelessWidget {
       );
     }
 
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: SizedBox(
-        width: totalWidth,
-        child: Column(
-          children: [
-            _HeaderRow(members: members, currentUserId: currentUserId),
-            Expanded(
-              child: SingleChildScrollView(
-                child: Column(
-                  children: [
-                    for (final row in rows)
-                      _DataRow(row: row, members: members, date: date, currentUserId: currentUserId),
-                  ],
+    // 3.3, 6.3 interfaccia.md: `compact` mostra due colonne, `medium`
+    // tre, `expanded` e oltre tutte insieme a larghezza distribuita —
+    // senza mai scendere sotto una larghezza leggibile, oltre la quale
+    // subentra lo scorrimento orizzontale anche a `expanded`.
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final columnWidth = _columnWidthFor(context.breakpoint, constraints.maxWidth, members.length);
+        final totalWidth = _labelColumnWidth + members.length * columnWidth;
+        final needsHorizontalScroll = totalWidth > constraints.maxWidth;
+
+        final grid = SizedBox(
+          width: needsHorizontalScroll ? totalWidth : constraints.maxWidth,
+          child: Column(
+            children: [
+              _HeaderRow(members: members, currentUserId: currentUserId, columnWidth: columnWidth),
+              Expanded(
+                child: SingleChildScrollView(
+                  child: Column(
+                    children: [
+                      for (final row in rows)
+                        _DataRow(
+                          row: row,
+                          members: members,
+                          date: date,
+                          currentUserId: currentUserId,
+                          columnWidth: columnWidth,
+                        ),
+                    ],
+                  ),
                 ),
               ),
-            ),
-          ],
-        ),
-      ),
+            ],
+          ),
+        );
+
+        return needsHorizontalScroll
+            ? SingleChildScrollView(scrollDirection: Axis.horizontal, child: grid)
+            : grid;
+      },
     );
   }
+}
+
+double _columnWidthFor(AppBreakpoint breakpoint, double availableWidth, int memberCount) {
+  if (memberCount == 0) return _memberColumnWidth;
+  final usableWidth = availableWidth - _labelColumnWidth;
+  final visibleColumns = switch (breakpoint) {
+    AppBreakpoint.compact => 2,
+    AppBreakpoint.medium => 3,
+    AppBreakpoint.expanded || AppBreakpoint.large => memberCount,
+  };
+  if (visibleColumns >= memberCount) {
+    return (usableWidth / memberCount).clamp(_memberColumnWidth, double.infinity);
+  }
+  return usableWidth / visibleColumns;
 }
 
 /// Intestazione delle colonne (6.3 interfaccia.md): riga fissa in cima,
 /// che permane allo scorrimento verticale (garantito qui dallo stare
 /// fuori dallo `SingleChildScrollView` verticale del corpo).
 class _HeaderRow extends StatelessWidget {
-  const _HeaderRow({required this.members, required this.currentUserId});
+  const _HeaderRow({required this.members, required this.currentUserId, required this.columnWidth});
 
   final List<MemberPlanDay> members;
   final String currentUserId;
+  final double columnWidth;
 
   @override
   Widget build(BuildContext context) {
@@ -168,7 +202,7 @@ class _HeaderRow extends StatelessWidget {
             const SizedBox(width: _labelColumnWidth),
             for (final member in members)
               SizedBox(
-                width: _memberColumnWidth,
+                width: columnWidth,
                 child: _HeaderCell(member: member, isSelf: member.userId == currentUserId),
               ),
           ],
@@ -216,12 +250,19 @@ class _HeaderCell extends StatelessWidget {
 }
 
 class _DataRow extends StatelessWidget {
-  const _DataRow({required this.row, required this.members, required this.date, required this.currentUserId});
+  const _DataRow({
+    required this.row,
+    required this.members,
+    required this.date,
+    required this.currentUserId,
+    required this.columnWidth,
+  });
 
   final _GroupRow row;
   final List<MemberPlanDay> members;
   final DateTime date;
   final String currentUserId;
+  final double columnWidth;
 
   @override
   Widget build(BuildContext context) {
@@ -236,7 +277,7 @@ class _DataRow extends StatelessWidget {
             SizedBox(width: _labelColumnWidth, child: _RowLabel(row: row)),
             for (final member in members)
               SizedBox(
-                width: _memberColumnWidth,
+                width: columnWidth,
                 child: DecoratedBox(
                   decoration: BoxDecoration(color: member.userId == currentUserId ? colors.surfaceAlt : null),
                   child: Padding(
