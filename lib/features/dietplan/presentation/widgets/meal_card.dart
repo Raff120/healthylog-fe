@@ -10,15 +10,24 @@ import '../../data/plan_day.dart';
 import '../../data/slot_status.dart';
 import '../../data/slot_type.dart';
 import '../../domain/plan_day_date.dart';
+import '../../providers/meal_swap_providers.dart';
 import '../../providers/plan_day_providers.dart';
 import '../slot_type_presentation.dart';
 
 /// Card di uno slot della giornata (4.1 interfaccia.md, VG-3, VG-4), con
-/// la spunta (SP-1, F13). A differenza di [SlotCard] (7.3, redazione) non
-/// consente di modificarne il contenuto: l'inversione (MS-1, F17) resta
-/// assente.
+/// la spunta (SP-1, F13) e, da espansa, l'avvio dell'inversione (6.5
+/// interfaccia.md: "Vista giornaliera → Azione 'Sposta' nella card
+/// espansa"), che conduce comunque alla settimanale per la scelta della
+/// destinazione. A differenza di [SlotCard] (7.3, redazione) non
+/// consente di modificarne il contenuto.
 class MealCard extends ConsumerStatefulWidget {
-  const MealCard({super.key, required this.slot, required this.date, required this.canCheck});
+  const MealCard({
+    super.key,
+    required this.slot,
+    required this.date,
+    required this.canCheck,
+    required this.planId,
+  });
 
   final PlanDaySlot slot;
 
@@ -29,6 +38,10 @@ class MealCard extends ConsumerStatefulWidget {
   /// SP-11: false quando la giornata non è coperta da un piano Attivo —
   /// i pulsanti restano visibili ma disabilitati (4.1 interfaccia.md).
   final bool canCheck;
+
+  /// Piano che copre la giornata, `null` se [canCheck] è `false`
+  /// (nessuna inversione possibile senza un piano Attivo, IN-16).
+  final String? planId;
 
   @override
   ConsumerState<MealCard> createState() => _MealCardState();
@@ -146,6 +159,17 @@ class _MealCardState extends ConsumerState<MealCard> {
                         ),
                       ),
                     ],
+                    if (_expanded && _canMove) ...[
+                      const SizedBox(height: AppSpacing.sm),
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: TextButton.icon(
+                          onPressed: () => _startMove(context),
+                          icon: Icon(Icons.swap_horiz, size: 18, color: colors.accent),
+                          label: Text('Sposta', style: typography.label.copyWith(color: colors.accent)),
+                        ),
+                      ),
+                    ],
                     if (_expanded && hasNote) ...[
                       const SizedBox(height: AppSpacing.sm),
                       Row(
@@ -201,6 +225,31 @@ class _MealCardState extends ConsumerState<MealCard> {
         ),
       ),
     );
+  }
+
+  /// MS-8, condizioni 1/3/4 applicate a questo solo slot (stesso
+  /// criterio di `isMealSwapOriginEligible`, qui senza un `PlanDay`
+  /// completo a disposizione): [MealCard.canCheck] già vale "coverage
+  /// Attivo" (SP-11).
+  bool get _canMove =>
+      widget.canCheck &&
+      widget.planId != null &&
+      widget.slot.status != SlotStatus.consumed &&
+      !dateOnly(widget.date).isBefore(dateOnly(DateTime.now()));
+
+  /// 6.5, 4.1 interfaccia.md: l'inversione si avvia anche dalla card
+  /// espansa della vista giornaliera, ma la scelta della destinazione
+  /// resta compito della vista settimanale, il solo contesto in cui
+  /// origine e destinazione sono visibili insieme (VS-8).
+  void _startMove(BuildContext context) {
+    ref.read(mealSwapSelectionProvider.notifier).start(MealSwapOrigin(
+          planId: widget.planId!,
+          date: dateOnly(widget.date),
+          slotId: widget.slot.slotId,
+          type: widget.slot.type,
+          status: widget.slot.status,
+        ));
+    ref.read(selectedPlanViewProvider.notifier).select(PlanViewMode.week);
   }
 
   /// SP-1: ciascun pulsante alterna fra il proprio stato e *Da consumare*

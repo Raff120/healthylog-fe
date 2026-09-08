@@ -67,6 +67,7 @@ Future<_RecordingAdapter> _pumpCard(
   required PlanDaySlot slot,
   required DateTime date,
   required bool canCheck,
+  String? planId = 'plan-1',
 }) async {
   final adapter = _RecordingAdapter();
   final dio = Dio(BaseOptions(baseUrl: 'http://example.test'));
@@ -78,7 +79,7 @@ Future<_RecordingAdapter> _pumpCard(
       overrides: [planDayApiProvider.overrideWithValue(PlanDayApi(dio))],
       child: MaterialApp(
         theme: AppTheme.light,
-        home: Scaffold(body: MealCard(slot: slot, date: date, canCheck: canCheck)),
+        home: Scaffold(body: MealCard(slot: slot, date: date, canCheck: canCheck, planId: planId)),
       ),
     ),
   );
@@ -94,6 +95,7 @@ Future<(_RecordingAdapter, ProviderContainer)> _pumpCardWithContainer(
   required PlanDaySlot slot,
   required DateTime date,
   required bool canCheck,
+  String? planId = 'plan-1',
 }) async {
   final adapter = _RecordingAdapter();
   final dio = Dio(BaseOptions(baseUrl: 'http://example.test'));
@@ -109,7 +111,7 @@ Future<(_RecordingAdapter, ProviderContainer)> _pumpCardWithContainer(
       container: container,
       child: MaterialApp(
         theme: AppTheme.light,
-        home: Scaffold(body: MealCard(slot: slot, date: date, canCheck: canCheck)),
+        home: Scaffold(body: MealCard(slot: slot, date: date, canCheck: canCheck, planId: planId)),
       ),
     ),
   );

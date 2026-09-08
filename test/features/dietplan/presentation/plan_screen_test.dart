@@ -318,6 +318,43 @@ void main() {
   );
 
   testWidgets(
+    'l\'azione "Sposta" nella card espansa conduce alla vista settimanale in modalità di selezione (6.5 interfaccia.md)',
+    (tester) async {
+      final today = dateOnly(DateTime.now());
+      final weekStart = startOfWeek(today);
+      final adapter = _DayOrRangeAdapter(
+        dayResponseFor: (date) => _dayJson(),
+        rangeResponseFor: (from, to) => _weekJson(weekStart),
+      );
+      final dio = Dio(BaseOptions(baseUrl: 'http://example.test'));
+      dio.httpClientAdapter = adapter;
+      dio.interceptors.add(ApiErrorInterceptor());
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            planDayApiProvider.overrideWithValue(PlanDayApi(dio)),
+            appDatabaseProvider.overrideWithValue(
+              AppDatabase(NativeDatabase.memory()),
+            ),
+          ],
+          child: MaterialApp(theme: AppTheme.light, home: const PlanScreen()),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // s1 (Yogurt e cereali) è "Da consumare": ammissibile come origine.
+      await tester.tap(find.text('Yogurt e cereali'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Sposta'));
+      await tester.pumpAndSettle();
+
+      // VS-8: la scelta della destinazione avviene sempre in settimanale.
+      expect(find.text('Scegli dove spostarlo'), findsOneWidget);
+    },
+  );
+
+  testWidgets(
     'una giornata senza pasti previsti presenta lo stato vuoto (GG-7)',
     (tester) async {
       final day = _dayJson();
@@ -386,6 +423,53 @@ void main() {
         isoDate(tomorrow),
         isoDate(today),
       ]);
+    },
+  );
+
+  testWidgets(
+    'le frecce del selettore passano alla settimana adiacente anche nella vista giornaliera (VG-16, VG-17)',
+    (tester) async {
+      final today = dateOnly(DateTime.now());
+      final weekStart = startOfWeek(today);
+      final nextWeekStart = weekStart.add(const Duration(days: 7));
+      final adapter = _ByDateAdapter((date) {
+        if (date == isoDate(nextWeekStart)) {
+          return _dayJsonFor(date, 'Pesce al forno');
+        }
+        return _dayJsonFor(date, 'Pasta al pomodoro');
+      });
+      final dio = Dio(BaseOptions(baseUrl: 'http://example.test'));
+      dio.httpClientAdapter = adapter;
+      dio.interceptors.add(ApiErrorInterceptor());
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            planDayApiProvider.overrideWithValue(PlanDayApi(dio)),
+            appDatabaseProvider.overrideWithValue(
+              AppDatabase(NativeDatabase.memory()),
+            ),
+          ],
+          child: MaterialApp(theme: AppTheme.light, home: const PlanScreen()),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Pasta al pomodoro'), findsOneWidget);
+
+      await tester.tap(find.byTooltip('Settimana successiva'));
+      await tester.pumpAndSettle();
+
+      // Salta al lunedì della settimana successiva, come lo scorrimento
+      // orizzontale della riga (stesso criterio, VG-16).
+      expect(find.text('Pesce al forno'), findsOneWidget);
+      expect(adapter.requestedDates.last, isoDate(nextWeekStart));
+
+      await tester.tap(find.byTooltip('Settimana precedente'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Pasta al pomodoro'), findsOneWidget);
+      expect(adapter.requestedDates.last, isoDate(weekStart));
     },
   );
 

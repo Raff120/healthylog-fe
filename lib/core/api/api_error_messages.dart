@@ -25,8 +25,17 @@ String describeApiError(String code) {
     'PLAN_TRANSITION_NOT_ALLOWED' => 'Questa operazione non è più possibile per il piano.',
     'PLAN_ACTIVE_CANNOT_DELETE' => 'Un piano Attivo non può essere eliminato: sospendilo o concludilo prima.',
     'PLAN_PERIOD_OVERLAP' => 'Il periodo si sovrappone a un piano esistente.',
-    'PLAN_NOT_ACTIVE' => 'Questa giornata non consente la spunta.',
+    'PLAN_NOT_ACTIVE' => 'Questa giornata non è coperta da un piano attivo.',
     'TIMEZONE_INVALID' => 'Fuso orario non riconosciuto.',
+    // 6.4 funzionale, IN-21: ragioni di rifiuto dell'inversione, desunte
+    // dalle regole — usate sia per il rifiuto del server sia, sul client,
+    // per la barra a chi insiste su uno slot non compatibile (6.5
+    // interfaccia.md).
+    'SWAP_PAST_DAY' => 'Questo giorno è già trascorso.',
+    'SLOT_ALREADY_CONSUMED' => 'Questo pasto è già stato consumato.',
+    'SWAP_TYPE_NOT_ALLOWED' => 'Questi pasti non sono invertibili tra loro.',
+    'SWAP_DIFFERENT_WEEKS' => 'Appartengono a settimane diverse.',
+    'SWAP_DIFFERENT_DAYS' => 'Devono appartenere allo stesso giorno.',
     _ => 'Qualcosa non ha funzionato. Riprova.',
   };
 }

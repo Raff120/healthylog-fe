@@ -11,6 +11,7 @@ import '../data/plan_day.dart';
 import '../data/plan_day_coverage.dart';
 import '../domain/plan_day_date.dart';
 import '../providers/diet_plan_providers.dart';
+import '../providers/meal_swap_providers.dart';
 import '../providers/plan_day_providers.dart';
 import 'widgets/date_selector.dart';
 import 'widgets/meal_card.dart';
@@ -31,8 +32,10 @@ class PlanScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final colors = context.colors;
+    final typography = context.typography;
     final viewMode = ref.watch(selectedPlanViewProvider);
     final selectedDate = ref.watch(selectedDayProvider);
+    final swapSelection = ref.watch(mealSwapSelectionProvider);
 
     void selectDate(DateTime date) => ref.read(selectedDayProvider.notifier).select(date);
     void showDay(DateTime date) {
@@ -49,10 +52,22 @@ class PlanScreen extends ConsumerWidget {
         elevation: 0,
         scrolledUnderElevation: 0,
         centerTitle: true,
-        title: SegmentedViewControl(
-          value: viewMode,
-          onChanged: (mode) => ref.read(selectedPlanViewProvider.notifier).select(mode),
-        ),
+        // 6.5 interfaccia.md: in modalità di selezione l'intestazione è
+        // sostituita da "Scegli dove spostarlo" e l'azione Annulla.
+        title: swapSelection == null
+            ? SegmentedViewControl(
+                value: viewMode,
+                onChanged: (mode) => ref.read(selectedPlanViewProvider.notifier).select(mode),
+              )
+            : Text('Scegli dove spostarlo', style: typography.titleMedium.copyWith(color: colors.textPrimary)),
+        actions: swapSelection == null
+            ? null
+            : [
+                TextButton(
+                  onPressed: () => ref.read(mealSwapSelectionProvider.notifier).cancel(),
+                  child: const Text('Annulla'),
+                ),
+              ],
       ),
       body: SafeArea(
         child: AnimatedSwitcher(
@@ -240,6 +255,7 @@ class _DayContent extends ConsumerWidget {
                 slots: day.slots,
                 date: day.date,
                 canCheck: day.coverage == PlanDayCoverage.active,
+                planId: day.planId,
               ),
             ),
           ],
@@ -249,7 +265,7 @@ class _DayContent extends ConsumerWidget {
 }
 
 class _SlotsOrEmpty extends StatelessWidget {
-  const _SlotsOrEmpty({required this.slots, required this.date, required this.canCheck});
+  const _SlotsOrEmpty({required this.slots, required this.date, required this.canCheck, required this.planId});
 
   final List<PlanDaySlot> slots;
   final DateTime date;
@@ -259,6 +275,10 @@ class _SlotsOrEmpty extends StatelessWidget {
   /// assenza di piano sostituiscono l'intero contenuto, vedi
   /// `_DayContent`).
   final bool canCheck;
+
+  /// Piano che copre la giornata, per l'avvio dell'inversione (6.5
+  /// interfaccia.md) dalla card espansa.
+  final String? planId;
 
   @override
   Widget build(BuildContext context) {
@@ -285,7 +305,7 @@ class _SlotsOrEmpty extends StatelessWidget {
       // VG-4: tutti gli slot restano sempre visibili, quale sia il loro
       // stato — nessun filtro qui.
       itemBuilder: (context, index) =>
-          MealCard(slot: slots[index], date: date, canCheck: canCheck),
+          MealCard(slot: slots[index], date: date, canCheck: canCheck, planId: planId),
     );
   }
 }
