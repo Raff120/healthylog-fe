@@ -5,6 +5,8 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../core/auth/session.dart';
 import '../core/auth/session_controller.dart';
+import '../features/care/presentation/nutritionist_screen.dart';
+import '../features/care/presentation/patient_detail_screen.dart';
 import '../features/dietplan/data/diet_plan_template.dart';
 import '../features/dietplan/presentation/create_diet_plan_screen.dart';
 import '../features/dietplan/presentation/diet_plan_management_screen.dart';
@@ -13,7 +15,7 @@ import '../features/dietplan/presentation/diet_plan_template_list_screen.dart';
 import '../features/dietplan/presentation/diet_plan_template_preview_screen.dart';
 import '../features/dietplan/presentation/diet_plan_template_schedule_screen.dart';
 import '../features/dietplan/presentation/diet_plan_view_screen.dart';
-import '../features/dietplan/presentation/plan_screen.dart';
+import '../features/dietplan/presentation/edit_plan_day_screen.dart';
 import '../features/identity/data/account_role.dart';
 import '../features/identity/presentation/devices_screen.dart';
 import '../features/identity/presentation/email_verification_link_screen.dart';
@@ -28,6 +30,7 @@ import '../features/identity/presentation/role_selection_screen.dart';
 import '../features/identity/presentation/settings_screen.dart';
 import '../features/group/presentation/group_screen.dart';
 import 'navigation/main_shell.dart';
+import 'navigation/role_home_screen.dart';
 import 'splash_screen.dart';
 
 part 'router.g.dart';
@@ -138,7 +141,8 @@ GoRouter goRouter(Ref ref) {
       ),
       GoRoute(
         path: '/home',
-        builder: (context, state) => const MainShell(child: PlanScreen()),
+        // 3.1 interfaccia.md: *Piano* per l'Utente, *Pazienti* per il Nutrizionista (F22).
+        builder: (context, state) => const MainShell(child: RoleHomeScreen()),
       ),
       GoRoute(
         path: '/profile',
@@ -152,10 +156,26 @@ GoRouter goRouter(Ref ref) {
       GoRoute(path: '/profile/settings', builder: (context, state) => const SettingsScreen()),
       GoRoute(path: '/profile/plans', builder: (context, state) => const DietPlanManagementScreen()),
       GoRoute(path: '/group', builder: (context, state) => const GroupScreen()),
+      GoRoute(path: '/profile/nutritionist', builder: (context, state) => const NutritionistScreen()),
+      GoRoute(
+        path: '/patients/:id',
+        builder: (context, state) => PatientDetailScreen(patientId: state.pathParameters['id']!),
+      ),
       GoRoute(
         path: '/diet-plans/new',
-        builder: (context, state) =>
-            CreateDietPlanScreen(sourceTemplate: state.extra as DietPlanTemplate?),
+        // CD-2 (F22): `patientId` in query quando si arriva dal dettaglio del Paziente.
+        builder: (context, state) => CreateDietPlanScreen(
+          sourceTemplate: state.extra as DietPlanTemplate?,
+          patientId: state.uri.queryParameters['patientId'],
+        ),
+      ),
+      GoRoute(
+        path: '/plan-days/:date/edit',
+        // MD-8, EP-2: `userId` in query per il Nutrizionista sul Paziente (F22).
+        builder: (context, state) => EditPlanDayScreen(
+          date: DateTime.parse(state.pathParameters['date']!),
+          userId: state.uri.queryParameters['userId'],
+        ),
       ),
       GoRoute(
         path: '/diet-plans/:id/schedule',
