@@ -20,6 +20,10 @@ import 'widgets/delete_plan_dialog.dart';
 /// (CV-7) e salvataggio come template (TP-5), pure ammesse da ST-7,
 /// sono rinviate insieme al resto (deciso con l'utente, vedi
 /// decisioni.md).
+///
+/// F22: la stessa vista serve al Paziente per il piano redatto dal
+/// proprio Nutrizionista, in qualunque stato (UT-8: sola lettura, senza
+/// eliminazione né altre azioni) — l'etichetta segue lo stato.
 class DietPlanViewScreen extends ConsumerWidget {
   const DietPlanViewScreen({super.key, required this.planId});
 
@@ -59,11 +63,11 @@ class DietPlanViewScreen extends ConsumerWidget {
         elevation: 0,
         scrolledUnderElevation: 0,
         title: Text(
-          planState.value?.name ?? 'Piano concluso',
+          planState.value?.name ?? 'Piano',
           style: typography.titleMedium.copyWith(color: colors.textPrimary),
         ),
         actions: [
-          if (planState.value != null)
+          if (planState.value != null && planState.value!.status == PlanStatus.completed)
             PopupMenuButton<String>(
               onSelected: (value) {
                 if (value == 'delete') _delete(context, ref);
@@ -86,7 +90,7 @@ class DietPlanViewScreen extends ConsumerWidget {
           data: (plan) => ListView(
             padding: const EdgeInsets.all(AppSpacing.md),
             children: [
-              Text('CONCLUSO', style: typography.overline.copyWith(color: colors.textTertiary)),
+              Text(_statusLabel(plan.status), style: typography.overline.copyWith(color: colors.textTertiary)),
               const SizedBox(height: AppSpacing.xxs),
               Text(planPeriodLabel(plan, _formatDate), style: typography.bodyMedium.copyWith(color: colors.textSecondary)),
               const SizedBox(height: AppSpacing.md),
@@ -98,3 +102,11 @@ class DietPlanViewScreen extends ConsumerWidget {
     );
   }
 }
+
+String _statusLabel(PlanStatus status) => switch (status) {
+      PlanStatus.completed => 'CONCLUSO',
+      PlanStatus.active => 'IN CORSO',
+      PlanStatus.suspended => 'SOSPESO',
+      PlanStatus.scheduled => 'PROGRAMMATO',
+      PlanStatus.draft => 'BOZZA',
+    };

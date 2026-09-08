@@ -219,11 +219,23 @@ class _DietPlanScheduleScreenState extends ConsumerState<DietPlanScheduleScreen>
     if (!mounted) return;
     final state = ref.read(dietPlanLifecycleControllerProvider);
     state?.whenOrNull(
-      data: (_) => context.pushReplacement('/profile/plans'),
+      data: (_) => _leave(),
       error: (error, _) => ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(describeApiError(error.asApiException?.code ?? ''))),
       ),
     );
+  }
+
+  /// F22: si torna da dove si è venuti — la gestione dei piani per
+  /// l'Utente, il dettaglio del Paziente per il Nutrizionista (9.2
+  /// interfaccia.md) — invece di un percorso fisso; il primo caso
+  /// resta il ripiego quando non c'è nulla a cui tornare.
+  void _leave() {
+    if (context.canPop()) {
+      context.pop();
+    } else {
+      context.go('/profile/plans');
+    }
   }
 
   /// CV-2, CD-13, CD-15: la completezza è verificata qui, sullo schema
@@ -241,7 +253,7 @@ class _DietPlanScheduleScreenState extends ConsumerState<DietPlanScheduleScreen>
     if (!mounted) return;
     final state = ref.read(confirmDietPlanControllerProvider);
     state?.whenOrNull(
-      data: (_) => context.pushReplacement('/profile/plans'),
+      data: (_) => _leave(),
       error: (error, _) {
         final exception = error.asApiException;
         if (exception?.code == 'PLAN_INCOMPLETE') {
@@ -380,7 +392,8 @@ class _DietPlanScheduleScreenState extends ConsumerState<DietPlanScheduleScreen>
           const SizedBox(width: AppSpacing.xs),
           Expanded(
             child: Text(
-              'Le modifiche decorrono da oggi: le giornate già trascorse restano invariate.',
+              'Le modifiche decorrono da oggi e valgono per tutte le settimane: le giornate già trascorse '
+              'restano invariate. Per cambiare una sola giornata, usa "Modifica questa giornata" dalla vista del giorno.',
               style: typography.caption.copyWith(color: colors.textPrimary),
             ),
           ),

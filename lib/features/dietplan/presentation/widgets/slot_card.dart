@@ -17,12 +17,18 @@ class SlotCard extends StatefulWidget {
     required this.index,
     required this.onChanged,
     required this.onRemove,
+    this.showAdherenceWeight = true,
   });
 
   final EditableSlot slot;
   final int index;
   final VoidCallback onChanged;
   final VoidCallback onRemove;
+
+  /// MD-8: nella modifica della singola occorrenza il peso di aderenza
+  /// non è in gioco — resta quello dello slot (o il predefinito per uno
+  /// nuovo): il cursore non compare.
+  final bool showAdherenceWeight;
 
   @override
   State<SlotCard> createState() => _SlotCardState();
@@ -155,6 +161,7 @@ class _SlotCardState extends State<SlotCard> {
                   ),
                   const SizedBox(height: AppSpacing.sm),
                   AppTextField(label: 'Nota accessoria', controller: slot.noteController, minLines: 2, maxLines: 3),
+                  if (widget.showAdherenceWeight) ...[
                   const SizedBox(height: AppSpacing.md),
                   Text('Peso di aderenza: ${slot.adherenceWeight.toStringAsFixed(1)}',
                       style: typography.bodyMedium.copyWith(color: colors.textPrimary)),
@@ -174,6 +181,7 @@ class _SlotCardState extends State<SlotCard> {
                     'Quanto questo pasto incide sull\'aderenza. A zero non viene conteggiato.',
                     style: typography.caption.copyWith(color: colors.textSecondary),
                   ),
+                  ],
                   const SizedBox(height: AppSpacing.md),
                   Align(
                     alignment: Alignment.centerRight,

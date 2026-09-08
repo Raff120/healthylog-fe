@@ -12,12 +12,13 @@ import '../providers/profile_providers.dart';
 import '../providers/sessions_providers.dart';
 
 /// Profilo (12.1 interfaccia.md): intestazione personale, elenco delle
-/// sezioni, disconnessione in fondo. Le sole sezioni già realizzate
-/// compaiono: Nutrizionista appartiene a una feature non ancora avviata
-/// e non è quindi presente (2.6: gli elementi per funzioni inesistenti
-/// non compaiono, non sono disabilitati). "Piani" (7.1 interfaccia.md,
-/// F10) apre la gestione del piano in corso. "Gruppo" (8.1, 8.2
+/// sezioni, disconnessione in fondo. "Piani" (7.1 interfaccia.md, F10)
+/// apre la gestione del piano in corso. "Gruppo" (8.1, 8.2
 /// interfaccia.md, F19) apre la sua gestione e composizione.
+/// "Nutrizionista" (9.3, F21) il collegamento e le richieste ricevute.
+/// Al Nutrizionista compaiono le sole voci *Dati personali* e
+/// *Impostazioni* (12.1: non ha gruppo, collegamenti in qualità di
+/// paziente, né piani propri — NU-10, NU-11, RG-2).
 /// "Impostazioni" (12.2, F11) raccoglie ora anche "Dispositivi
 /// collegati", che non compare più qui direttamente (vedi decisioni.md).
 class ProfileScreen extends ConsumerWidget {
@@ -117,19 +118,26 @@ class ProfileScreen extends ConsumerWidget {
                   label: 'Dati personali',
                   onTap: () => context.push('/profile/personal-data'),
                 ),
-                const SizedBox(height: AppSpacing.sm),
-                _ProfileSection(
-                  icon: Icons.calendar_month_outlined,
-                  label: 'Piani',
-                  onTap: () => context.push('/profile/plans'),
-                ),
-                // GE-4, NU-10: il Nutrizionista non può appartenere ad alcun Gruppo.
+                // NU-11, GE-4, NU-10, 12.1 interfaccia.md: piani propri, Gruppo e
+                // collegamento in qualità di paziente sono del solo Utente.
                 if (profile.role == AccountRole.user) ...[
+                  const SizedBox(height: AppSpacing.sm),
+                  _ProfileSection(
+                    icon: Icons.calendar_month_outlined,
+                    label: 'Piani',
+                    onTap: () => context.push('/profile/plans'),
+                  ),
                   const SizedBox(height: AppSpacing.sm),
                   _ProfileSection(
                     icon: Icons.groups_outlined,
                     label: 'Gruppo',
                     onTap: () => context.push('/group'),
+                  ),
+                  const SizedBox(height: AppSpacing.sm),
+                  _ProfileSection(
+                    icon: Icons.medical_services_outlined,
+                    label: 'Nutrizionista',
+                    onTap: () => context.push('/profile/nutritionist'),
                   ),
                 ],
                 const SizedBox(height: AppSpacing.sm),

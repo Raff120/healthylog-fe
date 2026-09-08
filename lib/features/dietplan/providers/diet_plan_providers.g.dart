@@ -93,7 +93,7 @@ final class CreateDietPlanControllerProvider
 }
 
 String _$createDietPlanControllerHash() =>
-    r'fac07fdb3c458c802581f080db7fe8bf0d7137b1';
+    r'1e59c70110526f6b6eefcaf1771e9db0ad380a7f';
 
 /// Creazione del piano (CD-1, CD-4): nessuno stato da ricaricare al primo
 /// utilizzo, a differenza di [DietPlanScheduleController] — la schermata di
@@ -275,7 +275,7 @@ final class ConfirmDietPlanControllerProvider
 }
 
 String _$confirmDietPlanControllerHash() =>
-    r'77ae868118f159cf316d0c196ef3c1e4dcb02010';
+    r'd348962a43cbe99008a615ee762f2d2e146f1276';
 
 /// CV-2: conferma del piano in redazione.
 
@@ -416,7 +416,7 @@ final class DietPlanLifecycleControllerProvider
 }
 
 String _$dietPlanLifecycleControllerHash() =>
-    r'e94942e605cac2c01827e20b2c6a4fe04aa85bc9';
+    r'bce05c5c1561f2d7cca5077cdfa6009b3ec28484';
 
 /// Transizioni di stato ed eliminazione disposte dalla schermata di
 /// gestione (7.1 interfaccia.md, F10): ciascuna invalida

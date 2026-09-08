@@ -7,6 +7,8 @@ import '../../../app/theme/theme_context.dart';
 import '../../../core/api/api_error_messages.dart';
 import '../../../core/api/api_exception.dart';
 import '../../../core/widgets/app_primary_button.dart';
+import '../../care/domain/plan_competence.dart';
+import '../../care/providers/care_providers.dart';
 import '../data/diet_plan.dart';
 import '../data/plan_status.dart';
 import '../domain/current_diet_plan.dart';
@@ -18,8 +20,10 @@ import 'widgets/delete_plan_dialog.dart';
 /// PA-8) con le azioni di stato di F10 (CV-2, AS-11, CV-4, CV-S1, CV-S6,
 /// CV-5, MD-1), seguita dalle voci compatte degli altri piani — Bozza,
 /// altri Programmato (PA-9) e Conclusi. Pulsante di creazione sempre
-/// presente (7.1: "Il pulsante è assente al Paziente" — non ancora
-/// rilevante, il Paziente non esiste prima di F22).
+/// presente salvo che per il Paziente (7.1: "Il pulsante è assente al
+/// Paziente", UT-8, F22), a cui non compaiono nemmeno le azioni sul
+/// piano redatto dal proprio Nutrizionista (TR-17) — la card lo indica
+/// con "Redatto da [Nome]".
 ///
 /// L'eliminazione (CV-10, CV-11) è offerta qui solo dalla card, per il
 /// Sospeso — mai per l'Attivo, che CV-11 esclude. Non compare invece
@@ -148,6 +152,9 @@ class DietPlanManagementScreen extends ConsumerWidget {
     final typography = context.typography;
     final listState = ref.watch(ownedDietPlansProvider);
     final acting = ref.watch(dietPlanLifecycleControllerProvider)?.isLoading ?? false;
+    // UT-8, F22: il collegamento vigente decide le facoltà sul piano.
+    final careLink = ref.watch(currentCareLinkOrNullProvider);
+    final canCreate = canCreateOwnPlan(careLink);
 
     return Scaffold(
       backgroundColor: colors.background,
@@ -159,10 +166,12 @@ class DietPlanManagementScreen extends ConsumerWidget {
       ),
       // 7.1 interfaccia.md: "Pulsante mobile in basso a destra", sempre
       // presente — non solo nello stato vuoto.
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => context.push('/diet-plans/new'),
-        child: const Icon(Icons.add),
-      ),
+      floatingActionButton: canCreate
+          ? FloatingActionButton(
+              onPressed: () => context.push('/diet-plans/new'),
+              child: const Icon(Icons.add),
+            )
+          : null,
       body: SafeArea(
         child: listState.when(
           loading: () => const Center(child: CircularProgressIndicator()),
@@ -173,6 +182,21 @@ class DietPlanManagementScreen extends ConsumerWidget {
             ),
           ),
           data: (plans) {
+            if (plans.isEmpty && !canCreate) {
+              // 7.1 interfaccia.md: "Per il Paziente privo di piani assegnati,
+              // la constatazione neutra che il nutrizionista non ne ha
+              // ancora redatti, senza azione".
+              return Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(AppSpacing.md),
+                  child: Text(
+                    'Il tuo nutrizionista non ha ancora redatto un piano.',
+                    style: typography.bodyMedium.copyWith(color: colors.textSecondary),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              );
+            }
             if (plans.isEmpty) {
               return Center(
                 child: Padding(
@@ -211,6 +235,8 @@ class DietPlanManagementScreen extends ConsumerWidget {
                   _CurrentPlanCard(
                     plan: current,
                     acting: acting,
+                    locked: isPlanLockedForPatient(current, careLink),
+                    authorName: current.authorId == careLink?.nutritionistId ? careLink?.nutritionistName : null,
                     formatDate: _formatDate,
                     onSuspend: () => _suspend(context, ref, current.id),
                     onResume: () => _resume(context, ref, current.id),
@@ -229,9 +255,11 @@ class DietPlanManagementScreen extends ConsumerWidget {
                     child: _OtherPlanTile(
                       plan: plan,
                       formatDate: _formatDate,
-                      onTap: () => context.push(plan.status == PlanStatus.completed
-                          ? '/diet-plans/${plan.id}'
-                          : '/diet-plans/${plan.id}/schedule'),
+                      // UT-8: il piano bloccato si apre in sola lettura, come il Concluso.
+                      onTap: () => context.push(
+                          plan.status == PlanStatus.completed || isPlanLockedForPatient(plan, careLink)
+                              ? '/diet-plans/${plan.id}'
+                              : '/diet-plans/${plan.id}/schedule'),
                     ),
                   ),
               ],
@@ -249,6 +277,8 @@ class _CurrentPlanCard extends StatelessWidget {
   const _CurrentPlanCard({
     required this.plan,
     required this.acting,
+    required this.locked,
+    required this.authorName,
     required this.formatDate,
     required this.onSuspend,
     required this.onResume,
@@ -262,6 +292,12 @@ class _CurrentPlanCard extends StatelessWidget {
 
   final DietPlan plan;
   final bool acting;
+
+  /// UT-8, TR-17: redatto dal proprio Nutrizionista — nessuna azione.
+  final bool locked;
+
+  /// 7.1 interfaccia.md: "Redatto da [Nome]" se di un Nutrizionista.
+  final String? authorName;
   final String Function(DateTime) formatDate;
   final VoidCallback onSuspend;
   final VoidCallback onResume;
@@ -298,12 +334,23 @@ class _CurrentPlanCard extends StatelessWidget {
           Text(plan.name, style: typography.titleLarge.copyWith(color: colors.textPrimary)),
           const SizedBox(height: AppSpacing.xxs),
           Text(planPeriodLabel(plan, formatDate), style: typography.bodyMedium.copyWith(color: colors.textSecondary)),
+          if (authorName != null && authorName!.isNotEmpty) ...[
+            const SizedBox(height: AppSpacing.xxs),
+            Text('Redatto da $authorName', style: typography.caption.copyWith(color: colors.textTertiary)),
+          ],
+          if (locked) ...[
+            const SizedBox(height: AppSpacing.sm),
+            Text(
+              'Il contenuto del piano è a cura del tuo nutrizionista: puoi spuntare e invertire i pasti.',
+              style: typography.caption.copyWith(color: colors.textSecondary),
+            ),
+          ],
           const SizedBox(height: AppSpacing.md),
           Wrap(
             spacing: AppSpacing.xs,
             runSpacing: AppSpacing.xs,
             children: [
-              for (final action in _actionsFor(plan.status))
+              for (final action in locked ? const <_PlanAction>[] : _actionsFor(plan.status))
                 OutlinedButton(
                   onPressed: acting ? null : action.onPressed,
                   style: action.destructive

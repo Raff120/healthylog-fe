@@ -7,6 +7,8 @@ import '../../../app/theme/theme_context.dart';
 import '../../../core/api/api_exception.dart';
 import '../../../core/api/api_error_messages.dart';
 import '../../../core/widgets/empty_state_view.dart';
+import '../../care/domain/plan_competence.dart';
+import '../../care/providers/care_providers.dart';
 import '../../identity/providers/profile_providers.dart';
 import '../data/plan_day.dart';
 import '../data/plan_day_coverage.dart';
@@ -69,7 +71,11 @@ class PlanScreen extends ConsumerWidget {
               )
             : Text('Scegli dove spostarlo', style: typography.titleMedium.copyWith(color: colors.textPrimary)),
         actions: swapSelection == null
-            ? null
+            ? [
+                // MD-8, MD-11: modifica della sola giornata selezionata, sul
+                // proprio piano e per chi ne ha titolo (non il Paziente, UT-8).
+                if (viewMode == PlanViewMode.day) _DayMenu(selectedDate: selectedDate),
+              ]
             : [
                 TextButton(
                   onPressed: () => ref.read(mealSwapSelectionProvider.notifier).cancel(),
@@ -251,6 +257,11 @@ class _DayContent extends ConsumerWidget {
     // CU-2, CU-3: il Cuoco può invece spuntare e invertire sul piano di
     // un membro del proprio Gruppo.
     final canOperate = member == null || ref.watch(isCookProvider);
+    // UT-8, TR-17 (F22): il Paziente non dispone del piano redatto dal
+    // proprio Nutrizionista — né lo riprende, né ne crea uno proprio.
+    final careLink = ref.watch(currentCareLinkOrNullProvider);
+    final canManage = !readOnly && !ref.watch(isPlanLockedProvider(day.planId));
+    final canCreate = !readOnly && canCreateOwnPlan(careLink);
     switch (day.coverage) {
       case PlanDayCoverage.suspended:
         // ref.watch (non solo read) tiene vivo il controller autoDispose
@@ -262,11 +273,9 @@ class _DayContent extends ConsumerWidget {
           icon: Icons.pause_circle_outline,
           title: 'Piano sospeso',
           text: 'Riprenderà quando lo deciderai',
-          // UT-8: l'unico caso possibile prima di F22 è l'Utente
-          // autonomo, sempre titolare del proprio piano.
-          actionLabel: readOnly ? null : 'Riprendi',
+          actionLabel: canManage ? 'Riprendi' : null,
           actionLoading: resuming,
-          onAction: readOnly
+          onAction: !canManage
               ? null
               : () async {
                   await ref
@@ -278,6 +287,14 @@ class _DayContent extends ConsumerWidget {
       case PlanDayCoverage.none:
         final ownedPlans = readOnly ? null : ref.watch(ownedDietPlansProvider);
         final everCreated = readOnly || (ownedPlans?.value?.isNotEmpty ?? true);
+        if (!canCreate && !everCreated) {
+          // 7.1 interfaccia.md: al Paziente privo di piani, la constatazione neutra.
+          return const EmptyStateView(
+            icon: Icons.calendar_month_outlined,
+            title: 'Nessun piano ancora',
+            text: 'Il tuo nutrizionista non ha ancora redatto un piano',
+          );
+        }
         return everCreated
             ? const EmptyStateView(
                 icon: Icons.event_busy,
@@ -377,4 +394,48 @@ class _SlotsOrEmpty extends StatelessWidget {
 String _formatDate(DateTime value) {
   final local = value.toLocal();
   return '${local.day.toString().padLeft(2, '0')}/${local.month.toString().padLeft(2, '0')}/${local.year}';
+}
+
+/// UT-8, PZ-4: se il piano indicato — il proprio, quello che copre la
+/// giornata — è redatto dal Nutrizionista con cui vige un collegamento.
+/// `false` finché piani o collegamento non sono noti.
+final isPlanLockedProvider = Provider.family<bool, String?>((ref, planId) {
+  if (planId == null) return false;
+  final careLink = ref.watch(currentCareLinkOrNullProvider);
+  if (careLink == null) return false;
+  final plans = ref.watch(ownedDietPlansProvider).value;
+  if (plans == null) return false;
+  for (final plan in plans) {
+    if (plan.id == planId) return isPlanLockedForPatient(plan, careLink);
+  }
+  return false;
+});
+
+/// MD-8: menu della giornata — "Modifica questa giornata", sul proprio
+/// piano Attivo, per chi ne ha titolo (MD-15). Assente su un membro del
+/// Gruppo (CU-9) e, per il Paziente, sul piano del Nutrizionista (UT-8).
+class _DayMenu extends ConsumerWidget {
+  const _DayMenu({required this.selectedDate});
+
+  final DateTime selectedDate;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final member = ref.watch(selectedGroupMemberProvider);
+    final sideBySide = ref.watch(sideBySideModeProvider);
+    if (member != null || sideBySide) return const SizedBox.shrink();
+    final day = ref.watch(planDayProvider(selectedDate)).value;
+    if (day == null || day.coverage != PlanDayCoverage.active) return const SizedBox.shrink();
+    if (ref.watch(isPlanLockedProvider(day.planId))) return const SizedBox.shrink();
+    if (dateOnly(selectedDate).isBefore(dateOnly(DateTime.now()))) return const SizedBox.shrink();
+    return PopupMenuButton<String>(
+      tooltip: 'Altre azioni',
+      onSelected: (value) {
+        if (value == 'edit-day') context.push('/plan-days/${isoDate(selectedDate)}/edit');
+      },
+      itemBuilder: (context) => const [
+        PopupMenuItem(value: 'edit-day', child: Text('Modifica questa giornata')),
+      ],
+    );
+  }
 }

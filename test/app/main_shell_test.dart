@@ -9,10 +9,13 @@ import 'package:healthylog/core/api/api_error_interceptor.dart';
 import 'package:healthylog/core/storage/app_database.dart';
 import 'package:healthylog/core/storage/secure_key_value_store.dart';
 import 'package:healthylog/features/dietplan/data/diet_plan_api.dart';
+import 'package:healthylog/features/dietplan/data/diet_plan_template_api.dart';
 import 'package:healthylog/features/dietplan/data/plan_day_api.dart';
 import 'package:healthylog/features/dietplan/domain/plan_day_date.dart';
 import 'package:healthylog/features/dietplan/providers/diet_plan_providers.dart';
+import 'package:healthylog/features/dietplan/providers/diet_plan_template_providers.dart';
 import 'package:healthylog/features/dietplan/providers/plan_day_providers.dart';
+import 'package:healthylog/features/care/providers/care_providers.dart';
 import 'package:healthylog/features/group/data/cooking_group_api.dart';
 import 'package:healthylog/features/group/providers/cooking_group_providers.dart';
 import 'package:healthylog/features/identity/data/identity_api.dart';
@@ -20,6 +23,8 @@ import 'package:healthylog/features/identity/data/profile_api.dart';
 import 'package:healthylog/features/identity/providers/identity_providers.dart';
 import 'package:healthylog/features/identity/providers/profile_providers.dart';
 import 'package:healthylog/main.dart';
+
+import '../support/care_api_stub.dart';
 
 /// Barra di navigazione principale (3.1, 3.2, 2.6 interfaccia.md), aggiunta
 /// retroattivamente a F06 (vedi decisioni.md): quattro voci per l'Utente,
@@ -148,8 +153,12 @@ Future<ProviderContainer> _pumpAuthenticatedApp(
       identityApiProvider.overrideWithValue(IdentityApi(identityDio)),
       profileApiProvider.overrideWithValue(ProfileApi(profileDio)),
       dietPlanApiProvider.overrideWithValue(DietPlanApi(dietPlanDio)),
+      // CT-2: nessun template, per la destinazione *Template* del Nutrizionista.
+      dietPlanTemplateApiProvider.overrideWithValue(DietPlanTemplateApi(dietPlanDio)),
       planDayApiProvider.overrideWithValue(PlanDayApi(planDayDio)),
       cookingGroupApiProvider.overrideWithValue(CookingGroupApi(cookingGroupDio)),
+      // F21/F22: nessun collegamento professionale (RG-5), nessun Paziente.
+      careApiProvider.overrideWithValue(stubCareApi()),
       // F14: la base dati reale userebbe path_provider/flutter_secure_storage,
       // assenti nella VM di test (sospensione indefinita, non un errore).
       appDatabaseProvider.overrideWithValue(
@@ -272,6 +281,8 @@ void main() {
           dietPlanApiProvider.overrideWithValue(DietPlanApi(dietPlanDio)),
           planDayApiProvider.overrideWithValue(PlanDayApi(planDayDio)),
           cookingGroupApiProvider.overrideWithValue(CookingGroupApi(cookingGroupDio)),
+          // F21/F22: nessun collegamento professionale (RG-5), nessun Paziente.
+          careApiProvider.overrideWithValue(stubCareApi()),
           appDatabaseProvider.overrideWithValue(
             AppDatabase(NativeDatabase.memory()),
           ),
@@ -313,9 +324,25 @@ void main() {
   testWidgets('mostra le tre voci del Nutrizionista (3.1)', (tester) async {
     await _pumpAuthenticatedApp(tester, role: 'NUTRITIONIST');
 
-    expect(find.text('Pazienti'), findsOneWidget);
+    // La voce della barra e il titolo della destinazione iniziale (9.1, F22).
+    expect(find.byKey(const Key('navItem-Pazienti')), findsOneWidget);
+    expect(find.text('Nessun paziente collegato'), findsOneWidget);
     expect(find.text('Template'), findsOneWidget);
     expect(find.text('Profilo'), findsOneWidget);
     expect(find.text('Attività'), findsNothing);
+  });
+
+  /// 3.1, 3.2 interfaccia.md (F22): *Template* è una destinazione della
+  /// barra del Nutrizionista — il tocco vi conduce conservando la barra,
+  /// non a schermo pieno (segnalato dall'utente, vedi decisioni.md).
+  testWidgets('il tocco su Template conserva la barra del Nutrizionista (3.2)', (tester) async {
+    await _pumpAuthenticatedApp(tester, role: 'NUTRITIONIST');
+
+    await tester.tap(find.byKey(const Key('navItem-Template')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Nessun template. Crealo con il pulsante in basso.'), findsOneWidget);
+    expect(find.byKey(const Key('navItem-Pazienti')), findsOneWidget);
+    expect(find.byKey(const Key('navItem-Profilo')), findsOneWidget);
   });
 }

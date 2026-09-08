@@ -8,6 +8,7 @@ import '../../group/providers/cooking_group_providers.dart';
 import '../../identity/providers/profile_providers.dart';
 import '../data/group_plan_day.dart';
 import '../data/plan_day.dart';
+import '../data/diet_plan_requests.dart';
 import '../data/plan_day_api.dart';
 import '../data/plan_day_local_cache.dart';
 import '../data/slot_status.dart';
@@ -180,5 +181,23 @@ class PlanDaySlotStatusController extends _$PlanDaySlotStatusController {
     // VG-12: la modalità affiancata deve rinnovarsi con qualunque
     // spunta, propria o di un membro disposta dal Cuoco (CU-3).
     ref.invalidate(groupPlanDayProvider(date));
+  }
+}
+
+/// MD-8: modifica della singola occorrenza. A salvataggio riuscito la
+/// giornata in cache è sostituita per intero con quella restituita —
+/// stesso criterio della spunta — così la vista giornaliera la riflette
+/// senza una nuova lettura.
+@riverpod
+class UpdatePlanDayController extends _$UpdatePlanDayController {
+  @override
+  AsyncValue<PlanDay>? build() => null;
+
+  Future<void> save(DateTime date, UpdatePlanDayRequest request, {String? userId}) async {
+    state = const AsyncValue.loading();
+    state = await AsyncValue.guard(
+      () => ref.read(planDayApiProvider).updateOccurrence(date, request, userId: userId),
+    );
+    if (state?.hasError == false) ref.invalidate(planDayProvider(dateOnly(date), userId: userId));
   }
 }
