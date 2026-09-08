@@ -15,6 +15,7 @@ class PlanDaySlot {
     required this.recipeText,
     required this.status,
     required this.replacementNote,
+    this.statusChangedBy,
   });
 
   factory PlanDaySlot.fromJson(Map<String, dynamic> json) => PlanDaySlot(
@@ -28,6 +29,7 @@ class PlanDaySlot {
     recipeText: json['recipeText'] as String?,
     status: SlotStatus.fromJson(json['status'] as String),
     replacementNote: json['replacementNote'] as String?,
+    statusChangedBy: json['statusChangedBy'] as String?,
   );
 
   final String slotId;
@@ -41,10 +43,16 @@ class PlanDaySlot {
   final SlotStatus status;
 
   /// Valorizzata solo se [status] è [SlotStatus.skipped] (SC-4). Assente
-  /// nella proiezione che il backend riserva a Cuoco e Nutrizionista
-  /// (SC-12, SC-13): qui presente perché questo modello rispecchia solo
-  /// la vista del proprietario, l'unica esistente prima di F20/F22.
+  /// dal JSON quando questo modello rispecchia la proiezione riservata a
+  /// Cuoco e Nutrizionista (SC-12, SC-13, `PlanDaySlotForOthersResponse`
+  /// sul backend) — [PlanDaySlot.fromJson] legge in tal caso il campo
+  /// assente come `null`, la stessa forma di uno slot mai in Saltato.
   final String? replacementNote;
+
+  /// CU-4 (F20): l'autore dell'ultima spunta, `null` finché nessuno ha
+  /// ancora agito sullo slot. Presente solo nella vista del proprietario
+  /// (non nella proiezione riservata ad altri).
+  final String? statusChangedBy;
 
   /// Per la cache locale di sola lettura (PL-6, F14): mai inviato al
   /// backend, che ha le proprie rappresentazioni dedicate in scrittura
@@ -60,6 +68,7 @@ class PlanDaySlot {
     'recipeText': recipeText,
     'status': status.toJson(),
     'replacementNote': replacementNote,
+    'statusChangedBy': statusChangedBy,
   };
 }
 

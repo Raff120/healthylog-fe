@@ -297,6 +297,10 @@ class _MemberAwareAdapter implements HttpClientAdapter {
             'recipeName': null,
             'recipeText': null,
             'status': status,
+            // CU-4: sul proprio piano, l'ultima spunta risulta apposta
+            // da Maria — assente nella proiezione del piano altrui
+            // (SC-12), che il backend non espone comunque.
+            if (userId == null) 'statusChangedBy': 'user-2',
           },
         ],
       }),
@@ -1197,6 +1201,18 @@ void main() {
         expect(find.text('Yogurt e cereali'), findsOneWidget);
         expect(find.text('Pasta di Maria'), findsNothing);
         expect(find.text('Stai vedendo il piano di Maria'), findsNothing);
+      },
+    );
+
+    testWidgets(
+      'la card espansa mostra l\'autore dell\'ultima spunta sul proprio piano (CU-4)',
+      (tester) async {
+        await _pumpWithGroup(tester);
+
+        await tester.tap(find.text('Yogurt e cereali'));
+        await tester.pumpAndSettle();
+
+        expect(find.text('Ripristinato da Maria'), findsOneWidget);
       },
     );
   });
