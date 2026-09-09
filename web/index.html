@@ -20,11 +20,26 @@
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
   <meta name="description" content="Il tuo piano alimentare, giorno per giorno.">
 
+  <!--
+    `viewport-fit=cover` estende la pagina sotto le zone riservate del
+    dispositivo (barra di stato, indicatore di Home), che vengono poi
+    restituite come spaziatura dell'elemento ospite qui sotto. Sopravvive
+    solo perché l'applicazione è innestata in un elemento proprio: nella
+    modalità a pagina intera il motore Flutter sostituisce d'autorità
+    questa dichiarazione con una propria (vedi decisioni.md).
+  -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
+
   <!-- iOS meta tags & icons -->
   <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black">
-  <!-- MP-9: il colore della barra del browser è quello d'accento del tema. -->
-  <meta name="theme-color" content="#5B8DB8">
+  <!-- iOS onora lo stile della barra di stato solo in presenza di questa
+       dichiarazione, che è distinta da quella priva di prefisso. -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <!-- MP-9: il colore della barra segue il tema in uso. -->
+  <meta name="color-scheme" content="light dark">
+  <meta name="theme-color" content="#FAF9F7" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#141312" media="(prefers-color-scheme: dark)">
   <meta name="apple-mobile-web-app-title" content="HealthyLog">
   <link rel="apple-touch-icon" href="icons/Icon-192.png">
 
@@ -33,16 +48,53 @@
 
   <title>HealthyLog</title>
   <link rel="manifest" href="manifest.json">
+
+  <style>
+    /*
+      Le zone che l'applicazione non dipinge — quella dietro la barra di
+      stato, anzitutto — mostrano lo sfondo della pagina: senza queste
+      dichiarazioni resterebbe bianco anche a tema scuro. I due valori sono
+      `backgroundLight` e `backgroundDark` della palette (`app_palette.dart`):
+      è l'unico punto fuori dal tema in cui un colore debba comparire, non
+      essendovi modo di attingere alla palette da qui.
+    */
+    :root {
+      color-scheme: light dark;
+      --healthylog-background: #FAF9F7;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --healthylog-background: #141312;
+      }
+    }
+
+    html, body {
+      margin: 0;
+      height: 100%;
+      background-color: var(--healthylog-background);
+    }
+
+    /*
+      L'applicazione occupa lo schermo intero, rientrata dalle zone riservate
+      del dispositivo. La rientranza va dichiarata qui: il motore Flutter non
+      legge `env(safe-area-inset-*)` e `MediaQuery.padding` resta nullo sul
+      web, sicché `SafeArea` non produrrebbe alcuna spaziatura (vedi
+      decisioni.md).
+    */
+    #healthylog {
+      position: fixed;
+      inset: 0;
+      padding-top: env(safe-area-inset-top);
+      padding-right: env(safe-area-inset-right);
+      padding-bottom: env(safe-area-inset-bottom);
+      padding-left: env(safe-area-inset-left);
+      box-sizing: border-box;
+    }
+  </style>
 </head>
 <body>
-  <!--
-    You can customize the "flutter_bootstrap.js" script.
-    This is useful to provide a custom configuration to the Flutter loader
-    or to give the user feedback during the initialization process.
-
-    For more details:
-    * https://docs.flutter.dev/platform-integration/web/initialization
-  -->
+  <div id="healthylog"></div>
   <script src="flutter_bootstrap.js" async></script>
 </body>
 </html>
