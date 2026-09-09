@@ -33,3 +33,9 @@ enum AppLocale {
 /// LO-1: le lingue offerte, nell'ordine in cui le Impostazioni le
 /// presentano (12.2 interfaccia.md).
 const supportedAppLocales = [AppLocale.it, AppLocale.en];
+
+/// LO-2: una lingua non prevista ricade sull'italiano, non sulla prima
+/// dell'elenco generato — che è l'inglese, in ordine alfabetico. Da
+/// passare a `MaterialApp.localeResolutionCallback`.
+Locale resolveAppLocale(Locale? deviceLocale, Iterable<Locale> supported) =>
+    AppLocale.fromTag(deviceLocale?.languageCode).flutterLocale;

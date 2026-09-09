@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 
 import '../../../../app/theme/app_spacing.dart';
 import '../../../../app/theme/theme_context.dart';
+import '../../../../l10n/l10n_context.dart';
 import '../../domain/plan_day_date.dart';
+import '../weekday_presentation.dart';
 
 String _monthYearLabel(DateTime date) =>
     '${italianMonths[date.month - 1]} ${date.year}';
@@ -40,7 +42,7 @@ class DateSelector extends StatelessWidget {
             IconButton(
               onPressed: () => onSelect(weekStart.subtract(const Duration(days: 7))),
               icon: Icon(Icons.chevron_left, color: colors.textSecondary),
-              tooltip: 'Settimana precedente',
+              tooltip: context.l10n.weekPrevious,
             ),
             Expanded(
               child: InkWell(
@@ -60,7 +62,7 @@ class DateSelector extends StatelessWidget {
             IconButton(
               onPressed: () => onSelect(weekStart.add(const Duration(days: 7))),
               icon: Icon(Icons.chevron_right, color: colors.textSecondary),
-              tooltip: 'Settimana successiva',
+              tooltip: context.l10n.weekNext,
             ),
             // 4.3, VG-19: compare solo quando ci si trova altrove.
             if (selectedDate != today)
@@ -160,7 +162,7 @@ class _DayColumn extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
-                weekday.initial,
+                weekdayInitial(context, weekday),
                 style: typography.overline.copyWith(
                   color: selected ? colors.surface : colors.textSecondary,
                 ),

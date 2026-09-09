@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../app/theme/app_spacing.dart';
 import '../../../../app/theme/theme_context.dart';
+import '../../../../l10n/l10n_context.dart';
 import '../../domain/plan_day_date.dart';
 
 /// Intestazione della vista settimanale (6.4 interfaccia.md, VS-12,
@@ -37,7 +38,7 @@ class WeekSelector extends StatelessWidget {
           IconButton(
             onPressed: onPrevious,
             icon: Icon(Icons.chevron_left, color: colors.textSecondary),
-            tooltip: 'Settimana precedente',
+            tooltip: context.l10n.weekPrevious,
           ),
           Expanded(
             child: Text(
@@ -49,12 +50,12 @@ class WeekSelector extends StatelessWidget {
           IconButton(
             onPressed: onNext,
             icon: Icon(Icons.chevron_right, color: colors.textSecondary),
-            tooltip: 'Settimana successiva',
+            tooltip: context.l10n.weekNext,
           ),
           if (onCurrentWeek != null)
             TextButton(
               onPressed: onCurrentWeek,
-              child: Text('Questa settimana', style: typography.label.copyWith(color: colors.accent)),
+              child: Text(context.l10n.weekThisWeek, style: typography.label.copyWith(color: colors.accent)),
             ),
         ],
       ),

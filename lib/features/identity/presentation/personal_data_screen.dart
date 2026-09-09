@@ -8,6 +8,7 @@ import '../../../core/api/api_error_messages.dart';
 import '../../../core/api/api_exception.dart';
 import '../../../core/widgets/app_primary_button.dart';
 import '../../../core/widgets/app_text_field.dart';
+import '../../../l10n/l10n_context.dart';
 import '../data/account_role.dart';
 import '../data/profile_models.dart';
 import '../domain/registration_field_validators.dart';
@@ -174,7 +175,7 @@ class _PersonalDataScreenState extends ConsumerState<PersonalDataScreen> {
       context.push('/verify-email', extra: _email.text.trim());
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Dati aggiornati.')),
+        SnackBar(content: Text(context.l10n.personalDataSaved)),
       );
       context.pop();
     }
@@ -185,12 +186,12 @@ class _PersonalDataScreenState extends ConsumerState<PersonalDataScreen> {
   String? _describeFieldError(String? code) {
     return switch (code) {
       null => null,
-      'REQUIRED' => 'Campo obbligatorio',
-      'TOO_LONG' => 'Troppo lungo',
-      'INVALID_FORMAT' => 'Formato non valido',
-      'EMAIL_ALREADY_USED' => 'Questo indirizzo è già registrato',
-      'USERNAME_ALREADY_USED' => 'Questo nome utente è già in uso',
-      _ => 'Valore non valido',
+      'REQUIRED' => context.l10n.validationRequired,
+      'TOO_LONG' => context.l10n.validationTooLong,
+      'INVALID_FORMAT' => context.l10n.validationInvalidFormat,
+      'EMAIL_ALREADY_USED' => context.l10n.validationEmailAlreadyRegistered,
+      'USERNAME_ALREADY_USED' => context.l10n.validationUsernameAlreadyTaken,
+      _ => context.l10n.validationInvalidValue,
     };
   }
 
@@ -206,7 +207,7 @@ class _PersonalDataScreenState extends ConsumerState<PersonalDataScreen> {
         backgroundColor: colors.background,
         elevation: 0,
         scrolledUnderElevation: 0,
-        title: Text('Dati personali', style: typography.titleMedium.copyWith(color: colors.textPrimary)),
+        title: Text(context.l10n.personalDataTitle, style: typography.titleMedium.copyWith(color: colors.textPrimary)),
       ),
       body: SafeArea(
         child: profileState.when(
@@ -250,21 +251,21 @@ class _PersonalDataScreenState extends ConsumerState<PersonalDataScreen> {
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       Text(
-                        profile.role == AccountRole.nutritionist ? 'Nutrizionista' : 'Utente',
+                        profile.role == AccountRole.nutritionist ? context.l10n.roleNutritionist : context.l10n.roleUser,
                         style: typography.caption.copyWith(color: colors.textSecondary),
                       ),
                       const SizedBox(height: AppSpacing.xxs),
                       Text(
-                        'Il ruolo non è modificabile',
+                        context.l10n.personalDataRoleNotChangeable,
                         style: typography.caption.copyWith(color: colors.textTertiary),
                       ),
                       const SizedBox(height: AppSpacing.md),
-                      AppTextField(label: 'Nome', controller: _firstName, errorText: _errorFor('firstName')),
+                      AppTextField(label: context.l10n.fieldFirstName, controller: _firstName, errorText: _errorFor('firstName')),
                       const SizedBox(height: AppSpacing.sm),
-                      AppTextField(label: 'Cognome', controller: _lastName, errorText: _errorFor('lastName')),
+                      AppTextField(label: context.l10n.fieldLastName, controller: _lastName, errorText: _errorFor('lastName')),
                       const SizedBox(height: AppSpacing.sm),
                       AppTextField(
-                        label: 'Nome utente',
+                        label: context.l10n.fieldUsername,
                         controller: _username,
                         errorText: _errorFor('username'),
                         onChanged: (value) {
@@ -277,14 +278,14 @@ class _PersonalDataScreenState extends ConsumerState<PersonalDataScreen> {
                         Padding(
                           padding: const EdgeInsets.only(top: AppSpacing.xxs, left: AppSpacing.xxs),
                           child: Text(
-                            'Servirà al tuo nutrizionista per trovarti',
+                            context.l10n.usernameHint,
                             style: typography.caption.copyWith(color: colors.textSecondary),
                           ),
                         ),
                       ],
                       const SizedBox(height: AppSpacing.sm),
                       AppTextField(
-                        label: 'Indirizzo e-mail',
+                        label: context.l10n.fieldEmail,
                         controller: _email,
                         keyboardType: TextInputType.emailAddress,
                         errorText: _errorFor('email'),
@@ -293,7 +294,7 @@ class _PersonalDataScreenState extends ConsumerState<PersonalDataScreen> {
                       BirthDateField(value: _birthDate, errorText: _errorFor('birthDate'), onTap: _pickBirthDate),
                       const SizedBox(height: AppSpacing.sm),
                       AppTextField(
-                        label: 'Luogo di nascita',
+                        label: context.l10n.fieldBirthPlace,
                         controller: _birthPlace,
                         errorText: _errorFor('birthPlace'),
                       ),
@@ -305,14 +306,14 @@ class _PersonalDataScreenState extends ConsumerState<PersonalDataScreen> {
                       ),
                       const SizedBox(height: AppSpacing.sm),
                       AppTextField(
-                        label: 'Peso obiettivo (kg)',
+                        label: context.l10n.personalDataTargetWeightKg,
                         controller: _targetWeight,
                         keyboardType: const TextInputType.numberWithOptions(decimal: true),
                         errorText: _errorFor('targetWeightKg'),
                       ),
                       const SizedBox(height: AppSpacing.sm),
                       AppTextField(
-                        label: 'Altezza (cm)',
+                        label: context.l10n.fieldHeightCm,
                         controller: _height,
                         keyboardType: TextInputType.number,
                         errorText: _errorFor('height'),

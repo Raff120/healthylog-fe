@@ -8,6 +8,7 @@ import '../../../core/api/api_error_messages.dart';
 import '../../../core/api/api_exception.dart';
 import '../../../core/widgets/app_primary_button.dart';
 import '../../../core/widgets/empty_state_view.dart';
+import '../../../l10n/l10n_context.dart';
 import '../data/diet_plan_requests.dart';
 import '../data/plan_day.dart';
 import '../data/plan_day_coverage.dart';
@@ -74,8 +75,8 @@ class _EditPlanDayScreenState extends ConsumerState<EditPlanDayScreen> {
   Future<void> _removeSlot(EditableSlot slot) async {
     if (!slot.isEmpty) {
       final confirmed = await _confirmDialog(
-        title: 'Rimuovere lo slot?',
-        message: 'Il contenuto compilato andrà perso.',
+        title: context.l10n.editRemoveSlotTitle,
+        message: context.l10n.editRemoveSlotBody,
         confirmLabel: 'Rimuovi',
       );
       if (confirmed != true) return;
@@ -121,7 +122,7 @@ class _EditPlanDayScreenState extends ConsumerState<EditPlanDayScreen> {
     final state = ref.read(updatePlanDayControllerProvider);
     state?.whenOrNull(
       data: (_) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Giornata salvata.')));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(context.l10n.editDaySaved)));
         setState(() => _dirty = false);
         if (context.canPop()) context.pop();
       },
@@ -140,14 +141,14 @@ class _EditPlanDayScreenState extends ConsumerState<EditPlanDayScreen> {
         if (match == null) continue;
         matchedRecipeField = true;
         final slot = _slots![int.parse(match.group(1)!)];
-        slot.recipeNameError = 'Serve una denominazione se è presente il testo della ricetta';
+        slot.recipeNameError = context.l10n.editRecipeNameRequired;
         slot.expanded = true;
       }
       setState(() {});
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            matchedRecipeField ? 'Controlla i campi della ricetta segnalati.' : describeApiError(context, 'VALIDATION_FAILED'),
+            matchedRecipeField ? context.l10n.editRecipeFieldsInvalid : describeApiError(context, 'VALIDATION_FAILED'),
           ),
         ),
       );
@@ -165,17 +166,17 @@ class _EditPlanDayScreenState extends ConsumerState<EditPlanDayScreen> {
               children: [
                 Icon(type.icon, size: 18),
                 const SizedBox(width: AppSpacing.xs),
-                Flexible(child: Text('Aggiungi ${type.displayName.toLowerCase()}', overflow: TextOverflow.ellipsis)),
+                Flexible(child: Text(context.l10n.slotAddOfType(slotTypeLabel(context, type).toLowerCase()), overflow: TextOverflow.ellipsis)),
               ],
             ),
           ),
         PopupMenuItem(
           value: SlotType.snack,
-          child: const Row(
+          child: Row(
             children: [
               Icon(Icons.add, size: 18),
               SizedBox(width: AppSpacing.xs),
-              Flexible(child: Text('Aggiungi spuntino', overflow: TextOverflow.ellipsis)),
+              Flexible(child: Text(context.l10n.editAddSnack, overflow: TextOverflow.ellipsis)),
             ],
           ),
         ),
@@ -199,7 +200,7 @@ class _EditPlanDayScreenState extends ConsumerState<EditPlanDayScreen> {
               const SizedBox(width: AppSpacing.xs),
               Expanded(
                 child: Text(
-                  'Le modifiche riguardano solo questa giornata: lo schema settimanale resta invariato.',
+                  context.l10n.editDayOnlyThisDayNotice,
                   style: typography.caption.copyWith(color: colors.textPrimary),
                 ),
               ),
@@ -212,7 +213,7 @@ class _EditPlanDayScreenState extends ConsumerState<EditPlanDayScreen> {
                 style: TextButton.styleFrom(padding: EdgeInsets.zero, minimumSize: Size.zero, tapTargetSize: MaterialTapTargetSize.shrinkWrap),
                 onPressed: () => context.pushReplacement('/diet-plans/$planId/schedule'),
                 child: Text(
-                  'Modifica invece lo schema, per tutte le giornate',
+                  context.l10n.editDayEditScheduleInstead,
                   style: typography.caption.copyWith(color: colors.accent),
                 ),
               ),
@@ -239,9 +240,9 @@ class _EditPlanDayScreenState extends ConsumerState<EditPlanDayScreen> {
         if (didPop) return;
         final navigator = Navigator.of(context);
         final confirmed = await _confirmDialog(
-          title: 'Modifiche non salvate',
-          message: 'Uscendo perderai le modifiche non salvate.',
-          confirmLabel: 'Esci senza salvare',
+          title: context.l10n.editDiscardTitle,
+          message: context.l10n.editDiscardBody,
+          confirmLabel: context.l10n.editDiscardConfirm,
         );
         if (confirmed == true) navigator.pop();
       },
@@ -252,7 +253,7 @@ class _EditPlanDayScreenState extends ConsumerState<EditPlanDayScreen> {
           elevation: 0,
           scrolledUnderElevation: 0,
           title: Text(
-            'Giornata del ${_formatDate(widget.date)}',
+            context.l10n.editDayTitle(_formatDate(widget.date)),
             style: typography.titleMedium.copyWith(color: colors.textPrimary),
           ),
           actions: [
@@ -276,10 +277,10 @@ class _EditPlanDayScreenState extends ConsumerState<EditPlanDayScreen> {
             ),
             data: (day) {
               if (day.coverage != PlanDayCoverage.active) {
-                return const EmptyStateView(
+                return EmptyStateView(
                   icon: Icons.event_busy,
-                  title: 'Giornata non modificabile',
-                  text: 'Solo le giornate coperte da un piano attivo possono essere modificate',
+                  title: context.l10n.editDayNotEditable,
+                  text: context.l10n.editDayNotEditableReason,
                 );
               }
               final slots = _slots!;
@@ -317,7 +318,7 @@ class _EditPlanDayScreenState extends ConsumerState<EditPlanDayScreen> {
                       top: false,
                       child: Padding(
                         padding: const EdgeInsets.all(AppSpacing.md),
-                        child: AppPrimaryButton(label: 'Salva giornata', loading: saving, onPressed: _dirty ? _save : null),
+                        child: AppPrimaryButton(label: context.l10n.editDaySave, loading: saving, onPressed: _dirty ? _save : null),
                       ),
                     ),
                   ),
@@ -362,16 +363,16 @@ class _ConsumedSlotCard extends StatelessWidget {
                 Text(
                   slot.type == SlotType.snack && slot.labelController.text.trim().isNotEmpty
                       ? slot.labelController.text.trim()
-                      : slot.type.displayName,
+                      : slotTypeLabel(context, slot.type),
                   style: typography.bodyLarge.copyWith(color: colors.textSecondary),
                 ),
                 Text(
-                  slot.contentController.text.trim().isEmpty ? 'Non specificato' : slot.contentController.text.trim(),
+                  slot.contentController.text.trim().isEmpty ? context.l10n.slotNotSpecified : slot.contentController.text.trim(),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: typography.caption.copyWith(color: colors.textTertiary),
                 ),
-                Text('Già consumato: non modificabile', style: typography.caption.copyWith(color: colors.textTertiary)),
+                Text(context.l10n.editDayConsumedNotEditable, style: typography.caption.copyWith(color: colors.textTertiary)),
               ],
             ),
           ),

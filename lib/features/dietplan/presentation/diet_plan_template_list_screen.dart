@@ -6,6 +6,7 @@ import '../../../app/theme/app_spacing.dart';
 import '../../../app/theme/theme_context.dart';
 import '../../../core/api/api_error_messages.dart';
 import '../../../core/api/api_exception.dart';
+import '../../../l10n/l10n_context.dart';
 import '../../notification/presentation/widgets/notification_bell.dart';
 import '../data/diet_plan_template.dart';
 import '../data/diet_plan_template_requests.dart';
@@ -23,7 +24,7 @@ class DietPlanTemplateListScreen extends ConsumerWidget {
   /// a differenza del piano (CD-1), il template non ha un'origine "in
   /// bianco" da nominare in un secondo momento.
   Future<void> _create(BuildContext context, WidgetRef ref) async {
-    final input = await showNameDescriptionDialog(context, title: 'Nuovo template', confirmLabel: 'Crea');
+    final input = await showNameDescriptionDialog(context, title: context.l10n.templateNew, confirmLabel: 'Crea');
     if (input == null) return;
     if (!context.mounted) return;
     await ref.read(createDietPlanTemplateControllerProvider.notifier).create(
@@ -86,7 +87,7 @@ class DietPlanTemplateListScreen extends ConsumerWidget {
                 child: Padding(
                   padding: const EdgeInsets.all(AppSpacing.md),
                   child: Text(
-                    'Nessun template. Crealo con il pulsante in basso.',
+                    context.l10n.templatesEmpty,
                     style: typography.bodyMedium.copyWith(color: colors.textSecondary),
                     textAlign: TextAlign.center,
                   ),
@@ -143,7 +144,7 @@ class _TemplateTile extends StatelessWidget {
                 Text(description, style: typography.caption.copyWith(color: colors.textSecondary)),
               ],
               const SizedBox(height: AppSpacing.xxs),
-              Text('Ultima modifica: $updatedAtLabel', style: typography.caption.copyWith(color: colors.textTertiary)),
+              Text(context.l10n.templateLastEdited(updatedAtLabel), style: typography.caption.copyWith(color: colors.textTertiary)),
             ],
           ),
         ),

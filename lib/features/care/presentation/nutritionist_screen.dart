@@ -6,6 +6,7 @@ import '../../../app/theme/theme_context.dart';
 import '../../../core/api/api_error_messages.dart';
 import '../../../core/api/api_exception.dart';
 import '../../../core/widgets/empty_state_view.dart';
+import '../../../l10n/l10n_context.dart';
 import '../data/care_models.dart';
 import '../providers/care_providers.dart';
 import 'widgets/care_confirmations.dart';
@@ -28,7 +29,7 @@ class NutritionistScreen extends ConsumerWidget {
     ref.read(revokeCareLinkControllerProvider)?.whenOrNull(
           // CP-19, PZ-8, 9.3 interfaccia.md: "l'interfaccia lo comunica con una barra temporanea".
           data: (_) => ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Collegamento revocato. Hai di nuovo piena facoltà sul tuo piano.')),
+            SnackBar(content: Text(context.l10n.careLinkRevoked)),
           ),
           error: (error, _) => ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text(describeApiError(context, error.asApiException?.code ?? ''))),
@@ -40,7 +41,7 @@ class NutritionistScreen extends ConsumerWidget {
     final accepted = await showCareLinkRequestSheet(context, request);
     if (accepted && context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Ora sei collegato a ${request.nutritionistName}.')),
+        SnackBar(content: Text(context.l10n.careLinkedNow(request.nutritionistName))),
       );
     }
   }
@@ -83,10 +84,10 @@ class NutritionistScreen extends ConsumerWidget {
                 ),
               ),
               data: (requests) => requests.isEmpty
-                  ? const EmptyStateView(
+                  ? EmptyStateView(
                       icon: Icons.medical_services_outlined,
-                      title: 'Nessun nutrizionista collegato',
-                      text: 'Puoi gestire il piano in autonomia',
+                      title: context.l10n.careNoNutritionist,
+                      text: context.l10n.careManagePlanYourself,
                     )
                   : _ReceivedRequestsList(requests: requests, onOpen: (request) => _open(context, request)),
             );
@@ -119,15 +120,14 @@ class _CurrentLinkView extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('COLLEGAMENTO IN CORSO', style: typography.overline.copyWith(color: colors.accent)),
+              Text(context.l10n.careLinkActiveHeader, style: typography.overline.copyWith(color: colors.accent)),
               const SizedBox(height: AppSpacing.xxs),
               Text(link.nutritionistName, style: typography.titleLarge.copyWith(color: colors.textPrimary)),
               const SizedBox(height: AppSpacing.xxs),
-              Text('Dal ${_formatDate(link.createdAt)}', style: typography.bodyMedium.copyWith(color: colors.textSecondary)),
+              Text(context.l10n.careLinkedSince(_formatDate(link.createdAt)), style: typography.bodyMedium.copyWith(color: colors.textSecondary)),
               const SizedBox(height: AppSpacing.sm),
               Text(
-                'Il nutrizionista redige il tuo piano e ne segue l\'andamento. Puoi sempre invertire e spuntare i '
-                'pasti, ma non modificarne il contenuto.',
+                context.l10n.careNutritionistNotice,
                 style: typography.caption.copyWith(color: colors.textSecondary),
               ),
             ],
@@ -137,7 +137,7 @@ class _CurrentLinkView extends StatelessWidget {
         Center(
           child: TextButton(
             onPressed: onRevoke,
-            child: Text('Revoca il collegamento', style: TextStyle(color: colors.error)),
+            child: Text(context.l10n.careRevokeLink, style: TextStyle(color: colors.error)),
           ),
         ),
       ],
@@ -160,7 +160,7 @@ class _ReceivedRequestsList extends StatelessWidget {
     return ListView(
       padding: const EdgeInsets.all(AppSpacing.md),
       children: [
-        Text('RICHIESTE RICEVUTE', style: typography.overline.copyWith(color: colors.textTertiary)),
+        Text(context.l10n.careRequestsReceivedHeader, style: typography.overline.copyWith(color: colors.textTertiary)),
         const SizedBox(height: AppSpacing.xs),
         for (final request in requests)
           Padding(
@@ -184,7 +184,7 @@ class _ReceivedRequestsList extends StatelessWidget {
                             Text(request.nutritionistName, style: typography.titleMedium.copyWith(color: colors.textPrimary)),
                             Text(
                               request.message == null || request.message!.isEmpty
-                                  ? 'Ricevuta il ${_formatDate(request.createdAt)}'
+                                  ? context.l10n.careRequestReceivedOn(_formatDate(request.createdAt))
                                   : request.message!,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,

@@ -6,6 +6,7 @@ import '../../../app/theme/theme_context.dart';
 import '../../../core/api/api_error_messages.dart';
 import '../../../core/api/api_exception.dart';
 import '../../../core/widgets/empty_state_view.dart';
+import '../../../l10n/l10n_context.dart';
 import '../data/measurement_models.dart';
 import '../providers/measurement_providers.dart';
 import 'widgets/last_measurement_card.dart';
@@ -36,9 +37,9 @@ class MeasurementsView extends ConsumerWidget {
         ),
       ),
       data: (items) => items.isEmpty
-          ? const EmptyStateView(
+          ? EmptyStateView(
               icon: Icons.straighten_outlined,
-              title: 'Nessuna misurazione registrata',
+              title: context.l10n.measurementNoneRecorded,
             )
           : _MeasurementsList(items: items),
     );
@@ -117,7 +118,7 @@ class _MeasurementDetailSheet extends StatelessWidget {
               ),
               const SizedBox(height: AppSpacing.xxs),
               Text(
-                'Rilevata dal tuo nutrizionista.',
+                context.l10n.measurementByNutritionist,
                 style: typography.caption.copyWith(color: colors.textTertiary),
               ),
               const SizedBox(height: AppSpacing.md),

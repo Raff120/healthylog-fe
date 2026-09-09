@@ -6,6 +6,7 @@ import '../../../../app/theme/app_spacing.dart';
 import '../../../../app/theme/theme_context.dart';
 import '../../../../core/widgets/app_primary_button.dart';
 import '../../../../core/widgets/app_text_field.dart';
+import '../../../../l10n/l10n_context.dart';
 import '../../data/measurement_models.dart';
 import '../../data/measurement_requests.dart';
 import '../../providers/measurement_providers.dart';
@@ -82,7 +83,7 @@ class _MeasurementSheetState extends ConsumerState<_MeasurementSheet> {
     final weight = _valueOf(_weight);
     // PR-13: la nota non è un valore rilevato — da sola non basta.
     if (weight == null && circumferences.isEmpty) {
-      setState(() => _error = 'Inserisci almeno un valore');
+      setState(() => _error = context.l10n.measurementAtLeastOneValue);
       return;
     }
     final note = _note.text.trim();
@@ -150,7 +151,7 @@ class _MeasurementSheetState extends ConsumerState<_MeasurementSheet> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Text(
-                  widget.existing != null ? 'Modifica misurazione' : 'Registra una misurazione',
+                  widget.existing != null ? context.l10n.measurementEditTitle : context.l10n.measurementRecordTitle,
                   style: typography.titleMedium.copyWith(color: colors.textPrimary),
                 ),
                 if (widget.patientId != null) ...[
@@ -158,7 +159,7 @@ class _MeasurementSheetState extends ConsumerState<_MeasurementSheet> {
                   // NU-12: la misurazione resta distinguibile come rilevata
                   // dal professionista, e il Paziente non potrà modificarla.
                   Text(
-                    'La registri tu: la persona potrà consultarla ma non modificarla.',
+                    context.l10n.measurementForPatientNotice,
                     style: typography.caption.copyWith(color: colors.textTertiary),
                   ),
                 ],

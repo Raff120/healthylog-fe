@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../app/theme/app_spacing.dart';
 import '../../../../app/theme/theme_context.dart';
+import '../../../../l10n/l10n_context.dart';
 import '../../providers/workout_providers.dart';
 import 'workout_sheet.dart';
 
@@ -112,7 +113,7 @@ class _WorkoutRow extends StatelessWidget {
                 style: typography.caption.copyWith(color: colors.textSecondary),
               ),
             IconButton(
-              tooltip: done ? 'Modifica' : 'Segna come svolto',
+              tooltip: done ? 'Modifica' : context.l10n.workoutMarkAsDone,
               onPressed: onCheck,
               icon: Icon(
                 done ? Icons.check_circle : Icons.radio_button_unchecked,

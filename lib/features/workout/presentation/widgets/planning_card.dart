@@ -3,8 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../app/theme/app_spacing.dart';
 import '../../../../app/theme/theme_context.dart';
+import '../../../../l10n/l10n_context.dart';
 import '../../data/workout_models.dart';
 import '../../providers/workout_providers.dart';
+import '../weekday_presentation.dart';
 import 'planning_sheet.dart';
 import 'weekly_goal_sheet.dart';
 
@@ -55,7 +57,7 @@ class PlanningCard extends ConsumerWidget {
           ),
           if (weekly.isEmpty && oneOff.isEmpty)
             Text(
-              'Nessun allenamento pianificato',
+              context.l10n.workoutNonePlanned,
               style: typography.bodyMedium.copyWith(color: colors.textSecondary),
             )
           else ...[
@@ -78,8 +80,8 @@ class PlanningCard extends ConsumerWidget {
               Expanded(
                 child: Text(
                   goal == null
-                      ? 'Nessun obiettivo settimanale'
-                      : '$goal ${goal == 1 ? 'allenamento' : 'allenamenti'} a settimana',
+                      ? context.l10n.workoutNoWeeklyGoal
+                      : context.l10n.workoutPerWeekSuffix(goal),
                   style: typography.bodyMedium.copyWith(
                     color: goal == null ? colors.textSecondary : colors.textPrimary,
                   ),
@@ -116,7 +118,7 @@ class _WeekStrip extends StatelessWidget {
             child: Column(
               children: [
                 Text(
-                  day.initial,
+                  workoutWeekdayInitial(context, day),
                   style: typography.label.copyWith(
                     color: _typesOn(day).isEmpty ? colors.textTertiary : colors.accent,
                     fontWeight: _typesOn(day).isEmpty ? FontWeight.w400 : FontWeight.w500,

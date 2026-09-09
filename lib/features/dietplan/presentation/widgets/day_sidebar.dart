@@ -4,6 +4,7 @@ import '../../../../app/theme/app_spacing.dart';
 import '../../../../app/theme/theme_context.dart';
 import '../../data/weekday.dart';
 import '../editable_slot.dart';
+import '../weekday_presentation.dart';
 
 /// Navigazione dei giorni su schermo ampio (7.3 interfaccia.md, MP-6):
 /// affiancata alla redazione del giorno selezionato, non sostituita da
@@ -34,7 +35,7 @@ class DaySidebar extends StatelessWidget {
               children: [
                 Expanded(
                   child: Text(
-                    day.dayOfWeek.label,
+                    weekdayLabel(context, day.dayOfWeek),
                     style: typography.bodyLarge.copyWith(
                       color: isSelected ? colors.accent : colors.textPrimary,
                     ),

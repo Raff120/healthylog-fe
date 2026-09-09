@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../app/theme/app_spacing.dart';
 import '../../../app/theme/theme_context.dart';
 import '../../../core/widgets/app_primary_button.dart';
+import '../../../l10n/l10n_context.dart';
 import '../providers/email_verify_link_controller.dart';
 
 /// Apertura del collegamento ricevuto per posta (5.3 interfaccia.md,
@@ -56,18 +57,18 @@ class _EmailVerificationLinkScreenState extends ConsumerState<EmailVerificationL
                         Icon(Icons.error_outline, size: 48, color: colors.textTertiary),
                         const SizedBox(height: AppSpacing.md),
                         Text(
-                          'Il collegamento non è più valido',
+                          context.l10n.verifyEmailLinkExpiredTitle,
                           textAlign: TextAlign.center,
                           style: typography.titleLarge.copyWith(color: colors.textPrimary),
                         ),
                         const SizedBox(height: AppSpacing.sm),
                         Text(
-                          'Torna all\'accesso per richiederne uno nuovo.',
+                          context.l10n.verifyEmailLinkExpiredBody,
                           textAlign: TextAlign.center,
                           style: typography.bodyMedium.copyWith(color: colors.textSecondary),
                         ),
                         const SizedBox(height: AppSpacing.lg),
-                        AppPrimaryButton(label: 'Torna all\'accesso', onPressed: () => context.go('/login')),
+                        AppPrimaryButton(label: context.l10n.verifyEmailBackToLogin, onPressed: () => context.go('/login')),
                       ]
                     : const [
                         Center(child: CircularProgressIndicator()),

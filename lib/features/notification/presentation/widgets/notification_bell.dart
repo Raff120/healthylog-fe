@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../app/theme/app_spacing.dart';
 import '../../../../app/theme/theme_context.dart';
+import '../../../../l10n/l10n_context.dart';
 import '../../providers/notification_providers.dart';
 
 /// Icona delle notifiche dell'intestazione (12.3, 3.2 interfaccia.md),
@@ -23,7 +24,7 @@ class NotificationBell extends ConsumerWidget {
     final unread = ref.watch(unreadNotificationCountProvider).value ?? 0;
 
     return IconButton(
-      tooltip: 'Notifiche',
+      tooltip: context.l10n.notificationsTitle,
       onPressed: () => context.push('/notifications'),
       icon: Stack(
         clipBehavior: Clip.none,

@@ -6,6 +6,7 @@ import '../../../../app/theme/app_spacing.dart';
 import '../../../../app/theme/theme_context.dart';
 import '../../../../core/widgets/app_primary_button.dart';
 import '../../../../core/widgets/app_text_field.dart';
+import '../../../../l10n/l10n_context.dart';
 import '../../data/workout_models.dart';
 import '../../data/workout_requests.dart';
 import '../../providers/workout_providers.dart';
@@ -82,7 +83,7 @@ class _WorkoutSheetState extends ConsumerState<_WorkoutSheet> {
       initialDate: _date.isAfter(today) ? today : _date,
       firstDate: DateTime(2000),
       lastDate: today,
-      helpText: 'Quando lo hai svolto',
+      helpText: context.l10n.workoutWhenDone,
     );
     if (picked != null) setState(() => _date = _dateOnly(picked));
   }
@@ -90,7 +91,7 @@ class _WorkoutSheetState extends ConsumerState<_WorkoutSheet> {
   Future<void> _submit() async {
     final activityType = _activityTypeController.text.trim();
     if (!_isReduced && activityType.isEmpty) {
-      setState(() => _activityTypeError = 'Indica il tipo di attività');
+      setState(() => _activityTypeError = context.l10n.workoutActivityTypeRequired);
       return;
     }
     // CB-1: l'omissione delle calorie non è segnalata né impedisce il
@@ -172,17 +173,17 @@ class _WorkoutSheetState extends ConsumerState<_WorkoutSheet> {
               children: [
                 Text(
                   _isEdit
-                      ? 'Modifica allenamento'
+                      ? context.l10n.workoutEditTitle
                       : _isReduced
                           ? widget.planned!.activityType
-                          : 'Registra un allenamento',
+                          : context.l10n.workoutRecordTitle,
                   style: typography.titleMedium.copyWith(color: colors.textPrimary),
                 ),
                 if (_isReduced) ...[
                   const SizedBox(height: AppSpacing.xxs),
                   // RA-3: l'integrazione resta possibile ma non obbligatoria.
                   Text(
-                    'Se vuoi, aggiungi calorie e nota. Puoi anche chiudere: l\'allenamento è registrato lo stesso.',
+                    context.l10n.workoutSheetFooter,
                     style: typography.caption.copyWith(color: colors.textTertiary),
                   ),
                 ],
@@ -200,7 +201,7 @@ class _WorkoutSheetState extends ConsumerState<_WorkoutSheet> {
                   const SizedBox(height: AppSpacing.sm),
                 ],
                 AppTextField(
-                  label: 'Calorie bruciate',
+                  label: context.l10n.workoutCaloriesBurned,
                   controller: _caloriesController,
                   keyboardType: TextInputType.number,
                   inputFormatters: [FilteringTextInputFormatter.digitsOnly],
@@ -210,7 +211,7 @@ class _WorkoutSheetState extends ConsumerState<_WorkoutSheet> {
                 // suggerito, neppure dagli allenamenti precedenti dello
                 // stesso tipo.
                 Text(
-                  'Se lo sai. Non è obbligatorio.',
+                  context.l10n.workoutCaloriesOptional,
                   style: typography.caption.copyWith(color: colors.textTertiary),
                 ),
                 const SizedBox(height: AppSpacing.sm),
@@ -302,7 +303,7 @@ class _ActivityTypeField extends ConsumerWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         AppTextField(
-          label: 'Tipo di attività',
+          label: context.l10n.workoutActivityType,
           controller: controller,
           errorText: errorText,
           textCapitalization: TextCapitalization.sentences,

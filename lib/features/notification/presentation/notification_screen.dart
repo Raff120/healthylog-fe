@@ -7,6 +7,7 @@ import '../../../app/theme/theme_context.dart';
 import '../../../core/api/api_error_messages.dart';
 import '../../../core/api/api_exception.dart';
 import '../../../core/widgets/empty_state_view.dart';
+import '../../../l10n/l10n_context.dart';
 import '../data/app_notification.dart';
 import '../domain/notification_presentation.dart';
 import '../providers/notification_providers.dart';
@@ -24,7 +25,7 @@ class NotificationScreen extends ConsumerWidget {
   /// NT-10, NT-3: il tocco marca la notifica come letta e conduce
   /// all'elemento a cui si riferisce, ove ve ne sia uno.
   Future<void> _open(BuildContext context, WidgetRef ref, AppNotification notification) async {
-    final destination = describeNotification(notification).destination;
+    final destination = describeNotification(context, notification).destination;
     if (!notification.isRead) {
       await ref.read(notificationControllerProvider.notifier).markRead(notification.id);
     }
@@ -49,7 +50,7 @@ class NotificationScreen extends ConsumerWidget {
         backgroundColor: colors.background,
         elevation: 0,
         scrolledUnderElevation: 0,
-        title: Text('Notifiche', style: typography.titleMedium.copyWith(color: colors.textPrimary)),
+        title: Text(context.l10n.notificationsTitle, style: typography.titleMedium.copyWith(color: colors.textPrimary)),
         actions: [
           // NT-11: la marcatura di tutte in un'unica operazione. Compare
           // solo quando vi sia qualcosa da marcare.
@@ -59,7 +60,7 @@ class NotificationScreen extends ConsumerWidget {
               onPressed: operating
                   ? null
                   : () => ref.read(notificationControllerProvider.notifier).markAllRead(),
-              child: const Text('Segna tutte come lette'),
+              child: Text(context.l10n.notificationsMarkAllRead),
             ),
         ],
       ),
@@ -75,7 +76,7 @@ class NotificationScreen extends ConsumerWidget {
           data: (items) => items.isEmpty
               // 4.4, 12.3: stato vuoto senza azione — è condizione che si
               // risolve con il tempo.
-              ? const EmptyStateView(icon: Icons.notifications_none, title: 'Nessuna notifica')
+              ? EmptyStateView(icon: Icons.notifications_none, title: context.l10n.notificationsEmpty)
               : ListView.separated(
                   padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
                   itemCount: items.length,
@@ -104,7 +105,7 @@ class _NotificationTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.colors;
     final typography = context.typography;
-    final presentation = describeNotification(notification);
+    final presentation = describeNotification(context, notification);
     final unread = !notification.isRead;
 
     // NT-12: scorrimento laterale con conferma implicita, ammesso su

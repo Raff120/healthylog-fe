@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../features/identity/data/account_role.dart';
+import '../../l10n/l10n_context.dart';
 
 /// Voce della navigazione principale (3.1, 3.2 interfaccia.md).
 ///
@@ -27,16 +28,19 @@ class AppDestination {
 /// Le icone Material sono le più prossime alle icone Lucide di 3.1
 /// (calendar-days, activity, chart-line, user, users, file-text): stesso
 /// criterio già seguito da `SlotTypePresentation` per gli slot.
-List<AppDestination> destinationsFor(AccountRole role) => switch (role) {
-      AccountRole.user => const [
-          AppDestination(icon: Icons.calendar_month_outlined, label: 'Piano', route: '/home'),
-          AppDestination(icon: Icons.monitor_heart_outlined, label: 'Attività', route: '/activity'),
-          AppDestination(icon: Icons.show_chart, label: 'Statistiche', route: '/statistics'),
-          AppDestination(icon: Icons.person_outline, label: 'Profilo', route: '/profile'),
-        ],
-      AccountRole.nutritionist => const [
-          AppDestination(icon: Icons.groups_outlined, label: 'Pazienti', route: '/home'),
-          AppDestination(icon: Icons.description_outlined, label: 'Template', route: '/diet-plan-templates'),
-          AppDestination(icon: Icons.person_outline, label: 'Profilo', route: '/profile'),
-        ],
-    };
+List<AppDestination> destinationsFor(BuildContext context, AccountRole role) {
+  final l10n = context.l10n;
+  return switch (role) {
+    AccountRole.user => [
+        AppDestination(icon: Icons.calendar_month_outlined, label: l10n.navPlan, route: '/home'),
+        AppDestination(icon: Icons.monitor_heart_outlined, label: l10n.navActivity, route: '/activity'),
+        AppDestination(icon: Icons.show_chart, label: l10n.navStatistics, route: '/statistics'),
+        AppDestination(icon: Icons.person_outline, label: l10n.navProfile, route: '/profile'),
+      ],
+    AccountRole.nutritionist => [
+        AppDestination(icon: Icons.groups_outlined, label: l10n.navPatients, route: '/home'),
+        AppDestination(icon: Icons.description_outlined, label: l10n.navTemplates, route: '/diet-plan-templates'),
+        AppDestination(icon: Icons.person_outline, label: l10n.navProfile, route: '/profile'),
+      ],
+  };
+}

@@ -1,12 +1,136 @@
 {
   "@@locale": "it",
+  "activityMeasurements": "Misure",
+  "activityWorkouts": "Allenamenti",
+  "adherenceBySlotType": "Per tipo di pasto",
+  "adherenceByWeekday": "Per giorno della settimana",
+  "adherencePeriodRange": "Periodo dal {start} a {end}",
+  "@adherencePeriodRange": {
+    "placeholders": {
+      "start": {
+        "type": "String"
+      },
+      "end": {
+        "type": "String"
+      }
+    }
+  },
+  "adherenceWeeklyTrend": "Andamento settimanale",
+  "bodyStatsNoMeasurements": "Nessuna misurazione nel periodo",
+  "bodyStatsNutritionistLegend": "I cerchi vuoti sono le misurazioni rilevate dal nutrizionista.",
+  "bodyStatsSingleValue": "Un solo valore: nessuna variazione da presentare",
+  "careLinkActiveHeader": "COLLEGAMENTO IN CORSO",
+  "careLinkRevoked": "Collegamento revocato. Hai di nuovo piena facoltà sul tuo piano.",
+  "careLinkedNow": "Ora sei collegato a {name}.",
+  "@careLinkedNow": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "careLinkedSince": "Dal {date}",
+  "@careLinkedSince": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "careManagePlanYourself": "Puoi gestire il piano in autonomia",
+  "careNoNutritionist": "Nessun nutrizionista collegato",
+  "careNutritionistNotice": "Il nutrizionista redige il tuo piano e ne segue l'andamento. Puoi sempre invertire e spuntare i pasti, ma non modificarne il contenuto.",
+  "careRequestAccepting": "Accettando, il nutrizionista:",
+  "careRequestKeepAfterRevoke": "Potrai revocare il collegamento in qualsiasi momento. Dopo la revoca conserverà solo gli schemi dei piani che ha redatto e le misurazioni che ha registrato personalmente.",
+  "careRequestReceivedOn": "Ricevuta il {date}",
+  "@careRequestReceivedOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "careRequestTitle": "Richiesta di collegamento",
+  "careRequestWillRead": "accederà in lettura ai tuoi dati nei periodi coperti dai suoi piani",
+  "careRequestWillRecordMeasurements": "potrà registrare misurazioni per tuo conto",
+  "careRequestWillWritePlan": "redigerà il tuo piano alimentare",
+  "careRequestYouCannotEdit": "e tu non potrai più modificare il contenuto del piano che ti assegna",
+  "careRequestsReceivedHeader": "RICHIESTE RICEVUTE",
+  "careRevokeKeepsList": "• gli schemi dei piani che ha redatto, con il periodo di validità;\n• le misurazioni che ha registrato personalmente;\n• i dati anagrafici essenziali.",
+  "@careRevokeKeepsList": {
+    "description": "CP-16, PV-21: la documentazione che il Nutrizionista conserva dopo la revoca."
+  },
+  "careRevokeLink": "Revoca il collegamento",
+  "careRevokeLosesList": "• spunte, inversioni e statistiche di aderenza;\n• allenamenti e misurazioni registrate dalla persona.",
+  "@careRevokeLosesList": {
+    "description": "CP-17: quanto non è conservato dopo la revoca."
+  },
+  "careRevokeNutritionistBody": "Il nutrizionista perderà immediatamente ogni accesso ai tuoi dati e ogni facoltà sul tuo piano, che resterà a tua disposizione.",
+  "careRevokeNutritionistKeeps": "Il nutrizionista conserverà:",
+  "careRevokeNutritionistLoses": "Non conserverà:",
+  "careRevokeNutritionistSideBody": "Perderai immediatamente ogni accesso ai dati della persona e ogni facoltà sui suoi piani.",
+  "careRevokeTitle": "Revocare il collegamento?",
+  "careRevokeYouKeep": "Conserverai:",
+  "careRevokeYouLose": "Non conserverai:",
   "commonCancel": "Annulla",
   "commonClose": "Chiudi",
   "commonConfirm": "Conferma",
   "commonDelete": "Elimina",
+  "commonListAnd": " e ",
+  "@commonListAnd": {
+    "description": "Congiunzione fra le due sole voci che l’elenco può avere."
+  },
   "commonNotSet": "Non impostato",
   "commonSave": "Salva",
   "commonSearch": "Cerca",
+  "commonShare": "Condividi",
+  "commonUnderstood": "Ho capito",
+  "dayPreviewNoSlots": "Nessuno slot",
+  "devicesCurrent": "(questo dispositivo)",
+  "devicesLastUsed": "Ultimo utilizzo: {when}",
+  "@devicesLastUsed": {
+    "placeholders": {
+      "when": {
+        "type": "String"
+      }
+    }
+  },
+  "devicesRevoke": "Revoca",
+  "devicesRevokeAllOthers": "Disconnetti tutti gli altri dispositivi",
+  "devicesRevokeAllOthersBody": "Le altre sessioni attive verranno chiuse.",
+  "devicesRevokeConfirm": "Disconnettere «{device}»?",
+  "@devicesRevokeConfirm": {
+    "placeholders": {
+      "device": {
+        "type": "String"
+      }
+    }
+  },
+  "devicesSignOut": "Disconnetti",
+  "devicesTitle": "Dispositivi collegati",
+  "editAddSnack": "Aggiungi spuntino",
+  "editDayConsumedNotEditable": "Già consumato: non modificabile",
+  "editDayEditScheduleInstead": "Modifica invece lo schema, per tutte le giornate",
+  "editDayNotEditable": "Giornata non modificabile",
+  "editDayNotEditableReason": "Solo le giornate coperte da un piano attivo possono essere modificate",
+  "editDayOnlyThisDayNotice": "Le modifiche riguardano solo questa giornata: lo schema settimanale resta invariato.",
+  "editDaySave": "Salva giornata",
+  "editDaySaved": "Giornata salvata.",
+  "editDayTitle": "Giornata del {date}",
+  "@editDayTitle": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "editDiscardBody": "Uscendo perderai le modifiche non salvate.",
+  "editDiscardConfirm": "Esci senza salvare",
+  "editDiscardTitle": "Modifiche non salvate",
+  "editRecipeFieldsInvalid": "Controlla i campi della ricetta segnalati.",
+  "editRecipeNameRequired": "Serve una denominazione se è presente il testo della ricetta",
+  "editRemoveSlotBody": "Il contenuto compilato andrà perso.",
+  "editRemoveSlotTitle": "Rimuovere lo slot?",
   "errorAccountNotVerified": "Conferma prima il tuo indirizzo e-mail.",
   "errorAlreadyInGroup": "Fai già parte di un gruppo: esci prima di crearne uno nuovo.",
   "errorAlreadyLinked": "La persona è già collegata a un nutrizionista: serve prima la revoca di quel collegamento.",
@@ -53,6 +177,657 @@
   "errorVerificationResendRateLimited": "Hai richiesto troppi reinvii. Riprova tra qualche minuto.",
   "errorVerificationTokenInvalid": "Il collegamento non è più valido. Richiedine uno nuovo.",
   "errorWorkoutFutureDate": "Un allenamento si registra quando è stato svolto: per il futuro c’è la pianificazione.",
+  "fieldBirthDate": "Data di nascita",
+  "fieldBirthPlace": "Luogo di nascita",
+  "fieldConfirmPassword": "Conferma password",
+  "fieldEmail": "Indirizzo e-mail",
+  "fieldFirstName": "Nome",
+  "fieldHeightCm": "Altezza (cm)",
+  "fieldLastName": "Cognome",
+  "fieldPassword": "Password",
+  "fieldUsername": "Nome utente",
+  "groupCreate": "Crea un gruppo",
+  "groupDissolve": "Sciogli il gruppo",
+  "groupDissolveBody": "Tutti i membri usciranno dal gruppo. Ciascuno conserverà il proprio piano e il proprio storico: nessun dato personale è coinvolto.",
+  "groupDissolveTitle": "Sciogliere il gruppo?",
+  "groupJoinConfirm": "Conferma adesione",
+  "groupJoinNoticeStart": "I tuoi pasti diventeranno visibili agli altri membri, e i Cuochi potranno operare inversioni e spunte sul tuo piano.",
+  "groupJoinWithCode": "Entra con un codice",
+  "groupLeave": "Esci dal gruppo",
+  "groupLeaveKeepsData": "Conserverai il tuo piano e il tuo storico.",
+  "groupLeaveTitle": "Uscire dal gruppo?",
+  "groupMemberCount": "{count, plural, =1{1 membro} other{{count} membri}}",
+  "@groupMemberCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "groupNone": "Non fai parte di un gruppo",
+  "groupNoneDescription": "Un gruppo serve a organizzare i pasti di più persone che cucinano insieme",
+  "groupOnlyMember": "Sei l'unico membro",
+  "groupPromoteCook": "Nomina Cuoco",
+  "groupRemoveMember": "Rimuovi dal gruppo",
+  "groupRemoveMemberBody": "{name} conserverà il proprio piano e il proprio storico.",
+  "@groupRemoveMemberBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "groupRemoveMemberTitle": "Rimuovere dal gruppo?",
+  "groupRename": "Modifica denominazione",
+  "groupRevokeCook": "Revoca privilegio di Cuoco",
+  "groupTransferFirstBody": "Per uscire dal gruppo devi prima trasferirne la proprietà a un altro membro, dal menu accanto al suo nome.",
+  "groupTransferFirstTitle": "Trasferisci prima la proprietà",
+  "groupTransferOwnership": "Trasferisci proprietà",
+  "groupTransferOwnershipBody": "{name} diventerà Proprietario del gruppo. Il trasferimento non è annullabile: solo il nuovo Proprietario potrà restituirla.",
+  "@groupTransferOwnershipBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "groupTransferOwnershipTitle": "Trasferire la proprietà?",
+  "inviteCodeCopied": "Codice copiato",
+  "inviteCodeField": "Codice di invito",
+  "inviteExpiresInDays": "Tra {days} giorni",
+  "@inviteExpiresInDays": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "inviteExpiresOn": "Scade il {date}",
+  "@inviteExpiresOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "inviteGenerate": "Genera codice",
+  "inviteMaxUses": "Numero massimo di utilizzi (facoltativo)",
+  "inviteNoActiveCode": "Nessun codice attivo",
+  "inviteNoExpiry": "Nessuna scadenza",
+  "inviteRemainingUses": "{count, plural, =1{1 utilizzo rimasto} other{{count} utilizzi rimasti}}",
+  "@inviteRemainingUses": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "inviteShareMessage": "Unisciti al mio gruppo «{group}» su HealthyLog con il codice {code}",
+  "@inviteShareMessage": {
+    "placeholders": {
+      "group": {
+        "type": "String"
+      },
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "inviteePatientCheckUsername": "Verifica il nome utente e riprova",
+  "inviteePatientMessage": "Messaggio di presentazione",
+  "inviteePatientMessageHint": "Aiuta la persona a riconoscerti",
+  "inviteePatientNotFound": "Nessun utente con questo nome",
+  "inviteePatientSend": "Invia richiesta",
+  "inviteePatientTitle": "Invita un paziente",
+  "inviteePatientUsernameHint": "Inserisci il nome utente esatto della persona",
+  "loginForgotPassword": "Password dimenticata?",
+  "loginSubmit": "Accedi",
+  "loginToRegister": "Non hai un account? Registrati",
+  "mealChangeStatusTitle": "Cambiare stato?",
+  "mealFutureDayBody": "Questo giorno non è ancora arrivato.",
+  "mealFutureDayTitle": "Registrare un pasto futuro?",
+  "mealOfflineUnavailable": "Non disponibile offline.",
+  "mealReplacementNote": "Nota di sostituzione",
+  "mealReplacementNoteLost": "La nota di sostituzione andrà perduta in modo definitivo.",
+  "mealSeeRecipe": "Vedi ricetta",
+  "mealStatusByCook": "{verb} da {name}",
+  "@mealStatusByCook": {
+    "description": "CU-4: l’attribuzione dell’operazione compiuta dal Cuoco.",
+    "placeholders": {
+      "verb": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "mealStatusVerbConsumed": "Consumato",
+  "mealStatusVerbRestored": "Ripristinato",
+  "mealStatusVerbSkipped": "Saltato",
+  "mealSwappedNotification": "Due pasti del tuo piano sono stati invertiti{when}.",
+  "@mealSwappedNotification": {
+    "placeholders": {
+      "when": {
+        "type": "String"
+      }
+    }
+  },
+  "measurementAtLeastOneValue": "Inserisci almeno un valore",
+  "measurementByNutritionist": "Rilevata dal tuo nutrizionista.",
+  "measurementDeleteConfirm": "Eliminare questa misurazione?",
+  "measurementEditTitle": "Modifica misurazione",
+  "measurementForPatientNotice": "La registri tu: la persona potrà consultarla ma non modificarla.",
+  "measurementNoneRecorded": "Nessuna misurazione registrata",
+  "measurementRecord": "Registra misurazione",
+  "measurementRecordTitle": "Registra una misurazione",
+  "memberSelectorSideBySide": "Vista affiancata",
+  "memberSelectorSingle": "Vista singola",
+  "memberViewingPlanOf": "Stai vedendo il piano di {name}",
+  "@memberViewingPlanOf": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "navActivity": "Attività",
+  "navNotAvailableYet": "{destination}: non ancora disponibile.",
+  "@navNotAvailableYet": {
+    "placeholders": {
+      "destination": {
+        "type": "String"
+      }
+    }
+  },
+  "navPatients": "Pazienti",
+  "navPlan": "Piano",
+  "navProfile": "Profilo",
+  "navStatistics": "Statistiche",
+  "navTemplates": "Template",
+  "notificationCareLinkRevoked": "Il collegamento professionale è stato revocato.",
+  "notificationCareRequestAccepted": "La tua richiesta di collegamento è stata accettata.",
+  "notificationCareRequestReceived": "Hai ricevuto una richiesta di collegamento professionale.",
+  "notificationCareRequestRejected": "La tua richiesta di collegamento è stata rifiutata.",
+  "notificationGroupCookGranted": "Sei stato nominato Cuoco del gruppo{group}.",
+  "@notificationGroupCookGranted": {
+    "placeholders": {
+      "group": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationGroupCookRevoked": "Non sei più Cuoco del gruppo{group}.",
+  "@notificationGroupCookRevoked": {
+    "placeholders": {
+      "group": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationGroupDisbanded": "Il gruppo{group} è stato sciolto.",
+  "@notificationGroupDisbanded": {
+    "placeholders": {
+      "group": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationGroupMemberRemoved": "Sei stato rimosso dal gruppo{group}.",
+  "@notificationGroupMemberRemoved": {
+    "placeholders": {
+      "group": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationGroupOwnershipTransferred": "Sei diventato Proprietario del gruppo{group}.",
+  "@notificationGroupOwnershipTransferred": {
+    "placeholders": {
+      "group": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationInForceFrom": ", in vigore dal {date}",
+  "@notificationInForceFrom": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationMeasurementRecorded": "È stata registrata una misurazione del {date}.",
+  "@notificationMeasurementRecorded": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationOnDay": " nella giornata del {date}",
+  "@notificationOnDay": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationPlanActivatedAutomatically": "Il piano{plan} è entrato in vigore.",
+  "@notificationPlanActivatedAutomatically": {
+    "description": "NT-6: determinata dal sistema — la formulazione non attribuisce l’atto a nessuno.",
+    "placeholders": {
+      "plan": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationPlanAssigned": "Ti è stato assegnato il piano{plan}{from}.",
+  "@notificationPlanAssigned": {
+    "description": "AS-8: denominazione, autore e data di decorrenza.",
+    "placeholders": {
+      "plan": {
+        "type": "String"
+      },
+      "from": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationPlanCompleted": "Il piano{plan} è stato concluso.",
+  "@notificationPlanCompleted": {
+    "placeholders": {
+      "plan": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationPlanCompletedAutomatically": "Il piano{plan} si è concluso alla data prevista.",
+  "@notificationPlanCompletedAutomatically": {
+    "placeholders": {
+      "plan": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationPlanDayModified": "La giornata del {date} del piano{plan} è stata modificata.",
+  "@notificationPlanDayModified": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "plan": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationPlanModified": "Il piano{plan} è stato modificato.",
+  "@notificationPlanModified": {
+    "placeholders": {
+      "plan": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationPlanNameQuoted": " «{name}»",
+  "@notificationPlanNameQuoted": {
+    "description": "GG-11, LO-3: la denominazione è contenuto dell’Utente e non va tradotta.",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationPlanResumed": "Il piano{plan} è stato ripreso.",
+  "@notificationPlanResumed": {
+    "placeholders": {
+      "plan": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationPlanSuspended": "Il piano{plan} è stato sospeso.",
+  "@notificationPlanSuspended": {
+    "placeholders": {
+      "plan": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationPlanWithdrawn": "Il piano{plan} è stato ritirato ed è tornato in revisione.",
+  "@notificationPlanWithdrawn": {
+    "placeholders": {
+      "plan": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationSlotMarked": "{slot} del {date} è stato registrato lo stato {status}.",
+  "@notificationSlotMarked": {
+    "description": "La forma preposizionale evita l’accordo di genere con il participio.",
+    "placeholders": {
+      "slot": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      },
+      "status": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationSlotOnBreakfast": "Sulla colazione",
+  "notificationSlotOnDinner": "Sulla cena",
+  "notificationSlotOnGeneric": "Su un pasto",
+  "notificationSlotOnLunch": "Sul pranzo",
+  "notificationSlotOnSnack": "Sullo spuntino",
+  "notificationStatusConsumed": "«Consumato»",
+  "notificationStatusSkipped": "«Saltato»",
+  "notificationStatusToConsume": "«Da consumare»",
+  "notificationUnknown": "Si è verificato un evento che riguarda il tuo account.",
+  "@notificationUnknown": {
+    "description": "Tipo non riconosciuto da questa versione del client."
+  },
+  "notificationsEmpty": "Nessuna notifica",
+  "notificationsMarkAllRead": "Segna tutte come lette",
+  "notificationsTitle": "Notifiche",
+  "offlineBar": "Sei offline. Puoi consultare il piano già scaricato.",
+  "@offlineBar": {
+    "description": "OF-6, OF-19: segnalazione discreta, non condizione di errore."
+  },
+  "passwordRequirementHint": "Almeno 12 caratteri",
+  "@passwordRequirementHint": {
+    "description": "AU-3: unico requisito, senza vincoli di composizione."
+  },
+  "passwordResetConfirmTitle": "Imposta una nuova password",
+  "passwordResetDone": "Tutte le sessioni sono state chiuse. Accedi con la nuova password.",
+  "passwordResetLinkExpiredBody": "Richiedine uno nuovo dalla schermata di accesso.",
+  "passwordResetLinkExpiredTitle": "Il collegamento non è più valido",
+  "passwordResetNewPassword": "Nuova password",
+  "passwordResetRequestNewLink": "Richiedi un nuovo collegamento",
+  "passwordResetRequestSent": "Se esiste un account con questo indirizzo, riceverai un collegamento tra pochi istanti.",
+  "@passwordResetRequestSent": {
+    "description": "AC-17: l'esito non rivela l'esistenza dell'account."
+  },
+  "passwordResetRequestSubmit": "Invia collegamento",
+  "passwordResetRequestSubtitle": "Ti invieremo un collegamento per impostare una nuova password",
+  "passwordResetRequestTitle": "Recupera l'accesso",
+  "passwordResetSubmit": "Reimposta password",
+  "patientAdherenceWithPeriod": "Aderenza · {period}",
+  "@patientAdherenceWithPeriod": {
+    "placeholders": {
+      "period": {
+        "type": "String"
+      }
+    }
+  },
+  "patientCreatePlan": "Crea un nuovo piano",
+  "patientCurrentPlanHeader": "PIANO IN CORSO",
+  "patientEditDay": "Modifica una giornata",
+  "patientLinkedSince": "Collegato dal {date}",
+  "@patientLinkedSince": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "patientMeasureChange": "{measure}: {change} {unit}",
+  "@patientMeasureChange": {
+    "placeholders": {
+      "measure": {
+        "type": "String"
+      },
+      "change": {
+        "type": "String"
+      },
+      "unit": {
+        "type": "String"
+      }
+    }
+  },
+  "patientMeasureSingleValue": "{measure}: un solo valore nel periodo",
+  "@patientMeasureSingleValue": {
+    "placeholders": {
+      "measure": {
+        "type": "String"
+      }
+    }
+  },
+  "patientMonthStatisticsHeader": "STATISTICHE DEL MESE",
+  "patientNoCurrentPlan": "Nessun piano in corso redatto da te.",
+  "patientNoMeasurements": "Nessuna misurazione",
+  "patientNoWorkouts": "Nessun allenamento",
+  "patientOtherPlansHeader": "ALTRI PIANI REDATTI",
+  "patientPickDay": "Giornata da modificare",
+  "patientPlanWithStatus": "{plan} · {status}",
+  "@patientPlanWithStatus": {
+    "placeholders": {
+      "plan": {
+        "type": "String"
+      },
+      "status": {
+        "type": "String"
+      }
+    }
+  },
+  "patientSortAdherence": "Aderenza",
+  "patientSortName": "Alfabetico",
+  "patientSortRecentActivity": "Attività recente",
+  "patientWithdrawBody": "Il paziente non lo vedrà più.",
+  "patientsEmpty": "Nessun paziente collegato",
+  "patientsInvite": "Invita paziente",
+  "patientsInviteHint": "Invita un paziente con il suo nome utente",
+  "patientsPendingRequests": "RICHIESTE PENDENTI",
+  "patientsRequestSent": "Richiesta inviata.",
+  "patientsRequestSentOn": "Inviata il {date} · In attesa",
+  "@patientsRequestSentOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "patientsSelect": "Seleziona un paziente",
+  "personalDataRoleNotChangeable": "Il ruolo non è modificabile",
+  "personalDataSaved": "Dati aggiornati.",
+  "personalDataTargetWeightKg": "Peso obiettivo (kg)",
+  "personalDataTitle": "Dati personali",
+  "planActionComplete": "Concludi",
+  "planActionDelete": "Elimina",
+  "planActionEdit": "Modifica",
+  "planActionReactivate": "Riattiva",
+  "planActionResume": "Riprendi",
+  "planActionSuspend": "Sospendi",
+  "planActionWithdraw": "Ritira",
+  "planCompletedOn": "Piano concluso il {date}",
+  "@planCompletedOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "planCreateFirst": "Crea il tuo primo piano alimentare",
+  "planCreateFromScratch": "Da zero",
+  "planCreateFromScratchDescription": "Componi lo schema settimanale partendo da una struttura vuota",
+  "planCreateFromTemplate": "Da un template",
+  "planCreateFromTemplateDescription": "Parti da uno schema già pronto e modificalo",
+  "planCreateSubmit": "Crea piano",
+  "planCreateTitle": "Nuovo piano",
+  "planDeleteIrreversible": "L'operazione non può essere annullata.",
+  "planDeleteLossAllPeriods": "Andranno perdute in modo definitivo, per tutti i periodi del piano:",
+  "planDeleteLossDays": "•  le giornate e le spunte di consumo",
+  "planDeleteLossStatistics": "•  le statistiche di aderenza",
+  "planDeleteLossSwaps": "•  lo storico delle inversioni",
+  "planDeleteLossThisPeriod": "Andranno perdute in modo definitivo, per questo periodo:",
+  "planDeleteTitle": "Eliminare il piano?",
+  "planDeleteWorkoutsKept": "Allenamenti e misurazioni dello stesso periodo restano.",
+  "planEditThisDay": "Modifica questa giornata",
+  "planEndDate": "Data di fine",
+  "planMoreActions": "Altre azioni",
+  "planNoMealsPlanned": "Nessun pasto previsto",
+  "planNoneForThisDay": "Nessun piano per questo giorno",
+  "planNoneYet": "Nessun piano ancora",
+  "planOpenEnded": "A tempo indeterminato",
+  "planOverlapNotice": "Il periodo è già occupato da un altro piano ({start} – {end}).",
+  "@planOverlapNotice": {
+    "placeholders": {
+      "start": {
+        "type": "String"
+      },
+      "end": {
+        "type": "String"
+      }
+    }
+  },
+  "planOverlapNoticeOpen": "Il periodo è già occupato da un altro piano (dal {start}).",
+  "@planOverlapNoticeOpen": {
+    "placeholders": {
+      "start": {
+        "type": "String"
+      }
+    }
+  },
+  "planOverlapWithName": "Si sovrappone a «{name}».",
+  "@planOverlapWithName": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "planPatientNoPlanYet": "Il tuo nutrizionista non ha ancora redatto un piano",
+  "planRecordWorkout": "Registra allenamento",
+  "planStartDate": "Data di inizio",
+  "planStartsOn": "Il piano inizia il {date}",
+  "@planStartsOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "planStatusActive": "Attivo",
+  "planStatusCompleted": "Concluso",
+  "planStatusDraft": "Bozza",
+  "planStatusLowerActive": "in corso",
+  "planStatusLowerCompleted": "concluso",
+  "planStatusLowerDraft": "bozza",
+  "planStatusLowerScheduled": "programmato",
+  "planStatusLowerSuspended": "sospeso",
+  "planStatusScheduled": "Programmato",
+  "planStatusSuspended": "Sospeso",
+  "planSuspended": "Piano sospeso",
+  "planSuspendedHint": "Riprenderà quando lo deciderai",
+  "planViewNoSwaps": "Nessuna inversione su questo piano.",
+  "planViewOngoing": "in corso",
+  "planViewOngoingUpper": "IN CORSO",
+  "planViewOpenStatistics": "Apri le statistiche complete",
+  "planViewOverallAdherence": "Aderenza complessiva del piano",
+  "planViewPeriodRange": "Dal {start} a {end}",
+  "@planViewPeriodRange": {
+    "placeholders": {
+      "start": {
+        "type": "String"
+      },
+      "end": {
+        "type": "String"
+      }
+    }
+  },
+  "planViewPeriodStatistics": "Statistiche del periodo",
+  "planViewPeriods": "Periodi di svolgimento",
+  "planViewSwapHistory": "Storico delle inversioni",
+  "planViewWeeklySchedule": "Schema settimanale",
+  "plansActivateNow": "Attiva ora",
+  "plansAdherencePercent": "{value}%",
+  "@plansAdherencePercent": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "plansAuthoredBy": "Redatto da {author}",
+  "@plansAuthoredBy": {
+    "placeholders": {
+      "author": {
+        "type": "String"
+      }
+    }
+  },
+  "plansCompleteConfirmBody": "Potrai sempre riattivarlo in seguito.",
+  "plansCompleteConfirmTitle": "Concludere il piano?",
+  "plansCurrent": "In corso",
+  "plansDateRange": "{start} – {end}",
+  "@plansDateRange": {
+    "placeholders": {
+      "start": {
+        "type": "String"
+      },
+      "end": {
+        "type": "String"
+      }
+    }
+  },
+  "plansEmptyOwn": "Non hai ancora un piano alimentare.",
+  "plansEmptyPatient": "Il tuo nutrizionista non ha ancora redatto un piano.",
+  "plansFrom": "Dal {date}",
+  "@plansFrom": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "plansPatientNotice": "Il contenuto del piano è a cura del tuo nutrizionista: puoi spuntare e invertire i pasti.",
+  "plansPeriodCount": "{count} periodi",
+  "@plansPeriodCount": {
+    "description": "ST-8, ST-9: il piano riattivato è voce unica, con il numero di periodi accanto.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "plansStartHere": "Inizia da qui",
+  "plansWithdrawConfirmBody": "Tornerà in Bozza: potrai riprenderlo dalla redazione.",
+  "plansWithdrawConfirmTitle": "Ritirare il piano?",
+  "profileGroup": "Gruppo",
+  "profileLogout": "Disconnetti",
+  "profileLogoutConfirm": "Vuoi disconnetterti da questo dispositivo?",
+  "profileNutritionist": "Nutrizionista",
+  "profilePersonalData": "Dati personali",
+  "profilePlans": "Piani",
+  "profileSettings": "Impostazioni",
+  "registerSubmit": "Crea account",
+  "roleNutritionist": "Nutrizionista",
+  "roleNutritionistDescription": "Redigi e segui i piani dei tuoi pazienti",
+  "roleNutritionistTitle": "Sono un nutrizionista",
+  "roleSelectionNotChangeable": "La scelta non è modificabile in seguito",
+  "roleSelectionTitle": "Come userai HealthyLog?",
+  "roleUser": "Utente",
+  "roleUserDescription": "Consulti la tua dieta, segni i pasti e registri gli allenamenti",
+  "roleUserTitle": "Seguo un piano",
+  "scheduleConfirmPlan": "Conferma piano",
+  "scheduleIncompleteTitle": "Schema incompleto",
+  "scheduleRetroactivityNotice": "Le modifiche decorrono da oggi e valgono per tutte le settimane: le giornate già trascorse restano invariate. Per cambiare una sola giornata, usa «Modifica questa giornata» dalla vista del giorno.",
+  "scheduleSave": "Salva modifiche",
+  "scheduleSaveAsTemplate": "Salva come template",
+  "scheduleSaved": "Piano salvato.",
+  "scheduleSlotsWithoutContent": "{count, plural, =1{1 pasto senza contenuto} other{{count} pasti senza contenuto}}",
+  "@scheduleSlotsWithoutContent": {
+    "description": "CD-13: gli slot ancora privi di contenuto di una giornata.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "scheduleTemplateCreated": "Template creato.",
+  "scheduleTitle": "Redazione dello schema",
   "settingsDevices": "Dispositivi collegati",
   "settingsLanguage": "Lingua",
   "settingsLanguageEnglish": "English",
@@ -72,5 +847,364 @@
   "settingsThemeSystem": "Sistema",
   "settingsTimezone": "Fuso orario",
   "settingsTimezoneSearch": "Cerca fuso orario",
-  "settingsTitle": "Impostazioni"
+  "settingsTitle": "Impostazioni",
+  "sexFemale": "Femmina",
+  "sexMale": "Maschio",
+  "signedNegative": "−{value}",
+  "@signedNegative": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "signedPositive": "+{value}",
+  "@signedPositive": {
+    "description": "AN-10: la variazione reca il proprio segno, senza qualificazioni.",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "slotAccessoryNote": "Nota accessoria",
+  "slotAddOfType": "Aggiungi {type}",
+  "@slotAddOfType": {
+    "placeholders": {
+      "type": {
+        "type": "String"
+      }
+    }
+  },
+  "slotAdherenceWeight": "Peso di aderenza: {value}",
+  "@slotAdherenceWeight": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "slotAdherenceWeightHelp": "Quanto questo pasto incide sull'aderenza. A zero non viene conteggiato.",
+  "slotDescriptiveLabel": "Etichetta descrittiva",
+  "slotNotSpecified": "Non specificato",
+  "slotRecipeName": "Denominazione della ricetta",
+  "slotRecipeText": "Testo della ricetta",
+  "slotToBeDefined": "Da definire",
+  "slotTypeBreakfast": "Colazione",
+  "slotTypeDinner": "Cena",
+  "slotTypeLunch": "Pranzo",
+  "slotTypeSnack": "Spuntino",
+  "statisticsAdherence": "Aderenza",
+  "statisticsAppearWithPlan": "Le statistiche del piano compaiono quando ne esiste uno.",
+  "statisticsBody": "Corpo",
+  "statisticsChangePeriod": "Cambia periodo",
+  "statisticsExclusionDaysSuspended": "{count, plural, =1{1 giorno di sospensione} other{{count} giorni di sospensione}}",
+  "@statisticsExclusionDaysSuspended": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "statisticsExclusionDaysUncovered": "{count, plural, =1{1 giorno senza piano} other{{count} giorni senza piano}}",
+  "@statisticsExclusionDaysUncovered": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "statisticsExclusionNotice": "Il calcolo esclude {what}.",
+  "@statisticsExclusionNotice": {
+    "placeholders": {
+      "what": {
+        "type": "String"
+      }
+    }
+  },
+  "statisticsMonthOf": "Mese di {month}",
+  "@statisticsMonthOf": {
+    "placeholders": {
+      "month": {
+        "type": "String"
+      }
+    }
+  },
+  "statisticsNoDataForPeriod": "Dati non disponibili per questo periodo",
+  "statisticsNoDataYet": "Non ci sono ancora dati",
+  "statisticsNoPlanForPeriod": "Nessun piano su cui riferire il periodo",
+  "statisticsPercent": "{value}%",
+  "@statisticsPercent": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "statisticsPeriodOrdinal": "{index}° periodo",
+  "@statisticsPeriodOrdinal": {
+    "placeholders": {
+      "index": {
+        "type": "int"
+      }
+    }
+  },
+  "statisticsPlanRange": "{plan} · {start} – {end}",
+  "@statisticsPlanRange": {
+    "placeholders": {
+      "plan": {
+        "type": "String"
+      },
+      "start": {
+        "type": "String"
+      },
+      "end": {
+        "type": "String"
+      }
+    }
+  },
+  "statisticsUnavailable": "Statistiche non disponibili",
+  "statisticsWeekRange": "Settimana dal {start} al {end}",
+  "@statisticsWeekRange": {
+    "placeholders": {
+      "start": {
+        "type": "String"
+      },
+      "end": {
+        "type": "String"
+      }
+    }
+  },
+  "statisticsWholePlan": "Intero piano",
+  "statisticsWorkouts": "Allenamenti",
+  "swapChooseDestination": "Scegli dove spostarlo",
+  "templateDeleteConfirmBody": "I piani già creati da «{name}» non ne risentono.",
+  "@templateDeleteConfirmBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "templateDeleteConfirmTitle": "Eliminare il template?",
+  "templateLastEdited": "Ultima modifica: {when}",
+  "@templateLastEdited": {
+    "placeholders": {
+      "when": {
+        "type": "String"
+      }
+    }
+  },
+  "templateNew": "Nuovo template",
+  "templatePreviewTitle": "Anteprima template",
+  "templateRename": "Rinomina template",
+  "templateSaved": "Template salvato.",
+  "templateScheduleTitle": "Redazione del template",
+  "templateUse": "Usa questo template",
+  "templatesEmpty": "Nessun template. Crealo con il pulsante in basso.",
+  "timezoneAfricaCairo": "Il Cairo",
+  "timezoneAfricaJohannesburg": "Johannesburg",
+  "timezoneAmericaArgentinaBuenosAires": "Buenos Aires",
+  "timezoneAmericaChicago": "Chicago",
+  "timezoneAmericaDenver": "Denver",
+  "timezoneAmericaLosAngeles": "Los Angeles",
+  "timezoneAmericaNewYork": "New York",
+  "timezoneAmericaSaoPaulo": "San Paolo",
+  "timezoneAsiaBangkok": "Bangkok",
+  "timezoneAsiaDubai": "Dubai",
+  "timezoneAsiaHongKong": "Hong Kong",
+  "timezoneAsiaKolkata": "Nuova Delhi",
+  "timezoneAsiaSeoul": "Seul",
+  "timezoneAsiaShanghai": "Shanghai",
+  "timezoneAsiaTokyo": "Tokyo",
+  "timezoneAustraliaPerth": "Perth",
+  "timezoneAustraliaSydney": "Sydney",
+  "timezoneEuropeAmsterdam": "Amsterdam",
+  "timezoneEuropeAthens": "Atene",
+  "timezoneEuropeBerlin": "Berlino",
+  "timezoneEuropeDublin": "Dublino",
+  "timezoneEuropeHelsinki": "Helsinki",
+  "timezoneEuropeLisbon": "Lisbona",
+  "timezoneEuropeLondon": "Londra",
+  "timezoneEuropeMadrid": "Madrid",
+  "timezoneEuropeMoscow": "Mosca",
+  "timezoneEuropeParis": "Parigi",
+  "timezoneEuropeRome": "Roma",
+  "timezoneEuropeVienna": "Vienna",
+  "timezoneEuropeZurich": "Zurigo",
+  "timezonePacificAuckland": "Auckland",
+  "timezoneUtc": "UTC",
+  "usernameHint": "Servirà al tuo nutrizionista per trovarti",
+  "validationEmailAlreadyRegistered": "Questo indirizzo è già registrato",
+  "validationInvalidFormat": "Formato non valido",
+  "validationInvalidValue": "Valore non valido",
+  "validationPasswordsDoNotMatch": "Le password non coincidono",
+  "validationRequired": "Campo obbligatorio",
+  "validationTooLong": "Troppo lungo",
+  "validationUsernameAlreadyTaken": "Questo nome utente è già in uso",
+  "verifyEmailBackToLogin": "Torna all'accesso",
+  "verifyEmailLinkExpiredBody": "Torna all'accesso per richiederne uno nuovo.",
+  "verifyEmailLinkExpiredTitle": "Il collegamento non è più valido",
+  "verifyEmailResend": "Invia di nuovo",
+  "verifyEmailResendIn": "Invia di nuovo ({seconds}s)",
+  "@verifyEmailResendIn": {
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
+  "verifyEmailSentTo": "Abbiamo inviato un collegamento di conferma a {email}",
+  "@verifyEmailSentTo": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "verifyEmailTitle": "Controlla la tua posta",
+  "verifyEmailUseAnotherAddress": "Usa un altro indirizzo",
+  "weekNext": "Settimana successiva",
+  "weekNoPlan": "Nessun piano",
+  "weekPlanCompleted": "Piano concluso",
+  "weekPlanNotStarted": "Piano non ancora iniziato",
+  "weekPrevious": "Settimana precedente",
+  "weekThisWeek": "Questa settimana",
+  "weekdayFriday": "Venerdì",
+  "weekdayInitialFriday": "V",
+  "weekdayInitialMonday": "L",
+  "@weekdayInitialMonday": {
+    "description": "7.3: iniziale del selettore dei giorni."
+  },
+  "weekdayInitialSaturday": "S",
+  "weekdayInitialSunday": "D",
+  "weekdayInitialThursday": "G",
+  "weekdayInitialTuesday": "M",
+  "weekdayInitialWednesday": "M",
+  "weekdayMonday": "Lunedì",
+  "weekdaySaturday": "Sabato",
+  "weekdaySunday": "Domenica",
+  "weekdayThursday": "Giovedì",
+  "weekdayTuesday": "Martedì",
+  "weekdayWednesday": "Mercoledì",
+  "workoutActivityType": "Tipo di attività",
+  "workoutActivityTypeRequired": "Indica il tipo di attività",
+  "workoutAddOneOff": "Aggiungi allenamento occasionale",
+  "workoutAddRecurring": "Aggiungi allenamento ricorrente",
+  "workoutCaloriesBurned": "Calorie bruciate",
+  "workoutCaloriesOptional": "Se lo sai. Non è obbligatorio.",
+  "workoutClearFilters": "Rimuovi i filtri",
+  "workoutDeleteConfirm": "Eliminare questo allenamento?",
+  "workoutDeleteKeepsPlanning": "La pianificazione resta: l'allenamento tornerà previsto e non svolto.",
+  "workoutDuplicateMany": "Hai già registrato {count} allenamenti in questo giorno",
+  "@workoutDuplicateMany": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "workoutDuplicateSingle": "Hai già registrato un allenamento in questo giorno",
+  "workoutEditTitle": "Modifica allenamento",
+  "workoutFilters": "Filtri",
+  "workoutMarkAsDone": "Segna come svolto",
+  "workoutNoTypesYet": "Nessun tipo ancora registrato.",
+  "workoutNoWeeklyGoal": "Nessun obiettivo settimanale",
+  "workoutNonePlanned": "Nessun allenamento pianificato",
+  "workoutNonePlannedDot": "Nessun allenamento pianificato.",
+  "workoutNoneRecorded": "Nessun allenamento registrato",
+  "workoutNoneWithFilters": "Nessun allenamento con questi filtri",
+  "workoutOneOff": "Allenamento occasionale",
+  "workoutPerWeek": "Allenamenti a settimana",
+  "workoutPerWeekSuffix": "{count, plural, =1{1 allenamento a settimana} other{{count} allenamenti a settimana}}",
+  "@workoutPerWeekSuffix": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "workoutPickAtLeastOneDay": "Scegli almeno un giorno",
+  "workoutPickPeriod": "Scegli un periodo",
+  "workoutPlanningNotice": "Le modifiche valgono da oggi in avanti: i giorni trascorsi restano come erano.",
+  "workoutRecord": "Registra allenamento",
+  "workoutRecordAnyway": "Registra comunque",
+  "workoutRecordTitle": "Registra un allenamento",
+  "workoutRecurring": "Allenamento ricorrente",
+  "workoutRemoveGoal": "Rimuovi obiettivo",
+  "workoutSheetFooter": "Se vuoi, aggiungi calorie e nota. Puoi anche chiudere: l'allenamento è registrato lo stesso.",
+  "workoutStatsDistribution": "Distribuzione per tipo",
+  "workoutStatsGoalComparison": "Confronto con l’obiettivo",
+  "workoutStatsGoalProgress": "{done} su {goal} previsti",
+  "@workoutStatsGoalProgress": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "goal": {
+        "type": "int"
+      }
+    }
+  },
+  "workoutStatsGoalProgressWeekly": "{done} su {goal} previsti dall’obiettivo settimanale",
+  "@workoutStatsGoalProgressWeekly": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "goal": {
+        "type": "int"
+      }
+    }
+  },
+  "workoutStatsGoalWeeks": "Su {weeks} settimane intere, ciascuna con l’obiettivo allora vigente.",
+  "@workoutStatsGoalWeeks": {
+    "placeholders": {
+      "weeks": {
+        "type": "int"
+      }
+    }
+  },
+  "workoutStatsGoalWeeksNotice": "Su {weeks} settimane intere, ciascuna con l’obiettivo allora vigente.",
+  "@workoutStatsGoalWeeksNotice": {
+    "placeholders": {
+      "weeks": {
+        "type": "int"
+      }
+    }
+  },
+  "workoutStatsNonePlannedInPeriod": "Nessun allenamento pianificato nel periodo.",
+  "workoutStatsNoneRecordedInPeriod": "Nessun allenamento registrato nel periodo.",
+  "workoutStatsPlanComparison": "Confronto con la pianificazione",
+  "workoutStatsPlanProgress": "{planned} pianificati, {done} svolti",
+  "@workoutStatsPlanProgress": {
+    "placeholders": {
+      "planned": {
+        "type": "int"
+      },
+      "done": {
+        "type": "int"
+      }
+    }
+  },
+  "workoutStatsSuspendedNotice": "{count, plural, =1{Comprende 1 giorno di sospensione, che l’aderenza esclude.} other{Comprende {count} giorni di sospensione, che l’aderenza esclude.}}",
+  "@workoutStatsSuspendedNotice": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "workoutStatsTotalDone": "{count, plural, =1{1 allenamento svolto} other{{count} allenamenti svolti}}",
+  "@workoutStatsTotalDone": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "workoutStatsWeeklyTrend": "Andamento settimanale",
+  "workoutWeeklyGoal": "Obiettivo settimanale",
+  "workoutWeeklyGoalHelp": "Quante volte ti proponi di allenarti in una settimana. È indipendente dai giorni che hai pianificato.",
+  "workoutWhenDone": "Quando lo hai svolto"
 }

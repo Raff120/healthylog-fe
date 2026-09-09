@@ -7,6 +7,7 @@ import '../../../../core/api/api_error_messages.dart';
 import '../../../../core/api/api_exception.dart';
 import '../../../../core/api/connectivity_status.dart';
 import '../../../../core/widgets/app_text_field.dart';
+import '../../../../l10n/l10n_context.dart';
 import '../../../group/providers/cooking_group_providers.dart';
 import '../../../identity/providers/profile_providers.dart';
 import '../../data/plan_day.dart';
@@ -106,10 +107,10 @@ class _MealCardState extends ConsumerState<MealCard> {
     return null;
   }
 
-  String _statusVerb(SlotStatus status) => switch (status) {
-    SlotStatus.consumed => 'Consumato',
-    SlotStatus.skipped => 'Saltato',
-    SlotStatus.toConsume => 'Ripristinato',
+  String _statusVerb(BuildContext context, SlotStatus status) => switch (status) {
+    SlotStatus.consumed => context.l10n.mealStatusVerbConsumed,
+    SlotStatus.skipped => context.l10n.mealStatusVerbSkipped,
+    SlotStatus.toConsume => context.l10n.mealStatusVerbRestored,
   };
 
   /// SC-4, SC-5, 4.5 interfaccia.md: salvata all'uscita dal campo, non a
@@ -210,7 +211,7 @@ class _MealCardState extends ConsumerState<MealCard> {
                     ],
                     const SizedBox(height: AppSpacing.xxs),
                     Text(
-                      hasContent ? slot.content!.trim() : 'Da definire',
+                      hasContent ? slot.content!.trim() : context.l10n.slotToBeDefined,
                       style: typography.bodyLarge.copyWith(
                         color: hasContent
                             ? colors.textPrimary
@@ -233,7 +234,7 @@ class _MealCardState extends ConsumerState<MealCard> {
                             color: colors.accent,
                           ),
                           label: Text(
-                            'Vedi ricetta',
+                            context.l10n.mealSeeRecipe,
                             style: typography.label.copyWith(
                               color: colors.accent,
                             ),
@@ -283,7 +284,8 @@ class _MealCardState extends ConsumerState<MealCard> {
                           const SizedBox(width: AppSpacing.xxs),
                           Expanded(
                             child: Text(
-                              '${_statusVerb(slot.status)} da $cookAttributionName',
+                              context.l10n.mealStatusByCook(
+                                  _statusVerb(context, slot.status), cookAttributionName),
                               style: typography.caption.copyWith(color: colors.textSecondary),
                             ),
                           ),
@@ -295,13 +297,13 @@ class _MealCardState extends ConsumerState<MealCard> {
                       GestureDetector(
                         onTap: offline
                             ? () => ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(content: Text('Non disponibile offline.')),
+                                  SnackBar(content: Text(context.l10n.mealOfflineUnavailable)),
                                 )
                             : null,
                         child: AbsorbPointer(
                           absorbing: offline,
                           child: AppTextField(
-                            label: 'Nota di sostituzione',
+                            label: context.l10n.mealReplacementNote,
                             controller: _replacementNoteController,
                             focusNode: _replacementNoteFocusNode,
                             enabled: !offline,
@@ -325,7 +327,7 @@ class _MealCardState extends ConsumerState<MealCard> {
                   // finché l'Utente non tenta la spunta (OF-21).
                   onDisabledTap: widget.canCheck && offline
                       ? () => ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Non disponibile offline.')),
+                            SnackBar(content: Text(context.l10n.mealOfflineUnavailable)),
                           )
                       : null,
                   onSelect: (status) => _updateStatus(context, status),
@@ -414,8 +416,8 @@ class _MealCardState extends ConsumerState<MealCard> {
       context: context,
       builder: (dialogContext) => AlertDialog(
         backgroundColor: colors.surface,
-        title: const Text('Registrare un pasto futuro?'),
-        content: const Text('Questo giorno non è ancora arrivato.'),
+        title: Text(context.l10n.mealFutureDayTitle),
+        content: Text(context.l10n.mealFutureDayBody),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(false),
@@ -438,8 +440,8 @@ class _MealCardState extends ConsumerState<MealCard> {
       context: context,
       builder: (dialogContext) => AlertDialog(
         backgroundColor: colors.surface,
-        title: const Text('Cambiare stato?'),
-        content: const Text('La nota di sostituzione andrà perduta in modo definitivo.'),
+        title: Text(context.l10n.mealChangeStatusTitle),
+        content: Text(context.l10n.mealReplacementNoteLost),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(false),
@@ -461,7 +463,7 @@ class _MealCardState extends ConsumerState<MealCard> {
         (slot.label?.trim().isNotEmpty ?? false)) {
       return slot.label!.trim();
     }
-    return slot.type.displayName;
+    return slotTypeLabel(context, slot.type);
   }
 
   /// GG-15, GG-18: foglio modale a tre quarti di schermo. Il testo è

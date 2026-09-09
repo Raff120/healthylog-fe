@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../app/theme/app_spacing.dart';
 import '../../app/theme/theme_context.dart';
+import '../../l10n/l10n_context.dart';
 import '../api/connectivity_status.dart';
 
 /// Barra di assenza di connessione (4.6, 2.6 interfaccia.md; OF-6,
@@ -47,7 +48,7 @@ class OfflineBar extends ConsumerWidget {
                     // eccedere il riquadro sugli schermi più stretti.
                     Flexible(
                       child: Text(
-                        'Sei offline. Puoi consultare il piano già scaricato.',
+                        context.l10n.offlineBar,
                         style: typography.caption.copyWith(color: colors.textSecondary),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,

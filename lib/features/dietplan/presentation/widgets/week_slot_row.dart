@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../app/theme/app_spacing.dart';
 import '../../../../app/theme/theme_context.dart';
 import '../../../../core/api/api_error_messages.dart';
+import '../../../../l10n/l10n_context.dart';
 import '../../data/plan_day.dart';
 import '../../data/slot_status.dart';
 import '../../data/slot_type.dart';
@@ -100,7 +101,7 @@ class _WeekSlotRowState extends ConsumerState<WeekSlotRow> {
                 const SizedBox(width: AppSpacing.xs),
                 Expanded(
                   child: Text(
-                    hasContent ? slot.content!.trim() : 'Da definire',
+                    hasContent ? slot.content!.trim() : context.l10n.slotToBeDefined,
                     style: typography.bodyMedium.copyWith(
                       color: hasContent ? colors.textPrimary : colors.textTertiary,
                     ),
@@ -190,7 +191,7 @@ void _openDetailSheet(BuildContext context, PlanDaySlot slot, {required VoidCall
                 children: [
                   Icon(slot.type.icon, size: 20, color: colors.textSecondary),
                   const SizedBox(width: AppSpacing.xs),
-                  Text(_headerLabel(slot), style: typography.overline.copyWith(color: colors.textSecondary)),
+                  Text(_headerLabel(context, slot), style: typography.overline.copyWith(color: colors.textSecondary)),
                 ],
               ),
               const SizedBox(height: AppSpacing.sm),
@@ -207,7 +208,7 @@ void _openDetailSheet(BuildContext context, PlanDaySlot slot, {required VoidCall
                         const SizedBox(height: AppSpacing.sm),
                       ],
                       Text(
-                        hasContent ? slot.content!.trim() : 'Da definire',
+                        hasContent ? slot.content!.trim() : context.l10n.slotToBeDefined,
                         style: typography.bodyLarge.copyWith(
                           color: hasContent ? colors.textPrimary : colors.textTertiary,
                         ),
@@ -257,9 +258,9 @@ void _openDetailSheet(BuildContext context, PlanDaySlot slot, {required VoidCall
 
 /// GG-10: lo spuntino usa la denominazione descrittiva assegnata nel
 /// piano quando presente, non l'etichetta generica del tipo.
-String _headerLabel(PlanDaySlot slot) {
+String _headerLabel(BuildContext context, PlanDaySlot slot) {
   if (slot.type == SlotType.snack && (slot.label?.trim().isNotEmpty ?? false)) {
     return slot.label!.trim();
   }
-  return slot.type.displayName;
+  return slotTypeLabel(context, slot.type);
 }

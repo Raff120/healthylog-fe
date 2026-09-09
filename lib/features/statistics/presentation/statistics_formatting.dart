@@ -1,3 +1,6 @@
+import 'package:flutter/widgets.dart';
+
+import '../../../l10n/l10n_context.dart';
 import '../data/statistics_models.dart';
 
 const _months = [
@@ -19,29 +22,35 @@ String formatPercentage(double value) => '${value.round()}';
 
 /// Il periodo considerato, che accompagna in `caption` il valore
 /// complessivo (11.1).
-String describePeriod(StatisticsPeriod period, DateTime from, DateTime to, String? planName) =>
+String describePeriod(
+  BuildContext context,
+  StatisticsPeriod period,
+  DateTime from,
+  DateTime to,
+  String? planName,
+) =>
     switch (period) {
-      StatisticsPeriod.week =>
-        'Settimana dal ${formatDayAndMonth(from)} al ${formatDayAndMonth(to)}',
-      StatisticsPeriod.month => 'Mese di ${_months[from.month - 1]} ${from.year}',
-      StatisticsPeriod.plan =>
-        planName == null ? 'Intero piano' : '$planName · ${formatDay(from)} – ${formatDay(to)}',
+      StatisticsPeriod.week => context.l10n.statisticsWeekRange(formatDayAndMonth(from), formatDayAndMonth(to)),
+      StatisticsPeriod.month =>
+        context.l10n.statisticsMonthOf('${_months[from.month - 1]} ${from.year}'),
+      StatisticsPeriod.plan => planName == null
+          ? context.l10n.statisticsWholePlan
+          : context.l10n.statisticsPlanRange(planName, formatDay(from), formatDay(to)),
     };
 
 /// AD-12, AH-16: i giorni dell'intervallo osservato che il calcolo
 /// esclude, dichiarati distinguendo la sospensione dall'assenza di piano —
 /// perché un valore riferito a pochi giorni effettivi non sia scambiato
 /// per un dato d'insieme.
-String? describeExcludedDays(int suspendedDays, int uncoveredDays) {
+String? describeExcludedDays(BuildContext context, int suspendedDays, int uncoveredDays) {
+  final l10n = context.l10n;
   final parts = <String>[
-    if (suspendedDays > 0) '$suspendedDays ${_days(suspendedDays)} di sospensione',
-    if (uncoveredDays > 0) '$uncoveredDays ${_days(uncoveredDays)} senza piano',
+    if (suspendedDays > 0) l10n.statisticsExclusionDaysSuspended(suspendedDays),
+    if (uncoveredDays > 0) l10n.statisticsExclusionDaysUncovered(uncoveredDays),
   ];
   if (parts.isEmpty) return null;
-  return 'Il calcolo esclude ${parts.join(' e ')}.';
+  return l10n.statisticsExclusionNotice(parts.join(l10n.commonListAnd));
 }
-
-String _days(int count) => count == 1 ? 'giorno' : 'giorni';
 
 /// L'etichetta di una settimana sull'asse dell'andamento (AD-14): giorno e
 /// mese del lunedì che la apre (LO-11).

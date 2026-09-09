@@ -12,6 +12,7 @@ import '../../../l10n/l10n_context.dart';
 import '../../../l10n/locale_controller.dart';
 import '../data/profile_models.dart';
 import '../data/timezones.dart';
+import '../domain/timezone_label.dart';
 import '../providers/profile_providers.dart';
 
 /// Impostazioni (12.2 interfaccia.md). F11 vi introdusse Aspetto, Fuso
@@ -21,7 +22,7 @@ class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
 
   Future<void> _pickTimezone(BuildContext context, WidgetRef ref, String? current) async {
-    final selected = await showModalBottomSheet<TimezoneOption>(
+    final selected = await showModalBottomSheet<String>(
       context: context,
       isScrollControlled: true,
       builder: (sheetContext) => _TimezonePickerSheet(current: current),
@@ -29,7 +30,7 @@ class SettingsScreen extends ConsumerWidget {
     if (selected == null || !context.mounted) return;
 
     try {
-      await ref.read(profileControllerProvider.notifier).saveTimezone(selected.id);
+      await ref.read(profileControllerProvider.notifier).saveTimezone(selected);
     } catch (error) {
       if (!context.mounted) return;
       final code = error.asApiException?.code;
@@ -119,11 +120,8 @@ class SettingsScreen extends ConsumerWidget {
     );
   }
 
-  String _labelFor(BuildContext context, String? timezoneId) {
-    if (timezoneId == null) return context.l10n.commonNotSet;
-    final match = kTimezoneOptions.where((option) => option.id == timezoneId);
-    return match.isEmpty ? timezoneId : match.first.label;
-  }
+  String _labelFor(BuildContext context, String? timezoneId) =>
+      timezoneId == null ? context.l10n.commonNotSet : timezoneLabel(context, timezoneId);
 }
 
 class _SectionHeader extends StatelessWidget {
@@ -270,11 +268,14 @@ class _TimezonePickerSheetState extends State<_TimezonePickerSheet> {
     final colors = context.colors;
     final typography = context.typography;
     final query = _query.text.trim().toLowerCase();
+    // La ricerca considera tanto l'etichetta tradotta quanto
+    // l'identificativo: chi conosce "Europe/Rome" lo trova come chi
+    // cerca "Roma".
     final results = query.isEmpty
-        ? kTimezoneOptions
-        : kTimezoneOptions
-            .where((option) =>
-                option.label.toLowerCase().contains(query) || option.id.toLowerCase().contains(query))
+        ? kTimezoneIds
+        : kTimezoneIds
+            .where((id) =>
+                timezoneLabel(context, id).toLowerCase().contains(query) || id.toLowerCase().contains(query))
             .toList();
 
     return SafeArea(
@@ -306,12 +307,13 @@ class _TimezonePickerSheetState extends State<_TimezonePickerSheet> {
                 child: ListView.builder(
                   itemCount: results.length,
                   itemBuilder: (context, index) {
-                    final option = results[index];
+                    final id = results[index];
                     return ListTile(
-                      title: Text(option.label, style: typography.bodyLarge.copyWith(color: colors.textPrimary)),
-                      subtitle: Text(option.id, style: typography.caption.copyWith(color: colors.textSecondary)),
-                      trailing: option.id == widget.current ? Icon(Icons.check, color: colors.accent) : null,
-                      onTap: () => Navigator.of(context).pop(option),
+                      title: Text(timezoneLabel(context, id),
+                          style: typography.bodyLarge.copyWith(color: colors.textPrimary)),
+                      subtitle: Text(id, style: typography.caption.copyWith(color: colors.textSecondary)),
+                      trailing: id == widget.current ? Icon(Icons.check, color: colors.accent) : null,
+                      onTap: () => Navigator.of(context).pop(id),
                     );
                   },
                 ),

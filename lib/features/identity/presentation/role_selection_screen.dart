@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../app/theme/app_spacing.dart';
 import '../../../app/theme/theme_context.dart';
+import '../../../l10n/l10n_context.dart';
 import '../data/account_role.dart';
 
 /// Scelta del ruolo (5.1 interfaccia.md, RG-1): precede tutto perché è
@@ -32,24 +33,24 @@ class RoleSelectionScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Text('Come userai HealthyLog?', style: typography.titleLarge.copyWith(color: colors.textPrimary)),
+                  Text(context.l10n.roleSelectionTitle, style: typography.titleLarge.copyWith(color: colors.textPrimary)),
                   const SizedBox(height: AppSpacing.lg),
                   _RoleCard(
                     icon: Icons.person_outline,
-                    title: 'Seguo un piano',
-                    description: 'Consulti la tua dieta, segni i pasti e registri gli allenamenti',
+                    title: context.l10n.roleUserTitle,
+                    description: context.l10n.roleUserDescription,
                     onTap: () => context.push('/register/details', extra: AccountRole.user),
                   ),
                   const SizedBox(height: AppSpacing.sm),
                   _RoleCard(
                     icon: Icons.medical_information_outlined,
-                    title: 'Sono un nutrizionista',
-                    description: 'Redigi e segui i piani dei tuoi pazienti',
+                    title: context.l10n.roleNutritionistTitle,
+                    description: context.l10n.roleNutritionistDescription,
                     onTap: () => context.push('/register/details', extra: AccountRole.nutritionist),
                   ),
                   const SizedBox(height: AppSpacing.md),
                   Text(
-                    'La scelta non è modificabile in seguito',
+                    context.l10n.roleSelectionNotChangeable,
                     style: typography.caption.copyWith(color: colors.textSecondary),
                   ),
                 ],

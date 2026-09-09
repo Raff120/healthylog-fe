@@ -1,3 +1,4 @@
+import '../../../l10n/l10n_context.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -155,14 +156,14 @@ class _RegistrationDetailsScreenState extends ConsumerState<RegistrationDetailsS
   String? _describeFieldError(String? code) {
     return switch (code) {
       null => null,
-      'REQUIRED' => 'Campo obbligatorio',
-      'TOO_LONG' => 'Troppo lungo',
-      'TOO_SHORT' => 'Almeno 12 caratteri',
-      'INVALID_FORMAT' => 'Formato non valido',
-      'MISMATCH' => 'Le password non coincidono',
-      'EMAIL_ALREADY_USED' => 'Questo indirizzo è già registrato',
-      'USERNAME_ALREADY_USED' => 'Questo nome utente è già in uso',
-      _ => 'Valore non valido',
+      'REQUIRED' => context.l10n.validationRequired,
+      'TOO_LONG' => context.l10n.validationTooLong,
+      'TOO_SHORT' => context.l10n.passwordRequirementHint,
+      'INVALID_FORMAT' => context.l10n.validationInvalidFormat,
+      'MISMATCH' => context.l10n.validationPasswordsDoNotMatch,
+      'EMAIL_ALREADY_USED' => context.l10n.validationEmailAlreadyRegistered,
+      'USERNAME_ALREADY_USED' => context.l10n.validationUsernameAlreadyTaken,
+      _ => context.l10n.validationInvalidValue,
     };
   }
 
@@ -210,12 +211,12 @@ class _RegistrationDetailsScreenState extends ConsumerState<RegistrationDetailsS
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  AppTextField(label: 'Nome', controller: _firstName, errorText: _errorFor('firstName')),
+                  AppTextField(label: context.l10n.fieldFirstName, controller: _firstName, errorText: _errorFor('firstName')),
                   const SizedBox(height: AppSpacing.sm),
-                  AppTextField(label: 'Cognome', controller: _lastName, errorText: _errorFor('lastName')),
+                  AppTextField(label: context.l10n.fieldLastName, controller: _lastName, errorText: _errorFor('lastName')),
                   const SizedBox(height: AppSpacing.sm),
                   AppTextField(
-                    label: 'Nome utente',
+                    label: context.l10n.fieldUsername,
                     controller: _username,
                     errorText: _errorFor('username'),
                     onChanged: _onUsernameChanged,
@@ -228,21 +229,21 @@ class _RegistrationDetailsScreenState extends ConsumerState<RegistrationDetailsS
                     Padding(
                       padding: const EdgeInsets.only(top: AppSpacing.xxs, left: AppSpacing.xxs),
                       child: Text(
-                        'Servirà al tuo nutrizionista per trovarti',
+                        context.l10n.usernameHint,
                         style: typography.caption.copyWith(color: colors.textSecondary),
                       ),
                     ),
                   ],
                   const SizedBox(height: AppSpacing.sm),
                   AppTextField(
-                    label: 'Indirizzo e-mail',
+                    label: context.l10n.fieldEmail,
                     controller: _email,
                     keyboardType: TextInputType.emailAddress,
                     errorText: _errorFor('email'),
                   ),
                   const SizedBox(height: AppSpacing.sm),
                   AppTextField(
-                    label: 'Password',
+                    label: context.l10n.fieldPassword,
                     controller: _password,
                     obscureText: _obscurePassword,
                     errorText: _errorFor('password'),
@@ -255,7 +256,7 @@ class _RegistrationDetailsScreenState extends ConsumerState<RegistrationDetailsS
                   Padding(
                     padding: const EdgeInsets.only(top: AppSpacing.xxs, left: AppSpacing.xxs),
                     child: Text(
-                      'Almeno 12 caratteri',
+                      context.l10n.passwordRequirementHint,
                       style: typography.caption.copyWith(
                         color: _password.text.length >= passwordMinLength
                             ? context.consumptionColors.consumed
@@ -265,7 +266,7 @@ class _RegistrationDetailsScreenState extends ConsumerState<RegistrationDetailsS
                   ),
                   const SizedBox(height: AppSpacing.sm),
                   AppTextField(
-                    label: 'Conferma password',
+                    label: context.l10n.fieldConfirmPassword,
                     controller: _confirmPassword,
                     obscureText: _obscureConfirmPassword,
                     errorText: _errorFor('confirmPassword'),
@@ -283,7 +284,7 @@ class _RegistrationDetailsScreenState extends ConsumerState<RegistrationDetailsS
                     onTap: _pickBirthDate,
                   ),
                   const SizedBox(height: AppSpacing.sm),
-                  AppTextField(label: 'Luogo di nascita', controller: _birthPlace, errorText: _errorFor('birthPlace')),
+                  AppTextField(label: context.l10n.fieldBirthPlace, controller: _birthPlace, errorText: _errorFor('birthPlace')),
                   const SizedBox(height: AppSpacing.sm),
                   SexSelector(
                     value: _sex,
@@ -291,7 +292,7 @@ class _RegistrationDetailsScreenState extends ConsumerState<RegistrationDetailsS
                     errorText: _errorFor('sex'),
                   ),
                   const SizedBox(height: AppSpacing.lg),
-                  AppPrimaryButton(label: 'Crea account', loading: loading, onPressed: _submit),
+                  AppPrimaryButton(label: context.l10n.registerSubmit, loading: loading, onPressed: _submit),
                 ],
               ),
             ),

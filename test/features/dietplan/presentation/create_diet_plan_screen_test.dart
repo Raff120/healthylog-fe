@@ -140,7 +140,7 @@ void main() {
     await tester.tap(find.text('Crea piano'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Si sovrappone a "Piano estate".'), findsOneWidget);
+    expect(find.text('Si sovrappone a «Piano estate».'), findsOneWidget);
   });
 
   testWidgets('dopo un conflitto un secondo invio può ancora riuscire (PA-9)', (tester) async {
@@ -154,7 +154,7 @@ void main() {
     await tester.tap(find.text('Crea piano'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Si sovrappone a "Piano estate".'), findsOneWidget);
+    expect(find.text('Si sovrappone a «Piano estate».'), findsOneWidget);
 
     await tester.tap(find.text('Crea piano'));
     await tester.pumpAndSettle();

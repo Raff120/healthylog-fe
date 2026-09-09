@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../app/theme/theme_context.dart';
+import '../../../../l10n/l10n_context.dart';
 
 /// GE-12: uscita volontaria, conferma semplice — riservata a chi non è
 /// Proprietario. Il Proprietario con altri membri deve prima trasferire
@@ -14,8 +15,8 @@ Future<bool> confirmLeaveGroup(BuildContext context) async {
     context: context,
     builder: (dialogContext) => AlertDialog(
       backgroundColor: colors.surface,
-      title: const Text('Uscire dal gruppo?'),
-      content: const Text('Conserverai il tuo piano e il tuo storico.'),
+      title: Text(context.l10n.groupLeaveTitle),
+      content: Text(context.l10n.groupLeaveKeepsData),
       actions: [
         TextButton(onPressed: () => Navigator.of(dialogContext).pop(false), child: const Text('Annulla')),
         TextButton(
@@ -41,12 +42,12 @@ Future<void> explainOwnerMustTransferBeforeLeaving(BuildContext context) {
     context: context,
     builder: (dialogContext) => AlertDialog(
       backgroundColor: colors.surface,
-      title: const Text('Trasferisci prima la proprietà'),
-      content: const Text(
-        'Per uscire dal gruppo devi prima trasferirne la proprietà a un altro membro, dal menu accanto al suo nome.',
+      title: Text(context.l10n.groupTransferFirstTitle),
+      content: Text(
+        context.l10n.groupTransferFirstBody,
       ),
       actions: [
-        TextButton(onPressed: () => Navigator.of(dialogContext).pop(), child: const Text('Ho capito')),
+        TextButton(onPressed: () => Navigator.of(dialogContext).pop(), child: Text(context.l10n.commonUnderstood)),
       ],
     ),
   );
@@ -61,11 +62,8 @@ Future<bool> confirmDissolveGroup(BuildContext context) async {
     context: context,
     builder: (dialogContext) => AlertDialog(
       backgroundColor: colors.surface,
-      title: const Text('Sciogliere il gruppo?'),
-      content: const Text(
-        'Tutti i membri usciranno dal gruppo. Ciascuno conserverà il proprio piano e il proprio storico: '
-        'nessun dato personale è coinvolto.',
-      ),
+      title: Text(context.l10n.groupDissolveTitle),
+      content: Text(context.l10n.groupDissolveBody),
       actions: [
         TextButton(onPressed: () => Navigator.of(dialogContext).pop(false), child: const Text('Annulla')),
         TextButton(
@@ -87,8 +85,8 @@ Future<bool> confirmRemoveMember(BuildContext context, String memberName) async 
     context: context,
     builder: (dialogContext) => AlertDialog(
       backgroundColor: colors.surface,
-      title: const Text('Rimuovere dal gruppo?'),
-      content: Text('$memberName conserverà il proprio piano e il proprio storico.'),
+      title: Text(context.l10n.groupRemoveMemberTitle),
+      content: Text(context.l10n.groupRemoveMemberBody(memberName)),
       actions: [
         TextButton(onPressed: () => Navigator.of(dialogContext).pop(false), child: const Text('Annulla')),
         TextButton(
@@ -109,10 +107,9 @@ Future<bool> confirmTransferOwnership(BuildContext context, String memberName) a
     context: context,
     builder: (dialogContext) => AlertDialog(
       backgroundColor: colors.surface,
-      title: const Text('Trasferire la proprietà?'),
+      title: Text(context.l10n.groupTransferOwnershipTitle),
       content: Text(
-        '$memberName diventerà Proprietario del gruppo. Il trasferimento non è annullabile: solo il nuovo '
-        'Proprietario potrà restituirla.',
+        context.l10n.groupTransferOwnershipBody(memberName),
       ),
       actions: [
         TextButton(onPressed: () => Navigator.of(dialogContext).pop(false), child: const Text('Annulla')),

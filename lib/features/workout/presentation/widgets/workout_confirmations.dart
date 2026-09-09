@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../app/theme/app_spacing.dart';
 import '../../../../app/theme/theme_context.dart';
+import '../../../../l10n/l10n_context.dart';
 import '../../data/workout_models.dart';
 
 /// AL-6, RA-9, 4.5 interfaccia.md: la registrazione di un secondo
@@ -24,8 +25,8 @@ Future<bool> confirmDuplicateWorkout(
       backgroundColor: colors.surface,
       title: Text(
         existing.length == 1
-            ? 'Hai già registrato un allenamento in questo giorno'
-            : 'Hai già registrato ${existing.length} allenamenti in questo giorno',
+            ? context.l10n.workoutDuplicateSingle
+            : context.l10n.workoutDuplicateMany(existing.length),
       ),
       content: Column(
         mainAxisSize: MainAxisSize.min,
@@ -50,7 +51,7 @@ Future<bool> confirmDuplicateWorkout(
         ),
         TextButton(
           onPressed: () => Navigator.of(dialogContext).pop(true),
-          child: const Text('Registra comunque'),
+          child: Text(context.l10n.workoutRecordAnyway),
         ),
       ],
     ),
@@ -68,10 +69,10 @@ Future<bool> confirmDeleteWorkout(BuildContext context, {required bool fromPlann
     context: context,
     builder: (dialogContext) => AlertDialog(
       backgroundColor: colors.surface,
-      title: const Text('Eliminare questo allenamento?'),
+      title: Text(context.l10n.workoutDeleteConfirm),
       content: fromPlanning
           ? Text(
-              'La pianificazione resta: l\'allenamento tornerà previsto e non svolto.',
+              context.l10n.workoutDeleteKeepsPlanning,
               style: typography.bodyMedium.copyWith(color: colors.textSecondary),
             )
           : null,

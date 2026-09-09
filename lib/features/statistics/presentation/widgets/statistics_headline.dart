@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../app/theme/app_spacing.dart';
 import '../../../../app/theme/theme_context.dart';
+import '../../../../l10n/l10n_context.dart';
 
 /// Valore complessivo di una sezione di *Statistiche* (11.1, 11.2
 /// interfaccia.md): numero in `displayLarge` con cifre a larghezza fissa
@@ -26,7 +27,7 @@ class StatisticsHeadline extends StatelessWidget {
     required this.value,
     required this.unit,
     required this.caption,
-    this.emptyText = 'Non ci sono ancora dati',
+    this.emptyText,
     this.onCaptionTap,
   });
 
@@ -35,7 +36,9 @@ class StatisticsHeadline extends StatelessWidget {
 
   final String? unit;
   final String caption;
-  final String emptyText;
+  /// AD-4: in assenza vale la constatazione predefinita, risolta alla
+  /// costruzione perché richiede il contesto.
+  final String? emptyText;
 
   /// Riceve il contesto della didascalia, cui il menu si ancora.
   final void Function(BuildContext captionContext)? onCaptionTap;
@@ -52,7 +55,7 @@ class StatisticsHeadline extends StatelessWidget {
         children: [
           if (value == null)
             Text(
-              emptyText,
+              emptyText ?? context.l10n.statisticsNoDataYet,
               style: typography.titleMedium.copyWith(color: colors.textSecondary),
             )
           else

@@ -6,6 +6,7 @@ import '../../../app/theme/app_spacing.dart';
 import '../../../app/theme/theme_context.dart';
 import '../../../core/api/api_error_messages.dart';
 import '../../../core/api/api_exception.dart';
+import '../../../l10n/l10n_context.dart';
 import '../data/diet_plan_requests.dart';
 import '../data/diet_plan_template.dart';
 import '../data/slot_type.dart';
@@ -69,8 +70,8 @@ class _DietPlanTemplateScheduleScreenState extends ConsumerState<DietPlanTemplat
   Future<void> _removeSlot(EditableSlot slot) async {
     if (!slot.isEmpty) {
       final confirmed = await _confirmDialog(
-        title: 'Rimuovere lo slot?',
-        message: 'Il contenuto compilato andrà perso.',
+        title: context.l10n.editRemoveSlotTitle,
+        message: context.l10n.editRemoveSlotBody,
         confirmLabel: 'Rimuovi',
       );
       if (confirmed != true) return;
@@ -123,7 +124,7 @@ class _DietPlanTemplateScheduleScreenState extends ConsumerState<DietPlanTemplat
         _dirty = false;
         _saving = false;
       });
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Template salvato.')));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(context.l10n.templateSaved)));
     } catch (error) {
       if (!mounted) return;
       setState(() => _saving = false);
@@ -145,14 +146,14 @@ class _DietPlanTemplateScheduleScreenState extends ConsumerState<DietPlanTemplat
         final slotIndex = int.parse(match.group(2)!);
         final day = _days![dayIndex];
         final slot = day.slots[slotIndex];
-        slot.recipeNameError = 'Serve una denominazione se è presente il testo della ricetta';
+        slot.recipeNameError = context.l10n.editRecipeNameRequired;
         slot.expanded = true;
         setState(() => _selectedDay = day.dayOfWeek);
       }
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            matchedRecipeField ? 'Controlla i campi della ricetta segnalati.' : describeApiError(context, 'VALIDATION_FAILED'),
+            matchedRecipeField ? context.l10n.editRecipeFieldsInvalid : describeApiError(context, 'VALIDATION_FAILED'),
           ),
         ),
       );
@@ -197,12 +198,12 @@ class _DietPlanTemplateScheduleScreenState extends ConsumerState<DietPlanTemplat
                 OutlinedButton.icon(
                   onPressed: day.hasType(type) ? null : () => _addSlot(type),
                   icon: Icon(type.icon, size: 18),
-                  label: Text('Aggiungi ${type.displayName.toLowerCase()}'),
+                  label: Text(context.l10n.slotAddOfType(slotTypeLabel(context, type).toLowerCase())),
                 ),
               OutlinedButton.icon(
                 onPressed: () => _addSlot(SlotType.snack),
                 icon: const Icon(Icons.add, size: 18),
-                label: const Text('Aggiungi spuntino'),
+                label: Text(context.l10n.editAddSnack),
               ),
             ],
           ),
@@ -223,9 +224,9 @@ class _DietPlanTemplateScheduleScreenState extends ConsumerState<DietPlanTemplat
         if (didPop) return;
         final navigator = Navigator.of(context);
         final confirmed = await _confirmDialog(
-          title: 'Modifiche non salvate',
-          message: 'Uscendo perderai le modifiche non salvate.',
-          confirmLabel: 'Esci senza salvare',
+          title: context.l10n.editDiscardTitle,
+          message: context.l10n.editDiscardBody,
+          confirmLabel: context.l10n.editDiscardConfirm,
         );
         if (confirmed == true) navigator.pop();
       },
@@ -236,7 +237,7 @@ class _DietPlanTemplateScheduleScreenState extends ConsumerState<DietPlanTemplat
           elevation: 0,
           scrolledUnderElevation: 0,
           title: Text(
-            templateState.value?.name ?? 'Redazione del template',
+            templateState.value?.name ?? context.l10n.templateScheduleTitle,
             style: typography.titleMedium.copyWith(color: colors.textPrimary),
           ),
           actions: [
@@ -267,7 +268,7 @@ class _DietPlanTemplateScheduleScreenState extends ConsumerState<DietPlanTemplat
                             ),
                           ),
                     if (_dirty)
-                      Text('Modifiche non salvate', style: typography.caption.copyWith(color: colors.textSecondary)),
+                      Text(context.l10n.editDiscardTitle, style: typography.caption.copyWith(color: colors.textSecondary)),
                   ],
                 ),
               ),

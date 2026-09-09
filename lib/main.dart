@@ -48,6 +48,9 @@ class HealthyLogApp extends ConsumerWidget {
         GlobalCupertinoLocalizations.delegate,
       ],
       supportedLocales: [for (final locale in supportedAppLocales) locale.flutterLocale],
+      // LO-2: la risoluzione entra in gioco per i soli widget di sistema —
+      // `locale` sopra è sempre una delle due lingue previste.
+      localeResolutionCallback: resolveAppLocale,
     );
   }
 }

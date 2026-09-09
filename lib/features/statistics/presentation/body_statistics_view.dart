@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../app/theme/app_spacing.dart';
 import '../../../app/theme/theme_context.dart';
+import '../../../l10n/l10n_context.dart';
 import '../../measurement/presentation/measurements_view.dart' show showMeasurementDetail;
 import '../../measurement/presentation/widgets/measurement_list_tile.dart';
 import '../data/statistics_models.dart';
@@ -42,7 +43,7 @@ class BodyStatisticsView extends ConsumerWidget {
         child: Padding(
           padding: const EdgeInsets.all(AppSpacing.xxl),
           child: Text(
-            'Nessuna misurazione nel periodo',
+            context.l10n.bodyStatsNoMeasurements,
             style: typography.titleMedium.copyWith(color: colors.textSecondary),
             textAlign: TextAlign.center,
           ),
@@ -96,15 +97,15 @@ class BodyStatisticsView extends ConsumerWidget {
             children: [
               // AN-10: la differenza rispetto al primo valore del periodo.
               StatisticsHeadline(
-                value: series.change == null ? null : _formatChange(series.change!),
+                value: series.change == null ? null : _formatChange(context, series.change!),
                 unit: series.change == null ? null : series.unit,
-                caption: describePeriod(
+                caption: describePeriod(context, 
                   statistics.period,
                   statistics.from,
                   statistics.to,
                   statistics.planName,
                 ),
-                emptyText: 'Un solo valore: nessuna variazione da presentare',
+                emptyText: context.l10n.bodyStatsSingleValue,
                 // AD-8, AN-13: la didascalia è il selettore del periodo.
                 onCaptionTap: (anchor) =>
                     showStatisticsPeriodMenu(anchor, ref, statistics.period),
@@ -114,7 +115,7 @@ class BodyStatisticsView extends ConsumerWidget {
               if (series.points.any((point) => point.fromNutritionist) &&
                   series.points.any((point) => !point.fromNutritionist))
                 Text(
-                  'I cerchi vuoti sono le misurazioni rilevate dal nutrizionista.',
+                  context.l10n.bodyStatsNutritionistLegend,
                   style: typography.caption.copyWith(color: colors.textSecondary),
                 ),
               const SizedBox(height: AppSpacing.lg),
@@ -131,10 +132,10 @@ class BodyStatisticsView extends ConsumerWidget {
 
   /// AN-10, AN-11: differenza assoluta con il proprio segno, nell'unità
   /// propria della grandezza.
-  static String _formatChange(double change) {
+  static String _formatChange(BuildContext context, double change) {
     final value = change.abs().toStringAsFixed(1);
-    if (change > 0) return '+$value';
-    if (change < 0) return '−$value';
+    if (change > 0) return context.l10n.signedPositive(value);
+    if (change < 0) return context.l10n.signedNegative(value);
     return value;
   }
 }

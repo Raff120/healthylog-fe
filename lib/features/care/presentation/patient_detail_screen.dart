@@ -7,8 +7,10 @@ import '../../../app/theme/theme_context.dart';
 import '../../../core/api/api_error_messages.dart';
 import '../../../core/api/api_exception.dart';
 import '../../../core/widgets/app_primary_button.dart';
+import '../../../l10n/l10n_context.dart';
 import '../../dietplan/data/plan_status.dart';
 import '../../dietplan/domain/plan_day_date.dart';
+import '../../dietplan/presentation/plan_status_presentation.dart';
 import '../../dietplan/providers/diet_plan_providers.dart';
 import '../data/care_models.dart';
 import '../providers/care_providers.dart';
@@ -86,7 +88,7 @@ class PatientDetailScreen extends ConsumerWidget {
       initialDate: DateTime.now(),
       firstDate: dateOnly(DateTime.now()),
       lastDate: DateTime.now().add(const Duration(days: 365)),
-      helpText: 'Giornata da modificare',
+      helpText: context.l10n.patientPickDay,
     );
     if (picked == null || !context.mounted) return;
     context.push('/plan-days/${isoDate(picked)}/edit?userId=$patientId');
@@ -129,7 +131,7 @@ class PatientDetailScreen extends ConsumerWidget {
                     children: [
                       Text(patient.fullName, style: typography.titleLarge.copyWith(color: colors.textPrimary)),
                       Text(
-                        'Collegato dal ${_formatDate(patient.linkedAt)}',
+                        context.l10n.patientLinkedSince(_formatDate(patient.linkedAt)),
                         style: typography.caption.copyWith(color: colors.textSecondary),
                       ),
                     ],
@@ -138,7 +140,7 @@ class PatientDetailScreen extends ConsumerWidget {
               ],
             ),
             const SizedBox(height: AppSpacing.lg),
-            Text('PIANO IN CORSO', style: typography.overline.copyWith(color: colors.textTertiary)),
+            Text(context.l10n.patientCurrentPlanHeader, style: typography.overline.copyWith(color: colors.textTertiary)),
             const SizedBox(height: AppSpacing.xs),
             if (current == null)
               Container(
@@ -148,12 +150,12 @@ class PatientDetailScreen extends ConsumerWidget {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     Text(
-                      'Nessun piano in corso redatto da te.',
+                      context.l10n.patientNoCurrentPlan,
                       style: typography.bodyMedium.copyWith(color: colors.textSecondary),
                     ),
                     const SizedBox(height: AppSpacing.sm),
                     AppPrimaryButton(
-                      label: 'Crea piano',
+                      label: context.l10n.planCreateSubmit,
                       onPressed: () => context.push('/diet-plans/new?patientId=$patientId'),
                     ),
                   ],
@@ -175,13 +177,13 @@ class PatientDetailScreen extends ConsumerWidget {
                 onResume: () => _act(context, ref, () => ref.read(dietPlanLifecycleControllerProvider.notifier).resume(current.id)),
                 onComplete: () async {
                   final confirmed = await _confirmSimple(context,
-                      title: 'Concludere il piano?', message: 'Potrai sempre riattivarlo in seguito.', confirmLabel: 'Concludi');
+                      title: context.l10n.plansCompleteConfirmTitle, message: context.l10n.plansCompleteConfirmBody, confirmLabel: 'Concludi');
                   if (!confirmed || !context.mounted) return;
                   await _act(context, ref, () => ref.read(dietPlanLifecycleControllerProvider.notifier).complete(current.id));
                 },
                 onWithdraw: () async {
                   final confirmed = await _confirmSimple(context,
-                      title: 'Ritirare il piano?', message: 'Il paziente non lo vedrà più.', confirmLabel: 'Ritira');
+                      title: context.l10n.plansWithdrawConfirmTitle, message: context.l10n.patientWithdrawBody, confirmLabel: 'Ritira');
                   if (!confirmed || !context.mounted) return;
                   await _act(context, ref, () => ref.read(dietPlanLifecycleControllerProvider.notifier).withdraw(current.id));
                 },
@@ -190,7 +192,7 @@ class PatientDetailScreen extends ConsumerWidget {
               ),
             if (others.isNotEmpty) ...[
               const SizedBox(height: AppSpacing.lg),
-              Text('ALTRI PIANI REDATTI', style: typography.overline.copyWith(color: colors.textTertiary)),
+              Text(context.l10n.patientOtherPlansHeader, style: typography.overline.copyWith(color: colors.textTertiary)),
               const SizedBox(height: AppSpacing.xs),
               for (final plan in others)
                 Padding(
@@ -214,13 +216,13 @@ class PatientDetailScreen extends ConsumerWidget {
               Center(
                 child: TextButton(
                   onPressed: () => context.push('/diet-plans/new?patientId=$patientId'),
-                  child: const Text('Crea un nuovo piano'),
+                  child: Text(context.l10n.patientCreatePlan),
                 ),
               ),
             Center(
               child: TextButton(
                 onPressed: () => _revoke(context, ref, patient),
-                child: Text('Revoca il collegamento', style: TextStyle(color: colors.error)),
+                child: Text(context.l10n.careRevokeLink, style: TextStyle(color: colors.error)),
               ),
             ),
           ],
@@ -285,19 +287,34 @@ class _PatientPlanCard extends StatelessWidget {
   final VoidCallback onActivateNow;
   final VoidCallback? onEditDay;
 
-  String get _statusLabel => switch (plan.status) {
-        PlanStatus.active => 'In corso',
-        PlanStatus.suspended => 'Sospeso',
-        PlanStatus.scheduled => 'Programmato',
+  String _statusLabel(BuildContext context) => switch (plan.status) {
+        PlanStatus.active => context.l10n.plansCurrent,
+        PlanStatus.suspended => context.l10n.planStatusSuspended,
+        PlanStatus.scheduled => context.l10n.planStatusScheduled,
         _ => '',
       };
 
-  List<(String, VoidCallback)> get _actions => switch (plan.status) {
-        PlanStatus.active => [('Modifica', onEdit), ('Sospendi', onSuspend), ('Concludi', onComplete)],
-        PlanStatus.suspended => [('Modifica', onEdit), ('Riprendi', onResume), ('Concludi', onComplete)],
-        PlanStatus.scheduled => [('Modifica', onEdit), ('Ritira', onWithdraw), ('Attiva ora', onActivateNow)],
-        _ => const [],
-      };
+  List<(String, VoidCallback)> _actions(BuildContext context) {
+    final l10n = context.l10n;
+    return switch (plan.status) {
+      PlanStatus.active => [
+          (l10n.planActionEdit, onEdit),
+          (l10n.planActionSuspend, onSuspend),
+          (l10n.planActionComplete, onComplete),
+        ],
+      PlanStatus.suspended => [
+          (l10n.planActionEdit, onEdit),
+          (l10n.planActionResume, onResume),
+          (l10n.planActionComplete, onComplete),
+        ],
+      PlanStatus.scheduled => [
+          (l10n.planActionEdit, onEdit),
+          (l10n.planActionWithdraw, onWithdraw),
+          (l10n.plansActivateNow, onActivateNow),
+        ],
+      _ => const [],
+    };
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -309,23 +326,23 @@ class _PatientPlanCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(_statusLabel.toUpperCase(), style: typography.overline.copyWith(color: colors.accent)),
+          Text(_statusLabel(context).toUpperCase(), style: typography.overline.copyWith(color: colors.accent)),
           const SizedBox(height: AppSpacing.xxs),
           Text(plan.name, style: typography.titleLarge.copyWith(color: colors.textPrimary)),
           const SizedBox(height: AppSpacing.xxs),
-          Text(_periodLabel(plan), style: typography.bodyMedium.copyWith(color: colors.textSecondary)),
+          Text(_periodLabel(context, plan), style: typography.bodyMedium.copyWith(color: colors.textSecondary)),
           const SizedBox(height: AppSpacing.md),
           Wrap(
             spacing: AppSpacing.xs,
             runSpacing: AppSpacing.xs,
             children: [
-              for (final (label, action) in _actions)
+              for (final (label, action) in _actions(context))
                 OutlinedButton(onPressed: acting ? null : action, child: Text(label)),
               if (onEditDay != null)
                 OutlinedButton.icon(
                   onPressed: acting ? null : onEditDay,
                   icon: const Icon(Icons.edit_calendar_outlined, size: 18),
-                  label: const Text('Modifica una giornata'),
+                  label: Text(context.l10n.patientEditDay),
                 ),
             ],
           ),
@@ -341,13 +358,9 @@ class _PlanTile extends StatelessWidget {
   final PatientPlanSummary plan;
   final VoidCallback onTap;
 
-  String get _statusLabel => switch (plan.status) {
-        PlanStatus.draft => 'Bozza',
-        PlanStatus.scheduled => 'Programmato',
-        PlanStatus.completed => 'Concluso',
-        PlanStatus.active => 'In corso',
-        PlanStatus.suspended => 'Sospeso',
-      };
+  String _statusLabel(BuildContext context) => plan.status == PlanStatus.active
+      ? context.l10n.plansCurrent
+      : planStatusLabel(context, plan.status);
 
   @override
   Widget build(BuildContext context) {
@@ -377,7 +390,7 @@ class _PlanTile extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(plan.name, style: typography.titleMedium.copyWith(color: colors.textPrimary)),
-                    Text('$_statusLabel · ${_periodLabel(plan)}', style: typography.caption.copyWith(color: colors.textSecondary)),
+                    Text('${_statusLabel(context)} · ${_periodLabel(context, plan)}', style: typography.caption.copyWith(color: colors.textSecondary)),
                   ],
                 ),
               ),
@@ -390,10 +403,10 @@ class _PlanTile extends StatelessWidget {
   }
 }
 
-String _periodLabel(PatientPlanSummary plan) {
+String _periodLabel(BuildContext context, PatientPlanSummary plan) {
   final start = _formatDate(plan.startDate);
-  if (plan.endDate == null) return 'Dal $start';
-  return '$start – ${_formatDate(plan.endDate!)}';
+  if (plan.endDate == null) return context.l10n.plansFrom(start);
+  return context.l10n.plansDateRange(start, _formatDate(plan.endDate!));
 }
 
 String _formatDate(DateTime value) {

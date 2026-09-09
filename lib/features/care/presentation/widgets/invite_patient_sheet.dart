@@ -8,6 +8,7 @@ import '../../../../core/api/api_exception.dart';
 import '../../../../core/widgets/app_primary_button.dart';
 import '../../../../core/widgets/app_text_field.dart';
 import '../../../../core/widgets/empty_state_view.dart';
+import '../../../../l10n/l10n_context.dart';
 import '../../data/care_models.dart';
 import '../../providers/care_providers.dart';
 
@@ -112,10 +113,10 @@ class _InvitePatientSheetState extends ConsumerState<_InvitePatientSheet> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: found == null
               ? [
-                  Text('Invita un paziente', style: typography.titleMedium.copyWith(color: colors.textPrimary)),
+                  Text(context.l10n.inviteePatientTitle, style: typography.titleMedium.copyWith(color: colors.textPrimary)),
                   const SizedBox(height: AppSpacing.md),
                   AppTextField(
-                    label: 'Nome utente',
+                    label: context.l10n.fieldUsername,
                     controller: _username,
                     errorText: _error,
                     autofillHints: const [AutofillHints.username],
@@ -126,15 +127,15 @@ class _InvitePatientSheetState extends ConsumerState<_InvitePatientSheet> {
                   ),
                   const SizedBox(height: AppSpacing.xxs),
                   Text(
-                    'Inserisci il nome utente esatto della persona',
+                    context.l10n.inviteePatientUsernameHint,
                     style: typography.caption.copyWith(color: colors.textSecondary),
                   ),
                   if (_notFound) ...[
                     const SizedBox(height: AppSpacing.sm),
-                    const EmptyStateView(
+                    EmptyStateView(
                       icon: Icons.search_off,
-                      title: 'Nessun utente con questo nome',
-                      text: 'Verifica il nome utente e riprova',
+                      title: context.l10n.inviteePatientNotFound,
+                      text: context.l10n.inviteePatientCheckUsername,
                     ),
                   ],
                   const SizedBox(height: AppSpacing.md),
@@ -165,11 +166,11 @@ class _InvitePatientSheetState extends ConsumerState<_InvitePatientSheet> {
                     ],
                   ),
                   const SizedBox(height: AppSpacing.md),
-                  AppTextField(label: 'Messaggio di presentazione', controller: _message, minLines: 2, maxLines: 4),
+                  AppTextField(label: context.l10n.inviteePatientMessage, controller: _message, minLines: 2, maxLines: 4),
                   const SizedBox(height: AppSpacing.xxs),
-                  Text('Aiuta la persona a riconoscerti', style: typography.caption.copyWith(color: colors.textSecondary)),
+                  Text(context.l10n.inviteePatientMessageHint, style: typography.caption.copyWith(color: colors.textSecondary)),
                   const SizedBox(height: AppSpacing.lg),
-                  AppPrimaryButton(label: 'Invia richiesta', loading: sending, onPressed: _send),
+                  AppPrimaryButton(label: context.l10n.inviteePatientSend, loading: sending, onPressed: _send),
                   const SizedBox(height: AppSpacing.xs),
                   Center(
                     child: TextButton(

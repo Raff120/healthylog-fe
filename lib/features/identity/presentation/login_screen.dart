@@ -9,6 +9,7 @@ import '../../../core/api/api_exception.dart';
 import '../../../core/device/device_label.dart';
 import '../../../core/widgets/app_primary_button.dart';
 import '../../../core/widgets/app_text_field.dart';
+import '../../../l10n/l10n_context.dart';
 import '../data/auth_models.dart';
 import '../providers/login_controller.dart';
 
@@ -46,6 +47,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
     final state = ref.read(loginControllerProvider);
     if (!mounted || state == null) return;
+    final l10n = context.l10n;
     state.whenOrNull(
       data: (_) => context.go('/home'),
       error: (error, _) {
@@ -61,7 +63,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         // sbagliata.
         setState(() {
           _errorMessage = code == 'INVALID_CREDENTIALS'
-              ? 'Indirizzo o password non corretti.'
+              ? l10n.errorInvalidCredentials
               : describeApiError(context, code ?? '');
         });
       },
@@ -93,14 +95,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   ),
                   const SizedBox(height: AppSpacing.xl),
                   AppTextField(
-                    label: 'Indirizzo e-mail',
+                    label: context.l10n.fieldEmail,
                     controller: _email,
                     keyboardType: TextInputType.emailAddress,
                     autofillHints: const [AutofillHints.email],
                   ),
                   const SizedBox(height: AppSpacing.sm),
                   AppTextField(
-                    label: 'Password',
+                    label: context.l10n.fieldPassword,
                     controller: _password,
                     obscureText: _obscurePassword,
                     autofillHints: const [AutofillHints.password],
@@ -114,7 +116,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     alignment: Alignment.centerRight,
                     child: TextButton(
                       onPressed: () => context.push('/password-reset'),
-                      child: const Text('Password dimenticata?'),
+                      child: Text(context.l10n.loginForgotPassword),
                     ),
                   ),
                   if (_errorMessage != null) ...[
@@ -122,12 +124,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     const SizedBox(height: AppSpacing.sm),
                   ],
                   const SizedBox(height: AppSpacing.sm),
-                  AppPrimaryButton(label: 'Accedi', loading: loading, onPressed: _submit),
+                  AppPrimaryButton(label: context.l10n.loginSubmit, loading: loading, onPressed: _submit),
                   const SizedBox(height: AppSpacing.lg),
                   Center(
                     child: TextButton(
                       onPressed: () => context.push('/register'),
-                      child: const Text('Non hai un account? Registrati'),
+                      child: Text(context.l10n.loginToRegister),
                     ),
                   ),
                 ],

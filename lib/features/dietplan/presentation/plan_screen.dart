@@ -8,6 +8,7 @@ import '../../../app/theme/theme_context.dart';
 import '../../../core/api/api_exception.dart';
 import '../../../core/api/api_error_messages.dart';
 import '../../../core/widgets/empty_state_view.dart';
+import '../../../l10n/l10n_context.dart';
 import '../../care/domain/plan_competence.dart';
 import '../../group/providers/cooking_group_providers.dart';
 import '../../notification/presentation/widgets/notification_bell.dart';
@@ -85,7 +86,7 @@ class PlanScreen extends ConsumerWidget {
                 value: viewMode,
                 onChanged: (mode) => ref.read(selectedPlanViewProvider.notifier).select(mode),
               )
-            : Text('Scegli dove spostarlo', style: typography.titleMedium.copyWith(color: colors.textPrimary)),
+            : Text(context.l10n.swapChooseDestination, style: typography.titleMedium.copyWith(color: colors.textPrimary)),
         actions: swapSelection == null
             ? [
                 // MD-8, MD-11: modifica della sola giornata selezionata, sul
@@ -117,7 +118,7 @@ class PlanScreen extends ConsumerWidget {
               onPressed: () => showWorkoutSheet(context, date: selectedDate),
               backgroundColor: colors.accent,
               foregroundColor: colors.surface,
-              tooltip: 'Registra allenamento',
+              tooltip: context.l10n.planRecordWorkout,
               child: const Icon(Icons.add),
             )
           : null,
@@ -341,8 +342,8 @@ class _MealsContent extends ConsumerWidget {
             ref.watch(dietPlanLifecycleControllerProvider)?.isLoading ?? false;
         return EmptyStateView(
           icon: Icons.pause_circle_outline,
-          title: 'Piano sospeso',
-          text: 'Riprenderà quando lo deciderai',
+          title: context.l10n.planSuspended,
+          text: context.l10n.planSuspendedHint,
           actionLabel: canManage ? 'Riprendi' : null,
           actionLoading: resuming,
           onAction: !canManage
@@ -359,22 +360,22 @@ class _MealsContent extends ConsumerWidget {
         final everCreated = readOnly || (ownedPlans?.value?.isNotEmpty ?? true);
         if (!canCreate && !everCreated) {
           // 7.1 interfaccia.md: al Paziente privo di piani, la constatazione neutra.
-          return const EmptyStateView(
+          return EmptyStateView(
             icon: Icons.calendar_month_outlined,
-            title: 'Nessun piano ancora',
-            text: 'Il tuo nutrizionista non ha ancora redatto un piano',
+            title: context.l10n.planNoneYet,
+            text: context.l10n.planPatientNoPlanYet,
           );
         }
         return everCreated
-            ? const EmptyStateView(
+            ? EmptyStateView(
                 icon: Icons.event_busy,
-                title: 'Nessun piano per questo giorno',
+                title: context.l10n.planNoneForThisDay,
               )
             : EmptyStateView(
                 icon: Icons.calendar_month_outlined,
-                title: 'Inizia da qui',
-                text: 'Crea il tuo primo piano alimentare',
-                actionLabel: 'Crea piano',
+                title: context.l10n.plansStartHere,
+                text: context.l10n.planCreateFirst,
+                actionLabel: context.l10n.planCreateSubmit,
                 onAction: () => context.push('/diet-plans/new'),
               );
       case PlanDayCoverage.scheduled:
@@ -385,11 +386,11 @@ class _MealsContent extends ConsumerWidget {
           children: [
             if (day.coverage == PlanDayCoverage.scheduled)
               PlanStatusBanner(
-                text: 'Il piano inizia il ${_formatDate(day.planStartDate!)}',
+                text: context.l10n.planStartsOn(_formatDate(day.planStartDate!)),
               )
             else if (day.coverage == PlanDayCoverage.completed)
               PlanStatusBanner(
-                text: 'Piano concluso il ${_formatDate(day.planEndDate!)}',
+                text: context.l10n.planCompletedOn(_formatDate(day.planEndDate!)),
               ),
             Expanded(
               child: _SlotsOrEmpty(
@@ -435,9 +436,9 @@ class _SlotsOrEmpty extends StatelessWidget {
   Widget build(BuildContext context) {
     if (slots.isEmpty) {
       // GG-7: condizione legittima, non un errore — nessuna azione.
-      return const EmptyStateView(
+      return EmptyStateView(
         icon: Icons.restaurant_outlined,
-        title: 'Nessun pasto previsto',
+        title: context.l10n.planNoMealsPlanned,
       );
     }
 
@@ -499,12 +500,12 @@ class _DayMenu extends ConsumerWidget {
     if (ref.watch(isPlanLockedProvider(day.planId))) return const SizedBox.shrink();
     if (dateOnly(selectedDate).isBefore(dateOnly(DateTime.now()))) return const SizedBox.shrink();
     return PopupMenuButton<String>(
-      tooltip: 'Altre azioni',
+      tooltip: context.l10n.planMoreActions,
       onSelected: (value) {
         if (value == 'edit-day') context.push('/plan-days/${isoDate(selectedDate)}/edit');
       },
-      itemBuilder: (context) => const [
-        PopupMenuItem(value: 'edit-day', child: Text('Modifica questa giornata')),
+      itemBuilder: (context) => [
+        PopupMenuItem(value: 'edit-day', child: Text(context.l10n.planEditThisDay)),
       ],
     );
   }

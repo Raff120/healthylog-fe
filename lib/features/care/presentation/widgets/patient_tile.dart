@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../app/theme/app_spacing.dart';
 import '../../../../app/theme/theme_context.dart';
+import '../../../../l10n/l10n_context.dart';
 import '../../../dietplan/data/plan_status.dart';
 import '../../data/care_models.dart';
 
@@ -18,15 +19,18 @@ class PatientTile extends StatelessWidget {
   final VoidCallback onTap;
   final bool selected;
 
-  String _planLabel(PatientPlanSummary plan) {
+  /// 9.1: il piano è presentato con il proprio stato in minuscolo, che
+  /// segue la denominazione e non la introduce.
+  String _planLabel(BuildContext context, PatientPlanSummary plan) {
+    final l10n = context.l10n;
     final status = switch (plan.status) {
-      PlanStatus.active => 'in corso',
-      PlanStatus.suspended => 'sospeso',
-      PlanStatus.scheduled => 'programmato',
-      PlanStatus.draft => 'bozza',
-      PlanStatus.completed => 'concluso',
+      PlanStatus.active => l10n.planStatusLowerActive,
+      PlanStatus.suspended => l10n.planStatusLowerSuspended,
+      PlanStatus.scheduled => l10n.planStatusLowerScheduled,
+      PlanStatus.draft => l10n.planStatusLowerDraft,
+      PlanStatus.completed => l10n.planStatusLowerCompleted,
     };
-    return '${plan.name} · $status';
+    return l10n.patientPlanWithStatus(plan.name, status);
   }
 
   @override
@@ -60,7 +64,7 @@ class PatientTile extends StatelessWidget {
                     plan == null
                         ? dash
                         : Text(
-                            _planLabel(plan),
+                            _planLabel(context, plan),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: typography.caption.copyWith(color: colors.textSecondary),

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../app/theme/app_spacing.dart';
 import '../../../../app/theme/theme_context.dart';
+import '../../../../l10n/l10n_context.dart';
 import '../../../measurement/presentation/widgets/measurement_list_tile.dart';
 import '../../../measurement/presentation/widgets/measurement_sheet.dart';
 import '../../../measurement/providers/measurement_providers.dart';
@@ -50,7 +51,7 @@ class PatientActivitySection extends ConsumerWidget {
         ),
         if (measurements == null || measurements.isEmpty)
           Text(
-            'Nessuna misurazione',
+            context.l10n.patientNoMeasurements,
             style: typography.bodyMedium.copyWith(color: colors.textSecondary),
           )
         else
@@ -69,7 +70,7 @@ class PatientActivitySection extends ConsumerWidget {
         const SizedBox(height: AppSpacing.xs),
         if (workouts == null || workouts.isEmpty)
           Text(
-            'Nessun allenamento',
+            context.l10n.patientNoWorkouts,
             style: typography.bodyMedium.copyWith(color: colors.textSecondary),
           )
         else

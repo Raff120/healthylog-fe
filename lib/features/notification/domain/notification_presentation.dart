@@ -1,15 +1,14 @@
 import 'package:flutter/material.dart';
 
+import '../../../l10n/l10n_context.dart';
 import '../data/app_notification.dart';
 import '../data/notification_type.dart';
 
 /// Composizione della notifica per l'interfaccia (12.3 interfaccia.md).
 ///
 /// FR-22, ER-2: il server non restituisce testi destinati all'Utente. La
-/// descrizione sintetica di NT-2 nasce qui, dal tipo e dal payload, ed è
-/// il solo punto in cui i due si traducono in parole — quando F29
-/// introdurrà l'inglese (LO-1) sarà questo file a cambiare, non le
-/// schermate.
+/// descrizione sintetica di NT-2 nasce qui, dal tipo e dal payload, nella
+/// lingua selezionata (LO-1).
 ///
 /// NT-1: nessuna formulazione sollecita o incoraggia (2.1). Le frasi
 /// constatano ciò che è avvenuto.
@@ -27,162 +26,161 @@ class NotificationPresentation {
 
 /// Le icone Material sono le più prossime alle Lucide di 2.5, stesso
 /// criterio già seguito dalle destinazioni della navigazione.
-NotificationPresentation describeNotification(AppNotification notification) {
+NotificationPresentation describeNotification(BuildContext context, AppNotification notification) {
+  final l10n = context.l10n;
   final payload = notification.payload;
-  final planName = payload['planName'];
-  final groupName = payload['groupName'];
+  final plan = _quoted(context, payload['planName']);
+  final group = _quoted(context, payload['groupName']);
   final planId = payload['planId'];
 
   return switch (notification.type) {
     NotificationType.planAssigned => NotificationPresentation(
         icon: Icons.assignment_outlined,
         // AS-8: denominazione, autore e data di decorrenza.
-        text: 'Ti è stato assegnato il piano${_quoted(planName)}'
-            '${_fromDate(payload['startDate'])}.',
+        text: l10n.notificationPlanAssigned(plan, _fromDate(context, payload['startDate'])),
         destination: planId == null ? null : '/diet-plans/$planId',
       ),
     NotificationType.planWithdrawn => NotificationPresentation(
         icon: Icons.undo_outlined,
-        text: 'Il piano${_quoted(planName)} è stato ritirato ed è tornato in revisione.',
+        text: l10n.notificationPlanWithdrawn(plan),
       ),
     NotificationType.planModified => NotificationPresentation(
         icon: Icons.edit_outlined,
         text: payload['date'] == null
-            ? 'Il piano${_quoted(planName)} è stato modificato.'
-            : 'La giornata del ${_day(payload['date'])} del piano${_quoted(planName)} è stata modificata.',
-        destination: payload['date'] == null
-            ? (planId == null ? null : '/diet-plans/$planId')
-            : '/home',
+            ? l10n.notificationPlanModified(plan)
+            : l10n.notificationPlanDayModified(_day(context, payload['date']), plan),
+        destination: payload['date'] == null ? (planId == null ? null : '/diet-plans/$planId') : '/home',
       ),
     NotificationType.planSuspended => NotificationPresentation(
         icon: Icons.pause_circle_outline,
-        text: 'Il piano${_quoted(planName)} è stato sospeso.',
+        text: l10n.notificationPlanSuspended(plan),
         destination: planId == null ? null : '/diet-plans/$planId',
       ),
     NotificationType.planResumed => NotificationPresentation(
         icon: Icons.play_circle_outline,
-        text: 'Il piano${_quoted(planName)} è stato ripreso.',
+        text: l10n.notificationPlanResumed(plan),
         destination: planId == null ? null : '/diet-plans/$planId',
       ),
     NotificationType.planCompleted => NotificationPresentation(
         icon: Icons.check_circle_outline,
-        text: 'Il piano${_quoted(planName)} è stato concluso.',
+        text: l10n.notificationPlanCompleted(plan),
         destination: planId == null ? null : '/diet-plans/$planId',
       ),
     // NT-6: determinate dal sistema, non da una persona. La formulazione
     // non attribuisce l'atto a nessuno.
     NotificationType.planActivatedAutomatically => NotificationPresentation(
         icon: Icons.play_circle_outline,
-        text: 'Il piano${_quoted(planName)} è entrato in vigore.',
+        text: l10n.notificationPlanActivatedAutomatically(plan),
         destination: '/home',
       ),
     NotificationType.planCompletedAutomatically => NotificationPresentation(
         icon: Icons.check_circle_outline,
-        text: 'Il piano${_quoted(planName)} si è concluso alla data prevista.',
+        text: l10n.notificationPlanCompletedAutomatically(plan),
         destination: planId == null ? null : '/diet-plans/$planId',
       ),
     NotificationType.mealSwappedByCook => NotificationPresentation(
         icon: Icons.swap_horiz,
-        text: 'Due pasti del tuo piano sono stati invertiti'
-            '${_onDate(payload['firstDate'])}.',
+        text: l10n.mealSwappedNotification(_onDate(context, payload['firstDate'])),
         destination: '/home',
       ),
     NotificationType.slotMarkedByCook => NotificationPresentation(
         icon: Icons.check_box_outlined,
-        text: '${_slotOn(payload['slotType'])} del ${_day(payload['date'])} '
-            'è stato registrato lo stato ${_statusLabel(payload['status'])}.',
+        text: l10n.notificationSlotMarked(
+          _slotOn(context, payload['slotType']),
+          _day(context, payload['date']),
+          _statusLabel(context, payload['status']),
+        ),
         destination: '/home',
       ),
     NotificationType.measurementRecordedByNutritionist => NotificationPresentation(
         icon: Icons.straighten_outlined,
-        text: 'È stata registrata una misurazione del ${_day(payload['date'])}.',
+        text: l10n.notificationMeasurementRecorded(_day(context, payload['date'])),
         destination: '/activity',
       ),
     NotificationType.careLinkRequestReceived => NotificationPresentation(
         icon: Icons.medical_services_outlined,
-        text: 'Hai ricevuto una richiesta di collegamento professionale.',
+        text: l10n.notificationCareRequestReceived,
         destination: '/profile/nutritionist',
       ),
     NotificationType.careLinkRequestAccepted => NotificationPresentation(
         icon: Icons.person_add_alt,
-        text: 'La tua richiesta di collegamento è stata accettata.',
+        text: l10n.notificationCareRequestAccepted,
         destination: '/home',
       ),
     NotificationType.careLinkRequestRejected => NotificationPresentation(
         icon: Icons.person_off_outlined,
         // CP-6: il solo esito, senza motivazione.
-        text: 'La tua richiesta di collegamento è stata rifiutata.',
+        text: l10n.notificationCareRequestRejected,
       ),
     NotificationType.careLinkRevoked => NotificationPresentation(
         icon: Icons.link_off,
-        text: 'Il collegamento professionale è stato revocato.',
+        text: l10n.notificationCareLinkRevoked,
         destination: '/profile/nutritionist',
       ),
     NotificationType.groupCookGranted => NotificationPresentation(
         icon: Icons.restaurant_outlined,
-        text: 'Sei stato nominato Cuoco del gruppo${_quoted(groupName)}.',
+        text: l10n.notificationGroupCookGranted(group),
         destination: '/group',
       ),
     NotificationType.groupCookRevoked => NotificationPresentation(
         icon: Icons.restaurant_outlined,
-        text: 'Non sei più Cuoco del gruppo${_quoted(groupName)}.',
+        text: l10n.notificationGroupCookRevoked(group),
         destination: '/group',
       ),
     NotificationType.groupOwnershipTransferred => NotificationPresentation(
         icon: Icons.shield_outlined,
-        text: 'Sei diventato Proprietario del gruppo${_quoted(groupName)}.',
+        text: l10n.notificationGroupOwnershipTransferred(group),
         destination: '/group',
       ),
     NotificationType.groupMemberRemoved => NotificationPresentation(
         icon: Icons.group_remove_outlined,
-        text: 'Sei stato rimosso dal gruppo${_quoted(groupName)}.',
+        text: l10n.notificationGroupMemberRemoved(group),
       ),
     NotificationType.groupDisbanded => NotificationPresentation(
         icon: Icons.group_off_outlined,
         // NT-15: il gruppo non esiste più, non vi è nulla da raggiungere.
-        text: 'Il gruppo${_quoted(groupName)} è stato sciolto.',
+        text: l10n.notificationGroupDisbanded(group),
       ),
-    NotificationType.unknown => const NotificationPresentation(
+    NotificationType.unknown => NotificationPresentation(
         icon: Icons.notifications_none,
-        text: 'Si è verificato un evento che riguarda il tuo account.',
+        text: l10n.notificationUnknown,
       ),
   };
 }
 
 /// GG-11, LO-3: la denominazione è contenuto dell'Utente e non va
 /// tradotta né alterata. In sua assenza la frase resta corretta senza.
-String _quoted(String? name) => name == null || name.isEmpty ? '' : ' «$name»';
+String _quoted(BuildContext context, String? name) =>
+    name == null || name.isEmpty ? '' : context.l10n.notificationPlanNameQuoted(name);
 
-String _fromDate(String? isoDate) {
-  final day = _day(isoDate);
-  return day.isEmpty ? '' : ', in vigore dal $day';
+String _fromDate(BuildContext context, String? isoDate) {
+  final day = _day(context, isoDate);
+  return day.isEmpty ? '' : context.l10n.notificationInForceFrom(day);
 }
 
-String _onDate(String? isoDate) {
-  final day = _day(isoDate);
-  return day.isEmpty ? '' : ' nella giornata del $day';
+String _onDate(BuildContext context, String? isoDate) {
+  final day = _day(context, isoDate);
+  return day.isEmpty ? '' : context.l10n.notificationOnDay(day);
 }
 
-/// LO-9: formato italiano. F29 lo renderà dipendente dalla lingua.
-String _day(String? isoDate) {
+/// LO-9: formato proprio della lingua selezionata.
+String _day(BuildContext context, String? isoDate) {
   if (isoDate == null) return '';
   final date = DateTime.tryParse(isoDate);
   if (date == null) return '';
-  return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
+  return MaterialLocalizations.of(context).formatShortDate(date);
 }
 
-/// La forma preposizionale evita l'accordo di genere con il participio
-/// che segue, che varierebbe fra "la colazione" e "il pranzo".
-String _slotOn(String? slotType) => switch (slotType) {
-      'BREAKFAST' => 'Sulla colazione',
-      'LUNCH' => 'Sul pranzo',
-      'DINNER' => 'Sulla cena',
-      'SNACK' => 'Sullo spuntino',
-      _ => 'Su un pasto',
+String _slotOn(BuildContext context, String? slotType) => switch (slotType) {
+      'BREAKFAST' => context.l10n.notificationSlotOnBreakfast,
+      'LUNCH' => context.l10n.notificationSlotOnLunch,
+      'DINNER' => context.l10n.notificationSlotOnDinner,
+      'SNACK' => context.l10n.notificationSlotOnSnack,
+      _ => context.l10n.notificationSlotOnGeneric,
     };
 
-String _statusLabel(String? status) => switch (status) {
-      'CONSUMED' => '«Consumato»',
-      'SKIPPED' => '«Saltato»',
-      _ => '«Da consumare»',
+String _statusLabel(BuildContext context, String? status) => switch (status) {
+      'CONSUMED' => context.l10n.notificationStatusConsumed,
+      'SKIPPED' => context.l10n.notificationStatusSkipped,
+      _ => context.l10n.notificationStatusToConsume,
     };

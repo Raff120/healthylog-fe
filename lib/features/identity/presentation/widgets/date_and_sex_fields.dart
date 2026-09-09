@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../app/theme/app_spacing.dart';
 import '../../../../app/theme/theme_context.dart';
+import '../../../../l10n/l10n_context.dart';
 import '../../data/account_role.dart';
 
 /// Campo data di nascita (PR-1), condiviso da registrazione (5.1
@@ -20,7 +21,7 @@ class BirthDateField extends StatelessWidget {
     final typography = context.typography;
     final hasError = errorText != null;
     final label = value == null
-        ? 'Data di nascita'
+        ? context.l10n.fieldBirthDate
         : '${value!.day.toString().padLeft(2, '0')}/${value!.month.toString().padLeft(2, '0')}/${value!.year}';
 
     return Column(
@@ -72,9 +73,9 @@ class SexSelector extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         SegmentedButton<BiologicalSex>(
-          segments: const [
-            ButtonSegment(value: BiologicalSex.female, label: Text('Femmina')),
-            ButtonSegment(value: BiologicalSex.male, label: Text('Maschio')),
+          segments: [
+            ButtonSegment(value: BiologicalSex.female, label: Text(context.l10n.sexFemale)),
+            ButtonSegment(value: BiologicalSex.male, label: Text(context.l10n.sexMale)),
           ],
           selected: value == null ? {} : {value!},
           emptySelectionAllowed: true,

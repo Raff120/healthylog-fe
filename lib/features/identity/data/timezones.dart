@@ -5,44 +5,41 @@
 /// (`PATCH /me/timezone`): un identificativo IANA valido ma assente da
 /// questo elenco resta comunque accettato se mai raggiungesse l'API per
 /// altra via, semplicemente non è proponibile da qui.
-class TimezoneOption {
-  const TimezoneOption(this.id, this.label);
-
-  final String id;
-  final String label;
-}
-
-const List<TimezoneOption> kTimezoneOptions = [
-  TimezoneOption('Europe/Rome', 'Roma'),
-  TimezoneOption('Europe/London', 'Londra'),
-  TimezoneOption('Europe/Dublin', 'Dublino'),
-  TimezoneOption('Europe/Lisbon', 'Lisbona'),
-  TimezoneOption('Europe/Madrid', 'Madrid'),
-  TimezoneOption('Europe/Paris', 'Parigi'),
-  TimezoneOption('Europe/Berlin', 'Berlino'),
-  TimezoneOption('Europe/Amsterdam', 'Amsterdam'),
-  TimezoneOption('Europe/Zurich', 'Zurigo'),
-  TimezoneOption('Europe/Vienna', 'Vienna'),
-  TimezoneOption('Europe/Athens', 'Atene'),
-  TimezoneOption('Europe/Helsinki', 'Helsinki'),
-  TimezoneOption('Europe/Moscow', 'Mosca'),
-  TimezoneOption('Africa/Cairo', 'Il Cairo'),
-  TimezoneOption('Africa/Johannesburg', 'Johannesburg'),
-  TimezoneOption('Asia/Dubai', 'Dubai'),
-  TimezoneOption('Asia/Kolkata', 'Nuova Delhi'),
-  TimezoneOption('Asia/Bangkok', 'Bangkok'),
-  TimezoneOption('Asia/Shanghai', 'Shanghai'),
-  TimezoneOption('Asia/Hong_Kong', 'Hong Kong'),
-  TimezoneOption('Asia/Tokyo', 'Tokyo'),
-  TimezoneOption('Asia/Seoul', 'Seul'),
-  TimezoneOption('Australia/Sydney', 'Sydney'),
-  TimezoneOption('Australia/Perth', 'Perth'),
-  TimezoneOption('Pacific/Auckland', 'Auckland'),
-  TimezoneOption('America/Sao_Paulo', 'San Paolo'),
-  TimezoneOption('America/Argentina/Buenos_Aires', 'Buenos Aires'),
-  TimezoneOption('America/New_York', 'New York'),
-  TimezoneOption('America/Chicago', 'Chicago'),
-  TimezoneOption('America/Denver', 'Denver'),
-  TimezoneOption('America/Los_Angeles', 'Los Angeles'),
-  TimezoneOption('UTC', 'UTC'),
+///
+/// L'etichetta non è conservata qui ma risolta dal livello di traduzione
+/// (LO-1): "Roma" in italiano, "Rome" in inglese. Qui resta il solo
+/// identificativo IANA, che è il dato — vedi `timezoneLabel`.
+const List<String> kTimezoneIds = [
+  'Europe/Rome',
+  'Europe/London',
+  'Europe/Dublin',
+  'Europe/Lisbon',
+  'Europe/Madrid',
+  'Europe/Paris',
+  'Europe/Berlin',
+  'Europe/Amsterdam',
+  'Europe/Zurich',
+  'Europe/Vienna',
+  'Europe/Athens',
+  'Europe/Helsinki',
+  'Europe/Moscow',
+  'Africa/Cairo',
+  'Africa/Johannesburg',
+  'Asia/Dubai',
+  'Asia/Kolkata',
+  'Asia/Bangkok',
+  'Asia/Shanghai',
+  'Asia/Hong_Kong',
+  'Asia/Tokyo',
+  'Asia/Seoul',
+  'Australia/Sydney',
+  'Australia/Perth',
+  'Pacific/Auckland',
+  'America/Sao_Paulo',
+  'America/Argentina/Buenos_Aires',
+  'America/New_York',
+  'America/Chicago',
+  'America/Denver',
+  'America/Los_Angeles',
+  'UTC',
 ];

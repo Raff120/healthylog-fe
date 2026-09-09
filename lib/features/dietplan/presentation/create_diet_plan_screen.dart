@@ -8,6 +8,7 @@ import '../../../core/api/api_error_messages.dart';
 import '../../../core/api/api_exception.dart';
 import '../../../core/widgets/app_primary_button.dart';
 import '../../../core/widgets/app_text_field.dart';
+import '../../../l10n/l10n_context.dart';
 import '../data/diet_plan_requests.dart';
 import '../data/diet_plan_template.dart';
 import '../domain/diet_plan_field_validators.dart';
@@ -163,11 +164,13 @@ class _CreateDietPlanScreenState extends ConsumerState<CreateDietPlanScreen> {
             // AS-15: al Nutrizionista il piano altrui è indicato per il solo
             // periodo occupato, senza denominazione.
             _overlapMessage = conflictingName != null
-                ? 'Si sovrappone a "$conflictingName".'
+                ? context.l10n.planOverlapWithName(conflictingName)
                 : conflictingStart != null
-                    ? 'Il periodo è già occupato da un altro piano (${_formatIso(conflictingStart)}'
-                        '${conflictingEnd == null ? ', a tempo indeterminato' : ' – ${_formatIso(conflictingEnd)}'}).'
-                    : 'Il periodo si sovrappone a un piano esistente.';
+                    ? (conflictingEnd == null
+                        ? context.l10n.planOverlapNoticeOpen(_formatIso(conflictingStart))
+                        : context.l10n.planOverlapNotice(
+                            _formatIso(conflictingStart), _formatIso(conflictingEnd)))
+                    : context.l10n.errorPlanPeriodOverlap;
           });
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -183,9 +186,9 @@ class _CreateDietPlanScreenState extends ConsumerState<CreateDietPlanScreen> {
   String? _describeFieldError(String? code) {
     return switch (code) {
       null => null,
-      'REQUIRED' => 'Campo obbligatorio',
-      'TOO_LONG' => 'Troppo lungo',
-      _ => 'Valore non valido',
+      'REQUIRED' => context.l10n.validationRequired,
+      'TOO_LONG' => context.l10n.validationTooLong,
+      _ => context.l10n.validationInvalidValue,
     };
   }
 
@@ -263,15 +266,15 @@ class _CreateDietPlanScreenState extends ConsumerState<CreateDietPlanScreen> {
             children: [
               _OriginCard(
                 icon: Icons.note_add_outlined,
-                title: 'Da zero',
-                description: 'Componi lo schema settimanale partendo da una struttura vuota',
+                title: context.l10n.planCreateFromScratch,
+                description: context.l10n.planCreateFromScratchDescription,
                 onTap: () => setState(() => _scratchChosen = true),
               ),
               const SizedBox(height: AppSpacing.sm),
               _OriginCard(
                 icon: Icons.copy_outlined,
-                title: 'Da un template',
-                description: 'Parti da uno schema già pronto e modificalo',
+                title: context.l10n.planCreateFromTemplate,
+                description: context.l10n.planCreateFromTemplateDescription,
                 onTap: () => context.push('/diet-plan-templates'),
               ),
             ],
@@ -299,7 +302,7 @@ class _CreateDietPlanScreenState extends ConsumerState<CreateDietPlanScreen> {
               AppTextField(label: 'Denominazione', controller: _name, errorText: _errorFor('name')),
               const SizedBox(height: AppSpacing.sm),
               _DateField(
-                label: 'Data di inizio',
+                label: context.l10n.planStartDate,
                 value: _startDate,
                 errorText: _errorFor('startDate'),
                 onTap: _pickStartDate,
@@ -310,7 +313,7 @@ class _CreateDietPlanScreenState extends ConsumerState<CreateDietPlanScreen> {
                 children: [
                   Expanded(
                     child: Text(
-                      'A tempo indeterminato',
+                      context.l10n.planOpenEnded,
                       style: typography.bodyMedium.copyWith(color: colors.textPrimary),
                     ),
                   ),
@@ -327,7 +330,7 @@ class _CreateDietPlanScreenState extends ConsumerState<CreateDietPlanScreen> {
               if (!_indefinite) ...[
                 const SizedBox(height: AppSpacing.sm),
                 _DateField(
-                  label: 'Data di fine',
+                  label: context.l10n.planEndDate,
                   value: _endDate,
                   errorText: null,
                   onTap: _pickEndDate,
@@ -339,7 +342,7 @@ class _CreateDietPlanScreenState extends ConsumerState<CreateDietPlanScreen> {
                 Text(_overlapMessage!, style: typography.caption.copyWith(color: colors.error)),
               ],
               const SizedBox(height: AppSpacing.lg),
-              AppPrimaryButton(label: 'Crea piano', loading: loading, onPressed: _submit),
+              AppPrimaryButton(label: context.l10n.planCreateSubmit, loading: loading, onPressed: _submit),
             ],
           ),
         ),
@@ -376,7 +379,7 @@ class _CreateDietPlanScreenState extends ConsumerState<CreateDietPlanScreen> {
         backgroundColor: colors.background,
         elevation: 0,
         scrolledUnderElevation: 0,
-        title: Text('Nuovo piano', style: typography.titleMedium.copyWith(color: colors.textPrimary)),
+        title: Text(context.l10n.planCreateTitle, style: typography.titleMedium.copyWith(color: colors.textPrimary)),
       ),
       body: SafeArea(child: body),
     );

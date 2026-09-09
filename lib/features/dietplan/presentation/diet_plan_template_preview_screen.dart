@@ -7,6 +7,7 @@ import '../../../app/theme/theme_context.dart';
 import '../../../core/api/api_error_messages.dart';
 import '../../../core/api/api_exception.dart';
 import '../../../core/widgets/app_primary_button.dart';
+import '../../../l10n/l10n_context.dart';
 import '../data/diet_plan_template.dart';
 import '../data/diet_plan_template_requests.dart';
 import '../providers/diet_plan_template_providers.dart';
@@ -30,8 +31,8 @@ class DietPlanTemplatePreviewScreen extends ConsumerWidget {
       context: context,
       builder: (dialogContext) => AlertDialog(
         backgroundColor: colors.surface,
-        title: const Text('Eliminare il template?'),
-        content: Text('I piani già creati da "${template.name}" non ne risentono.'),
+        title: Text(context.l10n.templateDeleteConfirmTitle),
+        content: Text(context.l10n.templateDeleteConfirmBody(template.name)),
         actions: [
           TextButton(onPressed: () => Navigator.of(dialogContext).pop(false), child: const Text('Annulla')),
           TextButton(
@@ -59,7 +60,7 @@ class DietPlanTemplatePreviewScreen extends ConsumerWidget {
   Future<void> _rename(BuildContext context, WidgetRef ref, DietPlanTemplate template) async {
     final input = await showNameDescriptionDialog(
       context,
-      title: 'Rinomina template',
+      title: context.l10n.templateRename,
       confirmLabel: 'Salva',
       initialName: template.name,
       initialDescription: template.description ?? '',
@@ -97,7 +98,7 @@ class DietPlanTemplatePreviewScreen extends ConsumerWidget {
         elevation: 0,
         scrolledUnderElevation: 0,
         title: Text(
-          previewState.value?.name ?? 'Anteprima template',
+          previewState.value?.name ?? context.l10n.templatePreviewTitle,
           style: typography.titleMedium.copyWith(color: colors.textPrimary),
         ),
         actions: [
@@ -164,7 +165,7 @@ class DietPlanTemplatePreviewScreen extends ConsumerWidget {
                       Expanded(
                         flex: 2,
                         child: AppPrimaryButton(
-                          label: 'Usa questo template',
+                          label: context.l10n.templateUse,
                           onPressed: () => context.pushReplacement('/diet-plans/new', extra: template),
                         ),
                       ),

@@ -6,6 +6,7 @@ import '../../../../app/theme/theme_context.dart';
 import '../../../../core/api/api_error_messages.dart';
 import '../../../../core/api/api_exception.dart';
 import '../../../../core/widgets/app_primary_button.dart';
+import '../../../../l10n/l10n_context.dart';
 import '../../data/care_models.dart';
 import '../../providers/care_providers.dart';
 
@@ -72,7 +73,7 @@ class _CareLinkRequestSheet extends ConsumerWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Richiesta di collegamento', style: typography.overline.copyWith(color: colors.textTertiary)),
+            Text(context.l10n.careRequestTitle, style: typography.overline.copyWith(color: colors.textTertiary)),
             const SizedBox(height: AppSpacing.xxs),
             Text(request.nutritionistName, style: typography.titleLarge.copyWith(color: colors.textPrimary)),
             if (request.message != null && request.message!.isNotEmpty) ...[
@@ -80,16 +81,15 @@ class _CareLinkRequestSheet extends ConsumerWidget {
               Text('“${request.message}”', style: typography.bodyMedium.copyWith(color: colors.textSecondary)),
             ],
             const SizedBox(height: AppSpacing.md),
-            Text('Accettando, il nutrizionista:', style: typography.label.copyWith(color: colors.textPrimary)),
+            Text(context.l10n.careRequestAccepting, style: typography.label.copyWith(color: colors.textPrimary)),
             const SizedBox(height: AppSpacing.xxs),
-            _Consequence(text: 'redigerà il tuo piano alimentare'),
-            _Consequence(text: 'accederà in lettura ai tuoi dati nei periodi coperti dai suoi piani'),
-            _Consequence(text: 'potrà registrare misurazioni per tuo conto'),
-            _Consequence(text: 'e tu non potrai più modificare il contenuto del piano che ti assegna'),
+            _Consequence(text: context.l10n.careRequestWillWritePlan),
+            _Consequence(text: context.l10n.careRequestWillRead),
+            _Consequence(text: context.l10n.careRequestWillRecordMeasurements),
+            _Consequence(text: context.l10n.careRequestYouCannotEdit),
             const SizedBox(height: AppSpacing.md),
             Text(
-              'Potrai revocare il collegamento in qualsiasi momento. Dopo la revoca conserverà solo gli schemi '
-              'dei piani che ha redatto e le misurazioni che ha registrato personalmente.',
+              context.l10n.careRequestKeepAfterRevoke,
               style: typography.caption.copyWith(color: colors.textSecondary),
             ),
             const SizedBox(height: AppSpacing.lg),

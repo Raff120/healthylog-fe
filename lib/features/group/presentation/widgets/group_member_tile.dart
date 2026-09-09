@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../app/theme/app_spacing.dart';
 import '../../../../app/theme/theme_context.dart';
+import '../../../../l10n/l10n_context.dart';
 import '../../data/cooking_group.dart';
 
 enum GroupMemberAction { promote, revokeCook, remove, transferOwnership }
@@ -80,12 +81,12 @@ class GroupMemberTile extends StatelessWidget {
               itemBuilder: (menuContext) => [
                 PopupMenuItem(
                   value: member.cook ? GroupMemberAction.revokeCook : GroupMemberAction.promote,
-                  child: Text(member.cook ? 'Revoca privilegio di Cuoco' : 'Nomina Cuoco'),
+                  child: Text(member.cook ? context.l10n.groupRevokeCook : context.l10n.groupPromoteCook),
                 ),
-                const PopupMenuItem(value: GroupMemberAction.transferOwnership, child: Text('Trasferisci proprietà')),
+                PopupMenuItem(value: GroupMemberAction.transferOwnership, child: Text(context.l10n.groupTransferOwnership)),
                 PopupMenuItem(
                   value: GroupMemberAction.remove,
-                  child: Text('Rimuovi dal gruppo', style: TextStyle(color: colors.error)),
+                  child: Text(context.l10n.groupRemoveMember, style: TextStyle(color: colors.error)),
                 ),
               ],
             ),

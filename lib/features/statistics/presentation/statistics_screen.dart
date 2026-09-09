@@ -6,6 +6,7 @@ import '../../../core/api/api_error_messages.dart';
 import '../../../core/api/api_exception.dart';
 import '../../../core/widgets/app_segmented_control.dart';
 import '../../../core/widgets/empty_state_view.dart';
+import '../../../l10n/l10n_context.dart';
 import '../../notification/presentation/widgets/notification_bell.dart';
 import '../data/statistics_models.dart';
 import '../providers/statistics_providers.dart';
@@ -50,7 +51,7 @@ class StatisticsScreen extends ConsumerWidget {
         scrolledUnderElevation: 0,
         centerTitle: true,
         title: AppSegmentedControl(
-          labels: const ['Aderenza', 'Allenamenti', 'Corpo'],
+          labels: [context.l10n.statisticsAdherence, context.l10n.statisticsWorkouts, context.l10n.statisticsBody],
           selectedIndex: StatisticsViewMode.values.indexOf(mode),
           onSelect: (index) => ref
               .read(selectedStatisticsViewProvider.notifier)
@@ -87,9 +88,9 @@ class _PeriodSelectorFallback extends StatelessWidget {
   const _PeriodSelectorFallback();
 
   @override
-  Widget build(BuildContext context) => const EmptyStateView(
+  Widget build(BuildContext context) => EmptyStateView(
         icon: Icons.show_chart,
-        title: 'Statistiche non disponibili',
+        title: context.l10n.statisticsUnavailable,
       );
 }
 
@@ -150,9 +151,9 @@ class _Async<T> extends ConsumerWidget {
           return Builder(
             builder: (anchorContext) => EmptyStateView(
               icon: Icons.show_chart,
-              title: 'Nessun piano su cui riferire il periodo',
-              text: 'Le statistiche del piano compaiono quando ne esiste uno.',
-              actionLabel: 'Cambia periodo',
+              title: context.l10n.statisticsNoPlanForPeriod,
+              text: context.l10n.statisticsAppearWithPlan,
+              actionLabel: context.l10n.statisticsChangePeriod,
               onAction: () => showStatisticsPeriodMenu(anchorContext, ref, period),
             ),
           );
@@ -168,7 +169,7 @@ class _Async<T> extends ConsumerWidget {
               Builder(
                 builder: (anchorContext) => TextButton(
                   onPressed: () => showStatisticsPeriodMenu(anchorContext, ref, period),
-                  child: const Text('Cambia periodo'),
+                  child: Text(context.l10n.statisticsChangePeriod),
                 ),
               ),
             ],
