@@ -62,6 +62,7 @@ Map<String, dynamic> _patientJson({
   required String lastName,
   Map<String, dynamic>? currentPlan,
   String? lastActivityAt,
+  double? adherence,
 }) =>
     {
       'userId': id,
@@ -71,7 +72,7 @@ Map<String, dynamic> _patientJson({
       'careLinkId': 'link-$id',
       'linkedAt': '2026-09-01T00:00:00Z',
       'currentPlan': currentPlan,
-      'adherence': null,
+      'adherence': adherence,
       'lastActivityAt': lastActivityAt,
     };
 
@@ -232,5 +233,23 @@ void main() {
 
     expect(adapter.sentRequest, {'targetUserId': 'user-9', 'message': 'Sono la dott.ssa Verdi'});
     expect(find.text('Richiesta inviata.'), findsOneWidget);
+  });
+
+  /// VA-2, VA-5: l'aderenza del periodo recente compare come numero puro,
+  /// senza soglie né denominazioni qualificative; il Paziente che segua un
+  /// piano estraneo compare privo di indicatori (VA-3).
+  testWidgets('mostra l\'aderenza del periodo recente, senza qualificazioni (VA-2)', (tester) async {
+    await _pump(
+      tester,
+      _CareAdapter(patients: [
+        _patientJson(id: 'p-1', firstName: 'Mario', lastName: 'Rossi', adherence: 72.4),
+        _patientJson(id: 'p-2', firstName: 'Anna', lastName: 'Verdi'),
+      ]),
+    );
+
+    expect(find.text('72%'), findsOneWidget);
+    // VA-3: nessun indicatore per chi segue un piano non redatto dal
+    // Nutrizionista — un trattino, non uno zero.
+    expect(find.text('0%'), findsNothing);
   });
 }

@@ -167,8 +167,9 @@ class PatientPlanSummary {
 
 /// Voce dell'elenco dei Pazienti (VA-1, VA-2). VA-3: gli indicatori sono
 /// assenti quando il Paziente segue un piano non redatto dal
-/// Nutrizionista; `adherence` resta sempre assente finché F25 non
-/// introduce il calcolo.
+/// Nutrizionista, senza rivelare l'esistenza di quel piano. `adherence` è
+/// il valore del periodo recente, percentuale non arrotondata (AD-1ter);
+/// VA-5: criterio di ordinamento, mai graduatoria di merito.
 class PatientSummary {
   const PatientSummary({
     required this.userId,
