@@ -2,12 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../app/app_breakpoints.dart';
 import '../../../app/theme/app_spacing.dart';
 import '../../../app/theme/theme_context.dart';
 import '../../../core/api/api_exception.dart';
 import '../../../core/api/api_error_messages.dart';
 import '../../../core/widgets/empty_state_view.dart';
 import '../../care/domain/plan_competence.dart';
+import '../../group/providers/cooking_group_providers.dart';
+import '../../workout/presentation/widgets/day_workouts_section.dart';
+import '../../workout/presentation/widgets/workout_sheet.dart';
 import '../../care/providers/care_providers.dart';
 import '../../identity/providers/profile_providers.dart';
 import '../data/plan_day.dart';
@@ -41,6 +45,10 @@ class PlanScreen extends ConsumerWidget {
     final viewMode = ref.watch(selectedPlanViewProvider);
     final selectedDate = ref.watch(selectedDayProvider);
     final swapSelection = ref.watch(mealSwapSelectionProvider);
+    // VG-8, GE-18: il selettore esiste solo per chi appartiene a un
+    // Gruppo. Riservargli comunque la zona di sinistra sottraeva
+    // larghezza al segmented control anche a chi non lo vede mai.
+    final hasGroup = ref.watch(currentCookingGroupProvider).value != null;
 
     void selectDate(DateTime date) => ref.read(selectedDayProvider.notifier).select(date);
     void showDay(DateTime date) {
@@ -60,8 +68,15 @@ class PlanScreen extends ConsumerWidget {
         // VG-7, VG-8, 4.2 interfaccia.md: assente per l'Utente privo di
         // Gruppo (MemberSelector non presenta nulla in quel caso) e in
         // modalità di selezione dell'inversione.
-        leading: swapSelection == null ? const MemberSelector() : null,
-        leadingWidth: swapSelection == null ? 190 : null,
+        leading: swapSelection == null && hasGroup ? const MemberSelector() : null,
+        // 6.1: il segmented control è largo 180 e sta al centro. La zona
+        // di sinistra non può eccedere quanto resta una volta sottratte
+        // quella larghezza e le azioni, altrimenti è il titolo a cedere:
+        // su schermo stretto il selettore si restringe (il nome si tronca,
+        // 4.2), non il comando delle due viste.
+        leadingWidth: swapSelection == null && hasGroup
+            ? (context.breakpoint.isCompact ? 140 : 190)
+            : null,
         // 6.5 interfaccia.md: in modalità di selezione l'intestazione è
         // sostituita da "Scegli dove spostarlo" e l'azione Annulla.
         title: swapSelection == null
@@ -83,6 +98,22 @@ class PlanScreen extends ConsumerWidget {
                 ),
               ],
       ),
+      // 10.2 interfaccia.md: pulsante mobile in *Piano* per la
+      // registrazione di un allenamento, con il foglio completo. 6.2: è
+      // assente sulla giornata di un altro membro e in modalità
+      // affiancata (CU-10, VG-10), e mentre si sceglie dove spostare un
+      // pasto — l'intestazione stessa è allora dedicata all'inversione.
+      floatingActionButton: swapSelection == null &&
+              ref.watch(selectedGroupMemberProvider) == null &&
+              !ref.watch(sideBySideModeProvider)
+          ? FloatingActionButton(
+              onPressed: () => showWorkoutSheet(context, date: selectedDate),
+              backgroundColor: colors.accent,
+              foregroundColor: colors.surface,
+              tooltip: 'Registra allenamento',
+              child: const Icon(Icons.add),
+            )
+          : null,
       body: SafeArea(
         child: AnimatedSwitcher(
           duration: AppSpacing.motionScreenTransition,
@@ -243,6 +274,38 @@ class _WeeklyTab extends StatelessWidget {
 /// segnalano.
 class _DayContent extends ConsumerWidget {
   const _DayContent({required this.day});
+
+  final PlanDay day;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final member = ref.watch(selectedGroupMemberProvider);
+    // AL-12, VG-6: gli allenamenti previsti e registrati compaiono sopra
+    // i pasti, in una sezione distinta. CU-10, VG-10: assente sulla
+    // giornata di un altro membro del Gruppo, cui sono riservati.
+    //
+    // La sezione precede il contenuto in ogni condizione di copertura,
+    // sospensione e assenza di piano comprese: l'attività fisica è
+    // indipendente dal piano alimentare e non è preclusa quando questo è
+    // interrotto (AL-8, RA-8, SA-14) — 6.2 lo dice per la giornata senza
+    // pasti, e la ragione vale identica per le altre (vedi decisioni.md).
+    if (member == null) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          DayWorkoutsSection(date: day.date),
+          Expanded(child: _MealsContent(day: day)),
+        ],
+      );
+    }
+    return _MealsContent(day: day);
+  }
+}
+
+/// La parte alimentare della giornata, che la sezione degli allenamenti
+/// sovrasta senza mescolarvisi (AL-12: "chiaramente distinti").
+class _MealsContent extends ConsumerWidget {
+  const _MealsContent({required this.day});
 
   final PlanDay day;
 

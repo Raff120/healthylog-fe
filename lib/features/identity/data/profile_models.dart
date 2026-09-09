@@ -16,6 +16,7 @@ class Profile {
     required this.sex,
     required this.role,
     required this.height,
+    required this.targetWeightKg,
     required this.timezone,
   });
 
@@ -30,6 +31,7 @@ class Profile {
         sex: BiologicalSex.fromJson(json['sex'] as String),
         role: AccountRole.fromJson(json['role'] as String),
         height: json['height'] as int?,
+        targetWeightKg: (json['targetWeightKg'] as num?)?.toDouble(),
         timezone: json['timezone'] as String?,
       );
 
@@ -43,6 +45,12 @@ class Profile {
   final BiologicalSex sex;
   final AccountRole role;
   final int? height;
+
+  /// PR-8: peso obiettivo, facoltativo. Serve unicamente come
+  /// riferimento nei grafici di andamento (AN-6): nessun calcolo di
+  /// distanza residua né di tempo stimato (AN-9, PR-9).
+  final double? targetWeightKg;
+
   final String? timezone;
 }
 
@@ -57,6 +65,7 @@ class UpdateProfileRequest {
     required this.birthPlace,
     required this.sex,
     required this.height,
+    this.targetWeightKg,
   });
 
   final String email;
@@ -68,6 +77,9 @@ class UpdateProfileRequest {
   final BiologicalSex sex;
   final int? height;
 
+  /// PR-10: assente, rimuove il peso obiettivo.
+  final double? targetWeightKg;
+
   Map<String, dynamic> toJson() => {
         'email': email,
         'username': username,
@@ -78,6 +90,7 @@ class UpdateProfileRequest {
         'birthPlace': birthPlace,
         'sex': sex.toJson(),
         'height': height,
+        'targetWeightKg': targetWeightKg,
       };
 }
 
