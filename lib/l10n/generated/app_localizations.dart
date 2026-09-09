@@ -3331,6 +3331,18 @@ abstract class L10n {
   /// **'Settimana precedente'**
   String get weekPrevious;
 
+  /// VS-2: la settimana a cavallo di due mesi o di due anni.
+  ///
+  /// In it, this message translates to:
+  /// **'{start} – {end}'**
+  String weekRangeAcrossMonths(String start, String end);
+
+  /// VS-2: la settimana entro un solo mese.
+  ///
+  /// In it, this message translates to:
+  /// **'{startDay} – {endDay} {monthYear}'**
+  String weekRangeSameMonth(String startDay, String endDay, String monthYear);
+
   /// No description provided for @weekThisWeek.
   ///
   /// In it, this message translates to:

@@ -5,6 +5,7 @@ import '../../../app/theme/app_spacing.dart';
 import '../../../app/theme/theme_context.dart';
 import '../../../core/api/api_error_messages.dart';
 import '../../../core/api/api_exception.dart';
+import '../../../l10n/formats.dart';
 import '../../../l10n/l10n_context.dart';
 import '../data/device_session.dart';
 import '../providers/sessions_providers.dart';
@@ -57,13 +58,6 @@ class DevicesScreen extends ConsumerWidget {
     await ref.read(devicesControllerProvider.notifier).revokeAllExceptCurrent();
   }
 
-  String _formatLastUsed(DateTime value) {
-    final local = value.toLocal();
-    final date =
-        '${local.day.toString().padLeft(2, '0')}/${local.month.toString().padLeft(2, '0')}/${local.year}';
-    final time = '${local.hour.toString().padLeft(2, '0')}:${local.minute.toString().padLeft(2, '0')}';
-    return '$date, $time';
-  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -100,7 +94,7 @@ class DevicesScreen extends ConsumerWidget {
                     final session = sessions[index];
                     return _DeviceTile(
                       session: session,
-                      lastUsedLabel: _formatLastUsed(session.lastUsedAt),
+                      lastUsedLabel: formatDateAndTime(context, session.lastUsedAt),
                       onRevoke: session.current ? null : () => _confirmRevoke(context, ref, session),
                     );
                   },

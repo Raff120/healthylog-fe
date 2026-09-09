@@ -6,6 +6,7 @@ import '../../../app/theme/app_spacing.dart';
 import '../../../app/theme/theme_context.dart';
 import '../../../core/api/api_error_messages.dart';
 import '../../../core/api/api_exception.dart';
+import '../../../l10n/formats.dart';
 import '../../../l10n/l10n_context.dart';
 import '../../notification/presentation/widgets/notification_bell.dart';
 import '../data/diet_plan_template.dart';
@@ -40,10 +41,6 @@ class DietPlanTemplateListScreen extends ConsumerWidget {
     );
   }
 
-  String _formatDate(DateTime value) {
-    final local = value.toLocal();
-    return '${local.day.toString().padLeft(2, '0')}/${local.month.toString().padLeft(2, '0')}/${local.year}';
-  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -102,7 +99,7 @@ class DietPlanTemplateListScreen extends ConsumerWidget {
                 final template = templates[index];
                 return _TemplateTile(
                   template: template,
-                  updatedAtLabel: _formatDate(template.updatedAt),
+                  updatedAtLabel: formatDate(context, template.updatedAt),
                   onTap: () => context.push('/diet-plan-templates/${template.id}'),
                 );
               },

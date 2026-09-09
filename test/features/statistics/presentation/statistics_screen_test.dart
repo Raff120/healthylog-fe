@@ -83,7 +83,7 @@ void main() {
     expect(find.text('Mese'), findsNothing);
     expect(find.text('Piano'), findsNothing);
 
-    await tester.tap(find.text('Settimana dal 2 marzo al 8 marzo'));
+    await tester.tap(find.text('Settimana dal 2 mar al 8 mar'));
     await tester.pumpAndSettle();
 
     // AD-8: settimana, mese e intero piano; AD-10: nessun intervallo

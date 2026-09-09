@@ -6,6 +6,7 @@ import '../../../app/theme/app_spacing.dart';
 import '../../../app/theme/theme_context.dart';
 import '../../../core/api/api_error_messages.dart';
 import '../../../core/api/api_exception.dart';
+import '../../../l10n/formats.dart';
 import '../../../l10n/l10n_context.dart';
 import '../../statistics/data/statistics_models.dart';
 import '../../statistics/presentation/statistics_formatting.dart';
@@ -43,10 +44,6 @@ class DietPlanViewScreen extends ConsumerWidget {
 
   final String planId;
 
-  String _formatDate(DateTime value) {
-    final local = value.toLocal();
-    return '${local.day.toString().padLeft(2, '0')}/${local.month.toString().padLeft(2, '0')}/${local.year}';
-  }
 
   Future<void> _delete(BuildContext context, WidgetRef ref) async {
     final confirmed = await confirmDeletePlan(context, PlanStatus.completed);
@@ -107,7 +104,7 @@ class DietPlanViewScreen extends ConsumerWidget {
               Text(_statusLabel(context, plan.status), style: typography.overline.copyWith(color: colors.textTertiary)),
               const SizedBox(height: AppSpacing.xxs),
               Text(
-                planPeriodLabel(context, plan, _formatDate),
+                planPeriodLabel(context, plan, (date) => formatDate(context, date)),
                 style: typography.bodyMedium.copyWith(color: colors.textSecondary),
               ),
               // ST-9: il piano riattivato presenta l'elenco dei periodi
@@ -203,8 +200,8 @@ class _PlanPeriods extends ConsumerWidget {
   }
 
   String _periodLabel(BuildContext context, DietPlanPeriod period) {
-    final end = period.endDate == null ? context.l10n.planViewOngoing : formatDay(period.endDate!);
-    return context.l10n.planViewPeriodRange(formatDay(period.startDate), end);
+    final end = period.endDate == null ? context.l10n.planViewOngoing : formatDate(context, period.endDate!);
+    return context.l10n.planViewPeriodRange(formatDate(context, period.startDate), end);
   }
 }
 
@@ -308,8 +305,8 @@ class _SwapHistory extends ConsumerWidget {
   }
 
   String _describe(BuildContext context, MealSwapLog log) =>
-      '${formatDay(log.first.date)} ${slotTypeLabel(context, log.first.type)} '
-      '↔ ${formatDay(log.second.date)} ${slotTypeLabel(context, log.second.type)}';
+      '${formatDate(context, log.first.date)} ${slotTypeLabel(context, log.first.type)} '
+      '↔ ${formatDate(context, log.second.date)} ${slotTypeLabel(context, log.second.type)}';
 }
 
 /// 7.5: la striscia di stato del piano concluso, in maiuscolo. L'Attivo

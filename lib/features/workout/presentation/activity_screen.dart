@@ -7,6 +7,7 @@ import '../../../core/api/api_error_messages.dart';
 import '../../../core/api/api_exception.dart';
 import '../../../core/widgets/app_segmented_control.dart';
 import '../../../core/widgets/empty_state_view.dart';
+import '../../../l10n/formats.dart';
 import '../../../l10n/l10n_context.dart';
 import '../../measurement/presentation/measurements_view.dart';
 import '../../measurement/presentation/widgets/measurement_sheet.dart';
@@ -152,7 +153,7 @@ class _FilterChips extends ConsumerWidget {
             ),
           if (filters.from != null && filters.to != null)
             InputChip(
-              label: Text('${_formatDate(filters.from!)} — ${_formatDate(filters.to!)}'),
+              label: Text('${formatDate(context, filters.from!)} — ${formatDate(context, filters.to!)}'),
               onDeleted: () => controller.apply(filters.withoutPeriod()),
             ),
         ],
@@ -161,8 +162,3 @@ class _FilterChips extends ConsumerWidget {
   }
 }
 
-String _formatDate(DateTime value) {
-  final local = value.toLocal();
-  return '${local.day.toString().padLeft(2, '0')}/'
-      '${local.month.toString().padLeft(2, '0')}/${local.year}';
-}

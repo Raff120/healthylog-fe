@@ -8,6 +8,7 @@ import '../../../app/theme/theme_context.dart';
 import '../../../core/api/api_exception.dart';
 import '../../../core/api/api_error_messages.dart';
 import '../../../core/widgets/empty_state_view.dart';
+import '../../../l10n/formats.dart';
 import '../../../l10n/l10n_context.dart';
 import '../../care/domain/plan_competence.dart';
 import '../../group/providers/cooking_group_providers.dart';
@@ -386,11 +387,11 @@ class _MealsContent extends ConsumerWidget {
           children: [
             if (day.coverage == PlanDayCoverage.scheduled)
               PlanStatusBanner(
-                text: context.l10n.planStartsOn(_formatDate(day.planStartDate!)),
+                text: context.l10n.planStartsOn(formatDate(context, day.planStartDate!)),
               )
             else if (day.coverage == PlanDayCoverage.completed)
               PlanStatusBanner(
-                text: context.l10n.planCompletedOn(_formatDate(day.planEndDate!)),
+                text: context.l10n.planCompletedOn(formatDate(context, day.planEndDate!)),
               ),
             Expanded(
               child: _SlotsOrEmpty(
@@ -462,10 +463,6 @@ class _SlotsOrEmpty extends StatelessWidget {
   }
 }
 
-String _formatDate(DateTime value) {
-  final local = value.toLocal();
-  return '${local.day.toString().padLeft(2, '0')}/${local.month.toString().padLeft(2, '0')}/${local.year}';
-}
 
 /// UT-8, PZ-4: se il piano indicato — il proprio, quello che copre la
 /// giornata — è redatto dal Nutrizionista con cui vige un collegamento.

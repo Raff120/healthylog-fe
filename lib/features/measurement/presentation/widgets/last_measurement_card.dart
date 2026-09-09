@@ -3,12 +3,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../app/theme/app_spacing.dart';
 import '../../../../app/theme/theme_context.dart';
+import '../../../../l10n/formats.dart';
 import '../../../../l10n/l10n_context.dart';
 import '../../../../l10n/units.dart';
 import '../../../identity/providers/profile_providers.dart';
 import '../../data/measurement_models.dart';
 import '../body_circumference_presentation.dart';
-import 'measurement_sheet.dart';
 
 /// Ultima misurazione in evidenza (10.3 interfaccia.md): il peso in
 /// `displayLarge` e la data in `caption`, seguiti dalle circonferenze
@@ -45,7 +45,7 @@ class LastMeasurementCard extends ConsumerWidget {
           if (measurement.weightKg != null)
             Text(
               context.l10n.measureValueWithUnit(
-                formatMeasurementValue(weightToDisplay(measurement.weightKg!, units)),
+                formatDecimal(context, weightToDisplay(measurement.weightKg!, units)),
                 weightUnit(context, units),
               ),
               style: typography.displayLarge.copyWith(color: colors.textPrimary),
@@ -53,7 +53,7 @@ class LastMeasurementCard extends ConsumerWidget {
           Row(
             children: [
               Text(
-                formatMeasurementDate(measurement.date),
+                formatDate(context, measurement.date),
                 style: typography.caption.copyWith(color: colors.textSecondary),
               ),
               // AN-5, PR-17: la fonte è distinta anche qui.
@@ -77,7 +77,7 @@ class LastMeasurementCard extends ConsumerWidget {
                     ),
                     Text(
                       context.l10n.measureValueWithUnit(
-                        formatMeasurementValue(lengthToDisplay(entry.$2, units)),
+                        formatDecimal(context, lengthToDisplay(entry.$2, units)),
                         lengthUnit(context, units),
                       ),
                       style: typography.bodyMedium.copyWith(color: colors.textPrimary),

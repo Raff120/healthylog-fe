@@ -3,12 +3,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../app/theme/app_spacing.dart';
 import '../../../../app/theme/theme_context.dart';
+import '../../../../l10n/formats.dart';
 import '../../../../l10n/l10n_context.dart';
 import '../../../../l10n/units.dart';
 import '../../../identity/providers/profile_providers.dart';
 import '../../data/measurement_models.dart';
 import '../body_circumference_presentation.dart';
-import 'measurement_sheet.dart';
 
 /// Voce dell'elenco delle misurazioni (10.3 interfaccia.md): alta 68, in
 /// ordine cronologico decrescente (AN-4), con data, peso e circonferenze
@@ -48,7 +48,7 @@ class MeasurementListTile extends ConsumerWidget {
                   Row(
                     children: [
                       Text(
-                        formatMeasurementDate(measurement.date),
+                        formatDate(context, measurement.date),
                         style: typography.titleMedium.copyWith(color: colors.textPrimary),
                       ),
                       if (measurement.fromNutritionist) ...[
@@ -62,7 +62,7 @@ class MeasurementListTile extends ConsumerWidget {
                       circumferences
                           .map((entry) =>
                               '${bodyCircumferenceLabel(context, entry.$1)} '
-                              '${formatMeasurementValue(lengthToDisplay(entry.$2, units))}')
+                              '${formatDecimal(context, lengthToDisplay(entry.$2, units))}')
                           .join(' · '),
                       style: typography.caption.copyWith(color: colors.textSecondary),
                       maxLines: 1,
@@ -74,7 +74,7 @@ class MeasurementListTile extends ConsumerWidget {
             if (measurement.weightKg != null)
               Text(
                 context.l10n.measureValueWithUnit(
-                  formatMeasurementValue(weightToDisplay(measurement.weightKg!, units)),
+                  formatDecimal(context, weightToDisplay(measurement.weightKg!, units)),
                   weightUnit(context, units),
                 ),
                 style: typography.label.copyWith(color: colors.textSecondary),

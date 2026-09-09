@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../app/theme/app_spacing.dart';
 import '../../../app/theme/theme_context.dart';
 import '../../../core/widgets/app_segmented_control.dart';
+import '../../../l10n/formats.dart';
 import '../../../l10n/l10n_context.dart';
 import '../../dietplan/presentation/slot_type_presentation.dart';
 import '../../workout/presentation/weekday_presentation.dart';
@@ -74,7 +75,7 @@ class AdherenceView extends ConsumerWidget {
               bars: [
                 for (final week in statistics.weekly)
                   BarDatum(
-                    label: formatWeekLabel(week.weekStart),
+                    label: formatWeekLabel(context, week.weekStart),
                     value: week.value,
                     valueLabel: week.value == null ? '' : '${formatPercentage(week.value!)}%',
                   ),
@@ -123,10 +124,10 @@ class AdherenceView extends ConsumerWidget {
   ({double? value, String caption}) _shownValue(BuildContext context, int? periodIndex) {
     if (periodIndex != null && periodIndex < statistics.periods.length) {
       final period = statistics.periods[periodIndex];
-      final end = period.endDate == null ? context.l10n.planViewOngoing : formatDay(period.endDate!);
+      final end = period.endDate == null ? context.l10n.planViewOngoing : formatDate(context, period.endDate!);
       return (
         value: period.value,
-        caption: context.l10n.adherencePeriodRange(formatDay(period.startDate), end),
+        caption: context.l10n.adherencePeriodRange(formatDate(context, period.startDate), end),
       );
     }
     return (

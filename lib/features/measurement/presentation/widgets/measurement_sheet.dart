@@ -6,6 +6,7 @@ import '../../../../app/theme/app_spacing.dart';
 import '../../../../app/theme/theme_context.dart';
 import '../../../../core/widgets/app_primary_button.dart';
 import '../../../../core/widgets/app_text_field.dart';
+import '../../../../l10n/formats.dart';
 import '../../../../l10n/l10n_context.dart';
 import '../../../../l10n/unit_system.dart';
 import '../../../../l10n/units.dart';
@@ -67,7 +68,7 @@ class _MeasurementSheetState extends ConsumerState<_MeasurementSheet> {
   String? _error;
 
   TextEditingController _controllerFor(double Function(double, UnitSystem) convert, double? stored) =>
-      TextEditingController(text: stored == null ? '' : _formatNumber(convert(stored, _units)));
+      TextEditingController(text: stored == null ? '' : formatDecimal(context, convert(stored, _units)));
 
   @override
   void dispose() {
@@ -286,7 +287,7 @@ class _DateField extends StatelessWidget {
             Icon(Icons.calendar_today_outlined, size: 18, color: colors.textSecondary),
             const SizedBox(width: AppSpacing.xs),
             Text(
-              formatMeasurementDate(date),
+              formatDate(context, date),
               style: typography.bodyMedium.copyWith(color: colors.textPrimary),
             ),
           ],
@@ -298,14 +299,4 @@ class _DateField extends StatelessWidget {
 
 DateTime _dateOnly(DateTime value) => DateTime(value.year, value.month, value.day);
 
-String formatMeasurementDate(DateTime value) {
-  final local = value.toLocal();
-  return '${local.day.toString().padLeft(2, '0')}/'
-      '${local.month.toString().padLeft(2, '0')}/${local.year}';
-}
 
-/// Senza decimali superflui: 72 anziché 72.0.
-String _formatNumber(double value) =>
-    value == value.roundToDouble() ? value.round().toString() : value.toString();
-
-String formatMeasurementValue(double value) => _formatNumber(value);

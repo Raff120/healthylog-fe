@@ -8,6 +8,7 @@ import '../../../core/api/api_error_messages.dart';
 import '../../../core/api/api_exception.dart';
 import '../../../core/widgets/app_primary_button.dart';
 import '../../../core/widgets/app_text_field.dart';
+import '../../../l10n/formats.dart';
 import '../../../l10n/l10n_context.dart';
 import '../data/diet_plan_requests.dart';
 import '../data/diet_plan_template.dart';
@@ -192,12 +193,10 @@ class _CreateDietPlanScreenState extends ConsumerState<CreateDietPlanScreen> {
     };
   }
 
-  String _formatDate(DateTime date) =>
-      '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
 
   String _formatIso(String iso) {
     final parsed = DateTime.tryParse(iso);
-    return parsed == null ? iso : _formatDate(parsed);
+    return parsed == null ? iso : formatDate(context, parsed);
   }
 
   /// CD-2, 7.2 interfaccia.md: "Destinatario — solo per il Nutrizionista:
@@ -306,7 +305,7 @@ class _CreateDietPlanScreenState extends ConsumerState<CreateDietPlanScreen> {
                 value: _startDate,
                 errorText: _errorFor('startDate'),
                 onTap: _pickStartDate,
-                formatter: _formatDate,
+                formatter: (date) => formatDate(context, date),
               ),
               const SizedBox(height: AppSpacing.sm),
               Row(
@@ -334,7 +333,7 @@ class _CreateDietPlanScreenState extends ConsumerState<CreateDietPlanScreen> {
                   value: _endDate,
                   errorText: null,
                   onTap: _pickEndDate,
-                  formatter: _formatDate,
+                  formatter: (date) => formatDate(context, date),
                 ),
               ],
               if (_overlapMessage != null) ...[

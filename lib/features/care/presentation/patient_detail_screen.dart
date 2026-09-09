@@ -7,6 +7,7 @@ import '../../../app/theme/theme_context.dart';
 import '../../../core/api/api_error_messages.dart';
 import '../../../core/api/api_exception.dart';
 import '../../../core/widgets/app_primary_button.dart';
+import '../../../l10n/formats.dart';
 import '../../../l10n/l10n_context.dart';
 import '../../dietplan/data/plan_status.dart';
 import '../../dietplan/domain/plan_day_date.dart';
@@ -131,7 +132,7 @@ class PatientDetailScreen extends ConsumerWidget {
                     children: [
                       Text(patient.fullName, style: typography.titleLarge.copyWith(color: colors.textPrimary)),
                       Text(
-                        context.l10n.patientLinkedSince(_formatDate(patient.linkedAt)),
+                        context.l10n.patientLinkedSince(formatDate(context, patient.linkedAt)),
                         style: typography.caption.copyWith(color: colors.textSecondary),
                       ),
                     ],
@@ -404,12 +405,8 @@ class _PlanTile extends StatelessWidget {
 }
 
 String _periodLabel(BuildContext context, PatientPlanSummary plan) {
-  final start = _formatDate(plan.startDate);
+  final start = formatDate(context, plan.startDate);
   if (plan.endDate == null) return context.l10n.plansFrom(start);
-  return context.l10n.plansDateRange(start, _formatDate(plan.endDate!));
+  return context.l10n.plansDateRange(start, formatDate(context, plan.endDate!));
 }
 
-String _formatDate(DateTime value) {
-  final local = value.toLocal();
-  return '${local.day.toString().padLeft(2, '0')}/${local.month.toString().padLeft(2, '0')}/${local.year}';
-}

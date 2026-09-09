@@ -7,6 +7,7 @@ import '../../../app/theme/theme_context.dart';
 import '../../../core/api/api_error_messages.dart';
 import '../../../core/api/api_exception.dart';
 import '../../../core/widgets/app_primary_button.dart';
+import '../../../l10n/formats.dart';
 import '../../../l10n/l10n_context.dart';
 import '../../care/domain/plan_competence.dart';
 import '../../care/providers/care_providers.dart';
@@ -142,10 +143,6 @@ class DietPlanManagementScreen extends ConsumerWidget {
     );
   }
 
-  String _formatDate(DateTime value) {
-    final local = value.toLocal();
-    return '${local.day.toString().padLeft(2, '0')}/${local.month.toString().padLeft(2, '0')}/${local.year}';
-  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -238,7 +235,7 @@ class DietPlanManagementScreen extends ConsumerWidget {
                     acting: acting,
                     locked: isPlanLockedForPatient(current, careLink),
                     authorName: current.authorId == careLink?.nutritionistId ? careLink?.nutritionistName : null,
-                    formatDate: _formatDate,
+                    formatDate: (date) => formatDate(context, date),
                     onSuspend: () => _suspend(context, ref, current.id),
                     onResume: () => _resume(context, ref, current.id),
                     onComplete: () => _complete(context, ref, current.id),
@@ -255,7 +252,7 @@ class DietPlanManagementScreen extends ConsumerWidget {
                     padding: const EdgeInsets.only(bottom: AppSpacing.sm),
                     child: _OtherPlanTile(
                       plan: plan,
-                      formatDate: _formatDate,
+                      formatDate: (date) => formatDate(context, date),
                       // UT-8: il piano bloccato si apre in sola lettura, come il Concluso.
                       onTap: () => context.push(
                           plan.status == PlanStatus.completed || isPlanLockedForPatient(plan, careLink)

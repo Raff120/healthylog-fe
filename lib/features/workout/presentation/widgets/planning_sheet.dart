@@ -5,6 +5,7 @@ import '../../../../app/theme/app_spacing.dart';
 import '../../../../app/theme/theme_context.dart';
 import '../../../../core/widgets/app_primary_button.dart';
 import '../../../../core/widgets/app_text_field.dart';
+import '../../../../l10n/formats.dart';
 import '../../../../l10n/l10n_context.dart';
 import '../../data/workout_models.dart';
 import '../../data/workout_requests.dart';
@@ -115,7 +116,7 @@ class _PlannedRow extends ConsumerWidget {
                 Text(
                   plan.isWeekly
                       ? plan.daysOfWeek.map((day) => workoutWeekdayLabel(context, day)).join(', ')
-                      : _formatDate(plan.date!),
+                      : formatDate(context, plan.date!),
                   style: typography.caption.copyWith(color: colors.textSecondary),
                 ),
               ],
@@ -275,7 +276,7 @@ class _PlannedWorkoutEditorState extends ConsumerState<_PlannedWorkoutEditor> {
                       if (picked != null) setState(() => _date = _dateOnly(picked));
                     },
                     icon: const Icon(Icons.calendar_today_outlined, size: 18),
-                    label: Text(_formatDate(_date)),
+                    label: Text(formatDate(context, _date)),
                   ),
                 if (_error != null) ...[
                   const SizedBox(height: AppSpacing.xs),
@@ -295,8 +296,3 @@ class _PlannedWorkoutEditorState extends ConsumerState<_PlannedWorkoutEditor> {
 
 DateTime _dateOnly(DateTime value) => DateTime(value.year, value.month, value.day);
 
-String _formatDate(DateTime value) {
-  final local = value.toLocal();
-  return '${local.day.toString().padLeft(2, '0')}/'
-      '${local.month.toString().padLeft(2, '0')}/${local.year}';
-}

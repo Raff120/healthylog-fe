@@ -8,6 +8,7 @@ import '../../../core/api/api_error_messages.dart';
 import '../../../core/api/api_exception.dart';
 import '../../../core/widgets/app_primary_button.dart';
 import '../../../core/widgets/empty_state_view.dart';
+import '../../../l10n/formats.dart';
 import '../../../l10n/l10n_context.dart';
 import '../data/diet_plan_requests.dart';
 import '../data/plan_day.dart';
@@ -223,8 +224,6 @@ class _EditPlanDayScreenState extends ConsumerState<EditPlanDayScreen> {
     );
   }
 
-  String _formatDate(DateTime value) =>
-      '${value.day.toString().padLeft(2, '0')}/${value.month.toString().padLeft(2, '0')}/${value.year}';
 
   @override
   Widget build(BuildContext context) {
@@ -253,7 +252,7 @@ class _EditPlanDayScreenState extends ConsumerState<EditPlanDayScreen> {
           elevation: 0,
           scrolledUnderElevation: 0,
           title: Text(
-            context.l10n.editDayTitle(_formatDate(widget.date)),
+            context.l10n.editDayTitle(formatDate(context, widget.date)),
             style: typography.titleMedium.copyWith(color: colors.textPrimary),
           ),
           actions: [

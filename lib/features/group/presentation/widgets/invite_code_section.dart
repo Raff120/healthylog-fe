@@ -8,6 +8,7 @@ import '../../../../app/theme/theme_context.dart';
 import '../../../../core/api/api_error_messages.dart';
 import '../../../../core/api/api_exception.dart';
 import '../../../../core/widgets/app_primary_button.dart';
+import '../../../../l10n/formats.dart';
 import '../../../../l10n/l10n_context.dart';
 import '../../data/invite_code.dart';
 import '../../providers/cooking_group_providers.dart';
@@ -21,10 +22,6 @@ class InviteCodeSection extends ConsumerWidget {
   final String groupId;
   final String groupName;
 
-  String _formatDate(DateTime value) {
-    final local = value.toLocal();
-    return '${local.day.toString().padLeft(2, '0')}/${local.month.toString().padLeft(2, '0')}/${local.year}';
-  }
 
   Future<void> _generate(BuildContext context, WidgetRef ref) async {
     final request = await showGenerateInviteCodeSheet(context);
@@ -89,7 +86,7 @@ class InviteCodeSection extends ConsumerWidget {
           final code = codes.first;
           return _ActiveInviteCode(
             code: code,
-            expiresAtLabel: code.expiresAt == null ? null : _formatDate(code.expiresAt!),
+            expiresAtLabel: code.expiresAt == null ? null : formatDate(context, code.expiresAt!),
             remainingUses: code.maxUses == null ? null : code.maxUses! - code.usedCount,
             onShare: () => _share(context, code.code),
             onCopy: () => _copy(context, code.code),

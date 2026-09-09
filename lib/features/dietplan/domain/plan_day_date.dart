@@ -9,21 +9,6 @@ import '../data/weekday.dart';
 /// qui, come nel resto del client prima di quella feature, i nomi sono
 /// cablati in italiano. Condiviso fra il selettore giornaliero e quello
 /// settimanale (4.3 interfaccia.md), invece di due elenchi identici.
-const italianMonths = [
-  'gennaio',
-  'febbraio',
-  'marzo',
-  'aprile',
-  'maggio',
-  'giugno',
-  'luglio',
-  'agosto',
-  'settembre',
-  'ottobre',
-  'novembre',
-  'dicembre',
-];
-
 /// Formato ISO (`AAAA-MM-GG`) atteso dal backend (`@DateTimeFormat`).
 String isoDate(DateTime date) {
   final year = date.year.toString().padLeft(4, '0');

@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../../app/theme/app_spacing.dart';
 import '../../../../app/theme/theme_context.dart';
 import '../../../../l10n/l10n_context.dart';
-import '../../domain/plan_day_date.dart';
+import '../../../../l10n/formats.dart';
 
 /// Intestazione della vista settimanale (6.4 interfaccia.md, VS-12,
 /// VS-13): intervallo di date con frecce verso le settimane adiacenti,
@@ -42,7 +42,7 @@ class WeekSelector extends StatelessWidget {
           ),
           Expanded(
             child: Text(
-              weekRangeLabel(weekStart),
+              weekRangeLabel(context, weekStart),
               textAlign: TextAlign.center,
               style: typography.titleMedium.copyWith(color: colors.textPrimary),
             ),
@@ -67,15 +67,21 @@ class WeekSelector extends StatelessWidget {
 /// ripetuto sul primo estremo quando la settimana attraversa un confine
 /// di mese o d'anno (VS-2, LO-11: la settimana può farlo, essendo
 /// ancorata al lunedì e non al calendario del mese).
-String weekRangeLabel(DateTime weekStart) {
+String weekRangeLabel(BuildContext context, DateTime weekStart) {
   final end = weekStart.add(const Duration(days: 6));
-  final sameMonth = weekStart.month == end.month && weekStart.year == end.year;
-  if (sameMonth) {
-    return '${weekStart.day} – ${end.day} ${italianMonths[end.month - 1]} ${end.year}';
+  if (weekStart.month == end.month && weekStart.year == end.year) {
+    return context.l10n.weekRangeSameMonth(
+      formatDayOfMonth(context, weekStart),
+      formatDayOfMonth(context, end),
+      formatMonthAndYear(context, end),
+    );
   }
-  final sameYear = weekStart.year == end.year;
-  final startLabel = sameYear
-      ? '${weekStart.day} ${italianMonths[weekStart.month - 1]}'
-      : '${weekStart.day} ${italianMonths[weekStart.month - 1]} ${weekStart.year}';
-  return '$startLabel – ${end.day} ${italianMonths[end.month - 1]} ${end.year}';
+  // LO-9: gli estremi portano il proprio mese, ciascuno nel formato
+  // della lingua.
+  return context.l10n.weekRangeAcrossMonths(
+    weekStart.year == end.year
+        ? formatDayAndMonth(context, weekStart)
+        : '${formatDayAndMonth(context, weekStart)} ${weekStart.year}',
+    '${formatDayAndMonth(context, end)} ${end.year}',
+  );
 }

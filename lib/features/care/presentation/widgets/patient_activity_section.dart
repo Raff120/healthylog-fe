@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../app/theme/app_spacing.dart';
 import '../../../../app/theme/theme_context.dart';
+import '../../../../l10n/formats.dart';
 import '../../../../l10n/l10n_context.dart';
 import '../../../measurement/presentation/widgets/measurement_list_tile.dart';
 import '../../../measurement/presentation/widgets/measurement_sheet.dart';
@@ -98,7 +99,7 @@ class _WorkoutRow extends StatelessWidget {
         children: [
           Expanded(
             child: Text(
-              '${_formatDate(workout.date)} · ${workout.activityType}',
+              '${formatDate(context, workout.date)} · ${workout.activityType}',
               style: typography.bodyMedium.copyWith(color: colors.textPrimary),
               overflow: TextOverflow.ellipsis,
             ),
@@ -114,8 +115,3 @@ class _WorkoutRow extends StatelessWidget {
   }
 }
 
-String _formatDate(DateTime value) {
-  final local = value.toLocal();
-  return '${local.day.toString().padLeft(2, '0')}/'
-      '${local.month.toString().padLeft(2, '0')}/${local.year}';
-}

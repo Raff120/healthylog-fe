@@ -7,6 +7,7 @@ import '../../../app/theme/theme_context.dart';
 import '../../../core/api/api_error_messages.dart';
 import '../../../core/api/api_exception.dart';
 import '../../../core/widgets/empty_state_view.dart';
+import '../../../l10n/formats.dart';
 import '../../../l10n/l10n_context.dart';
 import '../data/app_notification.dart';
 import '../domain/notification_presentation.dart';
@@ -172,7 +173,7 @@ class _NotificationTile extends StatelessWidget {
                 ),
                 const SizedBox(width: AppSpacing.sm),
                 Text(
-                  _formatOccurredAt(notification.occurredAt),
+                  formatDateAndTime(context, notification.occurredAt),
                   style: typography.caption.copyWith(color: colors.textTertiary),
                 ),
               ],
@@ -183,11 +184,4 @@ class _NotificationTile extends StatelessWidget {
     );
   }
 
-  /// NT-2: data e ora dell'evento. LO-9: formato italiano; F29 lo renderà
-  /// dipendente dalla lingua selezionata.
-  String _formatOccurredAt(DateTime value) {
-    final date = '${value.day.toString().padLeft(2, '0')}/${value.month.toString().padLeft(2, '0')}';
-    final time = '${value.hour.toString().padLeft(2, '0')}:${value.minute.toString().padLeft(2, '0')}';
-    return '$date, $time';
-  }
 }

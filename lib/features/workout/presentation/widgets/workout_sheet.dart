@@ -6,6 +6,7 @@ import '../../../../app/theme/app_spacing.dart';
 import '../../../../app/theme/theme_context.dart';
 import '../../../../core/widgets/app_primary_button.dart';
 import '../../../../core/widgets/app_text_field.dart';
+import '../../../../l10n/formats.dart';
 import '../../../../l10n/l10n_context.dart';
 import '../../data/workout_models.dart';
 import '../../data/workout_requests.dart';
@@ -273,7 +274,7 @@ class _DateField extends StatelessWidget {
             Icon(Icons.calendar_today_outlined, size: 18, color: colors.textSecondary),
             const SizedBox(width: AppSpacing.xs),
             Text(
-              formatWorkoutDate(date),
+              formatDate(context, date),
               style: typography.bodyMedium.copyWith(color: colors.textPrimary),
             ),
           ],
@@ -335,8 +336,3 @@ DateTime _dateOnly(DateTime value) => DateTime(value.year, value.month, value.da
 
 /// Data breve, nel formato italiano già impiegato altrove; la
 /// localizzazione dei formati resta a F29 (LO-9).
-String formatWorkoutDate(DateTime value) {
-  final local = value.toLocal();
-  return '${local.day.toString().padLeft(2, '0')}/'
-      '${local.month.toString().padLeft(2, '0')}/${local.year}';
-}

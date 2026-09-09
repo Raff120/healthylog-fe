@@ -102,7 +102,7 @@ class WorkoutStatisticsView extends ConsumerWidget {
               bars: [
                 for (final week in statistics.weekly)
                   BarDatum(
-                    label: formatWeekLabel(week.weekStart),
+                    label: formatWeekLabel(context, week.weekStart),
                     value: week.count.toDouble(),
                     valueLabel: '${week.count}',
                   ),

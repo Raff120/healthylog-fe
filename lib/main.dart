@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_web_plugins/url_strategy.dart';
+import 'package:intl/date_symbol_data_local.dart';
 
 import 'app/router.dart';
 import 'app/theme/app_theme.dart';
@@ -10,13 +11,17 @@ import 'l10n/app_locale.dart';
 import 'l10n/generated/app_localizations.dart';
 import 'l10n/locale_controller.dart';
 
-void main() {
+void main() async {
   // FE-3, CT-17: indirizzi senza `#`, come richiede il routing della
   // PWA in produzione (nginx restituisce il documento principale per
   // ogni percorso privo di corrispondenza — un fallback pensato per
   // questa strategia, non per quella con hash). Innocuo sulle
   // piattaforme non web (no-op).
   usePathUrlStrategy();
+  // LO-9: carica i simboli di data delle lingue di LO-1, che `DateFormat`
+  // richiede per formattare in una lingua diversa da quella predefinita.
+  WidgetsFlutterBinding.ensureInitialized();
+  await initializeDateFormatting();
   runApp(const ProviderScope(child: HealthyLogApp()));
 }
 

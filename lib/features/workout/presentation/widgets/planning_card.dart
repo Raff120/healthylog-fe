@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../app/theme/app_spacing.dart';
 import '../../../../app/theme/theme_context.dart';
+import '../../../../l10n/formats.dart';
 import '../../../../l10n/l10n_context.dart';
 import '../../data/workout_models.dart';
 import '../../providers/workout_providers.dart';
@@ -66,7 +67,7 @@ class PlanningCard extends ConsumerWidget {
               const SizedBox(height: AppSpacing.sm),
               for (final plan in oneOff)
                 Text(
-                  '${plan.activityType} — ${_formatDate(plan.date!)}',
+                  '${plan.activityType} — ${formatDate(context, plan.date!)}',
                   style: typography.caption.copyWith(color: colors.textSecondary),
                 ),
             ],
@@ -145,8 +146,3 @@ class _WeekStrip extends StatelessWidget {
       .toList();
 }
 
-String _formatDate(DateTime value) {
-  final local = value.toLocal();
-  return '${local.day.toString().padLeft(2, '0')}/'
-      '${local.month.toString().padLeft(2, '0')}/${local.year}';
-}

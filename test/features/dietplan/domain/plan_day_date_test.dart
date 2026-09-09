@@ -1,6 +1,9 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:healthylog/features/dietplan/domain/plan_day_date.dart';
 import 'package:healthylog/features/dietplan/presentation/widgets/week_selector.dart';
+
+import '../../../support/l10n_test_support.dart';
 
 /// LO-11: il primo giorno della settimana è sempre il lunedì, non
 /// configurabile — la vista settimanale (6.2, VS-2) e le inversioni
@@ -41,16 +44,37 @@ void main() {
   });
 
   group('weekRangeLabel', () {
-    test('settimana interamente nello stesso mese', () {
-      expect(weekRangeLabel(DateTime(2026, 9, 7)), '7 – 13 settembre 2026');
+    // VS-2, LO-9: la composizione degli estremi, nel formato della lingua
+    // selezionata — qui l'italiano.
+    testWidgets('settimana interamente nello stesso mese', (tester) async {
+      expect(await _label(tester, DateTime(2026, 9, 7)), '7 – 13 settembre 2026');
     });
 
-    test('settimana a cavallo di due mesi dello stesso anno', () {
-      expect(weekRangeLabel(DateTime(2026, 8, 31)), '31 agosto – 6 settembre 2026');
+    testWidgets('settimana a cavallo di due mesi dello stesso anno', (tester) async {
+      expect(await _label(tester, DateTime(2026, 8, 31)), '31 ago – 6 set 2026');
     });
 
-    test('settimana a cavallo di due anni', () {
-      expect(weekRangeLabel(DateTime(2026, 12, 28)), '28 dicembre 2026 – 3 gennaio 2027');
+    testWidgets('settimana a cavallo di due anni', (tester) async {
+      expect(await _label(tester, DateTime(2026, 12, 28)), '28 dic 2026 – 3 gen 2027');
     });
   });
+}
+
+Future<String> _label(WidgetTester tester, DateTime weekStart) async {
+  late String label;
+  await tester.pumpWidget(
+    MaterialApp(
+      locale: testLocale,
+      localizationsDelegates: testLocalizationsDelegates,
+      supportedLocales: testSupportedLocales,
+      home: Builder(
+        builder: (context) {
+          label = weekRangeLabel(context, weekStart);
+          return const SizedBox.shrink();
+        },
+      ),
+    ),
+  );
+  await tester.pumpAndSettle();
+  return label;
 }

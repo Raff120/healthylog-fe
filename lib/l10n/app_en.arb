@@ -539,6 +539,8 @@
   "weekPlanCompleted": "Plan completed",
   "weekPlanNotStarted": "Plan not started yet",
   "weekPrevious": "Previous week",
+  "weekRangeAcrossMonths": "{start} – {end}",
+  "weekRangeSameMonth": "{monthYear} {startDay} – {endDay}",
   "weekThisWeek": "This week",
   "weekdayFriday": "Friday",
   "weekdayInitialFriday": "F",

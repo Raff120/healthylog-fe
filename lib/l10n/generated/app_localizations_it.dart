@@ -1891,6 +1891,16 @@ class L10nIt extends L10n {
   String get weekPrevious => 'Settimana precedente';
 
   @override
+  String weekRangeAcrossMonths(String start, String end) {
+    return '$start – $end';
+  }
+
+  @override
+  String weekRangeSameMonth(String startDay, String endDay, String monthYear) {
+    return '$startDay – $endDay $monthYear';
+  }
+
+  @override
   String get weekThisWeek => 'Questa settimana';
 
   @override

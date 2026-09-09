@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../app/theme/app_spacing.dart';
 import '../../../../app/theme/theme_context.dart';
 import '../../../../core/widgets/app_primary_button.dart';
+import '../../../../l10n/formats.dart';
 import '../../../../l10n/l10n_context.dart';
 import '../../providers/workout_providers.dart';
 
@@ -103,7 +104,7 @@ class _WorkoutFilterSheetState extends ConsumerState<_WorkoutFilterSheet> {
                 label: Text(
                   _filters.from == null || _filters.to == null
                       ? context.l10n.workoutPickPeriod
-                      : '${_formatDate(_filters.from!)} — ${_formatDate(_filters.to!)}',
+                      : '${formatDate(context, _filters.from!)} — ${formatDate(context, _filters.to!)}',
                 ),
               ),
               const SizedBox(height: AppSpacing.lg),
@@ -130,8 +131,3 @@ class _WorkoutFilterSheetState extends ConsumerState<_WorkoutFilterSheet> {
   }
 }
 
-String _formatDate(DateTime value) {
-  final local = value.toLocal();
-  return '${local.day.toString().padLeft(2, '0')}/'
-      '${local.month.toString().padLeft(2, '0')}/${local.year}';
-}

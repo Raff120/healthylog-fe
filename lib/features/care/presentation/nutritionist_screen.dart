@@ -6,6 +6,7 @@ import '../../../app/theme/theme_context.dart';
 import '../../../core/api/api_error_messages.dart';
 import '../../../core/api/api_exception.dart';
 import '../../../core/widgets/empty_state_view.dart';
+import '../../../l10n/formats.dart';
 import '../../../l10n/l10n_context.dart';
 import '../data/care_models.dart';
 import '../providers/care_providers.dart';
@@ -124,7 +125,7 @@ class _CurrentLinkView extends StatelessWidget {
               const SizedBox(height: AppSpacing.xxs),
               Text(link.nutritionistName, style: typography.titleLarge.copyWith(color: colors.textPrimary)),
               const SizedBox(height: AppSpacing.xxs),
-              Text(context.l10n.careLinkedSince(_formatDate(link.createdAt)), style: typography.bodyMedium.copyWith(color: colors.textSecondary)),
+              Text(context.l10n.careLinkedSince(formatDate(context, link.createdAt)), style: typography.bodyMedium.copyWith(color: colors.textSecondary)),
               const SizedBox(height: AppSpacing.sm),
               Text(
                 context.l10n.careNutritionistNotice,
@@ -184,7 +185,7 @@ class _ReceivedRequestsList extends StatelessWidget {
                             Text(request.nutritionistName, style: typography.titleMedium.copyWith(color: colors.textPrimary)),
                             Text(
                               request.message == null || request.message!.isEmpty
-                                  ? context.l10n.careRequestReceivedOn(_formatDate(request.createdAt))
+                                  ? context.l10n.careRequestReceivedOn(formatDate(context, request.createdAt))
                                   : request.message!,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
@@ -205,7 +206,3 @@ class _ReceivedRequestsList extends StatelessWidget {
   }
 }
 
-String _formatDate(DateTime value) {
-  final local = value.toLocal();
-  return '${local.day.toString().padLeft(2, '0')}/${local.month.toString().padLeft(2, '0')}/${local.year}';
-}

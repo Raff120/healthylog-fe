@@ -6,6 +6,7 @@ import '../../../app/theme/theme_context.dart';
 import '../../../core/api/api_error_messages.dart';
 import '../../../core/api/api_exception.dart';
 import '../../../core/widgets/empty_state_view.dart';
+import '../../../l10n/formats.dart';
 import '../../../l10n/l10n_context.dart';
 import '../../../l10n/units.dart';
 import '../../identity/providers/profile_providers.dart';
@@ -119,7 +120,7 @@ class _MeasurementDetailSheet extends ConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                formatMeasurementDate(measurement.date),
+                formatDate(context, measurement.date),
                 style: typography.titleMedium.copyWith(color: colors.textPrimary),
               ),
               const SizedBox(height: AppSpacing.xxs),
@@ -132,7 +133,7 @@ class _MeasurementDetailSheet extends ConsumerWidget {
                 Text(
                   context.l10n.measureNamedValueWithUnit(
                     context.l10n.measureWeight,
-                    formatMeasurementValue(weightToDisplay(measurement.weightKg!, units)),
+                    formatDecimal(context, weightToDisplay(measurement.weightKg!, units)),
                     weightUnit(context, units),
                   ),
                   style: typography.bodyMedium.copyWith(color: colors.textPrimary),
@@ -141,7 +142,7 @@ class _MeasurementDetailSheet extends ConsumerWidget {
                 Text(
                   context.l10n.measureNamedValueWithUnit(
                     bodyCircumferenceLabel(context, entry.$1),
-                    formatMeasurementValue(lengthToDisplay(entry.$2, units)),
+                    formatDecimal(context, lengthToDisplay(entry.$2, units)),
                     lengthUnit(context, units),
                   ),
                   style: typography.bodyMedium.copyWith(color: colors.textPrimary),

@@ -1173,6 +1173,33 @@
   "weekPlanCompleted": "Piano concluso",
   "weekPlanNotStarted": "Piano non ancora iniziato",
   "weekPrevious": "Settimana precedente",
+  "weekRangeAcrossMonths": "{start} – {end}",
+  "@weekRangeAcrossMonths": {
+    "description": "VS-2: la settimana a cavallo di due mesi o di due anni.",
+    "placeholders": {
+      "start": {
+        "type": "String"
+      },
+      "end": {
+        "type": "String"
+      }
+    }
+  },
+  "weekRangeSameMonth": "{startDay} – {endDay} {monthYear}",
+  "@weekRangeSameMonth": {
+    "description": "VS-2: la settimana entro un solo mese.",
+    "placeholders": {
+      "startDay": {
+        "type": "String"
+      },
+      "endDay": {
+        "type": "String"
+      },
+      "monthYear": {
+        "type": "String"
+      }
+    }
+  },
   "weekThisWeek": "Questa settimana",
   "weekdayFriday": "Venerdì",
   "weekdayInitialFriday": "V",

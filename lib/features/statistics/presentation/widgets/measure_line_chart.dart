@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../app/theme/app_spacing.dart';
 import '../../../../app/theme/theme_context.dart';
+import '../../../../l10n/formats.dart';
 import '../../data/statistics_models.dart';
 
 /// Grafico a linea dell'andamento di una grandezza corporea (11.3
@@ -51,6 +52,9 @@ class MeasureLineChart extends StatelessWidget {
           points: points,
           targetValue: targetValue,
           unit: unit,
+          // LO-9: le etichette dell'asse sono composte qui, dove il
+          // contesto c'è: il pittore non ne dispone.
+          formatAxisDate: (date) => formatDayAndMonthShort(context, date),
           lineColor: colors.accent,
           surfaceColor: colors.surface,
           gridColor: colors.dividerLight,
@@ -68,6 +72,7 @@ class _MeasureLinePainter extends CustomPainter {
     required this.points,
     required this.targetValue,
     required this.unit,
+    required this.formatAxisDate,
     required this.lineColor,
     required this.surfaceColor,
     required this.gridColor,
@@ -78,6 +83,7 @@ class _MeasureLinePainter extends CustomPainter {
   final List<MeasurePoint> points;
   final double? targetValue;
   final String unit;
+  final String Function(DateTime) formatAxisDate;
   final Color lineColor;
   final Color surfaceColor;
   final Color gridColor;
@@ -152,9 +158,9 @@ class _MeasureLinePainter extends CustomPainter {
   /// Asse orizzontale con le sole date, senza griglia (11.3).
   void _paintDateAxis(Canvas canvas, Rect plot, DateTime firstDay, DateTime lastDay) {
     final y = plot.bottom + AppSpacing.xxs;
-    _paintText(canvas, _formatDate(firstDay), Offset(plot.left, y));
+    _paintText(canvas, formatAxisDate(firstDay), Offset(plot.left, y));
     if (lastDay != firstDay) {
-      _paintText(canvas, _formatDate(lastDay), Offset(plot.right - 40, y), maxWidth: 40, alignRight: true);
+      _paintText(canvas, formatAxisDate(lastDay), Offset(plot.right - 40, y), maxWidth: 40, alignRight: true);
     }
   }
 
@@ -220,8 +226,6 @@ class _MeasureLinePainter extends CustomPainter {
     return '$rounded $unit';
   }
 
-  String _formatDate(DateTime date) =>
-      '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}';
 
   @override
   bool shouldRepaint(_MeasureLinePainter oldDelegate) =>

@@ -8,6 +8,7 @@ import '../../../app/theme/theme_context.dart';
 import '../../../core/api/api_error_messages.dart';
 import '../../../core/api/api_exception.dart';
 import '../../../core/widgets/empty_state_view.dart';
+import '../../../l10n/formats.dart';
 import '../../../l10n/l10n_context.dart';
 import '../../notification/presentation/widgets/notification_bell.dart';
 import '../data/care_models.dart';
@@ -216,7 +217,7 @@ class _PendingRequestTile extends StatelessWidget {
               children: [
                 Text(request.targetName, style: typography.bodyLarge.copyWith(color: colors.textPrimary)),
                 Text(
-                  expired ? context.l10n.careRequestExpired : context.l10n.patientsRequestSentOn(_formatDate(request.createdAt)),
+                  expired ? context.l10n.careRequestExpired : context.l10n.patientsRequestSentOn(formatDate(context, request.createdAt)),
                   style: typography.caption.copyWith(color: colors.textSecondary),
                 ),
               ],
@@ -229,7 +230,3 @@ class _PendingRequestTile extends StatelessWidget {
   }
 }
 
-String _formatDate(DateTime value) {
-  final local = value.toLocal();
-  return '${local.day.toString().padLeft(2, '0')}/${local.month.toString().padLeft(2, '0')}/${local.year}';
-}

@@ -2,12 +2,10 @@ import 'package:flutter/material.dart';
 
 import '../../../../app/theme/app_spacing.dart';
 import '../../../../app/theme/theme_context.dart';
+import '../../../../l10n/formats.dart';
 import '../../../../l10n/l10n_context.dart';
 import '../../domain/plan_day_date.dart';
 import '../weekday_presentation.dart';
-
-String _monthYearLabel(DateTime date) =>
-    '${italianMonths[date.month - 1]} ${date.year}';
 
 /// Selettore della data della vista giornaliera (4.3 interfaccia.md,
 /// VG-16, VG-17): intestazione mese/anno che apre il calendario e riga
@@ -50,7 +48,7 @@ class DateSelector extends StatelessWidget {
                 child: Padding(
                   padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
                   child: Text(
-                    _monthYearLabel(selectedDate),
+                    formatMonthAndYear(context, selectedDate),
                     textAlign: TextAlign.center,
                     style: typography.titleMedium.copyWith(
                       color: colors.textPrimary,

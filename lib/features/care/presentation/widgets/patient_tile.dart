@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../app/theme/app_spacing.dart';
 import '../../../../app/theme/theme_context.dart';
+import '../../../../l10n/formats.dart';
 import '../../../../l10n/l10n_context.dart';
 import '../../../dietplan/data/plan_status.dart';
 import '../../data/care_models.dart';
@@ -85,7 +86,7 @@ class PatientTile extends StatelessWidget {
                   patient.lastActivityAt == null
                       ? dash
                       : Text(
-                          _formatDate(patient.lastActivityAt!),
+                          formatDate(context, patient.lastActivityAt!),
                           style: typography.caption.copyWith(color: colors.textTertiary),
                         ),
                 ],
@@ -98,7 +99,3 @@ class PatientTile extends StatelessWidget {
   }
 }
 
-String _formatDate(DateTime value) {
-  final local = value.toLocal();
-  return '${local.day.toString().padLeft(2, '0')}/${local.month.toString().padLeft(2, '0')}/${local.year}';
-}

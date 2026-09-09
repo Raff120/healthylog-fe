@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../app/theme/app_spacing.dart';
 import '../../../../app/theme/theme_context.dart';
+import '../../../../l10n/formats.dart';
 import '../../../../l10n/l10n_context.dart';
 import '../../data/account_role.dart';
 
@@ -22,7 +23,7 @@ class BirthDateField extends StatelessWidget {
     final hasError = errorText != null;
     final label = value == null
         ? context.l10n.fieldBirthDate
-        : '${value!.day.toString().padLeft(2, '0')}/${value!.month.toString().padLeft(2, '0')}/${value!.year}';
+        : formatDate(context, value!);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
