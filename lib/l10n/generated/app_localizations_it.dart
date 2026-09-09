@@ -1008,7 +1008,7 @@ class L10nIt extends L10n {
       'Sei offline. Puoi consultare il piano già scaricato.';
 
   @override
-  String get passwordRequirementHint => 'Almeno 12 caratteri';
+  String get passwordRequirementHint => 'Almeno 8 caratteri';
 
   @override
   String get passwordResetConfirmTitle => 'Imposta una nuova password';

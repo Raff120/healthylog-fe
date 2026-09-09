@@ -4,7 +4,7 @@
 /// client, qui senza bisogno di rete).
 library;
 
-const int passwordMinLength = 12;
+const int passwordMinLength = 8;
 
 final RegExp _emailPattern = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$');
 final RegExp _usernamePattern = RegExp(r'^[a-zA-Z0-9_.-]+$');

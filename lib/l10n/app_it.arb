@@ -632,7 +632,7 @@
   "@offlineBar": {
     "description": "OF-6, OF-19: segnalazione discreta, non condizione di errore."
   },
-  "passwordRequirementHint": "Almeno 12 caratteri",
+  "passwordRequirementHint": "Almeno 8 caratteri",
   "@passwordRequirementHint": {
     "description": "AU-3: unico requisito, senza vincoli di composizione."
   },
