@@ -10,6 +10,7 @@ import '../../../core/api/api_error_messages.dart';
 import '../../../core/widgets/empty_state_view.dart';
 import '../../care/domain/plan_competence.dart';
 import '../../group/providers/cooking_group_providers.dart';
+import '../../notification/presentation/widgets/notification_bell.dart';
 import '../../workout/presentation/widgets/day_workouts_section.dart';
 import '../../workout/presentation/widgets/workout_sheet.dart';
 import '../../care/providers/care_providers.dart';
@@ -90,6 +91,12 @@ class PlanScreen extends ConsumerWidget {
                 // MD-8, MD-11: modifica della sola giornata selezionata, sul
                 // proprio piano e per chi ne ha titolo (non il Paziente, UT-8).
                 if (viewMode == PlanViewMode.day) _DayMenu(selectedDate: selectedDate),
+                // 12.3, 3.1: icona notifiche nell'intestazione di ogni
+                // destinazione principale, dopo l'azione contestuale
+                // (3.2). Assente mentre si sceglie dove spostare un
+                // pasto: l'intestazione è allora dedicata all'inversione
+                // (6.5) e l'unica azione ammessa è Annulla.
+                const NotificationBell(),
               ]
             : [
                 TextButton(

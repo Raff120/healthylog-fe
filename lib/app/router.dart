@@ -29,6 +29,7 @@ import '../features/identity/presentation/registration_details_screen.dart';
 import '../features/identity/presentation/role_selection_screen.dart';
 import '../features/identity/presentation/settings_screen.dart';
 import '../features/group/presentation/group_screen.dart';
+import '../features/notification/presentation/notification_screen.dart';
 import '../features/statistics/presentation/statistics_screen.dart';
 import '../features/workout/presentation/activity_screen.dart';
 import 'navigation/main_shell.dart';
@@ -173,6 +174,11 @@ GoRouter goRouter(Ref ref) {
       GoRoute(path: '/profile/settings', builder: (context, state) => const SettingsScreen()),
       GoRoute(path: '/profile/plans', builder: (context, state) => const DietPlanManagementScreen()),
       GoRoute(path: '/group', builder: (context, state) => const GroupScreen()),
+      // 12.3, 3.1: il centro notifiche è raggiungibile dall'intestazione
+      // di ogni destinazione principale, non è esso stesso una
+      // destinazione — nessun involucro di navigazione, freccia di
+      // ritorno come le altre schermate secondarie (3.2).
+      GoRoute(path: '/notifications', builder: (context, state) => const NotificationScreen()),
       GoRoute(path: '/profile/nutritionist', builder: (context, state) => const NutritionistScreen()),
       GoRoute(
         path: '/patients/:id',

@@ -9,6 +9,7 @@ import '../../../core/widgets/app_segmented_control.dart';
 import '../../../core/widgets/empty_state_view.dart';
 import '../../measurement/presentation/measurements_view.dart';
 import '../../measurement/presentation/widgets/measurement_sheet.dart';
+import '../../notification/presentation/widgets/notification_bell.dart';
 import '../providers/workout_providers.dart';
 import 'widgets/planning_card.dart';
 import 'widgets/workout_filter_sheet.dart';
@@ -50,6 +51,9 @@ class ActivityScreen extends ConsumerWidget {
               icon: const Icon(Icons.filter_list),
               onPressed: () => showWorkoutFilterSheet(context),
             ),
+          // 12.3, 3.1: icona notifiche nell'intestazione di ogni
+          // destinazione principale, dopo l'azione contestuale (3.2).
+          const NotificationBell(),
         ],
       ),
       body: SafeArea(

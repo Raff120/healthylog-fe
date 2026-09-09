@@ -1,3 +1,4 @@
+import '../support/notification_api_stub.dart';
 import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
@@ -23,6 +24,7 @@ import 'package:healthylog/features/identity/data/profile_api.dart';
 import 'package:healthylog/features/identity/providers/identity_providers.dart';
 import 'package:healthylog/features/identity/providers/profile_providers.dart';
 import 'package:healthylog/core/storage/preferences_store.dart';
+import 'package:healthylog/features/notification/providers/notification_providers.dart';
 import 'package:healthylog/features/statistics/providers/statistics_providers.dart';
 import 'package:healthylog/features/workout/providers/workout_providers.dart';
 import 'package:healthylog/main.dart';
@@ -165,6 +167,9 @@ Future<ProviderContainer> _pumpAuthenticatedApp(
       cookingGroupApiProvider.overrideWithValue(CookingGroupApi(cookingGroupDio)),
       // F21/F22: nessun collegamento professionale (RG-5), nessun Paziente.
       careApiProvider.overrideWithValue(stubCareApi()),
+      // NT-8, F28: l'indicatore delle notifiche è presente nell'intestazione
+      // di ogni destinazione principale (3.1).
+      notificationApiProvider.overrideWithValue(stubNotificationApi()),
         workoutApiProvider.overrideWithValue(stubWorkoutApi()),
       statisticsApiProvider.overrideWithValue(stubStatisticsApi()),
       // 11.1: il periodo selezionato è conservato tra le sessioni; nella
@@ -295,6 +300,9 @@ void main() {
           cookingGroupApiProvider.overrideWithValue(CookingGroupApi(cookingGroupDio)),
           // F21/F22: nessun collegamento professionale (RG-5), nessun Paziente.
           careApiProvider.overrideWithValue(stubCareApi()),
+          // NT-8, F28: l'indicatore delle notifiche è presente nell'intestazione
+          // di ogni destinazione principale (3.1).
+          notificationApiProvider.overrideWithValue(stubNotificationApi()),
         workoutApiProvider.overrideWithValue(stubWorkoutApi()),
       statisticsApiProvider.overrideWithValue(stubStatisticsApi()),
       // 11.1: il periodo selezionato è conservato tra le sessioni; nella

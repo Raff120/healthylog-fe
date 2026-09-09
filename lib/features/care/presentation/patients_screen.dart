@@ -8,6 +8,7 @@ import '../../../app/theme/theme_context.dart';
 import '../../../core/api/api_error_messages.dart';
 import '../../../core/api/api_exception.dart';
 import '../../../core/widgets/empty_state_view.dart';
+import '../../notification/presentation/widgets/notification_bell.dart';
 import '../data/care_models.dart';
 import '../providers/care_providers.dart';
 import 'patient_detail_screen.dart';
@@ -171,6 +172,9 @@ class _PatientsScreenState extends ConsumerState<PatientsScreen> {
         elevation: 0,
         scrolledUnderElevation: 0,
         title: Text('Pazienti', style: typography.titleMedium.copyWith(color: colors.textPrimary)),
+        // 12.3, 3.1: icona notifiche nell'intestazione di ogni
+        // destinazione principale.
+        actions: const [NotificationBell()],
       ),
       // 9.1 interfaccia.md: "Pulsante mobile, icona user-plus. Conduce a 9.3".
       floatingActionButton: FloatingActionButton(

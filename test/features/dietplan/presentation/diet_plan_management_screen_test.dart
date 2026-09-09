@@ -1,3 +1,4 @@
+import '../../../support/notification_api_stub.dart';
 import 'dart:convert';
 import 'dart:typed_data';
 
@@ -13,6 +14,7 @@ import 'package:healthylog/features/dietplan/presentation/diet_plan_management_s
 import 'package:healthylog/features/care/data/care_api.dart';
 import 'package:healthylog/features/care/providers/care_providers.dart';
 import 'package:healthylog/features/dietplan/providers/diet_plan_providers.dart';
+import 'package:healthylog/features/notification/providers/notification_providers.dart';
 
 import '../../../support/care_api_stub.dart';
 
@@ -107,6 +109,9 @@ Future<void> _pumpManagementScreen(WidgetTester tester, DietPlanApi api, {CareAp
         dietPlanApiProvider.overrideWithValue(api),
         // F22: nessun collegamento (Utente autonomo), salvo indicazione contraria.
         careApiProvider.overrideWithValue(careApi ?? stubCareApi()),
+        // NT-8, F28: l'indicatore delle notifiche è presente nell'intestazione
+        // di ogni destinazione principale (3.1).
+        notificationApiProvider.overrideWithValue(stubNotificationApi()),
       ],
       child: MaterialApp.router(theme: AppTheme.light, routerConfig: router),
     ),

@@ -7,6 +7,7 @@ import '../../../app/theme/theme_context.dart';
 import '../../../core/api/api_error_messages.dart';
 import '../../../core/api/api_exception.dart';
 import '../../../core/auth/session_controller.dart';
+import '../../notification/presentation/widgets/notification_bell.dart';
 import '../data/account_role.dart';
 import '../providers/profile_providers.dart';
 import '../providers/sessions_providers.dart';
@@ -72,7 +73,14 @@ class ProfileScreen extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: colors.background,
-      appBar: AppBar(backgroundColor: colors.background, elevation: 0, scrolledUnderElevation: 0),
+      appBar: AppBar(
+        backgroundColor: colors.background,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        // 12.3, 3.1: icona notifiche nell'intestazione di ogni
+        // destinazione principale.
+        actions: const [NotificationBell()],
+      ),
       body: SafeArea(
         child: profileState.when(
           loading: () => const Center(child: CircularProgressIndicator()),

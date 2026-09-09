@@ -6,6 +6,7 @@ import '../../../core/api/api_error_messages.dart';
 import '../../../core/api/api_exception.dart';
 import '../../../core/widgets/app_segmented_control.dart';
 import '../../../core/widgets/empty_state_view.dart';
+import '../../notification/presentation/widgets/notification_bell.dart';
 import '../data/statistics_models.dart';
 import '../providers/statistics_providers.dart';
 import 'adherence_view.dart';
@@ -55,6 +56,9 @@ class StatisticsScreen extends ConsumerWidget {
               .read(selectedStatisticsViewProvider.notifier)
               .select(StatisticsViewMode.values[index]),
         ),
+        // 12.3, 3.1: icona notifiche nell'intestazione di ogni
+        // destinazione principale.
+        actions: const [NotificationBell()],
       ),
       body: SafeArea(
         child: period.when(

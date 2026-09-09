@@ -6,6 +6,7 @@ import '../../../app/theme/app_spacing.dart';
 import '../../../app/theme/theme_context.dart';
 import '../../../core/api/api_error_messages.dart';
 import '../../../core/api/api_exception.dart';
+import '../../notification/presentation/widgets/notification_bell.dart';
 import '../data/diet_plan_template.dart';
 import '../data/diet_plan_template_requests.dart';
 import '../providers/diet_plan_template_providers.dart';
@@ -57,6 +58,12 @@ class DietPlanTemplateListScreen extends ConsumerWidget {
         elevation: 0,
         scrolledUnderElevation: 0,
         title: Text('Template', style: typography.titleMedium.copyWith(color: colors.textPrimary)),
+        // 12.3, 3.1: icona notifiche nell'intestazione di ogni
+        // destinazione principale. *Template* lo è per il Nutrizionista;
+        // l'Utente vi arriva dalla creazione del piano (CT-1) e vi trova
+        // la stessa icona, che 3.2 prevede comunque a destra
+        // dell'intestazione.
+        actions: const [NotificationBell()],
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: creating ? null : () => _create(context, ref),
