@@ -1,0 +1,17 @@
+# Escluso dal contesto di costruzione: quanto e' ricostruibile o inutile alla
+# compilazione per il web.
+.git/
+.github/
+.idea/
+.dart_tool/
+build/
+android/
+ios/
+macos/
+windows/
+linux/
+test/
+
+*.iml
+Dockerfile
+.dockerignore
