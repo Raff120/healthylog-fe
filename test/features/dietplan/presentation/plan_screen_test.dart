@@ -1350,7 +1350,20 @@ void main() {
         addTearDown(tester.view.reset);
 
         await _pumpWithGroup(tester);
-        await tester.tap(find.byTooltip('Vista affiancata'));
+        // 4.2: su schermo stretto la riga di avatar lascia il posto al
+        // menu a discesa, e la modalità affiancata ne è la voce in coda —
+        // non un'icona a sé, che sottrarrebbe larghezza all'intestazione.
+        expect(find.byTooltip('Vista affiancata'), findsNothing);
+        // Il selettore, non il menu "⋮" della giornata: lo distingue il
+        // `chevron-down` di 4.2.
+        await tester.tap(
+          find.ancestor(
+            of: find.byIcon(Icons.keyboard_arrow_down),
+            matching: find.byType(PopupMenuButton<String>),
+          ),
+        );
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('Vista affiancata'));
         await tester.pumpAndSettle();
 
         expect(find.text('Yogurt e cereali'), findsOneWidget);

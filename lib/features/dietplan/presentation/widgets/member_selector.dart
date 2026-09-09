@@ -69,27 +69,38 @@ class _MemberRow extends ConsumerWidget {
       return const SizedBox.shrink();
     }
 
+    // 4.2 interfaccia.md: l'icona `columns` separata appartiene alla riga
+    // di avatar ("dopo l'ultimo avatar"). Dove la riga lascia il posto al
+    // menu a discesa, la modalità affiancata è una sua voce, "in coda
+    // separata da un divisore": tenerla fuori sottraeva larghezza
+    // all'intestazione, che su schermo stretto non ne ha da cedere —
+    // il segmented control ne risultava compresso (vedi decisioni.md).
+    if (compact) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs),
+        child: _MemberDropdown(
+          group: group,
+          currentUserId: currentUserId,
+          selected: selected,
+          sideBySide: sideBySide,
+          onSelect: select,
+        ),
+      );
+    }
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           Flexible(
-            child: compact
-                ? _MemberDropdown(
-                    group: group,
-                    currentUserId: currentUserId,
-                    selected: selected,
-                    sideBySide: sideBySide,
-                    onSelect: select,
-                  )
-                : _MemberAvatarRow(
-                    group: group,
-                    currentUserId: currentUserId,
-                    selected: selected,
-                    sideBySide: sideBySide,
-                    onSelect: select,
-                  ),
+            child: _MemberAvatarRow(
+              group: group,
+              currentUserId: currentUserId,
+              selected: selected,
+              sideBySide: sideBySide,
+              onSelect: select,
+            ),
           ),
           const SizedBox(width: AppSpacing.sm),
           _SideBySideToggle(active: sideBySide),
@@ -206,7 +217,12 @@ class _MemberAvatar extends StatelessWidget {
 
 /// Schermo stretto o gruppo numeroso (4.2 interfaccia.md): avatar del
 /// membro corrente, nome e `chevron-down`, che apre l'elenco completo.
-class _MemberDropdown extends StatelessWidget {
+/// Valore riservato alla voce della modalità affiancata nel menu (4.2):
+/// non è l'identificativo di alcun membro, e non è `null` per la stessa
+/// ragione per cui non lo è il ritorno al proprio piano (vedi sotto).
+const _sideBySideMenuValue = '__side-by-side__';
+
+class _MemberDropdown extends ConsumerWidget {
   const _MemberDropdown({
     required this.group,
     required this.currentUserId,
@@ -225,7 +241,7 @@ class _MemberDropdown extends StatelessWidget {
   final ValueChanged<String?> onSelect;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final colors = context.colors;
     final typography = context.typography;
     final current = group.members.firstWhere((member) => member.userId == (selected ?? currentUserId));
@@ -239,13 +255,34 @@ class _MemberDropdown extends StatelessWidget {
       // valore dell'item non può quindi mai essere `null`. Il ritorno
       // al proprio piano usa perciò sempre `member.userId`, tradotto in
       // `null` solo qui, dopo che la selezione è già avvenuta.
-      onSelected: (userId) => onSelect(userId == currentUserId ? null : userId),
+      onSelected: (value) {
+        if (value == _sideBySideMenuValue) {
+          ref.read(sideBySideModeProvider.notifier).toggle();
+          return;
+        }
+        onSelect(value == currentUserId ? null : value);
+      },
       itemBuilder: (menuContext) => [
         for (final member in group.members)
           PopupMenuItem(
             value: member.userId,
             child: Text('${member.firstName} ${member.lastName}'),
           ),
+        const PopupMenuDivider(),
+        PopupMenuItem(
+          value: _sideBySideMenuValue,
+          child: Row(
+            children: [
+              Icon(
+                Icons.view_column_outlined,
+                size: 20,
+                color: sideBySide ? colors.accent : colors.textSecondary,
+              ),
+              const SizedBox(width: AppSpacing.xs),
+              Text(sideBySide ? 'Vista singola' : 'Vista affiancata'),
+            ],
+          ),
+        ),
       ],
       child: Row(
         mainAxisSize: MainAxisSize.min,
