@@ -103,8 +103,13 @@ flutter:
         - asset: assets/fonts/Inter/Inter-SemiBold.ttf
           weight: 600
 
+  # 2.5, MP-9: il marchio. È la stessa risorsa da cui sono generate le
+  # icone di piattaforma, così che dentro l'applicazione e sulla schermata
+  # iniziale del dispositivo compaia lo stesso segno.
+  assets:
+    - assets/brand/app_mark.png
+
   # To add assets to your application, add an assets section, like this:
-  # assets:
   #   - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg
 

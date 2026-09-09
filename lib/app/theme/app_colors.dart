@@ -22,8 +22,6 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.warning,
     required this.warningBackground,
     required this.confirm,
-    required this.markBackground,
-    required this.markForeground,
   });
 
   final Color background;
@@ -43,15 +41,6 @@ class AppColors extends ThemeExtension<AppColors> {
   final Color warningBackground;
   final Color confirm;
 
-  /// MP-9, 2.5: i due colori del marchio. Sono gli stessi nel tema chiaro
-  /// e in quello scuro — l'identità è una, e il marchio dentro
-  /// l'applicazione dev'essere lo stesso segno dell'icona sulla schermata
-  /// iniziale del dispositivo. Vivono qui, al livello semantico, invece
-  /// che nel widget: FE-17 vuole che nessun widget dichiari colori propri,
-  /// neppure quando sono costanti.
-  final Color markBackground;
-  final Color markForeground;
-
   static const AppColors light = AppColors(
     background: AppPalette.backgroundLight,
     surface: AppPalette.surfaceLight,
@@ -69,8 +58,6 @@ class AppColors extends ThemeExtension<AppColors> {
     warning: AppPalette.warningLight,
     warningBackground: AppPalette.warningBackgroundLight,
     confirm: AppPalette.confirmLight,
-    markBackground: AppPalette.accentLight,
-    markForeground: AppPalette.surfaceLight,
   );
 
   static const AppColors dark = AppColors(
@@ -90,8 +77,6 @@ class AppColors extends ThemeExtension<AppColors> {
     warning: AppPalette.warningDark,
     warningBackground: AppPalette.warningBackgroundDark,
     confirm: AppPalette.confirmDark,
-    markBackground: AppPalette.accentLight,
-    markForeground: AppPalette.surfaceLight,
   );
 
   @override
@@ -112,8 +97,6 @@ class AppColors extends ThemeExtension<AppColors> {
     Color? warning,
     Color? warningBackground,
     Color? confirm,
-    Color? markBackground,
-    Color? markForeground,
   }) {
     return AppColors(
       background: background ?? this.background,
@@ -132,8 +115,6 @@ class AppColors extends ThemeExtension<AppColors> {
       warning: warning ?? this.warning,
       warningBackground: warningBackground ?? this.warningBackground,
       confirm: confirm ?? this.confirm,
-      markBackground: markBackground ?? this.markBackground,
-      markForeground: markForeground ?? this.markForeground,
     );
   }
 
@@ -157,8 +138,6 @@ class AppColors extends ThemeExtension<AppColors> {
       warning: Color.lerp(warning, other.warning, t)!,
       warningBackground: Color.lerp(warningBackground, other.warningBackground, t)!,
       confirm: Color.lerp(confirm, other.confirm, t)!,
-      markBackground: Color.lerp(markBackground, other.markBackground, t)!,
-      markForeground: Color.lerp(markForeground, other.markForeground, t)!,
     );
   }
 }

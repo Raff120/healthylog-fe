@@ -1,30 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:healthylog/app/branding/app_mark.dart';
-import 'package:healthylog/app/theme/app_colors.dart';
+import 'package:healthylog/app/theme/app_theme.dart';
 
-/// MP-9, 2.5: il marchio dentro l'applicazione è lo stesso segno
-/// dell'icona sulla schermata iniziale del dispositivo — bianco su
-/// accento — e non si inverte con il tema.
+/// MP-9, 2.5: il marchio dentro l'applicazione è la stessa risorsa da cui
+/// sono generate le icone di piattaforma — lo stesso segno che compare
+/// sulla schermata iniziale del dispositivo — e non muta con il tema.
 void main() {
-  test('i colori del marchio sono i medesimi nel chiaro e nello scuro (MP-9)', () {
-    expect(AppColors.dark.markBackground, AppColors.light.markBackground);
-    expect(AppColors.dark.markForeground, AppColors.light.markForeground);
-  });
-
-  testWidgets('il marchio si disegna in entrambi i temi (2.5)', (tester) async {
-    for (final theme in [ThemeData.light(), ThemeData.dark()]) {
+  testWidgets('presenta la risorsa del marchio in entrambi i temi (MP-9)', (tester) async {
+    for (final theme in [AppTheme.light, AppTheme.dark]) {
       await tester.pumpWidget(
-        MaterialApp(
-          theme: theme.copyWith(
-            extensions: [theme.brightness == Brightness.dark ? AppColors.dark : AppColors.light],
-          ),
-          home: const Scaffold(body: Center(child: AppMark())),
-        ),
+        MaterialApp(theme: theme, home: const Scaffold(body: Center(child: AppMark()))),
       );
-      await tester.pumpAndSettle();
-      expect(find.byType(AppMark), findsOneWidget);
-      expect(tester.takeException(), isNull);
+      await tester.pump();
+
+      final image = tester.widget<Image>(find.descendant(
+        of: find.byType(AppMark),
+        matching: find.byType(Image),
+      ));
+      expect((image.image as AssetImage).assetName, AppMark.asset);
+      // 2.5: nessun colore proprio applicato sopra la risorsa.
+      expect(image.color, isNull);
     }
   });
 }
