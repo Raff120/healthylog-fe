@@ -7,6 +7,8 @@ import '../../../app/theme/theme_context.dart';
 import '../../../core/api/api_error_messages.dart';
 import '../../../core/api/api_exception.dart';
 import '../../../core/auth/session_controller.dart';
+import '../../../l10n/l10n_context.dart';
+import '../../notification/presentation/widgets/notification_bell.dart';
 import '../data/account_role.dart';
 import '../providers/profile_providers.dart';
 import '../providers/sessions_providers.dart';
@@ -30,16 +32,16 @@ class ProfileScreen extends ConsumerWidget {
       context: context,
       builder: (dialogContext) => AlertDialog(
         backgroundColor: colors.surface,
-        title: const Text('Disconnetti'),
-        content: const Text('Vuoi disconnetterti da questo dispositivo?'),
+        title: Text(context.l10n.profileLogout),
+        content: Text(context.l10n.profileLogoutConfirm),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: const Text('Annulla'),
+            child: Text(context.l10n.commonCancel),
           ),
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: Text('Disconnetti', style: TextStyle(color: colors.error)),
+            child: Text(context.l10n.profileLogout, style: TextStyle(color: colors.error)),
           ),
         ],
       ),
@@ -72,13 +74,20 @@ class ProfileScreen extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: colors.background,
-      appBar: AppBar(backgroundColor: colors.background, elevation: 0, scrolledUnderElevation: 0),
+      appBar: AppBar(
+        backgroundColor: colors.background,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        // 12.3, 3.1: icona notifiche nell'intestazione di ogni
+        // destinazione principale.
+        actions: const [NotificationBell()],
+      ),
       body: SafeArea(
         child: profileState.when(
           loading: () => const Center(child: CircularProgressIndicator()),
           error: (error, _) => Center(
             child: Text(
-              describeApiError(error.asApiException?.code ?? ''),
+              describeApiError(context, error.asApiException?.code ?? ''),
               style: typography.bodyMedium.copyWith(color: colors.textSecondary),
             ),
           ),
@@ -115,7 +124,7 @@ class ProfileScreen extends ConsumerWidget {
                 const SizedBox(height: AppSpacing.lg),
                 _ProfileSection(
                   icon: Icons.person_outline,
-                  label: 'Dati personali',
+                  label: context.l10n.profilePersonalData,
                   onTap: () => context.push('/profile/personal-data'),
                 ),
                 // NU-11, GE-4, NU-10, 12.1 interfaccia.md: piani propri, Gruppo e
@@ -124,33 +133,33 @@ class ProfileScreen extends ConsumerWidget {
                   const SizedBox(height: AppSpacing.sm),
                   _ProfileSection(
                     icon: Icons.calendar_month_outlined,
-                    label: 'Piani',
+                    label: context.l10n.profilePlans,
                     onTap: () => context.push('/profile/plans'),
                   ),
                   const SizedBox(height: AppSpacing.sm),
                   _ProfileSection(
                     icon: Icons.groups_outlined,
-                    label: 'Gruppo',
+                    label: context.l10n.profileGroup,
                     onTap: () => context.push('/group'),
                   ),
                   const SizedBox(height: AppSpacing.sm),
                   _ProfileSection(
                     icon: Icons.medical_services_outlined,
-                    label: 'Nutrizionista',
+                    label: context.l10n.profileNutritionist,
                     onTap: () => context.push('/profile/nutritionist'),
                   ),
                 ],
                 const SizedBox(height: AppSpacing.sm),
                 _ProfileSection(
                   icon: Icons.settings_outlined,
-                  label: 'Impostazioni',
+                  label: context.l10n.profileSettings,
                   onTap: () => context.push('/profile/settings'),
                 ),
                 const Spacer(),
                 Center(
                   child: TextButton(
                     onPressed: () => _confirmLogout(context, ref),
-                    child: Text('Disconnetti', style: TextStyle(color: colors.error)),
+                    child: Text(context.l10n.profileLogout, style: TextStyle(color: colors.error)),
                   ),
                 ),
               ],

@@ -6,6 +6,7 @@ import '../../../../app/theme/app_spacing.dart';
 import '../../../../app/theme/theme_context.dart';
 import '../../../../core/widgets/app_primary_button.dart';
 import '../../../../core/widgets/app_text_field.dart';
+import '../../../../l10n/l10n_context.dart';
 import '../../providers/workout_providers.dart';
 
 /// Impostazione dell'obiettivo settimanale (OS-9: dalla sezione dedicata
@@ -71,26 +72,26 @@ class _WeeklyGoalSheetState extends ConsumerState<_WeeklyGoalSheet> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Text(
-                  'Obiettivo settimanale',
+                  context.l10n.workoutWeeklyGoal,
                   style: typography.titleMedium.copyWith(color: colors.textPrimary),
                 ),
                 const SizedBox(height: AppSpacing.xxs),
                 // OS-2: obiettivo e pianificazione possono divergere, e il
                 // sistema non li allinea.
                 Text(
-                  'Quante volte ti proponi di allenarti in una settimana. È indipendente dai giorni che hai pianificato.',
+                  context.l10n.workoutWeeklyGoalHelp,
                   style: typography.caption.copyWith(color: colors.textTertiary),
                 ),
                 const SizedBox(height: AppSpacing.md),
                 AppTextField(
-                  label: 'Allenamenti a settimana',
+                  label: context.l10n.workoutPerWeek,
                   controller: _controller,
                   keyboardType: TextInputType.number,
                   inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                 ),
                 const SizedBox(height: AppSpacing.lg),
                 AppPrimaryButton(
-                  label: 'Salva',
+                  label: context.l10n.commonSave,
                   loading: saving,
                   onPressed: () {
                     final value = int.tryParse(_controller.text.trim());
@@ -104,7 +105,7 @@ class _WeeklyGoalSheetState extends ConsumerState<_WeeklyGoalSheet> {
                   const SizedBox(height: AppSpacing.xs),
                   TextButton(
                     onPressed: saving ? null : () => _save(null),
-                    child: const Text('Rimuovi obiettivo'),
+                    child: Text(context.l10n.workoutRemoveGoal),
                   ),
                 ],
                 const SizedBox(height: AppSpacing.xs),

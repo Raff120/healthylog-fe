@@ -5,6 +5,8 @@ import '../../../app/theme/app_spacing.dart';
 import '../../../app/theme/theme_context.dart';
 import '../../../core/api/api_error_messages.dart';
 import '../../../core/api/api_exception.dart';
+import '../../../l10n/formats.dart';
+import '../../../l10n/l10n_context.dart';
 import '../data/device_session.dart';
 import '../providers/sessions_providers.dart';
 
@@ -20,13 +22,13 @@ class DevicesScreen extends ConsumerWidget {
       context: context,
       builder: (dialogContext) => AlertDialog(
         backgroundColor: colors.surface,
-        title: const Text('Revoca'),
-        content: Text('Disconnettere "${session.deviceLabel}"?'),
+        title: Text(context.l10n.devicesRevoke),
+        content: Text(context.l10n.devicesRevokeConfirm(session.deviceLabel)),
         actions: [
-          TextButton(onPressed: () => Navigator.of(dialogContext).pop(false), child: const Text('Annulla')),
+          TextButton(onPressed: () => Navigator.of(dialogContext).pop(false), child: Text(context.l10n.commonCancel)),
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: Text('Revoca', style: TextStyle(color: colors.error)),
+            child: Text(context.l10n.devicesRevoke, style: TextStyle(color: colors.error)),
           ),
         ],
       ),
@@ -41,13 +43,13 @@ class DevicesScreen extends ConsumerWidget {
       context: context,
       builder: (dialogContext) => AlertDialog(
         backgroundColor: colors.surface,
-        title: const Text('Disconnetti tutti gli altri dispositivi'),
-        content: const Text('Le altre sessioni attive verranno chiuse.'),
+        title: Text(context.l10n.devicesRevokeAllOthers),
+        content: Text(context.l10n.devicesRevokeAllOthersBody),
         actions: [
-          TextButton(onPressed: () => Navigator.of(dialogContext).pop(false), child: const Text('Annulla')),
+          TextButton(onPressed: () => Navigator.of(dialogContext).pop(false), child: Text(context.l10n.commonCancel)),
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: Text('Disconnetti', style: TextStyle(color: colors.error)),
+            child: Text(context.l10n.devicesSignOut, style: TextStyle(color: colors.error)),
           ),
         ],
       ),
@@ -56,13 +58,6 @@ class DevicesScreen extends ConsumerWidget {
     await ref.read(devicesControllerProvider.notifier).revokeAllExceptCurrent();
   }
 
-  String _formatLastUsed(DateTime value) {
-    final local = value.toLocal();
-    final date =
-        '${local.day.toString().padLeft(2, '0')}/${local.month.toString().padLeft(2, '0')}/${local.year}';
-    final time = '${local.hour.toString().padLeft(2, '0')}:${local.minute.toString().padLeft(2, '0')}';
-    return '$date, $time';
-  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -77,14 +72,14 @@ class DevicesScreen extends ConsumerWidget {
         backgroundColor: colors.background,
         elevation: 0,
         scrolledUnderElevation: 0,
-        title: Text('Dispositivi collegati', style: typography.titleMedium.copyWith(color: colors.textPrimary)),
+        title: Text(context.l10n.devicesTitle, style: typography.titleMedium.copyWith(color: colors.textPrimary)),
       ),
       body: SafeArea(
         child: devicesState.when(
           loading: () => const Center(child: CircularProgressIndicator()),
           error: (error, _) => Center(
             child: Text(
-              describeApiError(error.asApiException?.code ?? ''),
+              describeApiError(context, error.asApiException?.code ?? ''),
               style: typography.bodyMedium.copyWith(color: colors.textSecondary),
             ),
           ),
@@ -99,7 +94,7 @@ class DevicesScreen extends ConsumerWidget {
                     final session = sessions[index];
                     return _DeviceTile(
                       session: session,
-                      lastUsedLabel: _formatLastUsed(session.lastUsedAt),
+                      lastUsedLabel: formatDateAndTime(context, session.lastUsedAt),
                       onRevoke: session.current ? null : () => _confirmRevoke(context, ref, session),
                     );
                   },
@@ -111,7 +106,7 @@ class DevicesScreen extends ConsumerWidget {
                   child: TextButton(
                     onPressed: () => _confirmRevokeAllOthers(context, ref),
                     child: Text(
-                      'Disconnetti tutti gli altri dispositivi',
+                      context.l10n.devicesRevokeAllOthers,
                       style: TextStyle(color: colors.error),
                     ),
                   ),
@@ -156,18 +151,18 @@ class _DeviceTile extends StatelessWidget {
                     if (session.current) ...[
                       const SizedBox(width: AppSpacing.xs),
                       Text(
-                        '(questo dispositivo)',
+                        context.l10n.devicesCurrent,
                         style: typography.caption.copyWith(color: colors.textSecondary),
                       ),
                     ],
                   ],
                 ),
-                Text('Ultimo utilizzo: $lastUsedLabel', style: typography.caption.copyWith(color: colors.textSecondary)),
+                Text(context.l10n.devicesLastUsed(lastUsedLabel), style: typography.caption.copyWith(color: colors.textSecondary)),
               ],
             ),
           ),
           if (onRevoke != null)
-            TextButton(onPressed: onRevoke, child: Text('Revoca', style: TextStyle(color: colors.error))),
+            TextButton(onPressed: onRevoke, child: Text(context.l10n.devicesRevoke, style: TextStyle(color: colors.error))),
         ],
       ),
     );

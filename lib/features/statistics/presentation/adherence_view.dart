@@ -4,7 +4,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../app/theme/app_spacing.dart';
 import '../../../app/theme/theme_context.dart';
 import '../../../core/widgets/app_segmented_control.dart';
+import '../../../l10n/formats.dart';
+import '../../../l10n/l10n_context.dart';
 import '../../dietplan/presentation/slot_type_presentation.dart';
+import '../../workout/presentation/weekday_presentation.dart';
 import '../data/statistics_models.dart';
 import '../providers/statistics_providers.dart';
 import 'statistics_formatting.dart';
@@ -35,8 +38,8 @@ class AdherenceView extends ConsumerWidget {
     final colors = context.colors;
     final typography = context.typography;
     final periodIndex = ref.watch(selectedAdherencePeriodIndexProvider);
-    final shown = _shownValue(periodIndex);
-    final excluded = describeExcludedDays(statistics.suspendedDays, statistics.uncoveredDays);
+    final shown = _shownValue(context, periodIndex);
+    final excluded = describeExcludedDays(context, statistics.suspendedDays, statistics.uncoveredDays);
 
     return ListView(
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.xs),
@@ -67,12 +70,12 @@ class AdherenceView extends ConsumerWidget {
         if (statistics.weekly.length > 1) ...[
           const SizedBox(height: AppSpacing.lg),
           _Section(
-            title: 'Andamento settimanale',
+            title: context.l10n.adherenceWeeklyTrend,
             child: WeeklyBarChart(
               bars: [
                 for (final week in statistics.weekly)
                   BarDatum(
-                    label: formatWeekLabel(week.weekStart),
+                    label: formatWeekLabel(context, week.weekStart),
                     value: week.value,
                     valueLabel: week.value == null ? '' : '${formatPercentage(week.value!)}%',
                   ),
@@ -82,7 +85,7 @@ class AdherenceView extends ConsumerWidget {
         ],
         const SizedBox(height: AppSpacing.lg),
         _Section(
-          title: 'Per tipo di pasto',
+          title: context.l10n.adherenceBySlotType,
           // AD-13: serve a riconoscere quali momenti della giornata
           // risultino più difficili da rispettare.
           child: Column(
@@ -90,7 +93,7 @@ class AdherenceView extends ConsumerWidget {
               for (final bucket in statistics.bySlotType)
                 BreakdownRow(
                   icon: bucket.slotType.icon,
-                  label: bucket.slotType.displayName,
+                  label: slotTypeLabel(context, bucket.slotType),
                   value: bucket.value == null ? null : '${formatPercentage(bucket.value!)}%',
                   fraction: bucket.value == null ? null : bucket.value! / 100,
                 ),
@@ -99,14 +102,14 @@ class AdherenceView extends ConsumerWidget {
         ),
         const SizedBox(height: AppSpacing.lg),
         _Section(
-          title: 'Per giorno della settimana',
+          title: context.l10n.adherenceByWeekday,
           // AD-13, LO-11: sette righe, dal lunedì alla domenica — servono a
           // riconoscere i giorni ricorrenti in cui il piano viene meno.
           child: Column(
             children: [
               for (final bucket in statistics.byWeekday)
                 BreakdownRow(
-                  label: bucket.weekday.label,
+                  label: workoutWeekdayLabel(context, bucket.weekday),
                   value: bucket.value == null ? null : '${formatPercentage(bucket.value!)}%',
                   fraction: bucket.value == null ? null : bucket.value! / 100,
                 ),
@@ -118,15 +121,18 @@ class AdherenceView extends ConsumerWidget {
     );
   }
 
-  ({double? value, String caption}) _shownValue(int? periodIndex) {
+  ({double? value, String caption}) _shownValue(BuildContext context, int? periodIndex) {
     if (periodIndex != null && periodIndex < statistics.periods.length) {
       final period = statistics.periods[periodIndex];
-      final end = period.endDate == null ? 'in corso' : formatDay(period.endDate!);
-      return (value: period.value, caption: 'Periodo dal ${formatDay(period.startDate)} a $end');
+      final end = period.endDate == null ? context.l10n.planViewOngoing : formatDate(context, period.endDate!);
+      return (
+        value: period.value,
+        caption: context.l10n.adherencePeriodRange(formatDate(context, period.startDate), end),
+      );
     }
     return (
       value: statistics.value,
-      caption: describePeriod(statistics.period, statistics.from, statistics.to, statistics.planName),
+      caption: describePeriod(context, statistics.period, statistics.from, statistics.to, statistics.planName),
     );
   }
 }
@@ -143,7 +149,7 @@ class _PeriodBreakdownSelector extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return AppSegmentedControl(
       labels: [
-        'Complessivo',
+        context.l10n.adherenceOverall,
         for (var index = 0; index < statistics.periods.length; index++) '${index + 1}° periodo',
       ],
       selectedIndex: selectedIndex == null ? 0 : selectedIndex! + 1,

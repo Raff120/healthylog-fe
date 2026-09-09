@@ -5,9 +5,12 @@ import '../../../../app/theme/app_spacing.dart';
 import '../../../../app/theme/theme_context.dart';
 import '../../../../core/widgets/app_primary_button.dart';
 import '../../../../core/widgets/app_text_field.dart';
+import '../../../../l10n/formats.dart';
+import '../../../../l10n/l10n_context.dart';
 import '../../data/workout_models.dart';
 import '../../data/workout_requests.dart';
 import '../../providers/workout_providers.dart';
+import '../weekday_presentation.dart';
 
 /// Modifica della pianificazione (10.1 interfaccia.md): selezione dei
 /// giorni della settimana (AL-10), tipo di attività, e l'azione per
@@ -48,12 +51,12 @@ class _PlanningSheet extends ConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Text(
-                'Pianificazione',
+                context.l10n.workoutPlanning,
                 style: typography.titleMedium.copyWith(color: colors.textPrimary),
               ),
               const SizedBox(height: AppSpacing.xxs),
               Text(
-                'Le modifiche valgono da oggi in avanti: i giorni trascorsi restano come erano.',
+                context.l10n.workoutPlanningNotice,
                 style: typography.caption.copyWith(color: colors.textTertiary),
               ),
               const SizedBox(height: AppSpacing.md),
@@ -63,7 +66,7 @@ class _PlanningSheet extends ConsumerWidget {
                 Padding(
                   padding: const EdgeInsets.only(bottom: AppSpacing.sm),
                   child: Text(
-                    'Nessun allenamento pianificato.',
+                    context.l10n.workoutNonePlannedDot,
                     style: typography.bodyMedium.copyWith(color: colors.textSecondary),
                   ),
                 ),
@@ -71,13 +74,13 @@ class _PlanningSheet extends ConsumerWidget {
               OutlinedButton.icon(
                 onPressed: () => showPlannedWorkoutEditor(context, recurrence: WorkoutRecurrence.weekly),
                 icon: const Icon(Icons.repeat, size: 18),
-                label: const Text('Aggiungi allenamento ricorrente'),
+                label: Text(context.l10n.workoutAddRecurring),
               ),
               const SizedBox(height: AppSpacing.xs),
               OutlinedButton.icon(
                 onPressed: () => showPlannedWorkoutEditor(context, recurrence: WorkoutRecurrence.oneOff),
                 icon: const Icon(Icons.event_outlined, size: 18),
-                label: const Text('Aggiungi allenamento occasionale'),
+                label: Text(context.l10n.workoutAddOneOff),
               ),
               const SizedBox(height: AppSpacing.md),
             ],
@@ -112,20 +115,20 @@ class _PlannedRow extends ConsumerWidget {
                 Text(plan.activityType, style: typography.bodyMedium.copyWith(color: colors.textPrimary)),
                 Text(
                   plan.isWeekly
-                      ? plan.daysOfWeek.map((day) => day.label).join(', ')
-                      : _formatDate(plan.date!),
+                      ? plan.daysOfWeek.map((day) => workoutWeekdayLabel(context, day)).join(', ')
+                      : formatDate(context, plan.date!),
                   style: typography.caption.copyWith(color: colors.textSecondary),
                 ),
               ],
             ),
           ),
           IconButton(
-            tooltip: 'Modifica',
+            tooltip: context.l10n.commonEdit,
             icon: const Icon(Icons.edit_outlined, size: 18),
             onPressed: () => showPlannedWorkoutEditor(context, recurrence: plan.recurrence, existing: plan),
           ),
           IconButton(
-            tooltip: 'Cessa',
+            tooltip: context.l10n.workoutCease,
             icon: const Icon(Icons.close, size: 18),
             onPressed: () => ref.read(plannedWorkoutControllerProvider.notifier).cease(plan.id),
           ),
@@ -177,11 +180,11 @@ class _PlannedWorkoutEditorState extends ConsumerState<_PlannedWorkoutEditor> {
   Future<void> _submit() async {
     final activityType = _activityTypeController.text.trim();
     if (activityType.isEmpty) {
-      setState(() => _error = 'Indica il tipo di attività');
+      setState(() => _error = context.l10n.workoutActivityTypeRequired);
       return;
     }
     if (_isWeekly && _days.isEmpty) {
-      setState(() => _error = 'Scegli almeno un giorno');
+      setState(() => _error = context.l10n.workoutPickAtLeastOneDay);
       return;
     }
     final controller = ref.read(plannedWorkoutControllerProvider.notifier);
@@ -229,12 +232,12 @@ class _PlannedWorkoutEditorState extends ConsumerState<_PlannedWorkoutEditor> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Text(
-                  _isWeekly ? 'Allenamento ricorrente' : 'Allenamento occasionale',
+                  _isWeekly ? context.l10n.workoutRecurring : context.l10n.workoutOneOff,
                   style: typography.titleMedium.copyWith(color: colors.textPrimary),
                 ),
                 const SizedBox(height: AppSpacing.md),
                 AppTextField(
-                  label: 'Tipo di attività',
+                  label: context.l10n.workoutActivityType,
                   controller: _activityTypeController,
                   textCapitalization: TextCapitalization.sentences,
                   onChanged: (_) {
@@ -248,7 +251,7 @@ class _PlannedWorkoutEditorState extends ConsumerState<_PlannedWorkoutEditor> {
                     children: [
                       for (final day in Weekday.values)
                         FilterChip(
-                          label: Text(day.initial),
+                          label: Text(workoutWeekdayInitial(context, day)),
                           selected: _days.contains(day),
                           onSelected: (selected) => setState(() {
                             if (selected) {
@@ -273,14 +276,14 @@ class _PlannedWorkoutEditorState extends ConsumerState<_PlannedWorkoutEditor> {
                       if (picked != null) setState(() => _date = _dateOnly(picked));
                     },
                     icon: const Icon(Icons.calendar_today_outlined, size: 18),
-                    label: Text(_formatDate(_date)),
+                    label: Text(formatDate(context, _date)),
                   ),
                 if (_error != null) ...[
                   const SizedBox(height: AppSpacing.xs),
                   Text(_error!, style: typography.caption.copyWith(color: colors.error)),
                 ],
                 const SizedBox(height: AppSpacing.lg),
-                AppPrimaryButton(label: 'Salva', loading: saving, onPressed: _submit),
+                AppPrimaryButton(label: context.l10n.commonSave, loading: saving, onPressed: _submit),
                 const SizedBox(height: AppSpacing.xs),
               ],
             ),
@@ -293,8 +296,3 @@ class _PlannedWorkoutEditorState extends ConsumerState<_PlannedWorkoutEditor> {
 
 DateTime _dateOnly(DateTime value) => DateTime(value.year, value.month, value.day);
 
-String _formatDate(DateTime value) {
-  final local = value.toLocal();
-  return '${local.day.toString().padLeft(2, '0')}/'
-      '${local.month.toString().padLeft(2, '0')}/${local.year}';
-}

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../app/theme/app_spacing.dart';
 import '../../../app/theme/theme_context.dart';
+import '../../../l10n/l10n_context.dart';
 import '../data/statistics_models.dart';
 import 'statistics_formatting.dart';
 import 'widgets/breakdown_row.dart';
@@ -40,7 +41,7 @@ class WorkoutStatisticsView extends ConsumerWidget {
         StatisticsHeadline(
           value: '${statistics.total}',
           unit: statistics.total == 1 ? 'allenamento' : 'allenamenti',
-          caption: describePeriod(
+          caption: describePeriod(context, 
             statistics.period,
             statistics.from,
             statistics.to,
@@ -54,9 +55,7 @@ class WorkoutStatisticsView extends ConsumerWidget {
         // dall'aderenza, concorrono invece qui per intero (SA-14).
         if (statistics.divergesFromAdherence)
           Text(
-            'Comprende ${statistics.suspendedDays} '
-            '${statistics.suspendedDays == 1 ? 'giorno' : 'giorni'} di sospensione, '
-            'che l’aderenza esclude.',
+            context.l10n.workoutStatsSuspendedNotice(statistics.suspendedDays),
             style: typography.caption.copyWith(color: colors.textSecondary),
           ),
         const SizedBox(height: AppSpacing.lg),
@@ -64,18 +63,18 @@ class WorkoutStatisticsView extends ConsumerWidget {
         // in sua assenza nulla segnala che manchi.
         if (statistics.hasGoal) ...[
           _Section(
-            title: 'Confronto con l’obiettivo',
+            title: context.l10n.workoutStatsGoalComparison,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 BreakdownRow(
-                  label: '${statistics.goalDone} su ${statistics.goal} previsti',
+                  label: context.l10n.workoutStatsGoalProgress(statistics.goalDone!, statistics.goal!),
                   value: null,
                   fraction: statistics.goal! == 0 ? null : statistics.goalDone! / statistics.goal!,
                 ),
                 if (statistics.goalWeeks > 1)
                   Text(
-                    'Su ${statistics.goalWeeks} settimane intere, ciascuna con l’obiettivo allora vigente.',
+                    context.l10n.workoutStatsGoalWeeksNotice(statistics.goalWeeks),
                     style: typography.caption.copyWith(color: colors.textSecondary),
                   ),
               ],
@@ -86,11 +85,11 @@ class WorkoutStatisticsView extends ConsumerWidget {
         // SA-5: distinto dal precedente e presentato separatamente —
         // l'obiettivo riguarda *quante volte*, la pianificazione *quando*.
         _Section(
-          title: 'Confronto con la pianificazione',
+          title: context.l10n.workoutStatsPlanComparison,
           child: Text(
             statistics.planned == 0
-                ? 'Nessun allenamento pianificato nel periodo.'
-                : '${statistics.planned} pianificati, ${statistics.plannedDone} svolti',
+                ? context.l10n.workoutStatsNonePlannedInPeriod
+                : context.l10n.workoutStatsPlanProgress(statistics.planned, statistics.plannedDone),
             style: typography.bodyMedium.copyWith(color: colors.textPrimary),
           ),
         ),
@@ -98,12 +97,12 @@ class WorkoutStatisticsView extends ConsumerWidget {
         if (statistics.weekly.length > 1) ...[
           const SizedBox(height: AppSpacing.lg),
           _Section(
-            title: 'Andamento settimanale',
+            title: context.l10n.workoutStatsWeeklyTrend,
             child: WeeklyBarChart(
               bars: [
                 for (final week in statistics.weekly)
                   BarDatum(
-                    label: formatWeekLabel(week.weekStart),
+                    label: formatWeekLabel(context, week.weekStart),
                     value: week.count.toDouble(),
                     valueLabel: '${week.count}',
                   ),
@@ -118,12 +117,12 @@ class WorkoutStatisticsView extends ConsumerWidget {
         ],
         const SizedBox(height: AppSpacing.lg),
         _Section(
-          title: 'Distribuzione per tipo',
+          title: context.l10n.workoutStatsDistribution,
           // SA-7: le statistiche non distinguono gli allenamenti pianificati
           // da quelli spontanei — la distinzione resta nell'elenco (RA-13).
           child: statistics.byActivityType.isEmpty
               ? Text(
-                  'Nessun allenamento registrato nel periodo.',
+                  context.l10n.workoutStatsNoneRecordedInPeriod,
                   style: typography.bodyMedium.copyWith(color: colors.textSecondary),
                 )
               : Column(

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../app/theme/app_spacing.dart';
 import '../../../../app/theme/theme_context.dart';
+import '../../../../l10n/l10n_context.dart';
 import '../../data/plan_status.dart';
 
 /// CV-10, CV-11, CV-12, ST-14, 4.5 interfaccia.md: conferma
@@ -25,7 +26,7 @@ Future<bool> confirmDeletePlan(BuildContext context, PlanStatus status) async {
     context: context,
     builder: (dialogContext) => AlertDialog(
       backgroundColor: colors.surface,
-      title: const Text('Eliminare il piano?'),
+      title: Text(context.l10n.planDeleteTitle),
       content: rafforzata
           ? Column(
               mainAxisSize: MainAxisSize.min,
@@ -33,26 +34,26 @@ Future<bool> confirmDeletePlan(BuildContext context, PlanStatus status) async {
               children: [
                 Text(
                   status == PlanStatus.completed
-                      ? 'Andranno perdute in modo definitivo, per tutti i periodi del piano:'
-                      : 'Andranno perdute in modo definitivo, per questo periodo:',
+                      ? context.l10n.planDeleteLossAllPeriods
+                      : context.l10n.planDeleteLossThisPeriod,
                 ),
                 const SizedBox(height: AppSpacing.xs),
-                Text('•  le giornate e le spunte di consumo', style: TextStyle(color: colors.textSecondary)),
-                Text('•  le statistiche di aderenza', style: TextStyle(color: colors.textSecondary)),
-                Text('•  lo storico delle inversioni', style: TextStyle(color: colors.textSecondary)),
+                Text(context.l10n.planDeleteLossDays, style: TextStyle(color: colors.textSecondary)),
+                Text(context.l10n.planDeleteLossStatistics, style: TextStyle(color: colors.textSecondary)),
+                Text(context.l10n.planDeleteLossSwaps, style: TextStyle(color: colors.textSecondary)),
                 const SizedBox(height: AppSpacing.xs),
                 Text(
-                  'Allenamenti e misurazioni dello stesso periodo restano.',
+                  context.l10n.planDeleteWorkoutsKept,
                   style: TextStyle(color: colors.textSecondary),
                 ),
               ],
             )
-          : const Text('L\'operazione non può essere annullata.'),
+          : Text(context.l10n.planDeleteIrreversible),
       actions: [
-        TextButton(onPressed: () => Navigator.of(dialogContext).pop(false), child: const Text('Annulla')),
+        TextButton(onPressed: () => Navigator.of(dialogContext).pop(false), child: Text(context.l10n.commonCancel)),
         TextButton(
           onPressed: () => Navigator.of(dialogContext).pop(true),
-          child: Text('Elimina', style: TextStyle(color: colors.error)),
+          child: Text(context.l10n.commonDelete, style: TextStyle(color: colors.error)),
         ),
       ],
     ),

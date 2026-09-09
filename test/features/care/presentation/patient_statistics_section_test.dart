@@ -5,6 +5,7 @@ import 'package:healthylog/app/theme/app_theme.dart';
 import 'package:healthylog/features/care/presentation/widgets/patient_statistics_section.dart';
 import 'package:healthylog/features/statistics/providers/statistics_providers.dart';
 
+import '../../../support/l10n_test_support.dart';
 import '../../../support/statistics_api_stub.dart';
 
 /// 9.2 interfaccia.md, VA-7: le statistiche del Paziente nel dettaglio del
@@ -31,6 +32,10 @@ Future<void> _pumpSection(
         )),
       ],
       child: MaterialApp(
+      locale: testLocale,
+      localizationsDelegates: testLocalizationsDelegates,
+      supportedLocales: testSupportedLocales,
+      
         theme: AppTheme.light,
         home: const Scaffold(
           body: SingleChildScrollView(child: PatientStatisticsSection(patientId: 'p-1')),
@@ -81,7 +86,6 @@ void main() {
         'series': [
           {
             'measure': 'WEIGHT',
-            'unit': 'kg',
             'points': [
               {'date': '2026-03-02', 'value': 80.0, 'source': 'USER'},
               {'date': '2026-03-20', 'value': 78.0, 'source': 'NUTRITIONIST'},

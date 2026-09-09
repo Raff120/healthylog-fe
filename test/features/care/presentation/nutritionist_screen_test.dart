@@ -1,3 +1,4 @@
+import '../../../support/l10n_test_support.dart';
 import 'dart:convert';
 import 'dart:typed_data';
 
@@ -101,7 +102,11 @@ Future<_CareLifecycleAdapter> _pump(WidgetTester tester, _CareLifecycleAdapter a
   await tester.pumpWidget(
     ProviderScope(
       overrides: [careApiProvider.overrideWithValue(CareApi(dio))],
-      child: MaterialApp.router(theme: AppTheme.light, routerConfig: router),
+      child: MaterialApp.router(
+      locale: testLocale,
+      localizationsDelegates: testLocalizationsDelegates,
+      supportedLocales: testSupportedLocales,
+      theme: AppTheme.light, routerConfig: router),
     ),
   );
   await tester.pumpAndSettle();

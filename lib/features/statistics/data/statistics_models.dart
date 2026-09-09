@@ -5,15 +5,18 @@ import '../../workout/data/workout_models.dart' show Weekday;
 /// Orizzonte di calcolo delle statistiche (AD-8, SA-10, AN-13): settimana,
 /// mese o intero piano. AD-10: l'intervallo personalizzato non è previsto
 /// in v1.
+///
+/// Le denominazioni non sono qui ma in
+/// `presentation/statistics_presentation.dart`: dipendono dalla lingua
+/// selezionata (LO-1) e l'enumerativo non deve conoscerla.
 enum StatisticsPeriod {
-  week('WEEK', 'Settimana'),
-  month('MONTH', 'Mese'),
-  plan('PLAN', 'Piano');
+  week('WEEK'),
+  month('MONTH'),
+  plan('PLAN');
 
-  const StatisticsPeriod(this.param, this.label);
+  const StatisticsPeriod(this.param);
 
   final String param;
-  final String label;
 
   static StatisticsPeriod fromParam(String value) =>
       StatisticsPeriod.values.firstWhere((period) => period.param == value, orElse: () => StatisticsPeriod.week);
@@ -21,18 +24,20 @@ enum StatisticsPeriod {
 
 /// Grandezza corporea di cui è consultabile l'andamento (AN-1), come la
 /// scrive il backend (`it.healthylog.model.BodyMeasure`).
+///
+/// Le denominazioni non sono qui ma in
+/// `presentation/statistics_presentation.dart` (LO-1).
 enum BodyMeasure {
-  weight('WEIGHT', 'Peso'),
-  waist('WAIST', 'Vita'),
-  hips('HIPS', 'Fianchi'),
-  chest('CHEST', 'Torace'),
-  arm('ARM', 'Braccio'),
-  thigh('THIGH', 'Coscia');
+  weight('WEIGHT'),
+  waist('WAIST'),
+  hips('HIPS'),
+  chest('CHEST'),
+  arm('ARM'),
+  thigh('THIGH');
 
-  const BodyMeasure(this.param, this.label);
+  const BodyMeasure(this.param);
 
   final String param;
-  final String label;
 
   static BodyMeasure fromJson(String value) =>
       BodyMeasure.values.firstWhere((measure) => measure.param == value);
@@ -283,14 +288,12 @@ class MeasurePoint {
 class MeasureSeries {
   const MeasureSeries({
     required this.measure,
-    required this.unit,
     required this.points,
     required this.change,
   });
 
   factory MeasureSeries.fromJson(Map<String, dynamic> json) => MeasureSeries(
         measure: BodyMeasure.fromJson(json['measure'] as String),
-        unit: json['unit'] as String,
         points: (json['points'] as List)
             .map((e) => MeasurePoint.fromJson(e as Map<String, dynamic>))
             .toList(),
@@ -298,7 +301,6 @@ class MeasureSeries {
       );
 
   final BodyMeasure measure;
-  final String unit;
   final List<MeasurePoint> points;
 
   /// AN-10: differenza rispetto al primo valore, assente con meno di due

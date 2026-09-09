@@ -4,6 +4,7 @@ import '../../../../app/theme/app_spacing.dart';
 import '../../../../app/theme/theme_context.dart';
 import '../../data/weekday.dart';
 import '../editable_slot.dart';
+import '../weekday_presentation.dart';
 
 /// Selettore dei giorni (7.3 interfaccia.md): sette segmenti con le
 /// iniziali, il giorno in redazione evidenziato in accento, un punto in
@@ -40,7 +41,7 @@ class DaySelector extends StatelessWidget {
                     radius: AppSpacing.minInteractiveTarget / 2,
                     backgroundColor: isSelected ? colors.accent : colors.surfaceAlt,
                     child: Text(
-                      day.dayOfWeek.initial,
+                      weekdayInitial(context, day.dayOfWeek),
                       style: typography.label.copyWith(
                         color: isSelected ? colors.surface : colors.textPrimary,
                       ),

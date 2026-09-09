@@ -1,3 +1,4 @@
+import '../../../l10n/app_locale.dart';
 import 'account_role.dart';
 
 /// Corpo di `POST /auth/register` (rispecchia `RegisterRequest` sul
@@ -13,6 +14,8 @@ class RegisterRequest {
     required this.sex,
     required this.password,
     required this.role,
+    required this.locale,
+    required this.privacyPolicyVersion,
   });
 
   final String email;
@@ -25,6 +28,14 @@ class RegisterRequest {
   final String password;
   final AccountRole role;
 
+  /// LO-2, AU-27: la lingua in uso al momento della registrazione, che il
+  /// server conserva e impiega per le comunicazioni per posta.
+  final AppLocale locale;
+
+  /// PV-6, PV-7: la versione dell'informativa presentata e accettata, che
+  /// il server registra con la data.
+  final String privacyPolicyVersion;
+
   Map<String, dynamic> toJson() => {
         'email': email,
         'username': username,
@@ -36,6 +47,8 @@ class RegisterRequest {
         'sex': sex.toJson(),
         'password': password,
         'role': role.toJson(),
+        'locale': locale.toJson(),
+        'privacyPolicyVersion': privacyPolicyVersion,
       };
 }
 

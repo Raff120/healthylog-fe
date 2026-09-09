@@ -8,6 +8,7 @@ import '../../../app/theme/theme_context.dart';
 import '../../../core/api/api_error_messages.dart';
 import '../../../core/api/api_exception.dart';
 import '../../../core/widgets/app_primary_button.dart';
+import '../../../l10n/l10n_context.dart';
 import '../data/diet_plan.dart';
 import '../data/diet_plan_requests.dart';
 import '../data/plan_status.dart';
@@ -17,6 +18,7 @@ import '../providers/diet_plan_providers.dart';
 import '../providers/diet_plan_template_providers.dart';
 import 'editable_slot.dart';
 import 'slot_type_presentation.dart';
+import 'weekday_presentation.dart';
 import 'widgets/day_selector.dart';
 import 'widgets/day_sidebar.dart';
 import 'widgets/delete_plan_dialog.dart';
@@ -79,9 +81,9 @@ class _DietPlanScheduleScreenState extends ConsumerState<DietPlanScheduleScreen>
   Future<void> _removeSlot(EditableSlot slot) async {
     if (!slot.isEmpty) {
       final confirmed = await _confirmDialog(
-        title: 'Rimuovere lo slot?',
-        message: 'Il contenuto compilato andrà perso.',
-        confirmLabel: 'Rimuovi',
+        title: context.l10n.editRemoveSlotTitle,
+        message: context.l10n.editRemoveSlotBody,
+        confirmLabel: context.l10n.commonRemove,
       );
       if (confirmed != true) return;
     }
@@ -109,7 +111,7 @@ class _DietPlanScheduleScreenState extends ConsumerState<DietPlanScheduleScreen>
         title: Text(title),
         content: Text(message),
         actions: [
-          TextButton(onPressed: () => Navigator.of(dialogContext).pop(false), child: const Text('Annulla')),
+          TextButton(onPressed: () => Navigator.of(dialogContext).pop(false), child: Text(context.l10n.commonCancel)),
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(true),
             child: Text(confirmLabel, style: TextStyle(color: colors.error)),
@@ -125,8 +127,8 @@ class _DietPlanScheduleScreenState extends ConsumerState<DietPlanScheduleScreen>
   Future<void> _saveAsTemplate(String planName) async {
     final input = await showNameDescriptionDialog(
       context,
-      title: 'Salva come template',
-      confirmLabel: 'Salva',
+      title: context.l10n.scheduleSaveAsTemplate,
+      confirmLabel: context.l10n.commonSave,
       initialName: planName,
     );
     if (input == null) return;
@@ -136,9 +138,9 @@ class _DietPlanScheduleScreenState extends ConsumerState<DietPlanScheduleScreen>
     if (!mounted) return;
     final state = ref.read(saveDietPlanAsTemplateControllerProvider);
     state?.whenOrNull(
-      data: (_) => ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Template creato.'))),
+      data: (_) => ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(context.l10n.scheduleTemplateCreated))),
       error: (error, _) => ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(describeApiError(error.asApiException?.code ?? ''))),
+        SnackBar(content: Text(describeApiError(context, error.asApiException?.code ?? ''))),
       ),
     );
   }
@@ -168,7 +170,7 @@ class _DietPlanScheduleScreenState extends ConsumerState<DietPlanScheduleScreen>
         _dirty = false;
         _saving = false;
       });
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Piano salvato.')));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(context.l10n.scheduleSaved)));
     } catch (error) {
       if (!mounted) return;
       setState(() => _saving = false);
@@ -190,21 +192,21 @@ class _DietPlanScheduleScreenState extends ConsumerState<DietPlanScheduleScreen>
         final slotIndex = int.parse(match.group(2)!);
         final day = _days![dayIndex];
         final slot = day.slots[slotIndex];
-        slot.recipeNameError = 'Serve una denominazione se è presente il testo della ricetta';
+        slot.recipeNameError = context.l10n.editRecipeNameRequired;
         slot.expanded = true;
         setState(() => _selectedDay = day.dayOfWeek);
       }
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            matchedRecipeField ? 'Controlla i campi della ricetta segnalati.' : describeApiError('VALIDATION_FAILED'),
+            matchedRecipeField ? context.l10n.editRecipeFieldsInvalid : describeApiError(context, 'VALIDATION_FAILED'),
           ),
         ),
       );
       return;
     }
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(describeApiError(exception?.code ?? ''))),
+      SnackBar(content: Text(describeApiError(context, exception?.code ?? ''))),
     );
   }
 
@@ -221,7 +223,7 @@ class _DietPlanScheduleScreenState extends ConsumerState<DietPlanScheduleScreen>
     state?.whenOrNull(
       data: (_) => _leave(),
       error: (error, _) => ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(describeApiError(error.asApiException?.code ?? ''))),
+        SnackBar(content: Text(describeApiError(context, error.asApiException?.code ?? ''))),
       ),
     );
   }
@@ -264,7 +266,7 @@ class _DietPlanScheduleScreenState extends ConsumerState<DietPlanScheduleScreen>
           setState(() => _selectedDay = _days!.first.dayOfWeek);
         }
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(describeApiError(exception?.code ?? ''))),
+          SnackBar(content: Text(describeApiError(context, exception?.code ?? ''))),
         );
       },
     );
@@ -292,7 +294,7 @@ class _DietPlanScheduleScreenState extends ConsumerState<DietPlanScheduleScreen>
             children: [
               Padding(
                 padding: const EdgeInsets.fromLTRB(AppSpacing.md, AppSpacing.md, AppSpacing.md, AppSpacing.xs),
-                child: Text('Schema incompleto', style: typography.titleMedium.copyWith(color: colors.textPrimary)),
+                child: Text(context.l10n.scheduleIncompleteTitle, style: typography.titleMedium.copyWith(color: colors.textPrimary)),
               ),
               Flexible(
                 child: ListView(
@@ -300,9 +302,10 @@ class _DietPlanScheduleScreenState extends ConsumerState<DietPlanScheduleScreen>
                   children: [
                     for (final day in incompleteDays)
                       ListTile(
-                        title: Text(day.dayOfWeek.label, style: typography.bodyLarge.copyWith(color: colors.textPrimary)),
+                        title: Text(weekdayLabel(context, day.dayOfWeek), style: typography.bodyLarge.copyWith(color: colors.textPrimary)),
                         subtitle: Text(
-                          '${day.slots.where((slot) => slot.isEmpty).length} pasto/i senza contenuto',
+                          context.l10n.scheduleSlotsWithoutContent(
+                              day.slots.where((slot) => slot.isEmpty).length),
                           style: typography.caption.copyWith(color: colors.textSecondary),
                         ),
                         trailing: Icon(Icons.chevron_right, color: colors.textTertiary),
@@ -360,17 +363,17 @@ class _DietPlanScheduleScreenState extends ConsumerState<DietPlanScheduleScreen>
               children: [
                 Icon(type.icon, size: 18),
                 const SizedBox(width: AppSpacing.xs),
-                Flexible(child: Text('Aggiungi ${type.displayName.toLowerCase()}', overflow: TextOverflow.ellipsis)),
+                Flexible(child: Text(context.l10n.slotAddOfType(slotTypeLabel(context, type).toLowerCase()), overflow: TextOverflow.ellipsis)),
               ],
             ),
           ),
         PopupMenuItem(
           value: SlotType.snack,
-          child: const Row(
+          child: Row(
             children: [
               Icon(Icons.add, size: 18),
               SizedBox(width: AppSpacing.xs),
-              Flexible(child: Text('Aggiungi spuntino', overflow: TextOverflow.ellipsis)),
+              Flexible(child: Text(context.l10n.editAddSnack, overflow: TextOverflow.ellipsis)),
             ],
           ),
         ),
@@ -392,8 +395,7 @@ class _DietPlanScheduleScreenState extends ConsumerState<DietPlanScheduleScreen>
           const SizedBox(width: AppSpacing.xs),
           Expanded(
             child: Text(
-              'Le modifiche decorrono da oggi e valgono per tutte le settimane: le giornate già trascorse '
-              'restano invariate. Per cambiare una sola giornata, usa "Modifica questa giornata" dalla vista del giorno.',
+              context.l10n.scheduleRetroactivityNotice,
               style: typography.caption.copyWith(color: colors.textPrimary),
             ),
           ),
@@ -446,9 +448,9 @@ class _DietPlanScheduleScreenState extends ConsumerState<DietPlanScheduleScreen>
         if (didPop) return;
         final navigator = Navigator.of(context);
         final confirmed = await _confirmDialog(
-          title: 'Modifiche non salvate',
-          message: 'Uscendo perderai le modifiche non salvate.',
-          confirmLabel: 'Esci senza salvare',
+          title: context.l10n.editDiscardTitle,
+          message: context.l10n.editDiscardBody,
+          confirmLabel: context.l10n.editDiscardConfirm,
         );
         if (confirmed == true) navigator.pop();
       },
@@ -459,7 +461,7 @@ class _DietPlanScheduleScreenState extends ConsumerState<DietPlanScheduleScreen>
           elevation: 0,
           scrolledUnderElevation: 0,
           title: Text(
-            planState.value?.name ?? 'Redazione dello schema',
+            planState.value?.name ?? context.l10n.scheduleTitle,
             style: typography.titleMedium.copyWith(color: colors.textPrimary),
           ),
           actions: [
@@ -483,14 +485,14 @@ class _DietPlanScheduleScreenState extends ConsumerState<DietPlanScheduleScreen>
                             ),
                             onPressed: _dirty ? _save : null,
                             child: Text(
-                              'Salva',
+                              context.l10n.commonSave,
                               style: typography.label.copyWith(
                                 color: _dirty ? colors.accent : colors.textTertiary,
                               ),
                             ),
                           ),
                     if (_dirty)
-                      Text('Modifiche non salvate', style: typography.caption.copyWith(color: colors.textSecondary)),
+                      Text(context.l10n.editDiscardTitle, style: typography.caption.copyWith(color: colors.textSecondary)),
                   ],
                 ),
               ),
@@ -498,7 +500,7 @@ class _DietPlanScheduleScreenState extends ConsumerState<DietPlanScheduleScreen>
             if (_days != null)
               PopupMenuButton<SlotType>(
                 icon: const Icon(Icons.add),
-                tooltip: 'Aggiungi',
+                tooltip: context.l10n.commonAdd,
                 onSelected: _addSlot,
                 itemBuilder: (context) => _addSlotMenuItems(_currentDay),
               ),
@@ -508,10 +510,10 @@ class _DietPlanScheduleScreenState extends ConsumerState<DietPlanScheduleScreen>
                 if (value == 'delete') _delete(planState.value!.status);
               },
               itemBuilder: (context) => [
-                const PopupMenuItem(value: 'save-as-template', child: Text('Salva come template')),
+                PopupMenuItem(value: 'save-as-template', child: Text(context.l10n.scheduleSaveAsTemplate)),
                 // CV-11: l'Attivo non compare, il server la rifiuterebbe comunque.
                 if (planState.value != null && planState.value!.status != PlanStatus.active)
-                  PopupMenuItem(value: 'delete', child: Text('Elimina', style: TextStyle(color: colors.error))),
+                  PopupMenuItem(value: 'delete', child: Text(context.l10n.commonDelete, style: TextStyle(color: colors.error))),
               ],
             ),
           ],
@@ -521,7 +523,7 @@ class _DietPlanScheduleScreenState extends ConsumerState<DietPlanScheduleScreen>
             loading: () => const Center(child: CircularProgressIndicator()),
             error: (error, _) => Center(
               child: Text(
-                describeApiError(error.asApiException?.code ?? ''),
+                describeApiError(context, error.asApiException?.code ?? ''),
                 style: typography.bodyMedium.copyWith(color: colors.textSecondary),
               ),
             ),
@@ -590,7 +592,7 @@ class _DietPlanScheduleScreenState extends ConsumerState<DietPlanScheduleScreen>
                   children: [
                     Expanded(child: content),
                     _bottomActionBar(
-                      label: 'Conferma piano',
+                      label: context.l10n.scheduleConfirmPlan,
                       loading: confirming,
                       onPressed: _dirty ? null : _confirm,
                     ),
@@ -603,7 +605,7 @@ class _DietPlanScheduleScreenState extends ConsumerState<DietPlanScheduleScreen>
                   children: [
                     Expanded(child: content),
                     _bottomActionBar(
-                      label: 'Salva modifiche',
+                      label: context.l10n.scheduleSave,
                       loading: _saving,
                       onPressed: _dirty ? _save : null,
                     ),

@@ -79,4 +79,33 @@ class DietPlanApi {
   /// CV-10, CV-11: eliminazione definitiva, rifiutata dal backend se il
   /// piano è Attivo.
   Future<void> delete(String id) => _dio.delete('/diet-plans/$id');
+
+  /// PV-12, PV-13, PV-15: il PDF del piano, con il nome del file che il
+  /// server propone nell'intestazione `Content-Disposition`.
+  Future<ExportedPlanFile> export(String id) async {
+    final response = await _dio.get<List<int>>(
+      '/diet-plans/$id/export',
+      options: Options(responseType: ResponseType.bytes),
+    );
+    return ExportedPlanFile(
+      fileName: _fileNameFrom(response.headers.value('content-disposition')) ?? 'piano.pdf',
+      bytes: response.data ?? const [],
+    );
+  }
+
+  /// Estrae `filename="…"` dall'intestazione, con il ripiego sul nome
+  /// predefinito quando l'intestazione manchi o non lo dichiari.
+  static String? _fileNameFrom(String? contentDisposition) {
+    if (contentDisposition == null) return null;
+    final match = RegExp('filename="?([^";]+)"?').firstMatch(contentDisposition);
+    return match?.group(1);
+  }
+}
+
+/// Il documento restituito dall'esportazione (PV-12).
+class ExportedPlanFile {
+  const ExportedPlanFile({required this.fileName, required this.bytes});
+
+  final String fileName;
+  final List<int> bytes;
 }

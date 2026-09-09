@@ -7,6 +7,8 @@ import '../../../app/theme/theme_context.dart';
 import '../../../core/api/api_error_messages.dart';
 import '../../../core/api/api_exception.dart';
 import '../../../core/widgets/app_primary_button.dart';
+import '../../../l10n/formats.dart';
+import '../../../l10n/l10n_context.dart';
 import '../../care/domain/plan_competence.dart';
 import '../../care/providers/care_providers.dart';
 import '../data/diet_plan.dart';
@@ -51,7 +53,7 @@ class DietPlanManagementScreen extends ConsumerWidget {
         title: Text(title),
         content: Text(message),
         actions: [
-          TextButton(onPressed: () => Navigator.of(dialogContext).pop(false), child: const Text('Annulla')),
+          TextButton(onPressed: () => Navigator.of(dialogContext).pop(false), child: Text(context.l10n.commonCancel)),
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(true),
             child: Text(confirmLabel),
@@ -76,9 +78,9 @@ class DietPlanManagementScreen extends ConsumerWidget {
   Future<void> _complete(BuildContext context, WidgetRef ref, String planId) async {
     final confirmed = await _confirmSimple(
       context,
-      title: 'Concludere il piano?',
-      message: 'Potrai sempre riattivarlo in seguito.',
-      confirmLabel: 'Concludi',
+      title: context.l10n.plansCompleteConfirmTitle,
+      message: context.l10n.plansCompleteConfirmBody,
+      confirmLabel: context.l10n.planActionComplete,
     );
     if (confirmed != true) return;
     if (!context.mounted) return;
@@ -89,9 +91,9 @@ class DietPlanManagementScreen extends ConsumerWidget {
   Future<void> _withdraw(BuildContext context, WidgetRef ref, String planId) async {
     final confirmed = await _confirmSimple(
       context,
-      title: 'Ritirare il piano?',
-      message: 'Tornerà in Bozza: potrai riprenderlo dalla redazione.',
-      confirmLabel: 'Ritira',
+      title: context.l10n.plansWithdrawConfirmTitle,
+      message: context.l10n.plansWithdrawConfirmBody,
+      confirmLabel: context.l10n.planActionWithdraw,
     );
     if (confirmed != true) return;
     if (!context.mounted) return;
@@ -109,7 +111,7 @@ class DietPlanManagementScreen extends ConsumerWidget {
     final state = ref.read(dietPlanLifecycleControllerProvider);
     if (state?.hasError ?? false) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(describeApiError(state?.error?.asApiException?.code ?? ''))),
+        SnackBar(content: Text(describeApiError(context, state?.error?.asApiException?.code ?? ''))),
       );
       return;
     }
@@ -130,21 +132,33 @@ class DietPlanManagementScreen extends ConsumerWidget {
     await _act(context, ref, () => ref.read(dietPlanLifecycleControllerProvider.notifier).delete(planId));
   }
 
+  /// PV-12, PV-13: il documento è preparato dal server e consegnato dal
+  /// mezzo proprio della piattaforma. L'attesa è dichiarata perché la
+  /// composizione non è istantanea (2.6).
+  Future<void> _export(BuildContext context, WidgetRef ref, String planId) async {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(context.l10n.planExportInProgress)),
+    );
+    await ref.read(dietPlanExportControllerProvider.notifier).export(planId);
+    if (!context.mounted) return;
+    ref.read(dietPlanExportControllerProvider)?.whenOrNull(
+          error: (error, _) => ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(describeApiError(context, error.asApiException?.code ?? ''))),
+          ),
+        );
+  }
+
   Future<void> _act(BuildContext context, WidgetRef ref, Future<void> Function() action) async {
     await action();
     if (!context.mounted) return;
     final state = ref.read(dietPlanLifecycleControllerProvider);
     state?.whenOrNull(
       error: (error, _) => ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(describeApiError(error.asApiException?.code ?? ''))),
+        SnackBar(content: Text(describeApiError(context, error.asApiException?.code ?? ''))),
       ),
     );
   }
 
-  String _formatDate(DateTime value) {
-    final local = value.toLocal();
-    return '${local.day.toString().padLeft(2, '0')}/${local.month.toString().padLeft(2, '0')}/${local.year}';
-  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -162,7 +176,7 @@ class DietPlanManagementScreen extends ConsumerWidget {
         backgroundColor: colors.background,
         elevation: 0,
         scrolledUnderElevation: 0,
-        title: Text('Piani', style: typography.titleMedium.copyWith(color: colors.textPrimary)),
+        title: Text(context.l10n.profilePlans, style: typography.titleMedium.copyWith(color: colors.textPrimary)),
       ),
       // 7.1 interfaccia.md: "Pulsante mobile in basso a destra", sempre
       // presente — non solo nello stato vuoto.
@@ -177,7 +191,7 @@ class DietPlanManagementScreen extends ConsumerWidget {
           loading: () => const Center(child: CircularProgressIndicator()),
           error: (error, _) => Center(
             child: Text(
-              describeApiError(error.asApiException?.code ?? ''),
+              describeApiError(context, error.asApiException?.code ?? ''),
               style: typography.bodyMedium.copyWith(color: colors.textSecondary),
             ),
           ),
@@ -190,7 +204,7 @@ class DietPlanManagementScreen extends ConsumerWidget {
                 child: Padding(
                   padding: const EdgeInsets.all(AppSpacing.md),
                   child: Text(
-                    'Il tuo nutrizionista non ha ancora redatto un piano.',
+                    context.l10n.plansEmptyPatient,
                     style: typography.bodyMedium.copyWith(color: colors.textSecondary),
                     textAlign: TextAlign.center,
                   ),
@@ -204,10 +218,10 @@ class DietPlanManagementScreen extends ConsumerWidget {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Text('Inizia da qui', style: typography.titleMedium.copyWith(color: colors.textPrimary)),
+                      Text(context.l10n.plansStartHere, style: typography.titleMedium.copyWith(color: colors.textPrimary)),
                       const SizedBox(height: AppSpacing.xs),
                       Text(
-                        'Non hai ancora un piano alimentare.',
+                        context.l10n.plansEmptyOwn,
                         style: typography.bodyMedium.copyWith(color: colors.textSecondary),
                         textAlign: TextAlign.center,
                       ),
@@ -215,7 +229,7 @@ class DietPlanManagementScreen extends ConsumerWidget {
                       SizedBox(
                         width: 200,
                         child: AppPrimaryButton(
-                          label: 'Crea piano',
+                          label: context.l10n.planCreateSubmit,
                           onPressed: () => context.push('/diet-plans/new'),
                         ),
                       ),
@@ -237,7 +251,7 @@ class DietPlanManagementScreen extends ConsumerWidget {
                     acting: acting,
                     locked: isPlanLockedForPatient(current, careLink),
                     authorName: current.authorId == careLink?.nutritionistId ? careLink?.nutritionistName : null,
-                    formatDate: _formatDate,
+                    formatDate: (date) => formatDate(context, date),
                     onSuspend: () => _suspend(context, ref, current.id),
                     onResume: () => _resume(context, ref, current.id),
                     onComplete: () => _complete(context, ref, current.id),
@@ -246,6 +260,7 @@ class DietPlanManagementScreen extends ConsumerWidget {
                     onEditScheduled: () => _editScheduled(context, ref, current.id),
                     onEditInPlace: () => _editInPlace(context, current.id),
                     onDelete: () => _delete(context, ref, current.id, current.status),
+                    onExport: () => _export(context, ref, current.id),
                   ),
                   if (others.isNotEmpty) const SizedBox(height: AppSpacing.md),
                 ],
@@ -254,7 +269,7 @@ class DietPlanManagementScreen extends ConsumerWidget {
                     padding: const EdgeInsets.only(bottom: AppSpacing.sm),
                     child: _OtherPlanTile(
                       plan: plan,
-                      formatDate: _formatDate,
+                      formatDate: (date) => formatDate(context, date),
                       // UT-8: il piano bloccato si apre in sola lettura, come il Concluso.
                       onTap: () => context.push(
                           plan.status == PlanStatus.completed || isPlanLockedForPatient(plan, careLink)
@@ -288,6 +303,7 @@ class _CurrentPlanCard extends StatelessWidget {
     required this.onEditScheduled,
     required this.onEditInPlace,
     required this.onDelete,
+    required this.onExport,
   });
 
   final DietPlan plan;
@@ -307,11 +323,14 @@ class _CurrentPlanCard extends StatelessWidget {
   final VoidCallback onEditScheduled;
   final VoidCallback onEditInPlace;
   final VoidCallback onDelete;
+  final VoidCallback onExport;
 
-  String get _statusLabel => switch (plan.status) {
-        PlanStatus.active => 'In corso',
-        PlanStatus.suspended => 'Sospeso',
-        PlanStatus.scheduled => 'Programmato',
+  /// 7.1: la riga di stato del piano in corso. L'Attivo si presenta come
+  /// "In corso", non con il nome tecnico dello stato.
+  String _statusLabel(BuildContext context) => switch (plan.status) {
+        PlanStatus.active => context.l10n.plansCurrent,
+        PlanStatus.suspended => context.l10n.planStatusSuspended,
+        PlanStatus.scheduled => context.l10n.planStatusScheduled,
         _ => '',
       };
 
@@ -329,19 +348,19 @@ class _CurrentPlanCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(_statusLabel.toUpperCase(), style: typography.overline.copyWith(color: colors.accent)),
+          Text(_statusLabel(context).toUpperCase(), style: typography.overline.copyWith(color: colors.accent)),
           const SizedBox(height: AppSpacing.xxs),
           Text(plan.name, style: typography.titleLarge.copyWith(color: colors.textPrimary)),
           const SizedBox(height: AppSpacing.xxs),
-          Text(planPeriodLabel(plan, formatDate), style: typography.bodyMedium.copyWith(color: colors.textSecondary)),
+          Text(planPeriodLabel(context, plan, formatDate), style: typography.bodyMedium.copyWith(color: colors.textSecondary)),
           if (authorName != null && authorName!.isNotEmpty) ...[
             const SizedBox(height: AppSpacing.xxs),
-            Text('Redatto da $authorName', style: typography.caption.copyWith(color: colors.textTertiary)),
+            Text(context.l10n.plansAuthoredBy(authorName!), style: typography.caption.copyWith(color: colors.textTertiary)),
           ],
           if (locked) ...[
             const SizedBox(height: AppSpacing.sm),
             Text(
-              'Il contenuto del piano è a cura del tuo nutrizionista: puoi spuntare e invertire i pasti.',
+              context.l10n.plansPatientNotice,
               style: typography.caption.copyWith(color: colors.textSecondary),
             ),
           ],
@@ -350,7 +369,7 @@ class _CurrentPlanCard extends StatelessWidget {
             spacing: AppSpacing.xs,
             runSpacing: AppSpacing.xs,
             children: [
-              for (final action in locked ? const <_PlanAction>[] : _actionsFor(plan.status))
+              for (final action in locked ? const <_PlanAction>[] : _actionsFor(context, plan.status))
                 OutlinedButton(
                   onPressed: acting ? null : action.onPressed,
                   style: action.destructive
@@ -368,25 +387,33 @@ class _CurrentPlanCard extends StatelessWidget {
   /// MD-1: Attivo e Sospeso si modificano ora direttamente (`onEditInPlace`),
   /// non solo il Programmato (`onEditScheduled`, via ritiro). CV-10:
   /// "Elimina" compare solo per il Sospeso — mai per l'Attivo (CV-11).
-  List<_PlanAction> _actionsFor(PlanStatus status) => switch (status) {
-        PlanStatus.active => [
-            _PlanAction('Modifica', onEditInPlace),
-            _PlanAction('Sospendi', onSuspend),
-            _PlanAction('Concludi', onComplete),
-          ],
-        PlanStatus.suspended => [
-            _PlanAction('Modifica', onEditInPlace),
-            _PlanAction('Riprendi', onResume),
-            _PlanAction('Concludi', onComplete),
-            _PlanAction('Elimina', onDelete, destructive: true),
-          ],
-        PlanStatus.scheduled => [
-            _PlanAction('Modifica', onEditScheduled),
-            _PlanAction('Ritira', onWithdraw),
-            _PlanAction('Attiva ora', onActivateNow),
-          ],
-        _ => const [],
-      };
+  List<_PlanAction> _actionsFor(BuildContext context, PlanStatus status) {
+    final l10n = context.l10n;
+    return switch (status) {
+      // 7.1: "Esporta" compare in ogni stato in cui il piano ha un
+      // contenuto da esportare (PV-12, PV-13).
+      PlanStatus.active => [
+          _PlanAction(l10n.planActionEdit, onEditInPlace),
+          _PlanAction(l10n.planActionSuspend, onSuspend),
+          _PlanAction(l10n.planActionComplete, onComplete),
+          _PlanAction(l10n.planActionExport, onExport),
+        ],
+      PlanStatus.suspended => [
+          _PlanAction(l10n.planActionEdit, onEditInPlace),
+          _PlanAction(l10n.planActionResume, onResume),
+          _PlanAction(l10n.planActionComplete, onComplete),
+          _PlanAction(l10n.planActionExport, onExport),
+          _PlanAction(l10n.planActionDelete, onDelete, destructive: true),
+        ],
+      PlanStatus.scheduled => [
+          _PlanAction(l10n.planActionEdit, onEditScheduled),
+          _PlanAction(l10n.planActionWithdraw, onWithdraw),
+          _PlanAction(l10n.plansActivateNow, onActivateNow),
+          _PlanAction(l10n.planActionExport, onExport),
+        ],
+      _ => const [],
+    };
+  }
 }
 
 class _PlanAction {
@@ -417,10 +444,10 @@ class _OtherPlanTile extends StatelessWidget {
   final String Function(DateTime) formatDate;
   final VoidCallback onTap;
 
-  String get _statusLabel => switch (plan.status) {
-        PlanStatus.draft => 'Bozza',
-        PlanStatus.scheduled => 'Programmato',
-        PlanStatus.completed => 'Concluso',
+  String _statusLabel(BuildContext context) => switch (plan.status) {
+        PlanStatus.draft => context.l10n.planStatusDraft,
+        PlanStatus.scheduled => context.l10n.planStatusScheduled,
+        PlanStatus.completed => context.l10n.planStatusCompleted,
         _ => '',
       };
 
@@ -459,12 +486,12 @@ class _OtherPlanTile extends StatelessWidget {
                   children: [
                     Text(plan.name, style: typography.titleMedium.copyWith(color: colors.textPrimary)),
                     Text(
-                      '$_statusLabel · ${planPeriodLabel(plan, formatDate)}'
+                      '${_statusLabel(context)} · ${planPeriodLabel(context, plan, formatDate)}'
                       // ST-8, ST-9, 7.1: il piano riattivato è voce unica,
                       // con il periodo espresso come intervallo complessivo
                       // e il numero di periodi accanto; il dettaglio ne
                       // presenta l'elenco (7.5).
-                      '${plan.hasMultiplePeriods ? ' · ${plan.periods.length} periodi' : ''}',
+                      '${plan.hasMultiplePeriods ? ' · ${context.l10n.plansPeriodCount(plan.periods.length)}' : ''}',
                       style: typography.caption.copyWith(color: colors.textSecondary),
                     ),
                   ],
@@ -476,7 +503,7 @@ class _OtherPlanTile extends StatelessWidget {
               // per quello in corso, la cui collocazione sono le statistiche.
               if (plan.adherence != null) ...[
                 Text(
-                  '${plan.adherence!.round()}%',
+                  context.l10n.plansAdherencePercent('${plan.adherence!.round()}'),
                   style: typography.label.copyWith(color: colors.textPrimary),
                 ),
                 const SizedBox(width: AppSpacing.xs),
@@ -490,8 +517,10 @@ class _OtherPlanTile extends StatelessWidget {
   }
 }
 
-String planPeriodLabel(DietPlan plan, String Function(DateTime) formatDate) {
+/// 7.1: il periodo del piano — "Dal …" a tempo indeterminato (PA-6),
+/// altrimenti l'intervallo.
+String planPeriodLabel(BuildContext context, DietPlan plan, String Function(DateTime) formatDate) {
   final start = formatDate(plan.startDate);
-  if (plan.endDate == null) return 'Dal $start';
-  return '$start – ${formatDate(plan.endDate!)}';
+  if (plan.endDate == null) return context.l10n.plansFrom(start);
+  return context.l10n.plansDateRange(start, formatDate(plan.endDate!));
 }

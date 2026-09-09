@@ -8,6 +8,8 @@ import '../../../../app/theme/theme_context.dart';
 import '../../../../core/api/api_error_messages.dart';
 import '../../../../core/api/api_exception.dart';
 import '../../../../core/widgets/app_primary_button.dart';
+import '../../../../l10n/formats.dart';
+import '../../../../l10n/l10n_context.dart';
 import '../../data/invite_code.dart';
 import '../../providers/cooking_group_providers.dart';
 import 'generate_invite_code_sheet.dart';
@@ -20,10 +22,6 @@ class InviteCodeSection extends ConsumerWidget {
   final String groupId;
   final String groupName;
 
-  String _formatDate(DateTime value) {
-    final local = value.toLocal();
-    return '${local.day.toString().padLeft(2, '0')}/${local.month.toString().padLeft(2, '0')}/${local.year}';
-  }
 
   Future<void> _generate(BuildContext context, WidgetRef ref) async {
     final request = await showGenerateInviteCodeSheet(context);
@@ -33,7 +31,7 @@ class InviteCodeSection extends ConsumerWidget {
     final state = ref.read(generateInviteCodeControllerProvider);
     state?.whenOrNull(
       error: (error, _) => ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(describeApiError(error.asApiException?.code ?? ''))),
+        SnackBar(content: Text(describeApiError(context, error.asApiException?.code ?? ''))),
       ),
     );
   }
@@ -45,12 +43,12 @@ class InviteCodeSection extends ConsumerWidget {
   Future<void> _copy(BuildContext context, String code) async {
     await Clipboard.setData(ClipboardData(text: code));
     if (!context.mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Codice copiato')));
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(context.l10n.inviteCodeCopied)));
   }
 
-  Future<void> _share(String code) {
+  Future<void> _share(BuildContext context, String code) {
     return SharePlus.instance.share(
-      ShareParams(text: 'Unisciti al mio gruppo "$groupName" su HealthyLog con il codice $code'),
+      ShareParams(text: context.l10n.inviteShareMessage(groupName, code)),
     );
   }
 
@@ -67,7 +65,7 @@ class InviteCodeSection extends ConsumerWidget {
       child: codesState.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, _) => Text(
-          describeApiError(error.asApiException?.code ?? ''),
+          describeApiError(context, error.asApiException?.code ?? ''),
           style: typography.bodyMedium.copyWith(color: colors.textSecondary),
         ),
         data: (codes) {
@@ -75,10 +73,10 @@ class InviteCodeSection extends ConsumerWidget {
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Nessun codice attivo', style: typography.bodyMedium.copyWith(color: colors.textSecondary)),
+                Text(context.l10n.inviteNoActiveCode, style: typography.bodyMedium.copyWith(color: colors.textSecondary)),
                 const SizedBox(height: AppSpacing.sm),
                 AppPrimaryButton(
-                  label: 'Genera codice',
+                  label: context.l10n.inviteGenerate,
                   loading: generating,
                   onPressed: () => _generate(context, ref),
                 ),
@@ -88,9 +86,9 @@ class InviteCodeSection extends ConsumerWidget {
           final code = codes.first;
           return _ActiveInviteCode(
             code: code,
-            expiresAtLabel: code.expiresAt == null ? null : _formatDate(code.expiresAt!),
+            expiresAtLabel: code.expiresAt == null ? null : formatDate(context, code.expiresAt!),
             remainingUses: code.maxUses == null ? null : code.maxUses! - code.usedCount,
-            onShare: () => _share(code.code),
+            onShare: () => _share(context, code.code),
             onCopy: () => _copy(context, code.code),
             onRegenerate: () => _generate(context, ref),
             onRevoke: () => _revoke(context, ref, code.id),
@@ -134,21 +132,21 @@ class _ActiveInviteCode extends StatelessWidget {
           style: typography.displayLarge.copyWith(color: colors.textPrimary),
         ),
         if (expiresAtLabel != null)
-          Text('Scade il $expiresAtLabel', style: typography.caption.copyWith(color: colors.textSecondary)),
+          Text(context.l10n.inviteExpiresOn(expiresAtLabel!), style: typography.caption.copyWith(color: colors.textSecondary)),
         if (remainingUses != null)
           Text(
-            '$remainingUses ${remainingUses == 1 ? 'utilizzo residuo' : 'utilizzi residui'}',
+            context.l10n.inviteRemainingUses(remainingUses!),
             style: typography.caption.copyWith(color: colors.textSecondary),
           ),
         const SizedBox(height: AppSpacing.md),
-        AppPrimaryButton(label: 'Condividi', onPressed: onShare),
+        AppPrimaryButton(label: context.l10n.commonShare, onPressed: onShare),
         const SizedBox(height: AppSpacing.sm),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            TextButton(onPressed: onCopy, child: const Text('Copia')),
-            TextButton(onPressed: onRegenerate, child: const Text('Rigenera')),
-            TextButton(onPressed: onRevoke, child: Text('Revoca', style: TextStyle(color: colors.error))),
+            TextButton(onPressed: onCopy, child: Text(context.l10n.commonCopy)),
+            TextButton(onPressed: onRegenerate, child: Text(context.l10n.commonRegenerate)),
+            TextButton(onPressed: onRevoke, child: Text(context.l10n.commonRevoke, style: TextStyle(color: colors.error))),
           ],
         ),
       ],

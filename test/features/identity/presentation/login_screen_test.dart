@@ -1,3 +1,4 @@
+import '../../../support/l10n_test_support.dart';
 import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
@@ -80,7 +81,11 @@ Future<void> _pumpLoginScreen(WidgetTester tester, IdentityApi identityApi) asyn
         secureKeyValueStoreProvider.overrideWithValue(_InMemorySecureKeyValueStore()),
         identityApiProvider.overrideWithValue(identityApi),
       ],
-      child: MaterialApp.router(theme: AppTheme.light, routerConfig: router),
+      child: MaterialApp.router(
+      locale: testLocale,
+      localizationsDelegates: testLocalizationsDelegates,
+      supportedLocales: testSupportedLocales,
+      theme: AppTheme.light, routerConfig: router),
     ),
   );
   await tester.pumpAndSettle();

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../data/statistics_models.dart';
 import '../../providers/statistics_providers.dart';
+import '../statistics_presentation.dart';
 
 /// Selettore del periodo (11.1 interfaccia.md, AD-8): *Settimana* ·
 /// *Mese* · *Piano*, comune ai tre segmenti e conservato tra le sessioni.
@@ -42,7 +43,7 @@ Future<void> showStatisticsPeriodMenu(
         CheckedPopupMenuItem(
           value: period,
           checked: period == current,
-          child: Text(period.label),
+          child: Text(statisticsPeriodLabel(context, period)),
         ),
     ],
   );

@@ -3,9 +3,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../app/theme/app_spacing.dart';
 import '../../../../app/theme/theme_context.dart';
+import '../../../../l10n/l10n_context.dart';
 import '../../../dietplan/presentation/slot_type_presentation.dart';
 import '../../../statistics/data/statistics_models.dart';
 import '../../../statistics/presentation/statistics_formatting.dart';
+import '../../../identity/providers/profile_providers.dart';
+import '../../../statistics/presentation/statistics_presentation.dart';
 import '../../../statistics/presentation/widgets/breakdown_row.dart';
 import '../../../statistics/presentation/widgets/statistics_headline.dart';
 import '../../../statistics/providers/statistics_providers.dart';
@@ -44,7 +47,7 @@ class PatientStatisticsSection extends ConsumerWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         const SizedBox(height: AppSpacing.lg),
-        Text('STATISTICHE DEL MESE', style: typography.overline.copyWith(color: colors.textTertiary)),
+        Text(context.l10n.patientMonthStatisticsHeader, style: typography.overline.copyWith(color: colors.textTertiary)),
         const SizedBox(height: AppSpacing.xs),
         _Adherence(query: query),
         _Workouts(query: query),
@@ -73,18 +76,19 @@ class _Adherence extends ConsumerWidget {
           StatisticsHeadline(
             value: data.value == null ? null : formatPercentage(data.value!),
             unit: data.value == null ? null : '%',
-            caption: 'Aderenza · ${describePeriod(data.period, data.from, data.to, null)}',
+            caption: context.l10n.patientAdherenceWithPeriod(
+                describePeriod(context, data.period, data.from, data.to, null)),
             // 9.2: le interruzioni non sono spiegate oltre.
-            emptyText: 'Dati non disponibili per questo periodo',
+            emptyText: context.l10n.statisticsNoDataForPeriod,
           ),
           for (final bucket in data.bySlotType)
             BreakdownRow(
               icon: bucket.slotType.icon,
-              label: bucket.slotType.displayName,
+              label: slotTypeLabel(context, bucket.slotType),
               value: bucket.value == null ? null : '${formatPercentage(bucket.value!)}%',
               fraction: bucket.value == null ? null : bucket.value! / 100,
             ),
-          if (describeExcludedDays(data.suspendedDays, data.uncoveredDays) case final note?)
+          if (describeExcludedDays(context, data.suspendedDays, data.uncoveredDays) case final note?)
             Text(note, style: typography.caption.copyWith(color: colors.textSecondary)),
           const SizedBox(height: AppSpacing.md),
           Divider(height: 1, color: colors.dividerLight),
@@ -112,7 +116,7 @@ class _Workouts extends ConsumerWidget {
         children: [
           const SizedBox(height: AppSpacing.md),
           Text(
-            data.total == 1 ? '1 allenamento svolto' : '${data.total} allenamenti svolti',
+            data.total == 1 ? context.l10n.workoutStatsTotalDone(1) : context.l10n.workoutStatsTotalDone(data.total),
             style: typography.bodyLarge.copyWith(color: colors.textPrimary),
           ),
           // OS-7, SA-6: l'obiettivo compare se in quelle settimane ve n'era
@@ -120,12 +124,12 @@ class _Workouts extends ConsumerWidget {
           // senza segnalarne la mancanza.
           if (data.hasGoal)
             Text(
-              '${data.goalDone} su ${data.goal} previsti dall’obiettivo settimanale',
+              context.l10n.workoutStatsGoalProgressWeekly(data.goalDone!, data.goal!),
               style: typography.bodyMedium.copyWith(color: colors.textSecondary),
             ),
           if (data.planned > 0)
             Text(
-              '${data.planned} pianificati, ${data.plannedDone} svolti',
+              context.l10n.workoutStatsPlanProgress(data.planned, data.plannedDone),
               style: typography.bodyMedium.copyWith(color: colors.textSecondary),
             ),
           const SizedBox(height: AppSpacing.md),
@@ -146,6 +150,10 @@ class _Body extends ConsumerWidget {
     final colors = context.colors;
     final typography = context.typography;
     final statistics = ref.watch(measurementStatisticsProvider(query));
+    // LO-4, LO-7: le unità sono quelle del Nutrizionista che consulta, non
+    // quelle del Paziente: il valore conservato è unico e la scelta è di
+    // sola presentazione.
+    final units = ref.watch(unitSystemProvider);
 
     return statistics.maybeWhen(
       orElse: () => const SizedBox.shrink(),
@@ -155,7 +163,7 @@ class _Body extends ConsumerWidget {
           const SizedBox(height: AppSpacing.md),
           if (data.series.isEmpty)
             Text(
-              'Dati non disponibili per questo periodo',
+              context.l10n.statisticsNoDataForPeriod,
               style: typography.bodyMedium.copyWith(color: colors.textSecondary),
             )
           else
@@ -165,8 +173,12 @@ class _Body extends ConsumerWidget {
               // determinabile dal sistema.
               Text(
                 series.change == null
-                    ? '${series.measure.label}: un solo valore nel periodo'
-                    : '${series.measure.label}: ${_signed(series.change!)} ${series.unit}',
+                    ? context.l10n.patientMeasureSingleValue(bodyMeasureLabel(context, series.measure))
+                    : context.l10n.patientMeasureChange(
+                        bodyMeasureLabel(context, series.measure),
+                        _signed(context, bodyMeasureToDisplay(series.measure, series.change!, units)),
+                        bodyMeasureUnit(context, series.measure, units),
+                      ),
                 style: typography.bodyMedium.copyWith(color: colors.textPrimary),
               ),
         ],
@@ -174,10 +186,10 @@ class _Body extends ConsumerWidget {
     );
   }
 
-  static String _signed(double change) {
+  static String _signed(BuildContext context, double change) {
     final value = change.abs().toStringAsFixed(1);
-    if (change > 0) return '+$value';
-    if (change < 0) return '−$value';
+    if (change > 0) return context.l10n.signedPositive(value);
+    if (change < 0) return context.l10n.signedNegative(value);
     return value;
   }
 }

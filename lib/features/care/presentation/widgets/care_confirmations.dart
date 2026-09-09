@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../app/theme/theme_context.dart';
+import '../../../../l10n/l10n_context.dart';
 
 /// CP-14, CP-18, 4.5 interfaccia.md: la revoca del collegamento è
 /// sempre a conferma rafforzata ed espone cosa il Nutrizionista
@@ -13,46 +14,42 @@ Future<bool> confirmRevokeCareLink(BuildContext context, {required bool asNutrit
     context: context,
     builder: (dialogContext) => AlertDialog(
       backgroundColor: colors.surface,
-      title: const Text('Revocare il collegamento?'),
+      title: Text(context.l10n.careRevokeTitle),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             asNutritionist
-                ? 'Perderai immediatamente ogni accesso ai dati della persona e ogni facoltà sui suoi piani.'
-                : 'Il nutrizionista perderà immediatamente ogni accesso ai tuoi dati e ogni facoltà sul tuo piano, '
-                    'che resterà a tua disposizione.',
+                ? context.l10n.careRevokeNutritionistSideBody
+                : context.l10n.careRevokeNutritionistBody,
             style: typography.bodyMedium.copyWith(color: colors.textPrimary),
           ),
           const SizedBox(height: 12),
           Text(
-            asNutritionist ? 'Conserverai:' : 'Il nutrizionista conserverà:',
+            asNutritionist ? context.l10n.careRevokeYouKeep : context.l10n.careRevokeNutritionistKeeps,
             style: typography.label.copyWith(color: colors.textPrimary),
           ),
           Text(
-            '• gli schemi dei piani che ha redatto, con il periodo di validità;\n'
-            '• le misurazioni che ha registrato personalmente;\n'
-            '• i dati anagrafici essenziali.',
+            context.l10n.careRevokeKeepsList,
             style: typography.bodyMedium.copyWith(color: colors.textSecondary),
           ),
           const SizedBox(height: 12),
           Text(
-            asNutritionist ? 'Non conserverai:' : 'Non conserverà:',
+            asNutritionist ? context.l10n.careRevokeYouLose : context.l10n.careRevokeNutritionistLoses,
             style: typography.label.copyWith(color: colors.textPrimary),
           ),
           Text(
-            '• spunte, inversioni e statistiche di aderenza;\n'
-            '• allenamenti e misurazioni registrate dalla persona.',
+            context.l10n.careRevokeLosesList,
             style: typography.bodyMedium.copyWith(color: colors.textSecondary),
           ),
         ],
       ),
       actions: [
-        TextButton(onPressed: () => Navigator.of(dialogContext).pop(false), child: const Text('Annulla')),
+        TextButton(onPressed: () => Navigator.of(dialogContext).pop(false), child: Text(context.l10n.commonCancel)),
         TextButton(
           onPressed: () => Navigator.of(dialogContext).pop(true),
-          child: Text('Revoca', style: TextStyle(color: colors.error)),
+          child: Text(context.l10n.commonRevoke, style: TextStyle(color: colors.error)),
         ),
       ],
     ),

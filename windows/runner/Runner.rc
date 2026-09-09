@@ -90,12 +90,12 @@ BEGIN
         BLOCK "040904e4"
         BEGIN
             VALUE "CompanyName", "it.healthylog" "\0"
-            VALUE "FileDescription", "healthylog" "\0"
+            VALUE "FileDescription", "HealthyLog" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "healthylog" "\0"
+            VALUE "InternalName", "HealthyLog" "\0"
             VALUE "LegalCopyright", "Copyright (C) 2026 it.healthylog. All rights reserved." "\0"
-            VALUE "OriginalFilename", "healthylog.exe" "\0"
-            VALUE "ProductName", "healthylog" "\0"
+            VALUE "OriginalFilename", "HealthyLog.exe" "\0"
+            VALUE "ProductName", "HealthyLog" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

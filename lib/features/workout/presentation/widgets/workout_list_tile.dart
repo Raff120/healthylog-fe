@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../../../../app/theme/app_spacing.dart';
 import '../../../../app/theme/theme_context.dart';
+import '../../../../l10n/formats.dart';
+import '../../../../l10n/l10n_context.dart';
 import '../../data/workout_models.dart';
 
 /// Voce dell'elenco degli allenamenti (10.1 interfaccia.md): alta 68, con
@@ -37,7 +39,7 @@ class WorkoutListTile extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    _formatDate(workout.date),
+                    formatDate(context, workout.date),
                     style: typography.caption.copyWith(color: colors.textSecondary),
                   ),
                   Row(
@@ -69,7 +71,7 @@ class WorkoutListTile extends StatelessWidget {
             // riferisce, mai aggregato (CB-9).
             if (workout.caloriesBurned != null)
               Text(
-                '${workout.caloriesBurned} kcal',
+                context.l10n.workoutCaloriesWithUnit(workout.caloriesBurned!),
                 style: typography.label.copyWith(color: colors.textSecondary),
               ),
           ],
@@ -79,8 +81,3 @@ class WorkoutListTile extends StatelessWidget {
   }
 }
 
-String _formatDate(DateTime value) {
-  final local = value.toLocal();
-  return '${local.day.toString().padLeft(2, '0')}/'
-      '${local.month.toString().padLeft(2, '0')}/${local.year}';
-}

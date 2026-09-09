@@ -6,6 +6,9 @@ import '../../../app/theme/app_spacing.dart';
 import '../../../app/theme/theme_context.dart';
 import '../../../core/api/api_error_messages.dart';
 import '../../../core/api/api_exception.dart';
+import '../../../l10n/formats.dart';
+import '../../../l10n/l10n_context.dart';
+import '../../notification/presentation/widgets/notification_bell.dart';
 import '../data/diet_plan_template.dart';
 import '../data/diet_plan_template_requests.dart';
 import '../providers/diet_plan_template_providers.dart';
@@ -22,7 +25,7 @@ class DietPlanTemplateListScreen extends ConsumerWidget {
   /// a differenza del piano (CD-1), il template non ha un'origine "in
   /// bianco" da nominare in un secondo momento.
   Future<void> _create(BuildContext context, WidgetRef ref) async {
-    final input = await showNameDescriptionDialog(context, title: 'Nuovo template', confirmLabel: 'Crea');
+    final input = await showNameDescriptionDialog(context, title: context.l10n.templateNew, confirmLabel: context.l10n.commonCreate);
     if (input == null) return;
     if (!context.mounted) return;
     await ref.read(createDietPlanTemplateControllerProvider.notifier).create(
@@ -33,15 +36,11 @@ class DietPlanTemplateListScreen extends ConsumerWidget {
     state.whenOrNull(
       data: (template) => context.pushReplacement('/diet-plan-templates/${template.id}/schedule'),
       error: (error, _) => ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(describeApiError(error.asApiException?.code ?? ''))),
+        SnackBar(content: Text(describeApiError(context, error.asApiException?.code ?? ''))),
       ),
     );
   }
 
-  String _formatDate(DateTime value) {
-    final local = value.toLocal();
-    return '${local.day.toString().padLeft(2, '0')}/${local.month.toString().padLeft(2, '0')}/${local.year}';
-  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -56,7 +55,13 @@ class DietPlanTemplateListScreen extends ConsumerWidget {
         backgroundColor: colors.background,
         elevation: 0,
         scrolledUnderElevation: 0,
-        title: Text('Template', style: typography.titleMedium.copyWith(color: colors.textPrimary)),
+        title: Text(context.l10n.navTemplates, style: typography.titleMedium.copyWith(color: colors.textPrimary)),
+        // 12.3, 3.1: icona notifiche nell'intestazione di ogni
+        // destinazione principale. *Template* lo è per il Nutrizionista;
+        // l'Utente vi arriva dalla creazione del piano (CT-1) e vi trova
+        // la stessa icona, che 3.2 prevede comunque a destra
+        // dell'intestazione.
+        actions: const [NotificationBell()],
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: creating ? null : () => _create(context, ref),
@@ -69,7 +74,7 @@ class DietPlanTemplateListScreen extends ConsumerWidget {
           loading: () => const Center(child: CircularProgressIndicator()),
           error: (error, _) => Center(
             child: Text(
-              describeApiError(error.asApiException?.code ?? ''),
+              describeApiError(context, error.asApiException?.code ?? ''),
               style: typography.bodyMedium.copyWith(color: colors.textSecondary),
             ),
           ),
@@ -79,7 +84,7 @@ class DietPlanTemplateListScreen extends ConsumerWidget {
                 child: Padding(
                   padding: const EdgeInsets.all(AppSpacing.md),
                   child: Text(
-                    'Nessun template. Crealo con il pulsante in basso.',
+                    context.l10n.templatesEmpty,
                     style: typography.bodyMedium.copyWith(color: colors.textSecondary),
                     textAlign: TextAlign.center,
                   ),
@@ -94,7 +99,7 @@ class DietPlanTemplateListScreen extends ConsumerWidget {
                 final template = templates[index];
                 return _TemplateTile(
                   template: template,
-                  updatedAtLabel: _formatDate(template.updatedAt),
+                  updatedAtLabel: formatDate(context, template.updatedAt),
                   onTap: () => context.push('/diet-plan-templates/${template.id}'),
                 );
               },
@@ -136,7 +141,7 @@ class _TemplateTile extends StatelessWidget {
                 Text(description, style: typography.caption.copyWith(color: colors.textSecondary)),
               ],
               const SizedBox(height: AppSpacing.xxs),
-              Text('Ultima modifica: $updatedAtLabel', style: typography.caption.copyWith(color: colors.textTertiary)),
+              Text(context.l10n.templateLastEdited(updatedAtLabel), style: typography.caption.copyWith(color: colors.textTertiary)),
             ],
           ),
         ),

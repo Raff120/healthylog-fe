@@ -1,3 +1,4 @@
+import '../../../l10n/l10n_context.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -57,7 +58,7 @@ class _EmailVerificationWaitingScreenState extends ConsumerState<EmailVerificati
         if (code == 'VERIFICATION_RESEND_RATE_LIMITED') {
           _startCooldown();
         }
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(describeApiError(code))));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(describeApiError(context, code))));
       },
     );
   }
@@ -84,26 +85,26 @@ class _EmailVerificationWaitingScreenState extends ConsumerState<EmailVerificati
                   Icon(Icons.mark_email_read_outlined, size: 48, color: colors.textTertiary),
                   const SizedBox(height: AppSpacing.md),
                   Text(
-                    'Controlla la tua posta',
+                    context.l10n.verifyEmailTitle,
                     textAlign: TextAlign.center,
                     style: typography.titleLarge.copyWith(color: colors.textPrimary),
                   ),
                   const SizedBox(height: AppSpacing.sm),
                   Text(
-                    'Abbiamo inviato un collegamento di conferma a ${widget.email}',
+                    context.l10n.verifyEmailSentTo(widget.email),
                     textAlign: TextAlign.center,
                     style: typography.bodyLarge.copyWith(color: colors.textSecondary),
                   ),
                   const SizedBox(height: AppSpacing.lg),
                   AppPrimaryButton(
-                    label: canResend ? 'Invia di nuovo' : 'Invia di nuovo (${_remaining.inSeconds}s)',
+                    label: canResend ? context.l10n.verifyEmailResend : context.l10n.verifyEmailResendIn(_remaining.inSeconds),
                     loading: loading,
                     onPressed: canResend ? _resend : null,
                   ),
                   const SizedBox(height: AppSpacing.sm),
                   TextButton(
                     onPressed: () => context.pop(),
-                    child: const Text('Usa un altro indirizzo'),
+                    child: Text(context.l10n.verifyEmailUseAnotherAddress),
                   ),
                 ],
               ),

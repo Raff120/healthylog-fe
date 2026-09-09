@@ -12,23 +12,22 @@ enum WorkoutRecurrence {
 
 /// Giorno della settimana come lo scrive il backend (`java.time.DayOfWeek`),
 /// con l'ordinamento da lunedì di LO-11.
+///
+/// Le denominazioni e le iniziali non sono qui ma in
+/// `presentation/weekday_presentation.dart`: dipendono dalla lingua
+/// selezionata (LO-1) e l'enumerativo non deve conoscerla.
 enum Weekday {
-  monday('MONDAY', 'L', 'Lunedì'),
-  tuesday('TUESDAY', 'M', 'Martedì'),
-  wednesday('WEDNESDAY', 'M', 'Mercoledì'),
-  thursday('THURSDAY', 'G', 'Giovedì'),
-  friday('FRIDAY', 'V', 'Venerdì'),
-  saturday('SATURDAY', 'S', 'Sabato'),
-  sunday('SUNDAY', 'D', 'Domenica');
+  monday('MONDAY'),
+  tuesday('TUESDAY'),
+  wednesday('WEDNESDAY'),
+  thursday('THURSDAY'),
+  friday('FRIDAY'),
+  saturday('SATURDAY'),
+  sunday('SUNDAY');
 
-  const Weekday(this.param, this.initial, this.label);
+  const Weekday(this.param);
 
   final String param;
-
-  /// 10.1 interfaccia.md: sette iniziali nella card della pianificazione.
-  final String initial;
-
-  final String label;
 
   static Weekday fromJson(String value) => Weekday.values.firstWhere((day) => day.param == value);
 

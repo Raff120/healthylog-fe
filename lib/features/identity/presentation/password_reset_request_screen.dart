@@ -5,6 +5,7 @@ import '../../../app/theme/app_spacing.dart';
 import '../../../app/theme/theme_context.dart';
 import '../../../core/widgets/app_primary_button.dart';
 import '../../../core/widgets/app_text_field.dart';
+import '../../../l10n/l10n_context.dart';
 import '../domain/registration_field_validators.dart';
 import '../providers/password_reset_controller.dart';
 
@@ -31,7 +32,7 @@ class _PasswordResetRequestScreenState extends ConsumerState<PasswordResetReques
 
   Future<void> _submit() async {
     final error = validateEmail(_email.text);
-    setState(() => _emailError = error == null ? null : 'Formato non valido');
+    setState(() => _emailError = error == null ? null : context.l10n.validationInvalidFormat);
     if (error != null) return;
 
     await ref.read(passwordResetRequestControllerProvider.notifier).submit(_email.text.trim());
@@ -58,27 +59,27 @@ class _PasswordResetRequestScreenState extends ConsumerState<PasswordResetReques
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Text('Recupera l\'accesso', style: typography.titleLarge.copyWith(color: colors.textPrimary)),
+                  Text(context.l10n.passwordResetRequestTitle, style: typography.titleLarge.copyWith(color: colors.textPrimary)),
                   const SizedBox(height: AppSpacing.sm),
                   Text(
-                    'Ti invieremo un collegamento per impostare una nuova password',
+                    context.l10n.passwordResetRequestSubtitle,
                     style: typography.bodyMedium.copyWith(color: colors.textSecondary),
                   ),
                   const SizedBox(height: AppSpacing.lg),
                   if (_sent) ...[
                     Text(
-                      'Se esiste un account con questo indirizzo, riceverai un collegamento tra pochi istanti.',
+                      context.l10n.passwordResetRequestSent,
                       style: typography.bodyMedium.copyWith(color: colors.textPrimary),
                     ),
                   ] else ...[
                     AppTextField(
-                      label: 'Indirizzo e-mail',
+                      label: context.l10n.fieldEmail,
                       controller: _email,
                       keyboardType: TextInputType.emailAddress,
                       errorText: _emailError,
                     ),
                     const SizedBox(height: AppSpacing.md),
-                    AppPrimaryButton(label: 'Invia collegamento', loading: loading, onPressed: _submit),
+                    AppPrimaryButton(label: context.l10n.passwordResetRequestSubmit, loading: loading, onPressed: _submit),
                   ],
                 ],
               ),

@@ -3,11 +3,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../app/theme/app_spacing.dart';
 import '../../../app/theme/theme_context.dart';
+import '../../../l10n/l10n_context.dart';
 import '../../measurement/presentation/measurements_view.dart' show showMeasurementDetail;
 import '../../measurement/presentation/widgets/measurement_list_tile.dart';
 import '../data/statistics_models.dart';
 import '../providers/statistics_providers.dart';
 import 'statistics_formatting.dart';
+import '../../../l10n/units.dart';
+import '../../identity/providers/profile_providers.dart';
+import 'statistics_presentation.dart';
 import 'widgets/measure_line_chart.dart';
 import 'widgets/statistics_headline.dart';
 import 'widgets/statistics_period_menu.dart';
@@ -42,7 +46,7 @@ class BodyStatisticsView extends ConsumerWidget {
         child: Padding(
           padding: const EdgeInsets.all(AppSpacing.xxl),
           child: Text(
-            'Nessuna misurazione nel periodo',
+            context.l10n.bodyStatsNoMeasurements,
             style: typography.titleMedium.copyWith(color: colors.textSecondary),
             textAlign: TextAlign.center,
           ),
@@ -51,6 +55,9 @@ class BodyStatisticsView extends ConsumerWidget {
     }
 
     final selected = ref.watch(selectedBodyMeasureProvider);
+    // LO-4, LO-7, LO-8: la conversione è di sola presentazione e si
+    // applica per ciò stesso a tutta la serie, quale ne sia l'epoca.
+    final units = ref.watch(unitSystemProvider);
     final series = statistics.series.firstWhere(
       (candidate) => candidate.measure == selected,
       orElse: () => statistics.series.first,
@@ -70,7 +77,7 @@ class BodyStatisticsView extends ConsumerWidget {
                 Padding(
                   padding: const EdgeInsets.only(right: AppSpacing.xs),
                   child: ChoiceChip(
-                    label: Text(candidate.measure.label),
+                    label: Text(bodyMeasureLabel(context, candidate.measure)),
                     selected: candidate.measure == series.measure,
                     onSelected: (_) =>
                         ref.read(selectedBodyMeasureProvider.notifier).select(candidate.measure),
@@ -83,10 +90,19 @@ class BodyStatisticsView extends ConsumerWidget {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
           child: MeasureLineChart(
-            points: series.points,
-            unit: series.unit,
+            points: [
+              for (final point in series.points)
+                MeasurePoint(
+                  date: point.date,
+                  value: bodyMeasureToDisplay(series.measure, point.value, units),
+                  source: point.source,
+                ),
+            ],
+            unit: bodyMeasureUnit(context, series.measure, units),
             // AN-6, AN-7: la linea di riferimento riguarda il solo peso.
-            targetValue: series.measure.hasTarget ? statistics.targetWeightKg : null,
+            targetValue: series.measure.hasTarget && statistics.targetWeightKg != null
+                ? weightToDisplay(statistics.targetWeightKg!, units)
+                : null,
           ),
         ),
         Padding(
@@ -96,15 +112,17 @@ class BodyStatisticsView extends ConsumerWidget {
             children: [
               // AN-10: la differenza rispetto al primo valore del periodo.
               StatisticsHeadline(
-                value: series.change == null ? null : _formatChange(series.change!),
-                unit: series.change == null ? null : series.unit,
-                caption: describePeriod(
+                value: series.change == null
+                    ? null
+                    : _formatChange(context, bodyMeasureToDisplay(series.measure, series.change!, units)),
+                unit: series.change == null ? null : bodyMeasureUnit(context, series.measure, units),
+                caption: describePeriod(context, 
                   statistics.period,
                   statistics.from,
                   statistics.to,
                   statistics.planName,
                 ),
-                emptyText: 'Un solo valore: nessuna variazione da presentare',
+                emptyText: context.l10n.bodyStatsSingleValue,
                 // AD-8, AN-13: la didascalia è il selettore del periodo.
                 onCaptionTap: (anchor) =>
                     showStatisticsPeriodMenu(anchor, ref, statistics.period),
@@ -114,11 +132,11 @@ class BodyStatisticsView extends ConsumerWidget {
               if (series.points.any((point) => point.fromNutritionist) &&
                   series.points.any((point) => !point.fromNutritionist))
                 Text(
-                  'I cerchi vuoti sono le misurazioni rilevate dal nutrizionista.',
+                  context.l10n.bodyStatsNutritionistLegend,
                   style: typography.caption.copyWith(color: colors.textSecondary),
                 ),
               const SizedBox(height: AppSpacing.lg),
-              Text('Misurazioni', style: typography.overline.copyWith(color: colors.textTertiary)),
+              Text(context.l10n.bodyMeasurementsTitle, style: typography.overline.copyWith(color: colors.textTertiary)),
             ],
           ),
         ),
@@ -131,10 +149,10 @@ class BodyStatisticsView extends ConsumerWidget {
 
   /// AN-10, AN-11: differenza assoluta con il proprio segno, nell'unità
   /// propria della grandezza.
-  static String _formatChange(double change) {
+  static String _formatChange(BuildContext context, double change) {
     final value = change.abs().toStringAsFixed(1);
-    if (change > 0) return '+$value';
-    if (change < 0) return '−$value';
+    if (change > 0) return context.l10n.signedPositive(value);
+    if (change < 0) return context.l10n.signedNegative(value);
     return value;
   }
 }

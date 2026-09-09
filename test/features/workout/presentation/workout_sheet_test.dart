@@ -1,3 +1,4 @@
+import '../../../support/l10n_test_support.dart';
 import 'dart:convert';
 import 'dart:typed_data';
 
@@ -87,6 +88,10 @@ Future<_WorkoutAdapter> _pumpSheet(
     ProviderScope(
       overrides: [workoutApiProvider.overrideWithValue(WorkoutApi(dio))],
       child: MaterialApp(
+      locale: testLocale,
+      localizationsDelegates: testLocalizationsDelegates,
+      supportedLocales: testSupportedLocales,
+      
         theme: AppTheme.light,
         home: Builder(
           builder: (context) => Scaffold(

@@ -6,6 +6,8 @@ import '../../../app/theme/app_spacing.dart';
 import '../../../app/theme/theme_context.dart';
 import '../../../core/api/api_error_messages.dart';
 import '../../../core/api/api_exception.dart';
+import '../../../l10n/formats.dart';
+import '../../../l10n/l10n_context.dart';
 import '../../statistics/data/statistics_models.dart';
 import '../../statistics/presentation/statistics_formatting.dart';
 import '../../statistics/presentation/widgets/breakdown_row.dart';
@@ -17,6 +19,7 @@ import '../data/plan_status.dart';
 import '../providers/diet_plan_providers.dart';
 import '../providers/meal_swap_providers.dart';
 import 'diet_plan_management_screen.dart' show planPeriodLabel;
+import 'plan_status_presentation.dart';
 import 'slot_type_presentation.dart';
 import 'widgets/day_preview.dart';
 import 'widgets/delete_plan_dialog.dart';
@@ -41,9 +44,20 @@ class DietPlanViewScreen extends ConsumerWidget {
 
   final String planId;
 
-  String _formatDate(DateTime value) {
-    final local = value.toLocal();
-    return '${local.day.toString().padLeft(2, '0')}/${local.month.toString().padLeft(2, '0')}/${local.year}';
+
+  /// PV-13: l'esportazione del piano concluso, identica a quella del
+  /// piano in corso — nulla nel documento dipende dallo stato.
+  Future<void> _export(BuildContext context, WidgetRef ref) async {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(context.l10n.planExportInProgress)),
+    );
+    await ref.read(dietPlanExportControllerProvider.notifier).export(planId);
+    if (!context.mounted) return;
+    ref.read(dietPlanExportControllerProvider)?.whenOrNull(
+          error: (error, _) => ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(describeApiError(context, error.asApiException?.code ?? ''))),
+          ),
+        );
   }
 
   Future<void> _delete(BuildContext context, WidgetRef ref) async {
@@ -56,7 +70,7 @@ class DietPlanViewScreen extends ConsumerWidget {
     state?.whenOrNull(
       data: (_) => context.pushReplacement('/profile/plans'),
       error: (error, _) => ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(describeApiError(error.asApiException?.code ?? ''))),
+        SnackBar(content: Text(describeApiError(context, error.asApiException?.code ?? ''))),
       ),
     );
   }
@@ -75,7 +89,7 @@ class DietPlanViewScreen extends ConsumerWidget {
         elevation: 0,
         scrolledUnderElevation: 0,
         title: Text(
-          planState.value?.name ?? 'Piano',
+          planState.value?.name ?? context.l10n.navPlan,
           style: typography.titleMedium.copyWith(color: colors.textPrimary),
         ),
         actions: [
@@ -83,9 +97,13 @@ class DietPlanViewScreen extends ConsumerWidget {
             PopupMenuButton<String>(
               onSelected: (value) {
                 if (value == 'delete') _delete(context, ref);
+                // PV-13: l'esportazione è possibile per i piani conclusi
+                // dello storico quanto per quelli in corso (7.5).
+                if (value == 'export') _export(context, ref);
               },
               itemBuilder: (context) => [
-                PopupMenuItem(value: 'delete', child: Text('Elimina', style: TextStyle(color: colors.error))),
+                PopupMenuItem(value: 'export', child: Text(context.l10n.planActionExport)),
+                PopupMenuItem(value: 'delete', child: Text(context.l10n.commonDelete, style: TextStyle(color: colors.error))),
               ],
             ),
         ],
@@ -95,24 +113,24 @@ class DietPlanViewScreen extends ConsumerWidget {
           loading: () => const Center(child: CircularProgressIndicator()),
           error: (error, _) => Center(
             child: Text(
-              describeApiError(error.asApiException?.code ?? ''),
+              describeApiError(context, error.asApiException?.code ?? ''),
               style: typography.bodyMedium.copyWith(color: colors.textSecondary),
             ),
           ),
           data: (plan) => ListView(
             padding: const EdgeInsets.all(AppSpacing.md),
             children: [
-              Text(_statusLabel(plan.status), style: typography.overline.copyWith(color: colors.textTertiary)),
+              Text(_statusLabel(context, plan.status), style: typography.overline.copyWith(color: colors.textTertiary)),
               const SizedBox(height: AppSpacing.xxs),
               Text(
-                planPeriodLabel(plan, _formatDate),
+                planPeriodLabel(context, plan, (date) => formatDate(context, date)),
                 style: typography.bodyMedium.copyWith(color: colors.textSecondary),
               ),
               // ST-9: il piano riattivato presenta l'elenco dei periodi
               // attraversati, con date e aderenza di ciascuno.
               if (plan.hasMultiplePeriods) ...[
                 const SizedBox(height: AppSpacing.lg),
-                _SectionTitle('Periodi di svolgimento'),
+                _SectionTitle(context.l10n.planViewPeriods),
                 _PlanPeriods(plan: plan),
               ],
               // ST-4: le statistiche del periodo, nella forma ridotta di
@@ -120,15 +138,15 @@ class DietPlanViewScreen extends ConsumerWidget {
               // periodo preselezionato.
               if (plan.status == PlanStatus.completed) ...[
                 const SizedBox(height: AppSpacing.lg),
-                _SectionTitle('Statistiche del periodo'),
+                _SectionTitle(context.l10n.planViewPeriodStatistics),
                 _PlanStatistics(planId: plan.id),
               ],
               const SizedBox(height: AppSpacing.lg),
-              _SectionTitle('Schema settimanale'),
+              _SectionTitle(context.l10n.planViewWeeklySchedule),
               for (final day in plan.weeklySchedule) DayPreview(day: day),
               // ST-5, IN-27: lo storico delle inversioni operate sul piano.
               const SizedBox(height: AppSpacing.lg),
-              _SectionTitle('Storico delle inversioni'),
+              _SectionTitle(context.l10n.planViewSwapHistory),
               _SwapHistory(planId: plan.id),
               const SizedBox(height: AppSpacing.xxl),
             ],
@@ -184,7 +202,7 @@ class _PlanPeriods extends ConsumerWidget {
               children: [
                 Expanded(
                   child: Text(
-                    _periodLabel(plan.periods[index]),
+                    _periodLabel(context, plan.periods[index]),
                     style: typography.bodyMedium.copyWith(color: colors.textPrimary),
                   ),
                 ),
@@ -200,9 +218,9 @@ class _PlanPeriods extends ConsumerWidget {
     );
   }
 
-  String _periodLabel(DietPlanPeriod period) {
-    final end = period.endDate == null ? 'in corso' : formatDay(period.endDate!);
-    return 'Dal ${formatDay(period.startDate)} a $end';
+  String _periodLabel(BuildContext context, DietPlanPeriod period) {
+    final end = period.endDate == null ? context.l10n.planViewOngoing : formatDate(context, period.endDate!);
+    return context.l10n.planViewPeriodRange(formatDate(context, period.startDate), end);
   }
 }
 
@@ -228,7 +246,7 @@ class _PlanStatistics extends ConsumerWidget {
         child: CircularProgressIndicator(),
       )),
       error: (error, _) => Text(
-        describeApiError(error.asApiException?.code ?? ''),
+        describeApiError(context, error.asApiException?.code ?? ''),
         style: typography.bodyMedium.copyWith(color: colors.textSecondary),
       ),
       data: (data) => InkWell(
@@ -241,21 +259,21 @@ class _PlanStatistics extends ConsumerWidget {
             StatisticsHeadline(
               value: data.value == null ? null : formatPercentage(data.value!),
               unit: data.value == null ? null : '%',
-              caption: 'Aderenza complessiva del piano',
+              caption: context.l10n.planViewOverallAdherence,
             ),
-            if (describeExcludedDays(data.suspendedDays, data.uncoveredDays) case final note?)
+            if (describeExcludedDays(context, data.suspendedDays, data.uncoveredDays) case final note?)
               Text(note, style: typography.caption.copyWith(color: colors.textSecondary)),
             const SizedBox(height: AppSpacing.sm),
             for (final bucket in data.bySlotType)
               BreakdownRow(
                 icon: bucket.slotType.icon,
-                label: bucket.slotType.displayName,
+                label: slotTypeLabel(context, bucket.slotType),
                 value: bucket.value == null ? null : '${formatPercentage(bucket.value!)}%',
                 fraction: bucket.value == null ? null : bucket.value! / 100,
               ),
             const SizedBox(height: AppSpacing.xs),
             Text(
-              'Apri le statistiche complete',
+              context.l10n.planViewOpenStatistics,
               style: typography.label.copyWith(color: colors.accent),
             ),
           ],
@@ -280,13 +298,13 @@ class _SwapHistory extends ConsumerWidget {
     return history.when(
       loading: () => const SizedBox.shrink(),
       error: (error, _) => Text(
-        describeApiError(error.asApiException?.code ?? ''),
+        describeApiError(context, error.asApiException?.code ?? ''),
         style: typography.bodyMedium.copyWith(color: colors.textSecondary),
       ),
       data: (logs) => logs.isEmpty
           // 4.4: constatazione neutra, mai la segnalazione di una mancanza.
           ? Text(
-              'Nessuna inversione su questo piano.',
+              context.l10n.planViewNoSwaps,
               style: typography.bodyMedium.copyWith(color: colors.textSecondary),
             )
           : Column(
@@ -296,7 +314,7 @@ class _SwapHistory extends ConsumerWidget {
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
                     child: Text(
-                      _describe(log),
+                      _describe(context, log),
                       style: typography.bodyMedium.copyWith(color: colors.textPrimary),
                     ),
                   ),
@@ -305,15 +323,13 @@ class _SwapHistory extends ConsumerWidget {
     );
   }
 
-  String _describe(MealSwapLog log) =>
-      '${formatDay(log.first.date)} ${log.first.type.displayName} '
-      '↔ ${formatDay(log.second.date)} ${log.second.type.displayName}';
+  String _describe(BuildContext context, MealSwapLog log) =>
+      '${formatDate(context, log.first.date)} ${slotTypeLabel(context, log.first.type)} '
+      '↔ ${formatDate(context, log.second.date)} ${slotTypeLabel(context, log.second.type)}';
 }
 
-String _statusLabel(PlanStatus status) => switch (status) {
-      PlanStatus.completed => 'CONCLUSO',
-      PlanStatus.active => 'IN CORSO',
-      PlanStatus.suspended => 'SOSPESO',
-      PlanStatus.scheduled => 'PROGRAMMATO',
-      PlanStatus.draft => 'BOZZA',
-    };
+/// 7.5: la striscia di stato del piano concluso, in maiuscolo. L'Attivo
+/// vi si presenta come "IN CORSO", non con il nome tecnico dello stato.
+String _statusLabel(BuildContext context, PlanStatus status) =>
+    (status == PlanStatus.active ? context.l10n.planViewOngoingUpper : planStatusLabel(context, status))
+        .toUpperCase();

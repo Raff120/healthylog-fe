@@ -1,3 +1,5 @@
+import '../../../support/l10n_test_support.dart';
+import '../../../support/notification_api_stub.dart';
 import 'dart:convert';
 import 'dart:typed_data';
 
@@ -18,6 +20,7 @@ import 'package:healthylog/features/group/data/cooking_group_api.dart';
 import 'package:healthylog/features/group/providers/cooking_group_providers.dart';
 import 'package:healthylog/features/identity/data/profile_api.dart';
 import 'package:healthylog/features/identity/providers/profile_providers.dart';
+import 'package:healthylog/features/notification/providers/notification_providers.dart';
 import 'package:healthylog/features/workout/providers/workout_providers.dart';
 
 import '../../../support/care_api_stub.dart';
@@ -100,13 +103,20 @@ Future<void> _pumpPlan(WidgetTester tester, {required bool withGroup}) async {
   await tester.pumpWidget(ProviderScope(
     overrides: [
       careApiProvider.overrideWithValue(stubCareApi()),
+      // NT-8, F28: l'indicatore delle notifiche è presente nell'intestazione
+      // di ogni destinazione principale (3.1).
+      notificationApiProvider.overrideWithValue(stubNotificationApi()),
       workoutApiProvider.overrideWithValue(stubWorkoutApi()),
       planDayApiProvider.overrideWithValue(PlanDayApi(planDayDio)),
       profileApiProvider.overrideWithValue(ProfileApi(profileDio)),
       cookingGroupApiProvider.overrideWithValue(CookingGroupApi(groupDio)),
       appDatabaseProvider.overrideWithValue(AppDatabase(NativeDatabase.memory())),
     ],
-    child: MaterialApp(theme: AppTheme.light, home: const PlanScreen()),
+    child: MaterialApp(
+      locale: testLocale,
+      localizationsDelegates: testLocalizationsDelegates,
+      supportedLocales: testSupportedLocales,
+      theme: AppTheme.light, home: const PlanScreen()),
   ));
   await tester.pumpAndSettle();
 }

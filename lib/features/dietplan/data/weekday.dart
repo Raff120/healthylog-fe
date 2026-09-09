@@ -1,5 +1,9 @@
 /// Giorno-modello dello schema settimanale (OG-1). Rispecchia
 /// `java.time.DayOfWeek` sul backend: stessa numerazione, lunedì primo.
+///
+/// Le denominazioni e le iniziali non sono qui ma in
+/// `presentation/weekday_presentation.dart`: dipendono dalla lingua
+/// selezionata (LO-1) e l'enumerativo non deve conoscerla.
 enum Weekday {
   monday,
   tuesday,
@@ -27,26 +31,5 @@ enum Weekday {
         'SATURDAY' => Weekday.saturday,
         'SUNDAY' => Weekday.sunday,
         _ => Weekday.monday,
-      };
-
-  /// Iniziale del selettore dei giorni (7.3 interfaccia.md).
-  String get initial => switch (this) {
-        Weekday.monday => 'L',
-        Weekday.tuesday => 'M',
-        Weekday.wednesday => 'M',
-        Weekday.thursday => 'G',
-        Weekday.friday => 'V',
-        Weekday.saturday => 'S',
-        Weekday.sunday => 'D',
-      };
-
-  String get label => switch (this) {
-        Weekday.monday => 'Lunedì',
-        Weekday.tuesday => 'Martedì',
-        Weekday.wednesday => 'Mercoledì',
-        Weekday.thursday => 'Giovedì',
-        Weekday.friday => 'Venerdì',
-        Weekday.saturday => 'Sabato',
-        Weekday.sunday => 'Domenica',
       };
 }

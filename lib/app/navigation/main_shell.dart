@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../core/widgets/offline_bar.dart';
 import '../../features/dietplan/providers/plan_day_providers.dart';
 import '../../features/identity/providers/profile_providers.dart';
+import '../../l10n/l10n_context.dart';
 import '../app_breakpoints.dart';
 import '../theme/app_spacing.dart';
 import '../theme/theme_context.dart';
@@ -36,7 +37,7 @@ class MainShell extends ConsumerWidget {
     final role = ref.watch(profileControllerProvider).value?.role;
     if (role == null) return child;
 
-    final destinations = destinationsFor(role);
+    final destinations = destinationsFor(context, role);
     final currentRoute = GoRouterState.of(context).matchedLocation;
     final selectedIndex = destinations.indexWhere(
       (d) => d.route == currentRoute,
@@ -48,7 +49,7 @@ class MainShell extends ConsumerWidget {
       if (!destination.enabled) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('${destination.label}: non ancora disponibile.'),
+            content: Text(context.l10n.navNotAvailableYet(destination.label)),
           ),
         );
         return;

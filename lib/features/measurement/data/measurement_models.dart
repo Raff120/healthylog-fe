@@ -1,5 +1,8 @@
 import '../../identity/data/account_role.dart';
 
+/// Le circonferenze corporee previste da PR-12, nel loro ordine.
+enum BodyCircumference { waist, hips, chest, arm, thigh }
+
 /// Circonferenze corporee in centimetri (PR-12), tutte facoltative.
 class BodyCircumferences {
   const BodyCircumferences({this.waist, this.hips, this.chest, this.arm, this.thigh});
@@ -31,13 +34,15 @@ class BodyCircumferences {
       };
 
   /// 10.3 interfaccia.md: le circonferenze rilevate in forma sintetica,
-  /// nell'ordine di PR-12.
-  List<(String, double)> get entries => [
-        if (waist != null) ('Vita', waist!),
-        if (hips != null) ('Fianchi', hips!),
-        if (chest != null) ('Torace', chest!),
-        if (arm != null) ('Braccio', arm!),
-        if (thigh != null) ('Coscia', thigh!),
+  /// nell'ordine di PR-12. La denominazione non è qui ma in
+  /// `presentation/body_circumference_presentation.dart`: dipende dalla
+  /// lingua selezionata (LO-1).
+  List<(BodyCircumference, double)> get entries => [
+        if (waist != null) (BodyCircumference.waist, waist!),
+        if (hips != null) (BodyCircumference.hips, hips!),
+        if (chest != null) (BodyCircumference.chest, chest!),
+        if (arm != null) (BodyCircumference.arm, arm!),
+        if (thigh != null) (BodyCircumference.thigh, thigh!),
       ];
 }
 

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../../app/theme/app_spacing.dart';
 import '../../../../app/theme/theme_context.dart';
 import '../../../../core/widgets/app_text_field.dart';
+import '../../../../l10n/l10n_context.dart';
 import '../../data/slot_type.dart';
 import '../editable_slot.dart';
 import '../slot_type_presentation.dart';
@@ -103,13 +104,13 @@ class _SlotCardState extends State<SlotCard> {
                         Text(
                           slot.type == SlotType.snack && slot.labelController.text.trim().isNotEmpty
                               ? slot.labelController.text.trim()
-                              : slot.type.displayName,
+                              : slotTypeLabel(context, slot.type),
                           style: typography.bodyLarge.copyWith(color: colors.textPrimary),
                         ),
                         if (!slot.expanded)
                           Text(
                             slot.contentController.text.trim().isEmpty
-                                ? 'Non specificato'
+                                ? context.l10n.slotNotSpecified
                                 : slot.contentController.text.trim(),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
@@ -137,33 +138,33 @@ class _SlotCardState extends State<SlotCard> {
                 children: [
                   const Divider(height: AppSpacing.md),
                   if (slot.type == SlotType.snack) ...[
-                    AppTextField(label: 'Etichetta descrittiva', controller: slot.labelController),
+                    AppTextField(label: context.l10n.slotDescriptiveLabel, controller: slot.labelController),
                     const SizedBox(height: AppSpacing.sm),
                   ],
                   AppTextField(
-                    label: 'Contenuto',
+                    label: context.l10n.slotContent,
                     controller: slot.contentController,
                     minLines: 2,
                     maxLines: 5,
                   ),
                   const SizedBox(height: AppSpacing.sm),
-                  AppTextField(label: 'Denominazione della ricetta', controller: slot.recipeNameController),
+                  AppTextField(label: context.l10n.slotRecipeName, controller: slot.recipeNameController),
                   if (slot.recipeNameError != null) ...[
                     const SizedBox(height: AppSpacing.xxs),
                     Text(slot.recipeNameError!, style: typography.caption.copyWith(color: colors.error)),
                   ],
                   const SizedBox(height: AppSpacing.sm),
                   AppTextField(
-                    label: 'Testo della ricetta',
+                    label: context.l10n.slotRecipeText,
                     controller: slot.recipeTextController,
                     minLines: 2,
                     maxLines: 6,
                   ),
                   const SizedBox(height: AppSpacing.sm),
-                  AppTextField(label: 'Nota accessoria', controller: slot.noteController, minLines: 2, maxLines: 3),
+                  AppTextField(label: context.l10n.slotAccessoryNote, controller: slot.noteController, minLines: 2, maxLines: 3),
                   if (widget.showAdherenceWeight) ...[
                   const SizedBox(height: AppSpacing.md),
-                  Text('Peso di aderenza: ${slot.adherenceWeight.toStringAsFixed(1)}',
+                  Text(context.l10n.slotAdherenceWeight(slot.adherenceWeight.toStringAsFixed(1)),
                       style: typography.bodyMedium.copyWith(color: colors.textPrimary)),
                   Slider(
                     value: slot.adherenceWeight,
@@ -178,7 +179,7 @@ class _SlotCardState extends State<SlotCard> {
                     },
                   ),
                   Text(
-                    'Quanto questo pasto incide sull\'aderenza. A zero non viene conteggiato.',
+                    context.l10n.slotAdherenceWeightHelp,
                     style: typography.caption.copyWith(color: colors.textSecondary),
                   ),
                   ],
@@ -188,7 +189,7 @@ class _SlotCardState extends State<SlotCard> {
                     child: TextButton.icon(
                       onPressed: widget.onRemove,
                       icon: Icon(Icons.delete_outline, color: colors.error),
-                      label: Text('Rimuovi', style: typography.label.copyWith(color: colors.error)),
+                      label: Text(context.l10n.commonRemove, style: typography.label.copyWith(color: colors.error)),
                     ),
                   ),
                 ],

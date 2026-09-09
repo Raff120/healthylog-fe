@@ -8,9 +8,13 @@ import '../../../app/theme/theme_context.dart';
 import '../../../core/api/api_error_messages.dart';
 import '../../../core/api/api_exception.dart';
 import '../../../core/widgets/empty_state_view.dart';
+import '../../../l10n/formats.dart';
+import '../../../l10n/l10n_context.dart';
+import '../../notification/presentation/widgets/notification_bell.dart';
 import '../data/care_models.dart';
 import '../providers/care_providers.dart';
 import 'patient_detail_screen.dart';
+import 'patient_sort_presentation.dart';
 import 'widgets/invite_patient_sheet.dart';
 import 'widgets/patient_tile.dart';
 
@@ -36,7 +40,7 @@ class _PatientsScreenState extends ConsumerState<PatientsScreen> {
   Future<void> _invite() async {
     final sent = await showInvitePatientSheet(context);
     if (sent && mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Richiesta inviata.')));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(context.l10n.patientsRequestSent)));
     }
   }
 
@@ -45,7 +49,7 @@ class _PatientsScreenState extends ConsumerState<PatientsScreen> {
     if (!mounted) return;
     ref.read(careLinkRequestActionControllerProvider)?.whenOrNull(
           error: (error, _) => ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(describeApiError(error.asApiException?.code ?? ''))),
+            SnackBar(content: Text(describeApiError(context, error.asApiException?.code ?? ''))),
           ),
         );
   }
@@ -73,7 +77,7 @@ class _PatientsScreenState extends ConsumerState<PatientsScreen> {
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (error, _) => Center(
         child: Text(
-          describeApiError(error.asApiException?.code ?? ''),
+          describeApiError(context, error.asApiException?.code ?? ''),
           style: typography.bodyMedium.copyWith(color: colors.textSecondary),
         ),
       ),
@@ -82,9 +86,9 @@ class _PatientsScreenState extends ConsumerState<PatientsScreen> {
         if (patients.isEmpty && requests.isEmpty) {
           return EmptyStateView(
             icon: Icons.groups_outlined,
-            title: 'Nessun paziente collegato',
-            text: 'Invita un paziente con il suo nome utente',
-            actionLabel: 'Invita paziente',
+            title: context.l10n.patientsEmpty,
+            text: context.l10n.patientsInviteHint,
+            actionLabel: context.l10n.patientsInvite,
             onAction: _invite,
           );
         }
@@ -92,7 +96,7 @@ class _PatientsScreenState extends ConsumerState<PatientsScreen> {
           padding: const EdgeInsets.fromLTRB(AppSpacing.md, AppSpacing.md, AppSpacing.md, AppSpacing.xxl * 2),
           children: [
             if (requests.isNotEmpty) ...[
-              Text('RICHIESTE PENDENTI', style: typography.overline.copyWith(color: colors.textTertiary)),
+              Text(context.l10n.patientsPendingRequests, style: typography.overline.copyWith(color: colors.textTertiary)),
               const SizedBox(height: AppSpacing.xs),
               for (final request in requests)
                 _PendingRequestTile(request: request, onWithdraw: () => _withdraw(request)),
@@ -105,18 +109,18 @@ class _PatientsScreenState extends ConsumerState<PatientsScreen> {
                     child: Text('PAZIENTI', style: typography.overline.copyWith(color: colors.textTertiary)),
                   ),
                   PopupMenuButton<PatientSort>(
-                    tooltip: 'Ordina',
+                    tooltip: context.l10n.patientsSortBy,
                     onSelected: (sort) => setState(() => _sort = sort),
                     itemBuilder: (context) => [
                       for (final sort in PatientSort.values)
-                        CheckedPopupMenuItem(value: sort, checked: sort == _sort, child: Text(sort.label)),
+                        CheckedPopupMenuItem(value: sort, checked: sort == _sort, child: Text(patientSortLabel(context, sort))),
                     ],
                     child: Padding(
                       padding: const EdgeInsets.symmetric(vertical: AppSpacing.xxs),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Text(_sort.label, style: typography.caption.copyWith(color: colors.textSecondary)),
+                          Text(patientSortLabel(context, _sort), style: typography.caption.copyWith(color: colors.textSecondary)),
                           Icon(Icons.arrow_drop_down, color: colors.textSecondary),
                         ],
                       ),
@@ -150,7 +154,7 @@ class _PatientsScreenState extends ConsumerState<PatientsScreen> {
                 child: _selectedPatientId == null
                     ? Center(
                         child: Text(
-                          'Seleziona un paziente',
+                          context.l10n.patientsSelect,
                           style: typography.bodyMedium.copyWith(color: colors.textSecondary),
                         ),
                       )
@@ -170,12 +174,15 @@ class _PatientsScreenState extends ConsumerState<PatientsScreen> {
         backgroundColor: colors.background,
         elevation: 0,
         scrolledUnderElevation: 0,
-        title: Text('Pazienti', style: typography.titleMedium.copyWith(color: colors.textPrimary)),
+        title: Text(context.l10n.navPatients, style: typography.titleMedium.copyWith(color: colors.textPrimary)),
+        // 12.3, 3.1: icona notifiche nell'intestazione di ogni
+        // destinazione principale.
+        actions: const [NotificationBell()],
       ),
       // 9.1 interfaccia.md: "Pulsante mobile, icona user-plus. Conduce a 9.3".
       floatingActionButton: FloatingActionButton(
         onPressed: _invite,
-        tooltip: 'Invita paziente',
+        tooltip: context.l10n.patientsInvite,
         child: const Icon(Icons.person_add_alt_1_outlined),
       ),
       body: SafeArea(child: body),
@@ -210,20 +217,16 @@ class _PendingRequestTile extends StatelessWidget {
               children: [
                 Text(request.targetName, style: typography.bodyLarge.copyWith(color: colors.textPrimary)),
                 Text(
-                  expired ? 'Decaduta' : 'Inviata il ${_formatDate(request.createdAt)} · In attesa',
+                  expired ? context.l10n.careRequestExpired : context.l10n.patientsRequestSentOn(formatDate(context, request.createdAt)),
                   style: typography.caption.copyWith(color: colors.textSecondary),
                 ),
               ],
             ),
           ),
-          if (!expired) TextButton(onPressed: onWithdraw, child: const Text('Revoca')),
+          if (!expired) TextButton(onPressed: onWithdraw, child: Text(context.l10n.commonRevoke)),
         ],
       ),
     );
   }
 }
 
-String _formatDate(DateTime value) {
-  final local = value.toLocal();
-  return '${local.day.toString().padLeft(2, '0')}/${local.month.toString().padLeft(2, '0')}/${local.year}';
-}

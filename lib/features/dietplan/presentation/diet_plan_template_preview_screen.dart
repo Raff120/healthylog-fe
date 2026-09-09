@@ -7,6 +7,7 @@ import '../../../app/theme/theme_context.dart';
 import '../../../core/api/api_error_messages.dart';
 import '../../../core/api/api_exception.dart';
 import '../../../core/widgets/app_primary_button.dart';
+import '../../../l10n/l10n_context.dart';
 import '../data/diet_plan_template.dart';
 import '../data/diet_plan_template_requests.dart';
 import '../providers/diet_plan_template_providers.dart';
@@ -30,13 +31,13 @@ class DietPlanTemplatePreviewScreen extends ConsumerWidget {
       context: context,
       builder: (dialogContext) => AlertDialog(
         backgroundColor: colors.surface,
-        title: const Text('Eliminare il template?'),
-        content: Text('I piani già creati da "${template.name}" non ne risentono.'),
+        title: Text(context.l10n.templateDeleteConfirmTitle),
+        content: Text(context.l10n.templateDeleteConfirmBody(template.name)),
         actions: [
-          TextButton(onPressed: () => Navigator.of(dialogContext).pop(false), child: const Text('Annulla')),
+          TextButton(onPressed: () => Navigator.of(dialogContext).pop(false), child: Text(context.l10n.commonCancel)),
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: Text('Elimina', style: TextStyle(color: colors.error)),
+            child: Text(context.l10n.commonDelete, style: TextStyle(color: colors.error)),
           ),
         ],
       ),
@@ -47,7 +48,7 @@ class DietPlanTemplatePreviewScreen extends ConsumerWidget {
     if (!context.mounted) return;
     if (state?.hasError ?? false) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(describeApiError(state?.error?.asApiException?.code ?? ''))),
+        SnackBar(content: Text(describeApiError(context, state?.error?.asApiException?.code ?? ''))),
       );
       return;
     }
@@ -59,8 +60,8 @@ class DietPlanTemplatePreviewScreen extends ConsumerWidget {
   Future<void> _rename(BuildContext context, WidgetRef ref, DietPlanTemplate template) async {
     final input = await showNameDescriptionDialog(
       context,
-      title: 'Rinomina template',
-      confirmLabel: 'Salva',
+      title: context.l10n.templateRename,
+      confirmLabel: context.l10n.commonSave,
       initialName: template.name,
       initialDescription: template.description ?? '',
     );
@@ -74,7 +75,7 @@ class DietPlanTemplatePreviewScreen extends ConsumerWidget {
     if (!context.mounted) return;
     state?.whenOrNull(
       error: (error, _) => ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(describeApiError(error.asApiException?.code ?? ''))),
+        SnackBar(content: Text(describeApiError(context, error.asApiException?.code ?? ''))),
       ),
     );
   }
@@ -97,7 +98,7 @@ class DietPlanTemplatePreviewScreen extends ConsumerWidget {
         elevation: 0,
         scrolledUnderElevation: 0,
         title: Text(
-          previewState.value?.name ?? 'Anteprima template',
+          previewState.value?.name ?? context.l10n.templatePreviewTitle,
           style: typography.titleMedium.copyWith(color: colors.textPrimary),
         ),
         actions: [
@@ -108,11 +109,11 @@ class DietPlanTemplatePreviewScreen extends ConsumerWidget {
                 if (value == 'delete') _confirmDelete(context, ref, previewState.value!);
               },
               itemBuilder: (context) => [
-                PopupMenuItem(value: 'rename', enabled: !renaming, child: const Text('Rinomina')),
+                PopupMenuItem(value: 'rename', enabled: !renaming, child: Text(context.l10n.templateRenameShort)),
                 PopupMenuItem(
                   value: 'delete',
                   enabled: !deleting,
-                  child: Text('Elimina', style: TextStyle(color: colors.error)),
+                  child: Text(context.l10n.commonDelete, style: TextStyle(color: colors.error)),
                 ),
               ],
             ),
@@ -123,7 +124,7 @@ class DietPlanTemplatePreviewScreen extends ConsumerWidget {
           loading: () => const Center(child: CircularProgressIndicator()),
           error: (error, _) => Center(
             child: Text(
-              describeApiError(error.asApiException?.code ?? ''),
+              describeApiError(context, error.asApiException?.code ?? ''),
               style: typography.bodyMedium.copyWith(color: colors.textSecondary),
             ),
           ),
@@ -157,14 +158,14 @@ class DietPlanTemplatePreviewScreen extends ConsumerWidget {
                       Expanded(
                         child: OutlinedButton(
                           onPressed: () => context.push('/diet-plan-templates/$templateId/schedule'),
-                          child: const Text('Modifica'),
+                          child: Text(context.l10n.commonEdit),
                         ),
                       ),
                       const SizedBox(width: AppSpacing.sm),
                       Expanded(
                         flex: 2,
                         child: AppPrimaryButton(
-                          label: 'Usa questo template',
+                          label: context.l10n.templateUse,
                           onPressed: () => context.pushReplacement('/diet-plans/new', extra: template),
                         ),
                       ),

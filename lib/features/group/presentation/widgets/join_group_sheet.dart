@@ -7,6 +7,7 @@ import '../../../../core/api/api_error_messages.dart';
 import '../../../../core/api/api_exception.dart';
 import '../../../../core/widgets/app_primary_button.dart';
 import '../../../../core/widgets/app_text_field.dart';
+import '../../../../l10n/l10n_context.dart';
 import '../../data/invite_code.dart';
 import '../../providers/cooking_group_providers.dart';
 
@@ -63,7 +64,7 @@ class _JoinGroupSheetState extends ConsumerState<_JoinGroupSheet> {
       if (!mounted) return;
       setState(() {
         _loadingPreview = false;
-        _codeError = describeApiError(error.asApiException?.code ?? '');
+        _codeError = describeApiError(context, error.asApiException?.code ?? '');
       });
     }
   }
@@ -76,7 +77,7 @@ class _JoinGroupSheetState extends ConsumerState<_JoinGroupSheet> {
     state?.whenOrNull(
       data: (_) => Navigator.of(context).pop(true),
       error: (error, _) => ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(describeApiError(error.asApiException?.code ?? ''))),
+        SnackBar(content: Text(describeApiError(context, error.asApiException?.code ?? ''))),
       ),
     );
   }
@@ -101,10 +102,10 @@ class _JoinGroupSheetState extends ConsumerState<_JoinGroupSheet> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: preview == null
               ? [
-                  Text('Entra con un codice', style: typography.titleMedium.copyWith(color: colors.textPrimary)),
+                  Text(context.l10n.groupJoinWithCode, style: typography.titleMedium.copyWith(color: colors.textPrimary)),
                   const SizedBox(height: AppSpacing.md),
                   AppTextField(
-                    label: 'Codice di invito',
+                    label: context.l10n.inviteCodeField,
                     controller: _codeController,
                     keyboardType: TextInputType.number,
                     errorText: _codeError,
@@ -112,7 +113,7 @@ class _JoinGroupSheetState extends ConsumerState<_JoinGroupSheet> {
                   ),
                   const SizedBox(height: AppSpacing.md),
                   AppPrimaryButton(
-                    label: 'Continua',
+                    label: context.l10n.commonContinue,
                     loading: _loadingPreview,
                     onPressed: _codeController.text.trim().isEmpty ? null : _lookUpCode,
                   ),
@@ -121,22 +122,21 @@ class _JoinGroupSheetState extends ConsumerState<_JoinGroupSheet> {
                   Text(preview.groupName, style: typography.titleMedium.copyWith(color: colors.textPrimary)),
                   const SizedBox(height: AppSpacing.xxs),
                   Text(
-                    '${preview.memberCount} ${preview.memberCount == 1 ? 'membro' : 'membri'}',
+                    context.l10n.groupMemberCount(preview.memberCount),
                     style: typography.caption.copyWith(color: colors.textSecondary),
                   ),
                   const SizedBox(height: AppSpacing.md),
                   Text(
-                    'I tuoi pasti diventeranno visibili agli altri membri, e i Cuochi potranno operare '
-                    'inversioni e spunte sul tuo piano.',
+                    context.l10n.groupJoinNoticeStart,
                     style: typography.bodyMedium.copyWith(color: colors.textSecondary),
                   ),
                   const SizedBox(height: AppSpacing.lg),
-                  AppPrimaryButton(label: 'Conferma adesione', loading: joining, onPressed: _confirmJoin),
+                  AppPrimaryButton(label: context.l10n.groupJoinConfirm, loading: joining, onPressed: _confirmJoin),
                   const SizedBox(height: AppSpacing.xs),
                   Center(
                     child: TextButton(
                       onPressed: joining ? null : () => setState(() => _preview = null),
-                      child: const Text('Indietro'),
+                      child: Text(context.l10n.commonBack),
                     ),
                   ),
                 ],

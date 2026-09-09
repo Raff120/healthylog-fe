@@ -1,3 +1,4 @@
+import '../../../l10n/l10n_context.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -10,10 +11,14 @@ import '../../../core/api/api_error_messages.dart';
 import '../../../core/api/api_exception.dart';
 import '../../../core/widgets/app_primary_button.dart';
 import '../../../core/widgets/app_text_field.dart';
+import '../../../l10n/app_locale.dart';
+import '../../../l10n/locale_controller.dart';
 import '../data/account_role.dart';
 import '../data/auth_models.dart';
+import '../domain/privacy_policy.dart';
 import '../domain/registration_field_validators.dart';
 import '../providers/registration_controller.dart';
+import 'widgets/privacy_policy_sheet.dart';
 import '../providers/username_availability_controller.dart';
 import 'widgets/date_and_sex_fields.dart';
 
@@ -42,6 +47,9 @@ class _RegistrationDetailsScreenState extends ConsumerState<RegistrationDetailsS
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
   bool _submitted = false;
+
+  /// PV-6, PV-7: l'accettazione è esplicita e obbligatoria (5.1).
+  bool _privacyAccepted = false;
   Timer? _usernameDebounce;
   String? _lastCheckedUsername;
 
@@ -110,7 +118,8 @@ class _RegistrationDetailsScreenState extends ConsumerState<RegistrationDetailsS
 
   Future<void> _submit() async {
     setState(() => _submitted = true);
-    if (!_validate()) return;
+    // PV-7: la sua assenza è segnalata come gli altri campi (5.1).
+    if (!_validate() || !_privacyAccepted) return;
 
     await ref.read(registrationControllerProvider.notifier).submit(
           RegisterRequest(
@@ -123,6 +132,12 @@ class _RegistrationDetailsScreenState extends ConsumerState<RegistrationDetailsS
             sex: _sex!,
             password: _password.text,
             role: widget.role,
+            // LO-2, AU-27: la lingua in uso, che il server conserva per
+            // le comunicazioni per posta.
+            locale: ref.read(localeControllerProvider).value ?? AppLocale.fallback,
+            // PV-7: la versione presentata, che il server registra
+            // insieme alla data.
+            privacyPolicyVersion: kPrivacyPolicyVersion,
           ),
         );
 
@@ -138,7 +153,7 @@ class _RegistrationDetailsScreenState extends ConsumerState<RegistrationDetailsS
           setState(() => _fieldErrors['username'] = code);
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(describeApiError(code ?? ''))),
+            SnackBar(content: Text(describeApiError(context, code ?? ''))),
           );
         }
       },
@@ -150,14 +165,14 @@ class _RegistrationDetailsScreenState extends ConsumerState<RegistrationDetailsS
   String? _describeFieldError(String? code) {
     return switch (code) {
       null => null,
-      'REQUIRED' => 'Campo obbligatorio',
-      'TOO_LONG' => 'Troppo lungo',
-      'TOO_SHORT' => 'Almeno 12 caratteri',
-      'INVALID_FORMAT' => 'Formato non valido',
-      'MISMATCH' => 'Le password non coincidono',
-      'EMAIL_ALREADY_USED' => 'Questo indirizzo è già registrato',
-      'USERNAME_ALREADY_USED' => 'Questo nome utente è già in uso',
-      _ => 'Valore non valido',
+      'REQUIRED' => context.l10n.validationRequired,
+      'TOO_LONG' => context.l10n.validationTooLong,
+      'TOO_SHORT' => context.l10n.passwordRequirementHint,
+      'INVALID_FORMAT' => context.l10n.validationInvalidFormat,
+      'MISMATCH' => context.l10n.validationPasswordsDoNotMatch,
+      'EMAIL_ALREADY_USED' => context.l10n.validationEmailAlreadyRegistered,
+      'USERNAME_ALREADY_USED' => context.l10n.validationUsernameAlreadyTaken,
+      _ => context.l10n.validationInvalidValue,
     };
   }
 
@@ -205,12 +220,12 @@ class _RegistrationDetailsScreenState extends ConsumerState<RegistrationDetailsS
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  AppTextField(label: 'Nome', controller: _firstName, errorText: _errorFor('firstName')),
+                  AppTextField(label: context.l10n.fieldFirstName, controller: _firstName, errorText: _errorFor('firstName')),
                   const SizedBox(height: AppSpacing.sm),
-                  AppTextField(label: 'Cognome', controller: _lastName, errorText: _errorFor('lastName')),
+                  AppTextField(label: context.l10n.fieldLastName, controller: _lastName, errorText: _errorFor('lastName')),
                   const SizedBox(height: AppSpacing.sm),
                   AppTextField(
-                    label: 'Nome utente',
+                    label: context.l10n.fieldUsername,
                     controller: _username,
                     errorText: _errorFor('username'),
                     onChanged: _onUsernameChanged,
@@ -223,21 +238,21 @@ class _RegistrationDetailsScreenState extends ConsumerState<RegistrationDetailsS
                     Padding(
                       padding: const EdgeInsets.only(top: AppSpacing.xxs, left: AppSpacing.xxs),
                       child: Text(
-                        'Servirà al tuo nutrizionista per trovarti',
+                        context.l10n.usernameHint,
                         style: typography.caption.copyWith(color: colors.textSecondary),
                       ),
                     ),
                   ],
                   const SizedBox(height: AppSpacing.sm),
                   AppTextField(
-                    label: 'Indirizzo e-mail',
+                    label: context.l10n.fieldEmail,
                     controller: _email,
                     keyboardType: TextInputType.emailAddress,
                     errorText: _errorFor('email'),
                   ),
                   const SizedBox(height: AppSpacing.sm),
                   AppTextField(
-                    label: 'Password',
+                    label: context.l10n.fieldPassword,
                     controller: _password,
                     obscureText: _obscurePassword,
                     errorText: _errorFor('password'),
@@ -250,7 +265,7 @@ class _RegistrationDetailsScreenState extends ConsumerState<RegistrationDetailsS
                   Padding(
                     padding: const EdgeInsets.only(top: AppSpacing.xxs, left: AppSpacing.xxs),
                     child: Text(
-                      'Almeno 12 caratteri',
+                      context.l10n.passwordRequirementHint,
                       style: typography.caption.copyWith(
                         color: _password.text.length >= passwordMinLength
                             ? context.consumptionColors.consumed
@@ -260,7 +275,7 @@ class _RegistrationDetailsScreenState extends ConsumerState<RegistrationDetailsS
                   ),
                   const SizedBox(height: AppSpacing.sm),
                   AppTextField(
-                    label: 'Conferma password',
+                    label: context.l10n.fieldConfirmPassword,
                     controller: _confirmPassword,
                     obscureText: _obscureConfirmPassword,
                     errorText: _errorFor('confirmPassword'),
@@ -278,21 +293,94 @@ class _RegistrationDetailsScreenState extends ConsumerState<RegistrationDetailsS
                     onTap: _pickBirthDate,
                   ),
                   const SizedBox(height: AppSpacing.sm),
-                  AppTextField(label: 'Luogo di nascita', controller: _birthPlace, errorText: _errorFor('birthPlace')),
+                  AppTextField(label: context.l10n.fieldBirthPlace, controller: _birthPlace, errorText: _errorFor('birthPlace')),
                   const SizedBox(height: AppSpacing.sm),
                   SexSelector(
                     value: _sex,
                     onChanged: (value) => setState(() => _sex = value),
                     errorText: _errorFor('sex'),
                   ),
+                  const SizedBox(height: AppSpacing.md),
+                  // PV-6, PV-7: casella di spunta sopra il pulsante di
+                  // invio, con il collegamento al testo integrale (5.1).
+                  _PrivacyAcceptance(
+                    value: _privacyAccepted,
+                    onChanged: (value) => setState(() => _privacyAccepted = value),
+                    errorText: _submitted && !_privacyAccepted
+                        ? context.l10n.privacyPolicyAcceptRequired
+                        : null,
+                  ),
                   const SizedBox(height: AppSpacing.lg),
-                  AppPrimaryButton(label: 'Crea account', loading: loading, onPressed: _submit),
+                  AppPrimaryButton(label: context.l10n.registerSubmit, loading: loading, onPressed: _submit),
                 ],
               ),
             ),
           ),
         ),
       ),
+    );
+  }
+}
+
+
+/// PV-6, PV-7: accettazione dell'informativa (5.1 interfaccia.md): una
+/// casella di spunta con il testo in `caption` e il collegamento al testo
+/// integrale, che apre un foglio modale scorribile.
+class _PrivacyAcceptance extends StatelessWidget {
+  const _PrivacyAcceptance({required this.value, required this.onChanged, this.errorText});
+
+  final bool value;
+  final ValueChanged<bool> onChanged;
+  final String? errorText;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final typography = context.typography;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Checkbox(
+              value: value,
+              onChanged: (checked) => onChanged(checked ?? false),
+              activeColor: colors.accent,
+            ),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.only(top: AppSpacing.sm),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      context.l10n.privacyPolicyAccept,
+                      style: typography.caption.copyWith(color: colors.textPrimary),
+                    ),
+                    GestureDetector(
+                      onTap: () => showPrivacyPolicySheet(context),
+                      child: Text(
+                        context.l10n.privacyPolicyRead,
+                        style: typography.caption.copyWith(
+                          color: colors.accent,
+                          decoration: TextDecoration.underline,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+        if (errorText != null)
+          Padding(
+            padding: const EdgeInsets.only(left: AppSpacing.md),
+            child: Text(errorText!, style: typography.caption.copyWith(color: colors.error)),
+          ),
+      ],
     );
   }
 }

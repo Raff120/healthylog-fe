@@ -6,12 +6,14 @@ import '../../../../app/theme/app_spacing.dart';
 import '../../../../app/theme/theme_context.dart';
 import '../../../../core/api/api_error_messages.dart';
 import '../../../../core/api/api_exception.dart';
+import '../../../../l10n/l10n_context.dart';
 import '../../../workout/presentation/widgets/week_day_workouts.dart';
 import '../../data/plan_day.dart';
 import '../../data/plan_day_coverage.dart';
 import '../../domain/plan_day_date.dart';
 import '../../providers/meal_swap_providers.dart';
 import '../../providers/plan_day_providers.dart';
+import '../weekday_presentation.dart';
 import 'week_slot_row.dart';
 
 /// Contenuto della vista settimanale (6.2 funzionale, VS-1; 6.4
@@ -52,7 +54,7 @@ class WeeklyView extends ConsumerWidget {
     ref.listen(mealSwapControllerProvider, (previous, next) {
       next?.whenOrNull(
         error: (error, _) => ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(describeApiError(error.asApiException?.code ?? ''))),
+          SnackBar(content: Text(describeApiError(context, error.asApiException?.code ?? ''))),
         ),
       );
     });
@@ -61,7 +63,7 @@ class WeeklyView extends ConsumerWidget {
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (error, _) => Center(
         child: Text(
-          describeApiError(error.asApiException?.code ?? ''),
+          describeApiError(context, error.asApiException?.code ?? ''),
           style: typography.bodyMedium.copyWith(color: colors.textSecondary),
         ),
       ),
@@ -160,7 +162,7 @@ class _DayCard extends ConsumerWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      weekdayOf(day.date).label,
+                      weekdayLabel(context, weekdayOf(day.date)),
                       style: typography.titleMedium.copyWith(
                         color: outOfPlan ? colors.textTertiary : colors.textPrimary,
                       ),
@@ -174,9 +176,9 @@ class _DayCard extends ConsumerWidget {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs, vertical: AppSpacing.xxs),
             child: outOfPlan
-                ? _Caption(text: _outOfPlanCaption(day.coverage))
+                ? _Caption(text: _outOfPlanCaption(context, day.coverage))
                 : day.slots.isEmpty
-                    ? const _Caption(text: 'Nessun pasto previsto')
+                    ? _Caption(text: context.l10n.planNoMealsPlanned)
                     : Column(children: [for (final slot in day.slots) WeekSlotRow(day: day, slot: slot)]),
           ),
           // VS-6, 6.4: gli allenamenti in coda al pannello, in sola
@@ -210,10 +212,10 @@ class _Caption extends StatelessWidget {
 /// VS-7, PA-10: la stessa distinzione già fatta dalla vista giornaliera
 /// (`_DayContent` in `plan_screen.dart`), qui condensata in una singola
 /// riga di constatazione anziché in uno stato vuoto a schermo intero.
-String _outOfPlanCaption(PlanDayCoverage coverage) => switch (coverage) {
-      PlanDayCoverage.none => 'Nessun piano',
-      PlanDayCoverage.scheduled => 'Piano non ancora iniziato',
-      PlanDayCoverage.suspended => 'Piano sospeso',
-      PlanDayCoverage.completed => 'Piano concluso',
+String _outOfPlanCaption(BuildContext context, PlanDayCoverage coverage) => switch (coverage) {
+      PlanDayCoverage.none => context.l10n.weekNoPlan,
+      PlanDayCoverage.scheduled => context.l10n.weekPlanNotStarted,
+      PlanDayCoverage.suspended => context.l10n.planSuspended,
+      PlanDayCoverage.completed => context.l10n.weekPlanCompleted,
       PlanDayCoverage.active => '',
     };

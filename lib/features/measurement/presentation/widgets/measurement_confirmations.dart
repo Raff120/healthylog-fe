@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../app/theme/theme_context.dart';
+import '../../../../l10n/l10n_context.dart';
 
 /// PR-16, 4.5 interfaccia.md: l'eliminazione di una misurazione richiede
 /// conferma semplice — operazione con conseguenze, ma il dato perduto è
@@ -11,15 +12,15 @@ Future<bool> confirmDeleteMeasurement(BuildContext context) async {
     context: context,
     builder: (dialogContext) => AlertDialog(
       backgroundColor: colors.surface,
-      title: const Text('Eliminare questa misurazione?'),
+      title: Text(context.l10n.measurementDeleteConfirm),
       actions: [
         TextButton(
           onPressed: () => Navigator.of(dialogContext).pop(false),
-          child: const Text('Annulla'),
+          child: Text(context.l10n.commonCancel),
         ),
         TextButton(
           onPressed: () => Navigator.of(dialogContext).pop(true),
-          child: Text('Elimina', style: TextStyle(color: colors.error)),
+          child: Text(context.l10n.commonDelete, style: TextStyle(color: colors.error)),
         ),
       ],
     ),

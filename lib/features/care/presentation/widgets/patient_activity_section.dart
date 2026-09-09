@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../app/theme/app_spacing.dart';
 import '../../../../app/theme/theme_context.dart';
+import '../../../../l10n/formats.dart';
+import '../../../../l10n/l10n_context.dart';
 import '../../../measurement/presentation/widgets/measurement_list_tile.dart';
 import '../../../measurement/presentation/widgets/measurement_sheet.dart';
 import '../../../measurement/providers/measurement_providers.dart';
@@ -41,16 +43,16 @@ class PatientActivitySection extends ConsumerWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text('MISURAZIONI', style: typography.overline.copyWith(color: colors.textTertiary)),
+            Text(context.l10n.patientMeasurementsHeader, style: typography.overline.copyWith(color: colors.textTertiary)),
             TextButton(
               onPressed: () => showMeasurementSheet(context, patientId: patientId),
-              child: const Text('Registra'),
+              child: Text(context.l10n.commonRecord),
             ),
           ],
         ),
         if (measurements == null || measurements.isEmpty)
           Text(
-            'Nessuna misurazione',
+            context.l10n.patientNoMeasurements,
             style: typography.bodyMedium.copyWith(color: colors.textSecondary),
           )
         else
@@ -65,11 +67,11 @@ class PatientActivitySection extends ConsumerWidget {
                   : null,
             ),
         const SizedBox(height: AppSpacing.lg),
-        Text('ALLENAMENTI', style: typography.overline.copyWith(color: colors.textTertiary)),
+        Text(context.l10n.patientWorkoutsHeader, style: typography.overline.copyWith(color: colors.textTertiary)),
         const SizedBox(height: AppSpacing.xs),
         if (workouts == null || workouts.isEmpty)
           Text(
-            'Nessun allenamento',
+            context.l10n.patientNoWorkouts,
             style: typography.bodyMedium.copyWith(color: colors.textSecondary),
           )
         else
@@ -97,14 +99,14 @@ class _WorkoutRow extends StatelessWidget {
         children: [
           Expanded(
             child: Text(
-              '${_formatDate(workout.date)} · ${workout.activityType}',
+              '${formatDate(context, workout.date)} · ${workout.activityType}',
               style: typography.bodyMedium.copyWith(color: colors.textPrimary),
               overflow: TextOverflow.ellipsis,
             ),
           ),
           if (workout.caloriesBurned != null)
             Text(
-              '${workout.caloriesBurned} kcal',
+              context.l10n.workoutCaloriesWithUnit(workout.caloriesBurned!),
               style: typography.caption.copyWith(color: colors.textSecondary),
             ),
         ],
@@ -113,8 +115,3 @@ class _WorkoutRow extends StatelessWidget {
   }
 }
 
-String _formatDate(DateTime value) {
-  final local = value.toLocal();
-  return '${local.day.toString().padLeft(2, '0')}/'
-      '${local.month.toString().padLeft(2, '0')}/${local.year}';
-}

@@ -1,3 +1,4 @@
+import '../../../support/l10n_test_support.dart';
 import 'dart:convert';
 import 'dart:typed_data';
 
@@ -90,6 +91,10 @@ Future<_MeasurementAdapter> _pumpView(
     ProviderScope(
       overrides: [measurementApiProvider.overrideWithValue(MeasurementApi(dio))],
       child: MaterialApp(
+      locale: testLocale,
+      localizationsDelegates: testLocalizationsDelegates,
+      supportedLocales: testSupportedLocales,
+      
         theme: AppTheme.light,
         home: const Scaffold(body: MeasurementsView()),
       ),
@@ -109,6 +114,10 @@ Future<_MeasurementAdapter> _pumpSheet(WidgetTester tester) async {
     ProviderScope(
       overrides: [measurementApiProvider.overrideWithValue(MeasurementApi(dio))],
       child: MaterialApp(
+      locale: testLocale,
+      localizationsDelegates: testLocalizationsDelegates,
+      supportedLocales: testSupportedLocales,
+      
         theme: AppTheme.light,
         home: Builder(
           builder: (context) => Scaffold(

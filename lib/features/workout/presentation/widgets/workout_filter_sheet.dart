@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../app/theme/app_spacing.dart';
 import '../../../../app/theme/theme_context.dart';
 import '../../../../core/widgets/app_primary_button.dart';
+import '../../../../l10n/formats.dart';
+import '../../../../l10n/l10n_context.dart';
 import '../../providers/workout_providers.dart';
 
 /// Filtri dell'elenco (RA-12, 10.1 interfaccia.md): tipo di attività —
@@ -48,13 +50,13 @@ class _WorkoutFilterSheetState extends ConsumerState<_WorkoutFilterSheet> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Text('Filtri', style: typography.titleMedium.copyWith(color: colors.textPrimary)),
+              Text(context.l10n.workoutFilters, style: typography.titleMedium.copyWith(color: colors.textPrimary)),
               const SizedBox(height: AppSpacing.md),
-              Text('Tipo di attività', style: typography.overline.copyWith(color: colors.textSecondary)),
+              Text(context.l10n.workoutActivityType, style: typography.overline.copyWith(color: colors.textSecondary)),
               const SizedBox(height: AppSpacing.xs),
               if (types.isEmpty)
                 Text(
-                  'Nessun tipo ancora registrato.',
+                  context.l10n.workoutNoTypesYet,
                   style: typography.bodyMedium.copyWith(color: colors.textSecondary),
                 )
               else
@@ -77,7 +79,7 @@ class _WorkoutFilterSheetState extends ConsumerState<_WorkoutFilterSheet> {
                   ],
                 ),
               const SizedBox(height: AppSpacing.md),
-              Text('Periodo', style: typography.overline.copyWith(color: colors.textSecondary)),
+              Text(context.l10n.workoutPeriod, style: typography.overline.copyWith(color: colors.textSecondary)),
               const SizedBox(height: AppSpacing.xs),
               OutlinedButton.icon(
                 onPressed: () async {
@@ -101,13 +103,13 @@ class _WorkoutFilterSheetState extends ConsumerState<_WorkoutFilterSheet> {
                 icon: const Icon(Icons.date_range_outlined, size: 18),
                 label: Text(
                   _filters.from == null || _filters.to == null
-                      ? 'Scegli un periodo'
-                      : '${_formatDate(_filters.from!)} — ${_formatDate(_filters.to!)}',
+                      ? context.l10n.workoutPickPeriod
+                      : '${formatDate(context, _filters.from!)} — ${formatDate(context, _filters.to!)}',
                 ),
               ),
               const SizedBox(height: AppSpacing.lg),
               AppPrimaryButton(
-                label: 'Applica',
+                label: context.l10n.commonApply,
                 onPressed: () {
                   ref.read(workoutFilterControllerProvider.notifier).apply(_filters);
                   Navigator.of(context).pop();
@@ -119,7 +121,7 @@ class _WorkoutFilterSheetState extends ConsumerState<_WorkoutFilterSheet> {
                   ref.read(workoutFilterControllerProvider.notifier).clear();
                   Navigator.of(context).pop();
                 },
-                child: const Text('Rimuovi i filtri'),
+                child: Text(context.l10n.workoutClearFilters),
               ),
             ],
           ),
@@ -129,8 +131,3 @@ class _WorkoutFilterSheetState extends ConsumerState<_WorkoutFilterSheet> {
   }
 }
 
-String _formatDate(DateTime value) {
-  final local = value.toLocal();
-  return '${local.day.toString().padLeft(2, '0')}/'
-      '${local.month.toString().padLeft(2, '0')}/${local.year}';
-}

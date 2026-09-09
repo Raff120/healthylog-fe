@@ -1,6 +1,7 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../core/api/api_client.dart';
+import '../../../core/download/file_download.dart';
 import '../../care/providers/care_providers.dart';
 import '../data/diet_plan.dart';
 import '../data/diet_plan_api.dart';
@@ -105,4 +106,29 @@ class DietPlanLifecycleController extends _$DietPlanLifecycleController {
 
   /// CV-10, CV-11.
   Future<void> delete(String planId) => _run(() => ref.read(dietPlanApiProvider).delete(planId));
+}
+
+/// PV-12, PV-13, PV-15: esportazione del piano in PDF. Controller
+/// distinto dal ciclo di vita: non muta nulla e non deve invalidare
+/// alcun elenco.
+@riverpod
+class DietPlanExportController extends _$DietPlanExportController {
+  @override
+  AsyncValue<void>? build() => null;
+
+  Future<void> export(String planId) async {
+    state = const AsyncValue.loading();
+    final outcome = await AsyncValue.guard(() async {
+      final exported = await ref.read(dietPlanApiProvider).export(planId);
+      await deliverFile(
+        fileName: exported.fileName,
+        bytes: exported.bytes,
+        mimeType: 'application/pdf',
+      );
+    });
+    // La consegna può concludersi quando la schermata è già stata
+    // lasciata — il foglio di condivisione del sistema la copre.
+    if (!ref.mounted) return;
+    state = outcome;
+  }
 }

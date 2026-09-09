@@ -1,3 +1,4 @@
+import '../../../support/l10n_test_support.dart';
 import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
@@ -99,7 +100,11 @@ Future<void> _pumpCreateScreen(WidgetTester tester, DietPlanApi api) async {
   await tester.pumpWidget(
     ProviderScope(
       overrides: [dietPlanApiProvider.overrideWithValue(api)],
-      child: MaterialApp.router(theme: AppTheme.light, routerConfig: router),
+      child: MaterialApp.router(
+      locale: testLocale,
+      localizationsDelegates: testLocalizationsDelegates,
+      supportedLocales: testSupportedLocales,
+      theme: AppTheme.light, routerConfig: router),
     ),
   );
   await tester.pumpAndSettle();
@@ -135,7 +140,7 @@ void main() {
     await tester.tap(find.text('Crea piano'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Si sovrappone a "Piano estate".'), findsOneWidget);
+    expect(find.text('Si sovrappone a «Piano estate».'), findsOneWidget);
   });
 
   testWidgets('dopo un conflitto un secondo invio può ancora riuscire (PA-9)', (tester) async {
@@ -149,7 +154,7 @@ void main() {
     await tester.tap(find.text('Crea piano'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Si sovrappone a "Piano estate".'), findsOneWidget);
+    expect(find.text('Si sovrappone a «Piano estate».'), findsOneWidget);
 
     await tester.tap(find.text('Crea piano'));
     await tester.pumpAndSettle();

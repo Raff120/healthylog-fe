@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../app/app_breakpoints.dart';
 import '../../../../app/theme/app_spacing.dart';
 import '../../../../app/theme/theme_context.dart';
+import '../../../../l10n/l10n_context.dart';
 import '../../../group/data/cooking_group.dart';
 import '../../../group/providers/cooking_group_providers.dart';
 import '../../../identity/providers/profile_providers.dart';
@@ -128,7 +129,7 @@ class _SideBySideToggle extends ConsumerWidget {
       ),
       child: IconButton(
         icon: Icon(Icons.view_column_outlined, size: 20, color: active ? colors.accent : colors.textSecondary),
-        tooltip: active ? 'Vista singola' : 'Vista affiancata',
+        tooltip: active ? context.l10n.memberSelectorSingle : context.l10n.memberSelectorSideBySide,
         onPressed: () => ref.read(sideBySideModeProvider.notifier).toggle(),
       ),
     );
@@ -245,7 +246,7 @@ class _MemberDropdown extends ConsumerWidget {
     final colors = context.colors;
     final typography = context.typography;
     final current = group.members.firstWhere((member) => member.userId == (selected ?? currentUserId));
-    final label = sideBySide ? 'Tutti' : current.firstName;
+    final label = sideBySide ? context.l10n.commonAll : current.firstName;
 
     return PopupMenuButton<String>(
       color: colors.surface,
@@ -279,7 +280,7 @@ class _MemberDropdown extends ConsumerWidget {
                 color: sideBySide ? colors.accent : colors.textSecondary,
               ),
               const SizedBox(width: AppSpacing.xs),
-              Text(sideBySide ? 'Vista singola' : 'Vista affiancata'),
+              Text(sideBySide ? context.l10n.memberSelectorSingle : context.l10n.memberSelectorSideBySide),
             ],
           ),
         ),
@@ -332,7 +333,7 @@ class MemberContextBanner extends ConsumerWidget {
     return Padding(
       padding: const EdgeInsets.fromLTRB(AppSpacing.md, AppSpacing.xxs, AppSpacing.md, 0),
       child: Text(
-        'Stai vedendo il piano di ${member.firstName}',
+        context.l10n.memberViewingPlanOf(member.firstName),
         style: typography.caption.copyWith(color: colors.textSecondary),
       ),
     );

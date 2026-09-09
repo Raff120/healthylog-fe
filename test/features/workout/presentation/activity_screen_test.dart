@@ -1,3 +1,4 @@
+import '../../../support/l10n_test_support.dart';
 import 'dart:convert';
 import 'dart:typed_data';
 
@@ -96,7 +97,11 @@ Future<_RecordingAdapter> _pumpActivity(
         workoutApiProvider.overrideWithValue(WorkoutApi(dio)),
         measurementApiProvider.overrideWithValue(stubMeasurementApi()),
       ],
-      child: MaterialApp(theme: AppTheme.light, home: const ActivityScreen()),
+      child: MaterialApp(
+      locale: testLocale,
+      localizationsDelegates: testLocalizationsDelegates,
+      supportedLocales: testSupportedLocales,
+      theme: AppTheme.light, home: const ActivityScreen()),
     ),
   );
   await tester.pumpAndSettle();

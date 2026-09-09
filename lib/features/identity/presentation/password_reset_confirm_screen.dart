@@ -8,6 +8,7 @@ import '../../../core/api/api_error_messages.dart';
 import '../../../core/api/api_exception.dart';
 import '../../../core/widgets/app_primary_button.dart';
 import '../../../core/widgets/app_text_field.dart';
+import '../../../l10n/l10n_context.dart';
 import '../domain/registration_field_validators.dart';
 import '../providers/password_reset_controller.dart';
 
@@ -58,7 +59,7 @@ class _PasswordResetConfirmScreenState extends ConsumerState<PasswordResetConfir
     state?.whenOrNull(
       data: (_) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Tutte le sessioni sono state chiuse. Accedi con la nuova password.')),
+          SnackBar(content: Text(context.l10n.passwordResetDone)),
         );
         context.go('/login');
       },
@@ -67,7 +68,7 @@ class _PasswordResetConfirmScreenState extends ConsumerState<PasswordResetConfir
         if (code == 'PASSWORD_RESET_TOKEN_INVALID') {
           setState(() => _expired = true);
         } else {
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(describeApiError(code))));
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(describeApiError(context, code))));
         }
       },
     );
@@ -94,28 +95,28 @@ class _PasswordResetConfirmScreenState extends ConsumerState<PasswordResetConfir
                 children: _expired
                     ? [
                         Text(
-                          'Il collegamento non è più valido',
+                          context.l10n.passwordResetLinkExpiredTitle,
                           style: typography.titleLarge.copyWith(color: colors.textPrimary),
                         ),
                         const SizedBox(height: AppSpacing.sm),
                         Text(
-                          'Richiedine uno nuovo dalla schermata di accesso.',
+                          context.l10n.passwordResetLinkExpiredBody,
                           style: typography.bodyMedium.copyWith(color: colors.textSecondary),
                         ),
                         const SizedBox(height: AppSpacing.lg),
                         AppPrimaryButton(
-                          label: 'Richiedi un nuovo collegamento',
+                          label: context.l10n.passwordResetRequestNewLink,
                           onPressed: () => context.go('/password-reset'),
                         ),
                       ]
                     : [
-                        Text('Imposta una nuova password', style: typography.titleLarge.copyWith(color: colors.textPrimary)),
+                        Text(context.l10n.passwordResetConfirmTitle, style: typography.titleLarge.copyWith(color: colors.textPrimary)),
                         const SizedBox(height: AppSpacing.lg),
                         AppTextField(
-                          label: 'Nuova password',
+                          label: context.l10n.passwordResetNewPassword,
                           controller: _password,
                           obscureText: _obscure,
-                          errorText: _submitted && _passwordError == 'TOO_SHORT' ? 'Almeno 12 caratteri' : null,
+                          errorText: _submitted && _passwordError == 'TOO_SHORT' ? context.l10n.passwordRequirementHint : null,
                           suffixIcon: IconButton(
                             icon: Icon(_obscure ? Icons.visibility_outlined : Icons.visibility_off_outlined),
                             onPressed: () => setState(() => _obscure = !_obscure),
@@ -123,13 +124,13 @@ class _PasswordResetConfirmScreenState extends ConsumerState<PasswordResetConfir
                         ),
                         const SizedBox(height: AppSpacing.sm),
                         AppTextField(
-                          label: 'Conferma password',
+                          label: context.l10n.fieldConfirmPassword,
                           controller: _confirmPassword,
                           obscureText: _obscure,
-                          errorText: _submitted && _confirmError != null ? 'Le password non coincidono' : null,
+                          errorText: _submitted && _confirmError != null ? context.l10n.validationPasswordsDoNotMatch : null,
                         ),
                         const SizedBox(height: AppSpacing.lg),
-                        AppPrimaryButton(label: 'Reimposta password', loading: loading, onPressed: _submit),
+                        AppPrimaryButton(label: context.l10n.passwordResetSubmit, loading: loading, onPressed: _submit),
                       ],
               ),
             ),

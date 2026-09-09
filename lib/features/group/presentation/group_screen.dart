@@ -6,6 +6,7 @@ import '../../../app/theme/theme_context.dart';
 import '../../../core/api/api_error_messages.dart';
 import '../../../core/api/api_exception.dart';
 import '../../../core/widgets/empty_state_view.dart';
+import '../../../l10n/l10n_context.dart';
 import '../../identity/providers/profile_providers.dart';
 import '../data/cooking_group.dart';
 import '../providers/cooking_group_providers.dart';
@@ -29,7 +30,7 @@ class GroupScreen extends ConsumerWidget {
     if (!context.mounted) return;
     ref.read(createCookingGroupControllerProvider)?.whenOrNull(
           error: (error, _) => ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(describeApiError(error.asApiException?.code ?? ''))),
+            SnackBar(content: Text(describeApiError(context, error.asApiException?.code ?? ''))),
           ),
         );
   }
@@ -49,7 +50,7 @@ class GroupScreen extends ConsumerWidget {
         backgroundColor: colors.background,
         elevation: 0,
         scrolledUnderElevation: 0,
-        title: Text('Gruppo', style: typography.titleMedium.copyWith(color: colors.textPrimary)),
+        title: Text(context.l10n.profileGroup, style: typography.titleMedium.copyWith(color: colors.textPrimary)),
       ),
       body: SafeArea(
         child: groupState.when(
@@ -64,7 +65,7 @@ class GroupScreen extends ConsumerWidget {
               );
             }
             return Center(
-              child: Text(describeApiError(code ?? ''), style: typography.bodyMedium.copyWith(color: colors.textSecondary)),
+              child: Text(describeApiError(context, code ?? ''), style: typography.bodyMedium.copyWith(color: colors.textSecondary)),
             );
           },
           data: (group) => _GroupDetailView(group: group),
@@ -91,13 +92,13 @@ class _NoGroupView extends StatelessWidget {
       children: [
         EmptyStateView(
           icon: Icons.groups_outlined,
-          title: 'Non fai parte di un gruppo',
-          text: 'Un gruppo serve a organizzare i pasti di più persone che cucinano insieme',
-          actionLabel: 'Crea un gruppo',
+          title: context.l10n.groupNone,
+          text: context.l10n.groupNoneDescription,
+          actionLabel: context.l10n.groupCreate,
           onAction: onCreate,
           actionLoading: creating,
         ),
-        TextButton(onPressed: onJoin, child: const Text('Entra con un codice')),
+        TextButton(onPressed: onJoin, child: Text(context.l10n.groupJoinWithCode)),
       ],
     );
   }
@@ -115,7 +116,7 @@ class _GroupDetailView extends ConsumerWidget {
     if (!context.mounted) return;
     ref.read(renameCookingGroupControllerProvider)?.whenOrNull(
           error: (error, _) => ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(describeApiError(error.asApiException?.code ?? ''))),
+            SnackBar(content: Text(describeApiError(context, error.asApiException?.code ?? ''))),
           ),
         );
   }
@@ -131,7 +132,7 @@ class _GroupDetailView extends ConsumerWidget {
     if (!context.mounted) return;
     ref.read(leaveCookingGroupControllerProvider)?.whenOrNull(
           error: (error, _) => ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(describeApiError(error.asApiException?.code ?? ''))),
+            SnackBar(content: Text(describeApiError(context, error.asApiException?.code ?? ''))),
           ),
         );
   }
@@ -143,7 +144,7 @@ class _GroupDetailView extends ConsumerWidget {
     if (!context.mounted) return;
     ref.read(dissolveCookingGroupControllerProvider)?.whenOrNull(
           error: (error, _) => ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(describeApiError(error.asApiException?.code ?? ''))),
+            SnackBar(content: Text(describeApiError(context, error.asApiException?.code ?? ''))),
           ),
         );
   }
@@ -185,7 +186,7 @@ class _GroupDetailView extends ConsumerWidget {
         Text(group.name, style: typography.titleLarge.copyWith(color: colors.textPrimary)),
         const SizedBox(height: AppSpacing.xxs),
         Text(
-          '${group.members.length} ${group.members.length == 1 ? 'membro' : 'membri'}',
+          context.l10n.groupMemberCount(group.members.length),
           style: typography.caption.copyWith(color: colors.textSecondary),
         ),
         const SizedBox(height: AppSpacing.lg),
@@ -203,7 +204,7 @@ class _GroupDetailView extends ConsumerWidget {
         if (isSoleMember) ...[
           const SizedBox(height: AppSpacing.xs),
           Text(
-            'Sei l\'unico membro',
+            context.l10n.groupOnlyMember,
             style: typography.bodyMedium.copyWith(color: colors.textSecondary),
             textAlign: TextAlign.center,
           ),
@@ -213,20 +214,20 @@ class _GroupDetailView extends ConsumerWidget {
         const SizedBox(height: AppSpacing.lg),
         if (isOwner)
           Center(
-            child: TextButton(onPressed: () => _rename(context, ref), child: const Text('Modifica denominazione')),
+            child: TextButton(onPressed: () => _rename(context, ref), child: Text(context.l10n.groupRename)),
           ),
         if (!isOwner || !isSoleMember)
           Center(
             child: TextButton(
               onPressed: () => _leave(context, ref, isOwner),
-              child: Text('Esci dal gruppo', style: TextStyle(color: colors.error)),
+              child: Text(context.l10n.groupLeave, style: TextStyle(color: colors.error)),
             ),
           ),
         if (isOwner)
           Center(
             child: TextButton(
               onPressed: () => _dissolve(context, ref),
-              child: Text('Sciogli il gruppo', style: TextStyle(color: colors.error)),
+              child: Text(context.l10n.groupDissolve, style: TextStyle(color: colors.error)),
             ),
           ),
       ],

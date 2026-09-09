@@ -99,8 +99,9 @@ const _planDayJson =
 /// `GET /diet-plans` (quest'ultima per distinguere PA-10 da "nessun
 /// piano mai creato") e `GET /cooking-groups/current` (VG-7,
 /// `MemberSelector`, F20), emesse nel frattempo dalla vista giornaliera,
-/// sono servite a parte: non devono influire sul conteggio delle
-/// richieste di profilo verificato più sotto.
+/// sono servite a parte, insieme a `GET /notifications/unread-count`
+/// (NT-8, F28): non devono influire sul conteggio delle richieste di
+/// profilo verificato più sotto.
 class _MeAdapter implements HttpClientAdapter {
   int meRequests = 0;
 
@@ -125,6 +126,20 @@ class _MeAdapter implements HttpClientAdapter {
     if (options.path.contains('/diet-plans')) {
       return ResponseBody.fromString(
         '[]',
+        200,
+        headers: {
+          Headers.contentTypeHeader: [Headers.jsonContentType],
+        },
+      );
+    }
+    // F28: l'indicatore delle notifiche non lette (NT-8) è presente
+    // nell'intestazione di ogni destinazione principale e interroga il
+    // server a ogni apertura. Servito a parte come le altre richieste
+    // collaterali, per non alterare il conteggio delle richieste di
+    // profilo verificato più sotto.
+    if (options.path.contains('/notifications')) {
+      return ResponseBody.fromString(
+        '{"unread":0}',
         200,
         headers: {
           Headers.contentTypeHeader: [Headers.jsonContentType],

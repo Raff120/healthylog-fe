@@ -1,7 +1,8 @@
-import 'dart:typed_data';
+import '../support/notification_api_stub.dart';
 
 import 'package:dio/dio.dart';
 import 'package:drift/native.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -23,6 +24,7 @@ import 'package:healthylog/features/identity/data/profile_api.dart';
 import 'package:healthylog/features/identity/providers/identity_providers.dart';
 import 'package:healthylog/features/identity/providers/profile_providers.dart';
 import 'package:healthylog/core/storage/preferences_store.dart';
+import 'package:healthylog/features/notification/providers/notification_providers.dart';
 import 'package:healthylog/features/statistics/providers/statistics_providers.dart';
 import 'package:healthylog/features/workout/providers/workout_providers.dart';
 import 'package:healthylog/main.dart';
@@ -113,11 +115,13 @@ String _profileJson(String role) =>
 Future<ProviderContainer> _pumpAuthenticatedApp(
   WidgetTester tester, {
   required String role,
-}) async {
   // `compact` (< 600, app_breakpoints.dart): la barra inferiore mostra
   // sempre l'etichetta (3.2 interfaccia.md) — a differenza della barra
   // laterale compatta, verificabile con i soli `find.text`.
-  tester.view.physicalSize = const Size(400, 800);
+  Size size = const Size(400, 800),
+  TargetPlatform? platform,
+}) async {
+  tester.view.physicalSize = size;
   tester.view.devicePixelRatio = 1.0;
   addTearDown(tester.view.reset);
 
@@ -165,6 +169,9 @@ Future<ProviderContainer> _pumpAuthenticatedApp(
       cookingGroupApiProvider.overrideWithValue(CookingGroupApi(cookingGroupDio)),
       // F21/F22: nessun collegamento professionale (RG-5), nessun Paziente.
       careApiProvider.overrideWithValue(stubCareApi()),
+      // NT-8, F28: l'indicatore delle notifiche è presente nell'intestazione
+      // di ogni destinazione principale (3.1).
+      notificationApiProvider.overrideWithValue(stubNotificationApi()),
         workoutApiProvider.overrideWithValue(stubWorkoutApi()),
       statisticsApiProvider.overrideWithValue(stubStatisticsApi()),
       // 11.1: il periodo selezionato è conservato tra le sessioni; nella
@@ -179,6 +186,12 @@ Future<ProviderContainer> _pumpAuthenticatedApp(
   );
   addTearDown(container.dispose);
 
+  // MP-7: la piattaforma è imposta per la prova, non per adattarvi la
+  // disposizione — che dipende dalla sola larghezza della finestra. Va
+  // riportata a null prima della fine del corpo della prova, che il
+  // banco verifica.
+  debugDefaultTargetPlatformOverride = platform;
+
   await tester.pumpWidget(
     UncontrolledProviderScope(
       container: container,
@@ -190,6 +203,51 @@ Future<ProviderContainer> _pumpAuthenticatedApp(
 }
 
 void main() {
+  // MP-7, FE-11: l'adattamento è determinato dalle dimensioni della
+  // finestra e non dalla piattaforma. La prova ripete la stessa larghezza
+  // su piattaforme diverse e ne attende la medesima disposizione.
+  group('adattamento per larghezza, non per piattaforma (MP-7, 3.3)', () {
+    for (final platform in [TargetPlatform.iOS, TargetPlatform.android, TargetPlatform.macOS]) {
+      testWidgets('$platform: finestra stretta adotta la barra inferiore', (tester) async {
+        await _pumpAuthenticatedApp(tester,
+            role: 'USER', size: const Size(400, 800), platform: platform);
+
+        final piano = tester.getCenter(find.text('Piano'));
+        debugDefaultTargetPlatformOverride = null;
+        // La barra inferiore sta in fondo, per l'intera larghezza.
+        expect(piano.dy, greaterThan(700));
+      });
+
+      testWidgets('$platform: finestra ampia adotta la barra laterale', (tester) async {
+        await _pumpAuthenticatedApp(tester,
+            role: 'USER', size: const Size(1000, 800), platform: platform);
+
+        final piano = tester.getCenter(find.text('Piano'));
+        debugDefaultTargetPlatformOverride = null;
+        // La barra laterale sta a sinistra, entro i 240 punti di 3.2.
+        expect(piano.dx, lessThan(240));
+        expect(piano.dy, lessThan(400));
+      });
+    }
+  });
+
+  // MP-2: nessuna destinazione è riservata a una piattaforma o preclusa su
+  // un'altra — l'insieme dipende dal solo ruolo (3.1).
+  group('parità delle destinazioni fra piattaforme (MP-2)', () {
+    for (final platform in [TargetPlatform.iOS, TargetPlatform.android, TargetPlatform.windows]) {
+      testWidgets('$platform presenta le stesse quattro voci', (tester) async {
+        await _pumpAuthenticatedApp(tester,
+            role: 'USER', size: const Size(400, 800), platform: platform);
+        final found = [
+          for (final label in ['Piano', 'Attività', 'Statistiche', 'Profilo'])
+            if (find.text(label).evaluate().isNotEmpty) label,
+        ];
+        debugDefaultTargetPlatformOverride = null;
+        expect(found, ['Piano', 'Attività', 'Statistiche', 'Profilo']);
+      });
+    }
+  });
+
   testWidgets(
     'mostra le quattro voci dell\'Utente (3.1)',
     (tester) async {
@@ -295,6 +353,9 @@ void main() {
           cookingGroupApiProvider.overrideWithValue(CookingGroupApi(cookingGroupDio)),
           // F21/F22: nessun collegamento professionale (RG-5), nessun Paziente.
           careApiProvider.overrideWithValue(stubCareApi()),
+          // NT-8, F28: l'indicatore delle notifiche è presente nell'intestazione
+          // di ogni destinazione principale (3.1).
+          notificationApiProvider.overrideWithValue(stubNotificationApi()),
         workoutApiProvider.overrideWithValue(stubWorkoutApi()),
       statisticsApiProvider.overrideWithValue(stubStatisticsApi()),
       // 11.1: il periodo selezionato è conservato tra le sessioni; nella

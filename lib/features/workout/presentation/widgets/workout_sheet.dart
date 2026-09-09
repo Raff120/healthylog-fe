@@ -6,6 +6,8 @@ import '../../../../app/theme/app_spacing.dart';
 import '../../../../app/theme/theme_context.dart';
 import '../../../../core/widgets/app_primary_button.dart';
 import '../../../../core/widgets/app_text_field.dart';
+import '../../../../l10n/formats.dart';
+import '../../../../l10n/l10n_context.dart';
 import '../../data/workout_models.dart';
 import '../../data/workout_requests.dart';
 import '../../providers/workout_providers.dart';
@@ -82,7 +84,7 @@ class _WorkoutSheetState extends ConsumerState<_WorkoutSheet> {
       initialDate: _date.isAfter(today) ? today : _date,
       firstDate: DateTime(2000),
       lastDate: today,
-      helpText: 'Quando lo hai svolto',
+      helpText: context.l10n.workoutWhenDone,
     );
     if (picked != null) setState(() => _date = _dateOnly(picked));
   }
@@ -90,7 +92,7 @@ class _WorkoutSheetState extends ConsumerState<_WorkoutSheet> {
   Future<void> _submit() async {
     final activityType = _activityTypeController.text.trim();
     if (!_isReduced && activityType.isEmpty) {
-      setState(() => _activityTypeError = 'Indica il tipo di attività');
+      setState(() => _activityTypeError = context.l10n.workoutActivityTypeRequired);
       return;
     }
     // CB-1: l'omissione delle calorie non è segnalata né impedisce il
@@ -172,17 +174,17 @@ class _WorkoutSheetState extends ConsumerState<_WorkoutSheet> {
               children: [
                 Text(
                   _isEdit
-                      ? 'Modifica allenamento'
+                      ? context.l10n.workoutEditTitle
                       : _isReduced
                           ? widget.planned!.activityType
-                          : 'Registra un allenamento',
+                          : context.l10n.workoutRecordTitle,
                   style: typography.titleMedium.copyWith(color: colors.textPrimary),
                 ),
                 if (_isReduced) ...[
                   const SizedBox(height: AppSpacing.xxs),
                   // RA-3: l'integrazione resta possibile ma non obbligatoria.
                   Text(
-                    'Se vuoi, aggiungi calorie e nota. Puoi anche chiudere: l\'allenamento è registrato lo stesso.',
+                    context.l10n.workoutSheetFooter,
                     style: typography.caption.copyWith(color: colors.textTertiary),
                   ),
                 ],
@@ -200,7 +202,7 @@ class _WorkoutSheetState extends ConsumerState<_WorkoutSheet> {
                   const SizedBox(height: AppSpacing.sm),
                 ],
                 AppTextField(
-                  label: 'Calorie bruciate',
+                  label: context.l10n.workoutCaloriesBurned,
                   controller: _caloriesController,
                   keyboardType: TextInputType.number,
                   inputFormatters: [FilteringTextInputFormatter.digitsOnly],
@@ -210,19 +212,19 @@ class _WorkoutSheetState extends ConsumerState<_WorkoutSheet> {
                 // suggerito, neppure dagli allenamenti precedenti dello
                 // stesso tipo.
                 Text(
-                  'Se lo sai. Non è obbligatorio.',
+                  context.l10n.workoutCaloriesOptional,
                   style: typography.caption.copyWith(color: colors.textTertiary),
                 ),
                 const SizedBox(height: AppSpacing.sm),
                 AppTextField(
-                  label: 'Nota',
+                  label: context.l10n.commonNote,
                   controller: _noteController,
                   minLines: 2,
                   maxLines: 4,
                 ),
                 const SizedBox(height: AppSpacing.lg),
                 AppPrimaryButton(
-                  label: _isEdit ? 'Salva' : 'Registra',
+                  label: _isEdit ? context.l10n.commonSave : context.l10n.commonRecord,
                   loading: saving,
                   onPressed: _submit,
                 ),
@@ -233,7 +235,7 @@ class _WorkoutSheetState extends ConsumerState<_WorkoutSheet> {
                   const SizedBox(height: AppSpacing.xs),
                   TextButton(
                     onPressed: saving ? null : _delete,
-                    child: Text('Elimina', style: TextStyle(color: colors.error)),
+                    child: Text(context.l10n.commonDelete, style: TextStyle(color: colors.error)),
                   ),
                 ],
                 const SizedBox(height: AppSpacing.xs),
@@ -272,7 +274,7 @@ class _DateField extends StatelessWidget {
             Icon(Icons.calendar_today_outlined, size: 18, color: colors.textSecondary),
             const SizedBox(width: AppSpacing.xs),
             Text(
-              formatWorkoutDate(date),
+              formatDate(context, date),
               style: typography.bodyMedium.copyWith(color: colors.textPrimary),
             ),
           ],
@@ -302,7 +304,7 @@ class _ActivityTypeField extends ConsumerWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         AppTextField(
-          label: 'Tipo di attività',
+          label: context.l10n.workoutActivityType,
           controller: controller,
           errorText: errorText,
           textCapitalization: TextCapitalization.sentences,
@@ -334,8 +336,3 @@ DateTime _dateOnly(DateTime value) => DateTime(value.year, value.month, value.da
 
 /// Data breve, nel formato italiano già impiegato altrove; la
 /// localizzazione dei formati resta a F29 (LO-9).
-String formatWorkoutDate(DateTime value) {
-  final local = value.toLocal();
-  return '${local.day.toString().padLeft(2, '0')}/'
-      '${local.month.toString().padLeft(2, '0')}/${local.year}';
-}

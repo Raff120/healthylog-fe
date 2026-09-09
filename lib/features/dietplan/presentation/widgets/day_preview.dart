@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 
 import '../../../../app/theme/app_spacing.dart';
 import '../../../../app/theme/theme_context.dart';
+import '../../../../l10n/l10n_context.dart';
 import '../../data/diet_plan.dart';
 import '../slot_type_presentation.dart';
+import '../weekday_presentation.dart';
 
 /// Un giorno dello schema settimanale, di sola lettura (7.4, 7.5
 /// interfaccia.md): comune all'anteprima di un template e al dettaglio
@@ -23,10 +25,10 @@ class DayPreview extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(day.dayOfWeek.label, style: typography.titleMedium.copyWith(color: colors.textPrimary)),
+          Text(weekdayLabel(context, day.dayOfWeek), style: typography.titleMedium.copyWith(color: colors.textPrimary)),
           const SizedBox(height: AppSpacing.xs),
           if (day.slots.isEmpty)
-            Text('Nessuno slot', style: typography.caption.copyWith(color: colors.textTertiary))
+            Text(context.l10n.dayPreviewNoSlots, style: typography.caption.copyWith(color: colors.textTertiary))
           else
             for (final slot in day.slots)
               Padding(
@@ -41,7 +43,7 @@ class DayPreview extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            slot.label?.isNotEmpty == true ? slot.label! : slot.type.displayName,
+                            slot.label?.isNotEmpty == true ? slot.label! : slotTypeLabel(context, slot.type),
                             style: typography.bodyMedium.copyWith(color: colors.textPrimary),
                           ),
                           if (slot.content != null && slot.content!.isNotEmpty)

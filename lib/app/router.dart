@@ -23,12 +23,18 @@ import '../features/identity/presentation/email_verification_waiting_screen.dart
 import '../features/identity/presentation/login_screen.dart';
 import '../features/identity/presentation/password_reset_confirm_screen.dart';
 import '../features/identity/presentation/password_reset_request_screen.dart';
+import '../features/identity/data/profile_models.dart';
+import '../features/identity/presentation/delete_account_screen.dart';
+import '../features/identity/presentation/deletion_pending_screen.dart';
 import '../features/identity/presentation/personal_data_screen.dart';
+import '../features/identity/presentation/privacy_acceptance_screen.dart';
 import '../features/identity/presentation/profile_screen.dart';
 import '../features/identity/presentation/registration_details_screen.dart';
 import '../features/identity/presentation/role_selection_screen.dart';
 import '../features/identity/presentation/settings_screen.dart';
+import '../features/identity/providers/profile_providers.dart';
 import '../features/group/presentation/group_screen.dart';
+import '../features/notification/presentation/notification_screen.dart';
 import '../features/statistics/presentation/statistics_screen.dart';
 import '../features/workout/presentation/activity_screen.dart';
 import 'navigation/main_shell.dart';
@@ -48,6 +54,14 @@ const _preLoginOnlyPaths = ['/login', '/register', '/verify-email'];
 /// base allo stato dell'Utente sarebbe qui spiazzante, non protettivo.
 const _alwaysAllowedPaths = ['/verify-email/confirm', '/password-reset'];
 
+/// PV-8: finché l'informativa aggiornata non è accettata, ogni rotta
+/// autenticata riporta qui.
+const _privacyAcceptancePath = '/privacy-acceptance';
+
+/// PV-17: durante il periodo di ripensamento, ogni rotta autenticata
+/// riporta alla schermata che ne constata la richiesta.
+const _deletionPendingPath = '/account-deletion';
+
 bool _startsWithAny(String path, List<String> prefixes) =>
     prefixes.any((prefix) => path == prefix || path.startsWith('$prefix/'));
 
@@ -58,14 +72,22 @@ bool _startsWithAny(String path, List<String> prefixes) =>
 class _SessionRouterRefresh extends ChangeNotifier {
   _SessionRouterRefresh(this._ref) {
     _subscription = _ref.listen(sessionControllerProvider, (_, _) => notifyListeners());
+    // PV-8, PV-17: gli sbarramenti dipendono anche dal profilo —
+    // l'informativa da accettare e il ripensamento in corso. Senza
+    // osservarlo, l'instradamento non li vedrebbe cambiare. È osservato
+    // nella forma che resta nulla finché non c'è sessione: interrogare il
+    // server prima dell'accesso non avrebbe senso.
+    _profileSubscription = _ref.listen(currentProfileOrNullProvider, (_, _) => notifyListeners());
   }
 
   final Ref _ref;
   late final ProviderSubscription<AsyncValue<AuthSession?>> _subscription;
+  late final ProviderSubscription<Profile?> _profileSubscription;
 
   @override
   void dispose() {
     _subscription.close();
+    _profileSubscription.close();
     super.dispose();
   }
 }
@@ -105,6 +127,21 @@ GoRouter goRouter(Ref ref) {
         return isPreLoginOnly ? null : '/login';
       }
       if (isPreLoginOnly || path == '/splash') return '/home';
+
+      // PV-17: durante il ripensamento l'accesso conduce alla schermata
+      // che ne constata la richiesta e offre di annullarla — è la sola
+      // via che PV-17 prevede per revocarla. PV-8: l'informativa
+      // aggiornata va accettata prima di proseguire. Finché il profilo
+      // non è caricato non si sbarra nulla: sarebbe uno sbarramento
+      // fondato sul nulla.
+      final profile = ref.read(currentProfileOrNullProvider);
+      if (profile == null) return null;
+      if (profile.isDeletionPending) {
+        return path == _deletionPendingPath ? null : _deletionPendingPath;
+      }
+      if (profile.privacyAcceptanceRequired) {
+        return path == _privacyAcceptancePath ? null : _privacyAcceptancePath;
+      }
       return null;
     },
     routes: [
@@ -173,6 +210,19 @@ GoRouter goRouter(Ref ref) {
       GoRoute(path: '/profile/settings', builder: (context, state) => const SettingsScreen()),
       GoRoute(path: '/profile/plans', builder: (context, state) => const DietPlanManagementScreen()),
       GoRoute(path: '/group', builder: (context, state) => const GroupScreen()),
+      // 12.3, 3.1: il centro notifiche è raggiungibile dall'intestazione
+      // di ogni destinazione principale, non è esso stesso una
+      // destinazione — nessun involucro di navigazione, freccia di
+      // ritorno come le altre schermate secondarie (3.2).
+      GoRoute(path: '/notifications', builder: (context, state) => const NotificationScreen()),
+      // PV-8, PV-17: sbarramenti, non destinazioni — nessun involucro di
+      // navigazione, nessuna via d'uscita oltre a quella che offrono.
+      GoRoute(path: _privacyAcceptancePath, builder: (context, state) => const PrivacyAcceptanceScreen()),
+      GoRoute(path: _deletionPendingPath, builder: (context, state) => const DeletionPendingScreen()),
+      GoRoute(
+        path: '/profile/delete-account',
+        builder: (context, state) => const DeleteAccountScreen(),
+      ),
       GoRoute(path: '/profile/nutritionist', builder: (context, state) => const NutritionistScreen()),
       GoRoute(
         path: '/patients/:id',

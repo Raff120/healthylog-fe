@@ -7,6 +7,7 @@ import 'package:healthylog/features/measurement/providers/measurement_providers.
 import 'package:healthylog/features/statistics/presentation/statistics_screen.dart';
 import 'package:healthylog/features/statistics/providers/statistics_providers.dart';
 
+import '../../../support/l10n_test_support.dart';
 import '../../../support/measurement_api_stub.dart';
 import '../../../support/preferences_store_stub.dart';
 import '../../../support/statistics_api_stub.dart';
@@ -36,7 +37,11 @@ Future<void> _pumpStatistics(
         measurementApiProvider.overrideWithValue(stubMeasurementApi()),
         preferencesStoreProvider.overrideWithValue(InMemoryPreferencesStore()),
       ],
-      child: MaterialApp(theme: AppTheme.light, home: const StatisticsScreen()),
+      child: MaterialApp(
+      locale: testLocale,
+      localizationsDelegates: testLocalizationsDelegates,
+      supportedLocales: testSupportedLocales,
+      theme: AppTheme.light, home: const StatisticsScreen()),
     ),
   );
   await tester.pumpAndSettle();
@@ -78,7 +83,7 @@ void main() {
     expect(find.text('Mese'), findsNothing);
     expect(find.text('Piano'), findsNothing);
 
-    await tester.tap(find.text('Settimana dal 2 marzo al 8 marzo'));
+    await tester.tap(find.text('Settimana dal 2 mar al 8 mar'));
     await tester.pumpAndSettle();
 
     // AD-8: settimana, mese e intero piano; AD-10: nessun intervallo
@@ -235,7 +240,6 @@ void main() {
       'series': [
         {
           'measure': 'WEIGHT',
-          'unit': 'kg',
           'points': [
             {'date': '2026-03-02', 'value': 80.0, 'source': 'USER'},
             {'date': '2026-03-06', 'value': 78.5, 'source': 'NUTRITIONIST'},
@@ -261,7 +265,6 @@ void main() {
       'series': [
         {
           'measure': 'WAIST',
-          'unit': 'cm',
           'points': [
             {'date': '2026-03-02', 'value': 92.0, 'source': 'USER'},
           ],

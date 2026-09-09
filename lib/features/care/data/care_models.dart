@@ -249,13 +249,15 @@ class PatientDetail {
 
 /// VA-4: i tre criteri di ordinamento dell'elenco dei Pazienti, nella
 /// forma del parametro `sort` di `GET /patients`.
+///
+/// L'etichetta non è conservata qui ma risolta dal livello di traduzione
+/// (LO-1): vedi `presentation/patient_sort_presentation.dart`.
 enum PatientSort {
-  name('name', 'Alfabetico'),
-  adherence('adherence', 'Aderenza'),
-  activity('activity', 'Attività recente');
+  name('name'),
+  adherence('adherence'),
+  activity('activity');
 
-  const PatientSort(this.param, this.label);
+  const PatientSort(this.param);
 
   final String param;
-  final String label;
 }

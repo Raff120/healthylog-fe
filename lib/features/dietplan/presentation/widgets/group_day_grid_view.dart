@@ -1,3 +1,4 @@
+import '../../../../l10n/l10n_context.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -42,7 +43,7 @@ class _GroupRow {
   /// riporta la denominazione generica").
   final String? label;
 
-  String get displayLabel => label ?? type.displayName;
+  String displayLabel(BuildContext context) => label ?? slotTypeLabel(context, type);
 }
 
 List<_GroupRow> _buildRows(List<MemberPlanDay> members) {
@@ -130,7 +131,7 @@ class _GroupDayGridViewState extends ConsumerState<GroupDayGridView> {
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (error, _) => Center(
         child: Text(
-          describeApiError(error.asApiException?.code ?? ''),
+          describeApiError(context, error.asApiException?.code ?? ''),
           style: typography.bodyMedium.copyWith(color: colors.textSecondary),
         ),
       ),
@@ -157,7 +158,7 @@ class _Grid extends StatelessWidget {
       final typography = context.typography;
       final colors = context.colors;
       return Center(
-        child: Text('Nessun pasto previsto', style: typography.bodyMedium.copyWith(color: colors.textSecondary)),
+        child: Text(context.l10n.planNoMealsPlanned, style: typography.bodyMedium.copyWith(color: colors.textSecondary)),
       );
     }
 
@@ -363,7 +364,7 @@ class _RowLabel extends StatelessWidget {
           Icon(row.type.icon, size: 20, color: colors.textSecondary),
           const SizedBox(height: AppSpacing.xxs),
           Text(
-            row.displayLabel,
+            row.displayLabel(context),
             textAlign: TextAlign.center,
             style: typography.overline.copyWith(color: colors.textSecondary),
             maxLines: 2,
@@ -438,7 +439,7 @@ class _GroupSlotCell extends ConsumerWidget {
                         overflow: TextOverflow.ellipsis,
                       )
                     : Text(
-                        hasContent ? slot.content!.trim() : 'Da definire',
+                        hasContent ? slot.content!.trim() : context.l10n.slotToBeDefined,
                         style: typography.bodyMedium.copyWith(
                           color: hasContent ? colors.textPrimary : colors.textTertiary,
                         ),
@@ -500,7 +501,7 @@ class _GroupSlotCell extends ConsumerWidget {
                 Expanded(
                   child: SingleChildScrollView(
                     child: Text(
-                      (slot.content?.trim().isNotEmpty ?? false) ? slot.content!.trim() : 'Da definire',
+                      (slot.content?.trim().isNotEmpty ?? false) ? slot.content!.trim() : context.l10n.slotToBeDefined,
                       style: typography.bodyLarge.copyWith(color: colors.textPrimary),
                     ),
                   ),

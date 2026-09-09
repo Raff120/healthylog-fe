@@ -7,8 +7,11 @@ import '../../../core/api/api_error_messages.dart';
 import '../../../core/api/api_exception.dart';
 import '../../../core/widgets/app_segmented_control.dart';
 import '../../../core/widgets/empty_state_view.dart';
+import '../../../l10n/formats.dart';
+import '../../../l10n/l10n_context.dart';
 import '../../measurement/presentation/measurements_view.dart';
 import '../../measurement/presentation/widgets/measurement_sheet.dart';
+import '../../notification/presentation/widgets/notification_bell.dart';
 import '../providers/workout_providers.dart';
 import 'widgets/planning_card.dart';
 import 'widgets/workout_filter_sheet.dart';
@@ -36,7 +39,7 @@ class ActivityScreen extends ConsumerWidget {
         scrolledUnderElevation: 0,
         centerTitle: true,
         title: AppSegmentedControl(
-          labels: const ['Allenamenti', 'Misure'],
+          labels: [context.l10n.activityWorkouts, context.l10n.activityMeasurements],
           selectedIndex: showingWorkouts ? 0 : 1,
           onSelect: (index) => ref.read(selectedActivityViewProvider.notifier).select(
                 index == 0 ? ActivityViewMode.workouts : ActivityViewMode.measurements,
@@ -46,10 +49,13 @@ class ActivityScreen extends ConsumerWidget {
           // RA-12: i filtri riguardano il solo elenco degli allenamenti.
           if (showingWorkouts)
             IconButton(
-              tooltip: 'Filtri',
+              tooltip: context.l10n.workoutFilters,
               icon: const Icon(Icons.filter_list),
               onPressed: () => showWorkoutFilterSheet(context),
             ),
+          // 12.3, 3.1: icona notifiche nell'intestazione di ogni
+          // destinazione principale, dopo l'azione contestuale (3.2).
+          const NotificationBell(),
         ],
       ),
       body: SafeArea(
@@ -61,7 +67,7 @@ class ActivityScreen extends ConsumerWidget {
             : showMeasurementSheet(context),
         backgroundColor: colors.accent,
         foregroundColor: colors.surface,
-        tooltip: showingWorkouts ? 'Registra allenamento' : 'Registra misurazione',
+        tooltip: showingWorkouts ? context.l10n.workoutRecord : context.l10n.measurementRecord,
         child: const Icon(Icons.add),
       ),
     );
@@ -94,7 +100,7 @@ class _WorkoutsView extends ConsumerWidget {
             loading: () => const Center(child: CircularProgressIndicator()),
             error: (error, _) => Center(
               child: Text(
-                describeApiError(error.asApiException?.code ?? ''),
+                describeApiError(context, error.asApiException?.code ?? ''),
                 style: typography.bodyMedium.copyWith(color: colors.textSecondary),
               ),
             ),
@@ -104,8 +110,8 @@ class _WorkoutsView extends ConsumerWidget {
                 ? EmptyStateView(
                     icon: Icons.directions_run_outlined,
                     title: filters.isEmpty
-                        ? 'Nessun allenamento registrato'
-                        : 'Nessun allenamento con questi filtri',
+                        ? context.l10n.workoutNoneRecorded
+                        : context.l10n.workoutNoneWithFilters,
                   )
                 : ListView.separated(
                     padding: const EdgeInsets.only(top: AppSpacing.xs, bottom: AppSpacing.xxl),
@@ -147,7 +153,7 @@ class _FilterChips extends ConsumerWidget {
             ),
           if (filters.from != null && filters.to != null)
             InputChip(
-              label: Text('${_formatDate(filters.from!)} — ${_formatDate(filters.to!)}'),
+              label: Text('${formatDate(context, filters.from!)} — ${formatDate(context, filters.to!)}'),
               onDeleted: () => controller.apply(filters.withoutPeriod()),
             ),
         ],
@@ -156,8 +162,3 @@ class _FilterChips extends ConsumerWidget {
   }
 }
 
-String _formatDate(DateTime value) {
-  final local = value.toLocal();
-  return '${local.day.toString().padLeft(2, '0')}/'
-      '${local.month.toString().padLeft(2, '0')}/${local.year}';
-}

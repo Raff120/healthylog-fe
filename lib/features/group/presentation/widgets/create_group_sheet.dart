@@ -4,6 +4,7 @@ import '../../../../app/theme/app_spacing.dart';
 import '../../../../app/theme/theme_context.dart';
 import '../../../../core/widgets/app_primary_button.dart';
 import '../../../../core/widgets/app_text_field.dart';
+import '../../../../l10n/l10n_context.dart';
 
 /// GE-1: foglio modale con il solo campo della denominazione (8.1
 /// interfaccia.md).
@@ -54,17 +55,17 @@ class _CreateGroupSheetState extends State<_CreateGroupSheet> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Crea un gruppo', style: typography.titleMedium.copyWith(color: colors.textPrimary)),
+            Text(context.l10n.groupCreate, style: typography.titleMedium.copyWith(color: colors.textPrimary)),
             const SizedBox(height: AppSpacing.md),
             AppTextField(
-              label: 'Denominazione',
+              label: context.l10n.commonName,
               controller: _nameController,
               textCapitalization: TextCapitalization.sentences,
               onChanged: (_) => setState(() {}),
             ),
             const SizedBox(height: AppSpacing.md),
             AppPrimaryButton(
-              label: 'Crea',
+              label: context.l10n.commonCreate,
               onPressed: _nameController.text.trim().isEmpty ? null : _confirm,
             ),
           ],

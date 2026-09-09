@@ -1,3 +1,4 @@
+import '../../../support/l10n_test_support.dart';
 import 'dart:convert';
 import 'dart:typed_data';
 
@@ -104,7 +105,11 @@ Future<void> _pumpScheduleScreen(WidgetTester tester, DietPlanApi api) async {
   await tester.pumpWidget(
     ProviderScope(
       overrides: [dietPlanApiProvider.overrideWithValue(api)],
-      child: MaterialApp.router(theme: AppTheme.light, routerConfig: router),
+      child: MaterialApp.router(
+      locale: testLocale,
+      localizationsDelegates: testLocalizationsDelegates,
+      supportedLocales: testSupportedLocales,
+      theme: AppTheme.light, routerConfig: router),
     ),
   );
   await tester.pumpAndSettle();
@@ -258,7 +263,11 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [dietPlanApiProvider.overrideWithValue(DietPlanApi(dio))],
-        child: MaterialApp.router(theme: AppTheme.light, routerConfig: router),
+        child: MaterialApp.router(
+      locale: testLocale,
+      localizationsDelegates: testLocalizationsDelegates,
+      supportedLocales: testSupportedLocales,
+      theme: AppTheme.light, routerConfig: router),
       ),
     );
     await tester.pumpAndSettle();
@@ -384,7 +393,11 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [dietPlanApiProvider.overrideWithValue(DietPlanApi(dio))],
-        child: MaterialApp.router(theme: AppTheme.light, routerConfig: router),
+        child: MaterialApp.router(
+      locale: testLocale,
+      localizationsDelegates: testLocalizationsDelegates,
+      supportedLocales: testSupportedLocales,
+      theme: AppTheme.light, routerConfig: router),
       ),
     );
     await tester.pumpAndSettle();

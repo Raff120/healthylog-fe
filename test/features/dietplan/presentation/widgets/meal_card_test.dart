@@ -1,3 +1,4 @@
+import '../../../../support/l10n_test_support.dart';
 import 'dart:convert';
 import 'dart:typed_data';
 
@@ -79,6 +80,10 @@ Future<_RecordingAdapter> _pumpCard(
     ProviderScope(
       overrides: [planDayApiProvider.overrideWithValue(PlanDayApi(dio))],
       child: MaterialApp(
+      locale: testLocale,
+      localizationsDelegates: testLocalizationsDelegates,
+      supportedLocales: testSupportedLocales,
+      
         theme: AppTheme.light,
         home: Scaffold(body: MealCard(slot: slot, date: date, canCheck: canCheck, planId: planId)),
       ),
@@ -111,6 +116,10 @@ Future<(_RecordingAdapter, ProviderContainer)> _pumpCardWithContainer(
     UncontrolledProviderScope(
       container: container,
       child: MaterialApp(
+      locale: testLocale,
+      localizationsDelegates: testLocalizationsDelegates,
+      supportedLocales: testSupportedLocales,
+      
         theme: AppTheme.light,
         home: Scaffold(body: MealCard(slot: slot, date: date, canCheck: canCheck, planId: planId)),
       ),

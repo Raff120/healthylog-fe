@@ -1,3 +1,5 @@
+import '../../../l10n/app_locale.dart';
+import '../../../l10n/unit_system.dart';
 import 'account_role.dart';
 
 /// Rispecchia `MeResponse` sul backend (PR-1, PR-6). Il ruolo è di sola
@@ -18,6 +20,11 @@ class Profile {
     required this.height,
     required this.targetWeightKg,
     required this.timezone,
+    required this.locale,
+    required this.unitSystem,
+    required this.privacyAcceptanceRequired,
+    required this.deletionRequestedAt,
+    required this.deletionEffectiveAt,
   });
 
   factory Profile.fromJson(Map<String, dynamic> json) => Profile(
@@ -33,6 +40,15 @@ class Profile {
         height: json['height'] as int?,
         targetWeightKg: (json['targetWeightKg'] as num?)?.toDouble(),
         timezone: json['timezone'] as String?,
+        locale: AppLocale.fromJson(json['locale'] as String?),
+        unitSystem: UnitSystem.fromJson(json['unitSystem'] as String?),
+        privacyAcceptanceRequired: json['privacyAcceptanceRequired'] as bool? ?? false,
+        deletionRequestedAt: json['deletionRequestedAt'] == null
+            ? null
+            : DateTime.parse(json['deletionRequestedAt'] as String).toLocal(),
+        deletionEffectiveAt: json['deletionEffectiveAt'] == null
+            ? null
+            : DateTime.parse(json['deletionEffectiveAt'] as String).toLocal(),
       );
 
   final String id;
@@ -52,6 +68,27 @@ class Profile {
   final double? targetWeightKg;
 
   final String? timezone;
+
+  /// LO-1, LO-2: lingua dell'interfaccia. Il server la conserva per le
+  /// comunicazioni per posta (AU-27); la presentazione attinge alla copia
+  /// locale di `LocaleController`, disponibile anche prima dell'accesso.
+  final AppLocale locale;
+
+  /// LO-4: sistema di unità di misura. Non ne esiste copia locale: serve
+  /// solo dopo l'accesso, dove il profilo è comunque caricato.
+  final UnitSystem unitSystem;
+
+  /// PV-8: l'aggiornamento sostanziale dell'informativa comporta una
+  /// nuova accettazione, richiesta al successivo accesso.
+  final bool privacyAcceptanceRequired;
+
+  /// PV-17: valorizzato durante il periodo di ripensamento.
+  final DateTime? deletionRequestedAt;
+
+  /// PV-17: quando la cancellazione diventa definitiva.
+  final DateTime? deletionEffectiveAt;
+
+  bool get isDeletionPending => deletionRequestedAt != null;
 }
 
 /// Corpo di `PATCH /me` (PR-1, PR-4, PR-6): rispecchia `UpdateProfileRequest`.
@@ -91,6 +128,21 @@ class UpdateProfileRequest {
         'sex': sex.toJson(),
         'height': height,
         'targetWeightKg': targetWeightKg,
+      };
+}
+
+/// Corpo di `PATCH /me/preferences` (LO-2, LO-4, F29, deroga: vedi
+/// decisioni.md). I due campi sono indipendenti: quello assente non è
+/// modificato.
+class UpdatePreferencesRequest {
+  const UpdatePreferencesRequest({this.locale, this.unitSystem});
+
+  final AppLocale? locale;
+  final UnitSystem? unitSystem;
+
+  Map<String, dynamic> toJson() => {
+        if (locale != null) 'locale': locale!.toJson(),
+        if (unitSystem != null) 'unitSystem': unitSystem!.toJson(),
       };
 }
 
