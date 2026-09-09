@@ -11,6 +11,7 @@ import '../../statistics/presentation/statistics_formatting.dart';
 import '../../statistics/presentation/widgets/breakdown_row.dart';
 import '../../statistics/presentation/widgets/statistics_headline.dart';
 import '../../statistics/providers/statistics_providers.dart';
+import '../data/diet_plan.dart';
 import '../data/meal_swap_log.dart';
 import '../data/plan_status.dart';
 import '../providers/diet_plan_providers.dart';
@@ -107,6 +108,13 @@ class DietPlanViewScreen extends ConsumerWidget {
                 planPeriodLabel(plan, _formatDate),
                 style: typography.bodyMedium.copyWith(color: colors.textSecondary),
               ),
+              // ST-9: il piano riattivato presenta l'elenco dei periodi
+              // attraversati, con date e aderenza di ciascuno.
+              if (plan.hasMultiplePeriods) ...[
+                const SizedBox(height: AppSpacing.lg),
+                _SectionTitle('Periodi di svolgimento'),
+                _PlanPeriods(plan: plan),
+              ],
               // ST-4: le statistiche del periodo, nella forma ridotta di
               // 7.5 — il tocco conduce alla sezione *Statistiche* con il
               // periodo preselezionato.
@@ -144,6 +152,57 @@ class _SectionTitle extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: AppSpacing.sm),
       child: Text(title, style: typography.overline.copyWith(color: colors.textTertiary)),
     );
+  }
+}
+
+/// ST-9, ST-10: i periodi attraversati, ciascuno con le proprie date e la
+/// propria aderenza. I due calcoli — complessivo e per singolo periodo —
+/// non sono omogenei: un piano ripreso a distanza di mesi produce dati che
+/// la sola somma occulterebbe, e l'alternanza fra i due si opera nella
+/// sezione *Statistiche* (11.1).
+class _PlanPeriods extends ConsumerWidget {
+  const _PlanPeriods({required this.plan});
+
+  final DietPlan plan;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final colors = context.colors;
+    final typography = context.typography;
+    final statistics = ref.watch(
+      adherenceStatisticsProvider(StatisticsQuery(period: StatisticsPeriod.plan, planId: plan.id)),
+    );
+    final periods = statistics.value?.periods;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        for (var index = 0; index < plan.periods.length; index++)
+          Padding(
+            padding: const EdgeInsets.only(bottom: AppSpacing.xs),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    _periodLabel(plan.periods[index]),
+                    style: typography.bodyMedium.copyWith(color: colors.textPrimary),
+                  ),
+                ),
+                if (periods != null && index < periods.length && periods[index].value != null)
+                  Text(
+                    '${formatPercentage(periods[index].value!)}%',
+                    style: typography.label.copyWith(color: colors.textPrimary),
+                  ),
+              ],
+            ),
+          ),
+      ],
+    );
+  }
+
+  String _periodLabel(DietPlanPeriod period) {
+    final end = period.endDate == null ? 'in corso' : formatDay(period.endDate!);
+    return 'Dal ${formatDay(period.startDate)} a $end';
   }
 }
 

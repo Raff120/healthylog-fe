@@ -459,7 +459,12 @@ class _OtherPlanTile extends StatelessWidget {
                   children: [
                     Text(plan.name, style: typography.titleMedium.copyWith(color: colors.textPrimary)),
                     Text(
-                      '$_statusLabel · ${planPeriodLabel(plan, formatDate)}',
+                      '$_statusLabel · ${planPeriodLabel(plan, formatDate)}'
+                      // ST-8, ST-9, 7.1: il piano riattivato è voce unica,
+                      // con il periodo espresso come intervallo complessivo
+                      // e il numero di periodi accanto; il dettaglio ne
+                      // presenta l'elenco (7.5).
+                      '${plan.hasMultiplePeriods ? ' · ${plan.periods.length} periodi' : ''}',
                       style: typography.caption.copyWith(color: colors.textSecondary),
                     ),
                   ],
