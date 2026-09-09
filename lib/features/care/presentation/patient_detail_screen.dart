@@ -14,6 +14,7 @@ import '../data/care_models.dart';
 import '../providers/care_providers.dart';
 import 'widgets/care_confirmations.dart';
 import 'widgets/patient_activity_section.dart';
+import 'widgets/patient_statistics_section.dart';
 
 /// Dettaglio del Paziente (9.2 interfaccia.md; VA-7, NU-2, NU-6):
 /// intestazione con nome e data del collegamento, card del piano in
@@ -23,7 +24,8 @@ import 'widgets/patient_activity_section.dart';
 /// un piano redatto da altri, la sezione presenta il solo "Crea piano",
 /// senza alcun riferimento al piano esistente (ST-16, VA-3).
 ///
-/// Statistiche e misurazioni (9.2) arrivano con F24/F25.
+/// 9.2: statistiche del Paziente circoscritte ai periodi coperti dai
+/// piani redatti dal professionista (ST-16bis, VA-7).
 class PatientDetailScreen extends ConsumerWidget {
   const PatientDetailScreen({super.key, required this.patientId, this.embedded = false});
 
@@ -201,6 +203,9 @@ class PatientDetailScreen extends ConsumerWidget {
                   ),
                 ),
             ],
+            // 9.2, VA-7: aderenza, allenamenti con l'obiettivo settimanale
+            // (OS-7) e andamento delle misure, nei limiti di ST-16bis.
+            PatientStatisticsSection(patientId: patientId),
             // 9.2: misurazioni e allenamenti del Paziente, con la
             // registrazione delle rilevazioni proprie (NU-12).
             PatientActivitySection(patientId: patientId),

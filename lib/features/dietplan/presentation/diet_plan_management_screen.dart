@@ -459,12 +459,28 @@ class _OtherPlanTile extends StatelessWidget {
                   children: [
                     Text(plan.name, style: typography.titleMedium.copyWith(color: colors.textPrimary)),
                     Text(
-                      '$_statusLabel · ${planPeriodLabel(plan, formatDate)}',
+                      '$_statusLabel · ${planPeriodLabel(plan, formatDate)}'
+                      // ST-8, ST-9, 7.1: il piano riattivato è voce unica,
+                      // con il periodo espresso come intervallo complessivo
+                      // e il numero di periodi accanto; il dettaglio ne
+                      // presenta l'elenco (7.5).
+                      '${plan.hasMultiplePeriods ? ' · ${plan.periods.length} periodi' : ''}',
                       style: typography.caption.copyWith(color: colors.textSecondary),
                     ),
                   ],
                 ),
               ),
+              // ST-2, 7.1: l'aderenza come numero puro in colore primario,
+              // senza colorazione di merito né barra di avanzamento
+              // (AD-15). Non compare per i Programmati, dove non esiste, né
+              // per quello in corso, la cui collocazione sono le statistiche.
+              if (plan.adherence != null) ...[
+                Text(
+                  '${plan.adherence!.round()}%',
+                  style: typography.label.copyWith(color: colors.textPrimary),
+                ),
+                const SizedBox(width: AppSpacing.xs),
+              ],
               Icon(Icons.chevron_right, color: colors.textTertiary),
             ],
           ),

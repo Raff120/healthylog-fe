@@ -2,6 +2,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../core/api/api_client.dart';
 import '../data/meal_swap_api.dart';
+import '../data/meal_swap_log.dart';
 import '../data/plan_day.dart';
 import '../data/plan_day_coverage.dart';
 import '../data/plan_status.dart';
@@ -131,3 +132,9 @@ class MealSwapController extends _$MealSwapController {
     ref.invalidate(groupPlanDayProvider(destinationDate));
   }
 }
+
+/// IN-24, ST-5: lo storico delle inversioni di un piano, che il dettaglio
+/// del piano concluso presenta in coda (7.5 interfaccia.md).
+@riverpod
+Future<List<MealSwapLog>> mealSwapHistory(Ref ref, String planId) =>
+    ref.watch(mealSwapApiProvider).history(planId);

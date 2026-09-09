@@ -36,13 +36,11 @@ class ActivityScreen extends ConsumerWidget {
         scrolledUnderElevation: 0,
         centerTitle: true,
         title: AppSegmentedControl(
-          firstLabel: 'Allenamenti',
-          secondLabel: 'Misure',
-          firstSelected: showingWorkouts,
-          onSelectFirst: () =>
-              ref.read(selectedActivityViewProvider.notifier).select(ActivityViewMode.workouts),
-          onSelectSecond: () =>
-              ref.read(selectedActivityViewProvider.notifier).select(ActivityViewMode.measurements),
+          labels: const ['Allenamenti', 'Misure'],
+          selectedIndex: showingWorkouts ? 0 : 1,
+          onSelect: (index) => ref.read(selectedActivityViewProvider.notifier).select(
+                index == 0 ? ActivityViewMode.workouts : ActivityViewMode.measurements,
+              ),
         ),
         actions: [
           // RA-12: i filtri riguardano il solo elenco degli allenamenti.

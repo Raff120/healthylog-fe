@@ -182,3 +182,94 @@ abstract class _$MealSwapController extends $Notifier<AsyncValue<void>?> {
     return element.handleCreate(ref, build);
   }
 }
+
+/// IN-24, ST-5: lo storico delle inversioni di un piano, che il dettaglio
+/// del piano concluso presenta in coda (7.5 interfaccia.md).
+
+@ProviderFor(mealSwapHistory)
+final mealSwapHistoryProvider = MealSwapHistoryFamily._();
+
+/// IN-24, ST-5: lo storico delle inversioni di un piano, che il dettaglio
+/// del piano concluso presenta in coda (7.5 interfaccia.md).
+
+final class MealSwapHistoryProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<List<MealSwapLog>>,
+          List<MealSwapLog>,
+          FutureOr<List<MealSwapLog>>
+        >
+    with
+        $FutureModifier<List<MealSwapLog>>,
+        $FutureProvider<List<MealSwapLog>> {
+  /// IN-24, ST-5: lo storico delle inversioni di un piano, che il dettaglio
+  /// del piano concluso presenta in coda (7.5 interfaccia.md).
+  MealSwapHistoryProvider._({
+    required MealSwapHistoryFamily super.from,
+    required String super.argument,
+  }) : super(
+         retry: null,
+         name: r'mealSwapHistoryProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$mealSwapHistoryHash();
+
+  @override
+  String toString() {
+    return r'mealSwapHistoryProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  $FutureProviderElement<List<MealSwapLog>> $createElement(
+    $ProviderPointer pointer,
+  ) => $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<List<MealSwapLog>> create(Ref ref) {
+    final argument = this.argument as String;
+    return mealSwapHistory(ref, argument);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is MealSwapHistoryProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$mealSwapHistoryHash() => r'e5e4379236f62bfc5d52855d1877dfc895018740';
+
+/// IN-24, ST-5: lo storico delle inversioni di un piano, che il dettaglio
+/// del piano concluso presenta in coda (7.5 interfaccia.md).
+
+final class MealSwapHistoryFamily extends $Family
+    with $FunctionalFamilyOverride<FutureOr<List<MealSwapLog>>, String> {
+  MealSwapHistoryFamily._()
+    : super(
+        retry: null,
+        name: r'mealSwapHistoryProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  /// IN-24, ST-5: lo storico delle inversioni di un piano, che il dettaglio
+  /// del piano concluso presenta in coda (7.5 interfaccia.md).
+
+  MealSwapHistoryProvider call(String planId) =>
+      MealSwapHistoryProvider._(argument: planId, from: this);
+
+  @override
+  String toString() => r'mealSwapHistoryProvider';
+}

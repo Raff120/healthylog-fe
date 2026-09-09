@@ -22,18 +22,22 @@ import 'package:healthylog/features/identity/data/identity_api.dart';
 import 'package:healthylog/features/identity/data/profile_api.dart';
 import 'package:healthylog/features/identity/providers/identity_providers.dart';
 import 'package:healthylog/features/identity/providers/profile_providers.dart';
+import 'package:healthylog/core/storage/preferences_store.dart';
+import 'package:healthylog/features/statistics/providers/statistics_providers.dart';
 import 'package:healthylog/features/workout/providers/workout_providers.dart';
 import 'package:healthylog/main.dart';
 
 import '../support/care_api_stub.dart';
+import '../support/preferences_store_stub.dart';
+import '../support/statistics_api_stub.dart';
 import '../support/workout_api_stub.dart';
 
-/// Barra di navigazione principale (3.1, 3.2, 2.6 interfaccia.md), aggiunta
+/// Barra di navigazione principale (3.1, 3.2 interfaccia.md), aggiunta
 /// retroattivamente a F06 (vedi decisioni.md): quattro voci per l'Utente,
-/// Attività e Statistiche visibili ma disabilitate finché le rispettive
-/// feature (F23+, F25+) non esistono — non nascoste, un'esclusione per
-/// ruolo è l'unico caso ammesso da 2.6. Verificato tramite l'app reale,
-/// sul modello di `router_test.dart`.
+/// tre per il Nutrizionista. Dalla Fase 7 nessuna voce dell'Utente è più
+/// disabilitata — *Attività* (F23) e *Statistiche* (F25) hanno entrambe
+/// una schermata propria. Verificato tramite l'app reale, sul modello di
+/// `router_test.dart`.
 class _InMemorySecureKeyValueStore extends SecureKeyValueStore {
   final values = <String, String>{};
 
@@ -162,6 +166,10 @@ Future<ProviderContainer> _pumpAuthenticatedApp(
       // F21/F22: nessun collegamento professionale (RG-5), nessun Paziente.
       careApiProvider.overrideWithValue(stubCareApi()),
         workoutApiProvider.overrideWithValue(stubWorkoutApi()),
+      statisticsApiProvider.overrideWithValue(stubStatisticsApi()),
+      // 11.1: il periodo selezionato è conservato tra le sessioni; nella
+      // VM di test l'archivio locale è in memoria.
+      preferencesStoreProvider.overrideWithValue(InMemoryPreferencesStore()),
       // F14: la base dati reale userebbe path_provider/flutter_secure_storage,
       // assenti nella VM di test (sospensione indefinita, non un errore).
       appDatabaseProvider.overrideWithValue(
@@ -183,7 +191,7 @@ Future<ProviderContainer> _pumpAuthenticatedApp(
 
 void main() {
   testWidgets(
-    'mostra le quattro voci dell\'Utente, due disabilitate (3.1, 2.6)',
+    'mostra le quattro voci dell\'Utente (3.1)',
     (tester) async {
       await _pumpAuthenticatedApp(tester, role: 'USER');
 
@@ -199,20 +207,21 @@ void main() {
     },
   );
 
-  testWidgets('una voce disabilitata non naviga e spiega perché (2.6)', (
+  testWidgets('il tocco su Statistiche naviga e conserva la barra (F25)', (
     tester,
   ) async {
     await _pumpAuthenticatedApp(tester, role: 'USER');
 
     await tester.tap(find.text('Statistiche'));
-    await tester.pump();
+    await tester.pumpAndSettle();
 
-    expect(find.text('Statistiche: non ancora disponibile.'), findsOneWidget);
-    // La destinazione resta quella di partenza (Piano, F12): il tocco su
-    // una voce disabilitata non naviga. Nessun piano mai creato in
-    // questo banco di prova (dietPlanDio restituisce `[]`): l'invito a
-    // crearne uno, non il neutro "fuori piano" (PA-10, 4.4).
-    expect(find.text('Inizia da qui'), findsOneWidget);
+    // 11.1: i tre segmenti dell'intestazione.
+    expect(find.text('Aderenza'), findsOneWidget);
+    expect(find.text('Corpo'), findsOneWidget);
+    // AD-4: senza slot valutabili la constatazione, non uno zero.
+    expect(find.text('Non ci sono ancora dati'), findsOneWidget);
+    // La barra resta: la voce di partenza è ancora raggiungibile.
+    expect(find.text('Profilo'), findsOneWidget);
   });
 
   testWidgets('il tocco su Profilo naviga e conserva la barra', (tester) async {
@@ -287,6 +296,10 @@ void main() {
           // F21/F22: nessun collegamento professionale (RG-5), nessun Paziente.
           careApiProvider.overrideWithValue(stubCareApi()),
         workoutApiProvider.overrideWithValue(stubWorkoutApi()),
+      statisticsApiProvider.overrideWithValue(stubStatisticsApi()),
+      // 11.1: il periodo selezionato è conservato tra le sessioni; nella
+      // VM di test l'archivio locale è in memoria.
+      preferencesStoreProvider.overrideWithValue(InMemoryPreferencesStore()),
           appDatabaseProvider.overrideWithValue(
             AppDatabase(NativeDatabase.memory()),
           ),

@@ -55,6 +55,22 @@ class DietPlanWeekDay {
   final List<DietPlanSlot> slots;
 }
 
+/// Un periodo di svolgimento (CO-6) o di sospensione (CV-S3) del piano.
+/// [endDate] assente indica un periodo tuttora in corso — è così che il
+/// Paziente conosce, se Sospeso, la data da cui la sospensione decorre
+/// (CV-15).
+class DietPlanPeriod {
+  const DietPlanPeriod({required this.startDate, required this.endDate});
+
+  factory DietPlanPeriod.fromJson(Map<String, dynamic> json) => DietPlanPeriod(
+        startDate: DateTime.parse(json['startDate'] as String),
+        endDate: json['endDate'] == null ? null : DateTime.parse(json['endDate'] as String),
+      );
+
+  final DateTime startDate;
+  final DateTime? endDate;
+}
+
 /// Rispecchia `DietPlanResponse` sul backend (3.1 funzionale, CD-1, CD-4).
 class DietPlan {
   const DietPlan({
@@ -66,7 +82,10 @@ class DietPlan {
     required this.status,
     required this.startDate,
     required this.endDate,
+    required this.periods,
+    required this.suspensions,
     required this.weeklySchedule,
+    required this.adherence,
   });
 
   factory DietPlan.fromJson(Map<String, dynamic> json) => DietPlan(
@@ -78,9 +97,16 @@ class DietPlan {
         status: PlanStatus.fromJson(json['status'] as String),
         startDate: DateTime.parse(json['startDate'] as String),
         endDate: json['endDate'] == null ? null : DateTime.parse(json['endDate'] as String),
+        periods: (json['periods'] as List? ?? const [])
+            .map((e) => DietPlanPeriod.fromJson(e as Map<String, dynamic>))
+            .toList(),
+        suspensions: (json['suspensions'] as List? ?? const [])
+            .map((e) => DietPlanPeriod.fromJson(e as Map<String, dynamic>))
+            .toList(),
         weeklySchedule: (json['weeklySchedule'] as List)
             .map((e) => DietPlanWeekDay.fromJson(e as Map<String, dynamic>))
             .toList(),
+        adherence: (json['adherence'] as num?)?.toDouble(),
       );
 
   final String id;
@@ -91,5 +117,22 @@ class DietPlan {
   final PlanStatus status;
   final DateTime startDate;
   final DateTime? endDate;
+
+  /// CO-6: i periodi di svolgimento attraversati. ST-8: il piano
+  /// riattivato è voce unica dello storico, e sono questi a raccontarne la
+  /// storia.
+  final List<DietPlanPeriod> periods;
+
+  /// CV-S3: i periodi di sospensione, esclusi da ogni calcolo di aderenza
+  /// (AD-11).
+  final List<DietPlanPeriod> suspensions;
+
   final List<DietPlanWeekDay> weeklySchedule;
+
+  /// ST-2: il valore sintetico di aderenza, presente nel solo elenco e per
+  /// i soli piani Conclusi. AD-1ter: percentuale non arrotondata.
+  final double? adherence;
+
+  /// ST-8, ST-9: il piano è stato riattivato e ha attraversato più periodi.
+  bool get hasMultiplePeriods => periods.length > 1;
 }

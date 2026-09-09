@@ -29,6 +29,7 @@ import '../features/identity/presentation/registration_details_screen.dart';
 import '../features/identity/presentation/role_selection_screen.dart';
 import '../features/identity/presentation/settings_screen.dart';
 import '../features/group/presentation/group_screen.dart';
+import '../features/statistics/presentation/statistics_screen.dart';
 import '../features/workout/presentation/activity_screen.dart';
 import 'navigation/main_shell.dart';
 import 'navigation/role_home_screen.dart';
@@ -150,6 +151,15 @@ GoRouter goRouter(Ref ref) {
         // allenamenti e misure dietro il segmented control.
         path: '/activity',
         builder: (context, state) => const MainShell(child: ActivityScreen()),
+      ),
+      GoRoute(
+        // 11 interfaccia.md: terza destinazione dell'Utente. `planId` in
+        // query quando vi si arriva dal dettaglio di un piano concluso
+        // (7.5), con il periodo preselezionato.
+        path: '/statistics',
+        builder: (context, state) => MainShell(
+          child: StatisticsScreen(planId: state.uri.queryParameters['planId']),
+        ),
       ),
       GoRoute(
         path: '/profile',
