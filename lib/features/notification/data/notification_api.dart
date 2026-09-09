@@ -24,4 +24,13 @@ class NotificationApi {
     final response = await _dio.get('/notifications/unread-count');
     return (response.data as Map<String, dynamic>)['unread'] as int;
   }
+
+  /// NT-10: marcatura conseguente al tocco esplicito.
+  Future<void> markRead(String id) => _dio.post('/notifications/$id/read');
+
+  /// NT-11: tutte in un'unica operazione.
+  Future<void> markAllRead() => _dio.post('/notifications/read-all');
+
+  /// NT-12: eliminazione singola, di una notifica letta o non letta.
+  Future<void> delete(String id) => _dio.delete('/notifications/$id');
 }

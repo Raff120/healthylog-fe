@@ -85,7 +85,7 @@ final class NotificationsProvider
   Notifications create() => Notifications();
 }
 
-String _$notificationsHash() => r'ffd8351eaff2d62d4c69e51ea9c022d4904cf26a';
+String _$notificationsHash() => r'd02ecf9a94438eacf37dcf484591bf8127fbb815';
 
 /// NT-7: il centro notifiche, in ordine cronologico decrescente. NT-10:
 /// la sola lettura non marca nulla — la marcatura è del solo
@@ -170,6 +170,65 @@ abstract class _$UnreadNotificationCount extends $AsyncNotifier<int> {
             as $ClassProviderElement<
               AnyNotifier<AsyncValue<int>, int>,
               AsyncValue<int>,
+              Object?,
+              Object?
+            >;
+    return element.handleCreate(ref, build);
+  }
+}
+
+/// NT-10, NT-11, NT-12: lettura ed eliminazione.
+
+@ProviderFor(NotificationController)
+final notificationControllerProvider = NotificationControllerProvider._();
+
+/// NT-10, NT-11, NT-12: lettura ed eliminazione.
+final class NotificationControllerProvider
+    extends $NotifierProvider<NotificationController, AsyncValue<void>?> {
+  /// NT-10, NT-11, NT-12: lettura ed eliminazione.
+  NotificationControllerProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'notificationControllerProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$notificationControllerHash();
+
+  @$internal
+  @override
+  NotificationController create() => NotificationController();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(AsyncValue<void>? value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<AsyncValue<void>?>(value),
+    );
+  }
+}
+
+String _$notificationControllerHash() =>
+    r'fd9371953bef4b204ba6b603d997cc4cfb212991';
+
+/// NT-10, NT-11, NT-12: lettura ed eliminazione.
+
+abstract class _$NotificationController extends $Notifier<AsyncValue<void>?> {
+  AsyncValue<void>? build();
+  @$mustCallSuper
+  @override
+  WhenComplete runBuild() {
+    final ref = this.ref as $Ref<AsyncValue<void>?, AsyncValue<void>?>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<AsyncValue<void>?, AsyncValue<void>?>,
+              AsyncValue<void>?,
               Object?,
               Object?
             >;
