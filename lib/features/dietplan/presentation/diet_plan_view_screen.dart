@@ -45,6 +45,21 @@ class DietPlanViewScreen extends ConsumerWidget {
   final String planId;
 
 
+  /// PV-13: l'esportazione del piano concluso, identica a quella del
+  /// piano in corso — nulla nel documento dipende dallo stato.
+  Future<void> _export(BuildContext context, WidgetRef ref) async {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(context.l10n.planExportInProgress)),
+    );
+    await ref.read(dietPlanExportControllerProvider.notifier).export(planId);
+    if (!context.mounted) return;
+    ref.read(dietPlanExportControllerProvider)?.whenOrNull(
+          error: (error, _) => ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(describeApiError(context, error.asApiException?.code ?? ''))),
+          ),
+        );
+  }
+
   Future<void> _delete(BuildContext context, WidgetRef ref) async {
     final confirmed = await confirmDeletePlan(context, PlanStatus.completed);
     if (!confirmed) return;
@@ -82,8 +97,12 @@ class DietPlanViewScreen extends ConsumerWidget {
             PopupMenuButton<String>(
               onSelected: (value) {
                 if (value == 'delete') _delete(context, ref);
+                // PV-13: l'esportazione è possibile per i piani conclusi
+                // dello storico quanto per quelli in corso (7.5).
+                if (value == 'export') _export(context, ref);
               },
               itemBuilder: (context) => [
+                PopupMenuItem(value: 'export', child: Text(context.l10n.planActionExport)),
                 PopupMenuItem(value: 'delete', child: Text(context.l10n.commonDelete, style: TextStyle(color: colors.error))),
               ],
             ),

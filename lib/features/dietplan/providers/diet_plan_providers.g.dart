@@ -447,3 +447,70 @@ abstract class _$DietPlanLifecycleController
     return element.handleCreate(ref, build);
   }
 }
+
+/// PV-12, PV-13, PV-15: esportazione del piano in PDF. Controller
+/// distinto dal ciclo di vita: non muta nulla e non deve invalidare
+/// alcun elenco.
+
+@ProviderFor(DietPlanExportController)
+final dietPlanExportControllerProvider = DietPlanExportControllerProvider._();
+
+/// PV-12, PV-13, PV-15: esportazione del piano in PDF. Controller
+/// distinto dal ciclo di vita: non muta nulla e non deve invalidare
+/// alcun elenco.
+final class DietPlanExportControllerProvider
+    extends $NotifierProvider<DietPlanExportController, AsyncValue<void>?> {
+  /// PV-12, PV-13, PV-15: esportazione del piano in PDF. Controller
+  /// distinto dal ciclo di vita: non muta nulla e non deve invalidare
+  /// alcun elenco.
+  DietPlanExportControllerProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'dietPlanExportControllerProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$dietPlanExportControllerHash();
+
+  @$internal
+  @override
+  DietPlanExportController create() => DietPlanExportController();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(AsyncValue<void>? value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<AsyncValue<void>?>(value),
+    );
+  }
+}
+
+String _$dietPlanExportControllerHash() =>
+    r'fa5602cc9392792e554a4af51c0e86d422239c32';
+
+/// PV-12, PV-13, PV-15: esportazione del piano in PDF. Controller
+/// distinto dal ciclo di vita: non muta nulla e non deve invalidare
+/// alcun elenco.
+
+abstract class _$DietPlanExportController extends $Notifier<AsyncValue<void>?> {
+  AsyncValue<void>? build();
+  @$mustCallSuper
+  @override
+  WhenComplete runBuild() {
+    final ref = this.ref as $Ref<AsyncValue<void>?, AsyncValue<void>?>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<AsyncValue<void>?, AsyncValue<void>?>,
+              AsyncValue<void>?,
+              Object?,
+              Object?
+            >;
+    return element.handleCreate(ref, build);
+  }
+}

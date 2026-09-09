@@ -132,6 +132,22 @@ class DietPlanManagementScreen extends ConsumerWidget {
     await _act(context, ref, () => ref.read(dietPlanLifecycleControllerProvider.notifier).delete(planId));
   }
 
+  /// PV-12, PV-13: il documento è preparato dal server e consegnato dal
+  /// mezzo proprio della piattaforma. L'attesa è dichiarata perché la
+  /// composizione non è istantanea (2.6).
+  Future<void> _export(BuildContext context, WidgetRef ref, String planId) async {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(context.l10n.planExportInProgress)),
+    );
+    await ref.read(dietPlanExportControllerProvider.notifier).export(planId);
+    if (!context.mounted) return;
+    ref.read(dietPlanExportControllerProvider)?.whenOrNull(
+          error: (error, _) => ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(describeApiError(context, error.asApiException?.code ?? ''))),
+          ),
+        );
+  }
+
   Future<void> _act(BuildContext context, WidgetRef ref, Future<void> Function() action) async {
     await action();
     if (!context.mounted) return;
@@ -244,6 +260,7 @@ class DietPlanManagementScreen extends ConsumerWidget {
                     onEditScheduled: () => _editScheduled(context, ref, current.id),
                     onEditInPlace: () => _editInPlace(context, current.id),
                     onDelete: () => _delete(context, ref, current.id, current.status),
+                    onExport: () => _export(context, ref, current.id),
                   ),
                   if (others.isNotEmpty) const SizedBox(height: AppSpacing.md),
                 ],
@@ -286,6 +303,7 @@ class _CurrentPlanCard extends StatelessWidget {
     required this.onEditScheduled,
     required this.onEditInPlace,
     required this.onDelete,
+    required this.onExport,
   });
 
   final DietPlan plan;
@@ -305,6 +323,7 @@ class _CurrentPlanCard extends StatelessWidget {
   final VoidCallback onEditScheduled;
   final VoidCallback onEditInPlace;
   final VoidCallback onDelete;
+  final VoidCallback onExport;
 
   /// 7.1: la riga di stato del piano in corso. L'Attivo si presenta come
   /// "In corso", non con il nome tecnico dello stato.
@@ -371,21 +390,26 @@ class _CurrentPlanCard extends StatelessWidget {
   List<_PlanAction> _actionsFor(BuildContext context, PlanStatus status) {
     final l10n = context.l10n;
     return switch (status) {
+      // 7.1: "Esporta" compare in ogni stato in cui il piano ha un
+      // contenuto da esportare (PV-12, PV-13).
       PlanStatus.active => [
           _PlanAction(l10n.planActionEdit, onEditInPlace),
           _PlanAction(l10n.planActionSuspend, onSuspend),
           _PlanAction(l10n.planActionComplete, onComplete),
+          _PlanAction(l10n.planActionExport, onExport),
         ],
       PlanStatus.suspended => [
           _PlanAction(l10n.planActionEdit, onEditInPlace),
           _PlanAction(l10n.planActionResume, onResume),
           _PlanAction(l10n.planActionComplete, onComplete),
+          _PlanAction(l10n.planActionExport, onExport),
           _PlanAction(l10n.planActionDelete, onDelete, destructive: true),
         ],
       PlanStatus.scheduled => [
           _PlanAction(l10n.planActionEdit, onEditScheduled),
           _PlanAction(l10n.planActionWithdraw, onWithdraw),
           _PlanAction(l10n.plansActivateNow, onActivateNow),
+          _PlanAction(l10n.planActionExport, onExport),
         ],
       _ => const [],
     };

@@ -62,6 +62,10 @@ dependencies:
   path: ^1.9.1
   sqlite3: ^3.5.2
   share_plus: ^13.3.0
+  # PV-12, PV-15: consegna del PDF sul web (scaricamento del browser).
+  # Già in albero come dipendenza transitiva del framework; dichiarato
+  # perché il codice lo usa direttamente (TS-9: nessun componente nuovo).
+  web: any
 
 dev_dependencies:
   flutter_test:

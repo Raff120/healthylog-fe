@@ -1993,6 +1993,12 @@ abstract class L10n {
   /// **'Modifica'**
   String get planActionEdit;
 
+  /// No description provided for @planActionExport.
+  ///
+  /// In it, this message translates to:
+  /// **'Esporta'**
+  String get planActionExport;
+
   /// No description provided for @planActionReactivate.
   ///
   /// In it, this message translates to:
@@ -2130,6 +2136,12 @@ abstract class L10n {
   /// In it, this message translates to:
   /// **'Data di fine'**
   String get planEndDate;
+
+  /// No description provided for @planExportInProgress.
+  ///
+  /// In it, this message translates to:
+  /// **'Preparazione del documento…'**
+  String get planExportInProgress;
 
   /// No description provided for @planMoreActions.
   ///

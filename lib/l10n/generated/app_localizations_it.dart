@@ -1123,6 +1123,9 @@ class L10nIt extends L10n {
   String get planActionEdit => 'Modifica';
 
   @override
+  String get planActionExport => 'Esporta';
+
+  @override
   String get planActionReactivate => 'Riattiva';
 
   @override
@@ -1198,6 +1201,9 @@ class L10nIt extends L10n {
 
   @override
   String get planEndDate => 'Data di fine';
+
+  @override
+  String get planExportInProgress => 'Preparazione del documento…';
 
   @override
   String get planMoreActions => 'Altre azioni';
