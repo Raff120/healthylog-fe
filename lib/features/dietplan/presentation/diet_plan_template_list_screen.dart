@@ -1,0 +1,151 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+
+import '../../../app/theme/app_spacing.dart';
+import '../../../app/theme/theme_context.dart';
+import '../../../core/api/api_error_messages.dart';
+import '../../../core/api/api_exception.dart';
+import '../../../l10n/formats.dart';
+import '../../../l10n/l10n_context.dart';
+import '../../notification/presentation/widgets/notification_bell.dart';
+import '../data/diet_plan_template.dart';
+import '../data/diet_plan_template_requests.dart';
+import '../providers/diet_plan_template_providers.dart';
+import 'widgets/name_description_dialog.dart';
+
+/// Elenco dei template (7.4 interfaccia.md, CT-2, CT-3): raggiunto per ora
+/// da un punto d'accesso provvisorio (nessuna schermata "Piani" esiste
+/// ancora, vedi decisioni.md) e dalla scelta "Da un template" in 7.2. Il
+/// tocco su una voce apre l'anteprima (CT-6).
+class DietPlanTemplateListScreen extends ConsumerWidget {
+  const DietPlanTemplateListScreen({super.key});
+
+  /// TP-3: la denominazione è raccolta subito, non proposta di default —
+  /// a differenza del piano (CD-1), il template non ha un'origine "in
+  /// bianco" da nominare in un secondo momento.
+  Future<void> _create(BuildContext context, WidgetRef ref) async {
+    final input = await showNameDescriptionDialog(context, title: context.l10n.templateNew, confirmLabel: context.l10n.commonCreate);
+    if (input == null) return;
+    if (!context.mounted) return;
+    await ref.read(createDietPlanTemplateControllerProvider.notifier).create(
+          CreateDietPlanTemplateRequest(name: input.name, description: input.description),
+        );
+    final state = ref.read(createDietPlanTemplateControllerProvider);
+    if (!context.mounted || state == null) return;
+    state.whenOrNull(
+      data: (template) => context.pushReplacement('/diet-plan-templates/${template.id}/schedule'),
+      error: (error, _) => ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(describeApiError(context, error.asApiException?.code ?? ''))),
+      ),
+    );
+  }
+
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final colors = context.colors;
+    final typography = context.typography;
+    final listState = ref.watch(dietPlanTemplateListProvider);
+    final creating = ref.watch(createDietPlanTemplateControllerProvider)?.isLoading ?? false;
+
+    return Scaffold(
+      backgroundColor: colors.background,
+      appBar: AppBar(
+        backgroundColor: colors.background,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        title: Text(context.l10n.navTemplates, style: typography.titleMedium.copyWith(color: colors.textPrimary)),
+        // 12.3, 3.1: icona notifiche nell'intestazione di ogni
+        // destinazione principale. *Template* lo è per il Nutrizionista;
+        // l'Utente vi arriva dalla creazione del piano (CT-1) e vi trova
+        // la stessa icona, che 3.2 prevede comunque a destra
+        // dell'intestazione.
+        actions: const [NotificationBell()],
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: creating ? null : () => _create(context, ref),
+        child: creating
+            ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
+            : const Icon(Icons.add),
+      ),
+      body: SafeArea(
+        child: listState.when(
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (error, _) => Center(
+            child: Text(
+              describeApiError(context, error.asApiException?.code ?? ''),
+              style: typography.bodyMedium.copyWith(color: colors.textSecondary),
+            ),
+          ),
+          data: (templates) {
+            if (templates.isEmpty) {
+              return Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(AppSpacing.md),
+                  child: Text(
+                    context.l10n.templatesEmpty,
+                    style: typography.bodyMedium.copyWith(color: colors.textSecondary),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              );
+            }
+            return ListView.separated(
+              padding: const EdgeInsets.fromLTRB(AppSpacing.md, AppSpacing.md, AppSpacing.md, AppSpacing.xxl),
+              itemCount: templates.length,
+              separatorBuilder: (context, index) => const SizedBox(height: AppSpacing.sm),
+              itemBuilder: (context, index) {
+                final template = templates[index];
+                return _TemplateTile(
+                  template: template,
+                  updatedAtLabel: formatDate(context, template.updatedAt),
+                  onTap: () => context.push('/diet-plan-templates/${template.id}'),
+                );
+              },
+            );
+          },
+        ),
+      ),
+    );
+  }
+}
+
+class _TemplateTile extends StatelessWidget {
+  const _TemplateTile({required this.template, required this.updatedAtLabel, required this.onTap});
+
+  final DietPlanTemplateSummary template;
+  final String updatedAtLabel;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final typography = context.typography;
+    final description = template.description;
+
+    return Material(
+      color: colors.surface,
+      borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.all(AppSpacing.md),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(template.name, style: typography.titleMedium.copyWith(color: colors.textPrimary)),
+              if (description != null && description.isNotEmpty) ...[
+                const SizedBox(height: AppSpacing.xxs),
+                Text(description, style: typography.caption.copyWith(color: colors.textSecondary)),
+              ],
+              const SizedBox(height: AppSpacing.xxs),
+              Text(context.l10n.templateLastEdited(updatedAtLabel), style: typography.caption.copyWith(color: colors.textTertiary)),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
