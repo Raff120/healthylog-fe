@@ -997,7 +997,7 @@ class L10nEn extends L10n {
       'You are offline. You can view the plan already downloaded.';
 
   @override
-  String get passwordRequirementHint => 'At least 12 characters';
+  String get passwordRequirementHint => 'At least 8 characters';
 
   @override
   String get passwordResetConfirmTitle => 'Set a new password';

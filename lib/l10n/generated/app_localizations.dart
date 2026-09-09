@@ -1780,7 +1780,7 @@ abstract class L10n {
   /// AU-3: unico requisito, senza vincoli di composizione.
   ///
   /// In it, this message translates to:
-  /// **'Almeno 12 caratteri'**
+  /// **'Almeno 8 caratteri'**
   String get passwordRequirementHint;
 
   /// No description provided for @passwordResetConfirmTitle.

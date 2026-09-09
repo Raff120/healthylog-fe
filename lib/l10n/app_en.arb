@@ -280,7 +280,7 @@
   "notificationsMarkAllRead": "Mark all as read",
   "notificationsTitle": "Notifications",
   "offlineBar": "You are offline. You can view the plan already downloaded.",
-  "passwordRequirementHint": "At least 12 characters",
+  "passwordRequirementHint": "At least 8 characters",
   "passwordResetConfirmTitle": "Set a new password",
   "passwordResetDone": "All sessions have been closed. Sign in with your new password.",
   "passwordResetLinkExpiredBody": "Request a new one from the sign-in screen.",
