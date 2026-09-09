@@ -57,6 +57,8 @@ Map<String, dynamic> _planJson({
   String id = 'plan-1',
   String name = 'Dieta di prova',
   String startDate = '2026-09-01',
+  double? adherence,
+  List<Map<String, dynamic>> periods = const [],
 }) =>
     {
       'id': id,
@@ -67,9 +69,10 @@ Map<String, dynamic> _planJson({
       'status': status,
       'startDate': startDate,
       'endDate': null,
-      'periods': const [],
+      'periods': periods,
       'suspensions': const [],
       'weeklySchedule': const [],
+      'adherence': adherence,
       'createdAt': '2026-09-01T00:00:00Z',
       'updatedAt': '2026-09-01T00:00:00Z',
     };
@@ -425,5 +428,60 @@ void main() {
     expect(find.text('Redatto da Anna Verdi'), findsNothing);
     // UT-8: ma non crea piani nuovi finché il collegamento è vigente.
     expect(find.byType(FloatingActionButton), findsNothing);
+  });
+
+  /// ST-2, 7.1 interfaccia.md: l'aderenza compare come numero puro sui
+  /// soli piani Conclusi — mai sui Programmati, dove non esiste, né sul
+  /// piano in corso. AD-15: nessuna colorazione di merito, nessuna barra.
+  testWidgets('mostra l\'aderenza sui soli piani conclusi (ST-2)', (tester) async {
+    final dio = Dio(BaseOptions(baseUrl: 'http://example.test'));
+    dio.httpClientAdapter = _JsonAdapter(
+      (options) => _isListRequest(options)
+          ? [
+              _planJson(status: 'COMPLETED', id: 'plan-1', name: 'Concluso', adherence: 72.4),
+              _planJson(
+                status: 'SCHEDULED',
+                id: 'plan-2',
+                name: 'Programmato',
+                startDate: '2026-10-01',
+              ),
+            ]
+          : <String, dynamic>{},
+    );
+    dio.interceptors.add(ApiErrorInterceptor());
+
+    await _pumpManagementScreen(tester, DietPlanApi(dio));
+
+    expect(find.text('72%'), findsOneWidget);
+    expect(find.byType(LinearProgressIndicator), findsNothing);
+  });
+
+  /// ST-8, 7.1: il piano riattivato è voce unica, con il numero di periodi
+  /// accanto al periodo complessivo — non due voci distinte.
+  testWidgets('il piano riattivato è voce unica con il numero di periodi (ST-8)', (tester) async {
+    final dio = Dio(BaseOptions(baseUrl: 'http://example.test'));
+    dio.httpClientAdapter = _JsonAdapter(
+      (options) => _isListRequest(options)
+          ? [
+              _planJson(
+                status: 'COMPLETED',
+                id: 'plan-1',
+                name: 'Ripreso',
+                adherence: 65.0,
+                periods: const [
+                  {'startDate': '2026-01-01', 'endDate': '2026-01-31'},
+                  {'startDate': '2026-06-01', 'endDate': '2026-06-30'},
+                  {'startDate': '2026-09-01', 'endDate': '2026-09-30'},
+                ],
+              ),
+            ]
+          : <String, dynamic>{},
+    );
+    dio.interceptors.add(ApiErrorInterceptor());
+
+    await _pumpManagementScreen(tester, DietPlanApi(dio));
+
+    expect(find.text('Ripreso'), findsOneWidget);
+    expect(find.textContaining('3 periodi'), findsOneWidget);
   });
 }
