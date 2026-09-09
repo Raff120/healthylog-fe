@@ -246,7 +246,7 @@ class _MemberDropdown extends ConsumerWidget {
     final colors = context.colors;
     final typography = context.typography;
     final current = group.members.firstWhere((member) => member.userId == (selected ?? currentUserId));
-    final label = sideBySide ? 'Tutti' : current.firstName;
+    final label = sideBySide ? context.l10n.commonAll : current.firstName;
 
     return PopupMenuButton<String>(
       color: colors.surface,

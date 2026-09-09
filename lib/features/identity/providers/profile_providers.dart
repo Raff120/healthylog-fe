@@ -4,6 +4,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../core/api/api_client.dart';
 import '../../../l10n/locale_controller.dart';
+import '../../../l10n/unit_system.dart';
 import '../data/profile_api.dart';
 import '../data/profile_models.dart';
 
@@ -49,3 +50,11 @@ class ProfileController extends _$ProfileController {
     return profile;
   }
 }
+
+/// LO-4: il sistema di unità di misura scelto dall'Utente, che ogni
+/// schermata consulta per convertire la presentazione (LO-7). Degrada al
+/// metrico durante il caricamento del profilo — LO-6 lo vuole comunque
+/// predefinito — invece di lasciare la schermata senza unità.
+@riverpod
+UnitSystem unitSystem(Ref ref) =>
+    ref.watch(profileControllerProvider).value?.unitSystem ?? UnitSystem.fallback;

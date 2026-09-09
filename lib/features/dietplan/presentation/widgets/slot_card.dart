@@ -142,7 +142,7 @@ class _SlotCardState extends State<SlotCard> {
                     const SizedBox(height: AppSpacing.sm),
                   ],
                   AppTextField(
-                    label: 'Contenuto',
+                    label: context.l10n.slotContent,
                     controller: slot.contentController,
                     minLines: 2,
                     maxLines: 5,
@@ -189,7 +189,7 @@ class _SlotCardState extends State<SlotCard> {
                     child: TextButton.icon(
                       onPressed: widget.onRemove,
                       icon: Icon(Icons.delete_outline, color: colors.error),
-                      label: Text('Rimuovi', style: typography.label.copyWith(color: colors.error)),
+                      label: Text(context.l10n.commonRemove, style: typography.label.copyWith(color: colors.error)),
                     ),
                   ),
                 ],

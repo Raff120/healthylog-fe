@@ -111,3 +111,58 @@ abstract class _$ProfileController extends $AsyncNotifier<Profile> {
     return element.handleCreate(ref, build);
   }
 }
+
+/// LO-4: il sistema di unità di misura scelto dall'Utente, che ogni
+/// schermata consulta per convertire la presentazione (LO-7). Degrada al
+/// metrico durante il caricamento del profilo — LO-6 lo vuole comunque
+/// predefinito — invece di lasciare la schermata senza unità.
+
+@ProviderFor(unitSystem)
+final unitSystemProvider = UnitSystemProvider._();
+
+/// LO-4: il sistema di unità di misura scelto dall'Utente, che ogni
+/// schermata consulta per convertire la presentazione (LO-7). Degrada al
+/// metrico durante il caricamento del profilo — LO-6 lo vuole comunque
+/// predefinito — invece di lasciare la schermata senza unità.
+
+final class UnitSystemProvider
+    extends $FunctionalProvider<UnitSystem, UnitSystem, UnitSystem>
+    with $Provider<UnitSystem> {
+  /// LO-4: il sistema di unità di misura scelto dall'Utente, che ogni
+  /// schermata consulta per convertire la presentazione (LO-7). Degrada al
+  /// metrico durante il caricamento del profilo — LO-6 lo vuole comunque
+  /// predefinito — invece di lasciare la schermata senza unità.
+  UnitSystemProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'unitSystemProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$unitSystemHash();
+
+  @$internal
+  @override
+  $ProviderElement<UnitSystem> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  UnitSystem create(Ref ref) {
+    return unitSystem(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(UnitSystem value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<UnitSystem>(value),
+    );
+  }
+}
+
+String _$unitSystemHash() => r'e8704dd9307ffbde011c0a4290fc202826e2f1b3';

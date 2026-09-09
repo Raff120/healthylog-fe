@@ -34,10 +34,10 @@ class DietPlanTemplatePreviewScreen extends ConsumerWidget {
         title: Text(context.l10n.templateDeleteConfirmTitle),
         content: Text(context.l10n.templateDeleteConfirmBody(template.name)),
         actions: [
-          TextButton(onPressed: () => Navigator.of(dialogContext).pop(false), child: const Text('Annulla')),
+          TextButton(onPressed: () => Navigator.of(dialogContext).pop(false), child: Text(context.l10n.commonCancel)),
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: Text('Elimina', style: TextStyle(color: colors.error)),
+            child: Text(context.l10n.commonDelete, style: TextStyle(color: colors.error)),
           ),
         ],
       ),
@@ -61,7 +61,7 @@ class DietPlanTemplatePreviewScreen extends ConsumerWidget {
     final input = await showNameDescriptionDialog(
       context,
       title: context.l10n.templateRename,
-      confirmLabel: 'Salva',
+      confirmLabel: context.l10n.commonSave,
       initialName: template.name,
       initialDescription: template.description ?? '',
     );
@@ -109,11 +109,11 @@ class DietPlanTemplatePreviewScreen extends ConsumerWidget {
                 if (value == 'delete') _confirmDelete(context, ref, previewState.value!);
               },
               itemBuilder: (context) => [
-                PopupMenuItem(value: 'rename', enabled: !renaming, child: const Text('Rinomina')),
+                PopupMenuItem(value: 'rename', enabled: !renaming, child: Text(context.l10n.templateRenameShort)),
                 PopupMenuItem(
                   value: 'delete',
                   enabled: !deleting,
-                  child: Text('Elimina', style: TextStyle(color: colors.error)),
+                  child: Text(context.l10n.commonDelete, style: TextStyle(color: colors.error)),
                 ),
               ],
             ),
@@ -158,7 +158,7 @@ class DietPlanTemplatePreviewScreen extends ConsumerWidget {
                       Expanded(
                         child: OutlinedButton(
                           onPressed: () => context.push('/diet-plan-templates/$templateId/schedule'),
-                          child: const Text('Modifica'),
+                          child: Text(context.l10n.commonEdit),
                         ),
                       ),
                       const SizedBox(width: AppSpacing.sm),

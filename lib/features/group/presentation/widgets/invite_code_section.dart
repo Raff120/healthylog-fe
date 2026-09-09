@@ -147,9 +147,9 @@ class _ActiveInviteCode extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            TextButton(onPressed: onCopy, child: const Text('Copia')),
-            TextButton(onPressed: onRegenerate, child: const Text('Rigenera')),
-            TextButton(onPressed: onRevoke, child: Text('Revoca', style: TextStyle(color: colors.error))),
+            TextButton(onPressed: onCopy, child: Text(context.l10n.commonCopy)),
+            TextButton(onPressed: onRegenerate, child: Text(context.l10n.commonRegenerate)),
+            TextButton(onPressed: onRevoke, child: Text(context.l10n.commonRevoke, style: TextStyle(color: colors.error))),
           ],
         ),
       ],

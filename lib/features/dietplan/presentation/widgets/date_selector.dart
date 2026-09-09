@@ -71,7 +71,7 @@ class DateSelector extends StatelessWidget {
                 child: TextButton(
                   onPressed: () => onSelect(today),
                   child: Text(
-                    'Oggi',
+                    context.l10n.commonToday,
                     style: typography.label.copyWith(color: colors.accent),
                   ),
                 ),

@@ -24,7 +24,7 @@ class DevicesScreen extends ConsumerWidget {
         title: Text(context.l10n.devicesRevoke),
         content: Text(context.l10n.devicesRevokeConfirm(session.deviceLabel)),
         actions: [
-          TextButton(onPressed: () => Navigator.of(dialogContext).pop(false), child: const Text('Annulla')),
+          TextButton(onPressed: () => Navigator.of(dialogContext).pop(false), child: Text(context.l10n.commonCancel)),
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(true),
             child: Text(context.l10n.devicesRevoke, style: TextStyle(color: colors.error)),
@@ -45,7 +45,7 @@ class DevicesScreen extends ConsumerWidget {
         title: Text(context.l10n.devicesRevokeAllOthers),
         content: Text(context.l10n.devicesRevokeAllOthersBody),
         actions: [
-          TextButton(onPressed: () => Navigator.of(dialogContext).pop(false), child: const Text('Annulla')),
+          TextButton(onPressed: () => Navigator.of(dialogContext).pop(false), child: Text(context.l10n.commonCancel)),
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(true),
             child: Text(context.l10n.devicesSignOut, style: TextStyle(color: colors.error)),

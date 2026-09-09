@@ -7,8 +7,11 @@ import '../../../core/api/api_error_messages.dart';
 import '../../../core/api/api_exception.dart';
 import '../../../core/widgets/empty_state_view.dart';
 import '../../../l10n/l10n_context.dart';
+import '../../../l10n/units.dart';
+import '../../identity/providers/profile_providers.dart';
 import '../data/measurement_models.dart';
 import '../providers/measurement_providers.dart';
+import 'body_circumference_presentation.dart';
 import 'widgets/last_measurement_card.dart';
 import 'widgets/measurement_list_tile.dart';
 import 'widgets/measurement_sheet.dart';
@@ -89,15 +92,18 @@ Future<void> showMeasurementDetail(BuildContext context, BodyMeasurement measure
   );
 }
 
-class _MeasurementDetailSheet extends StatelessWidget {
+class _MeasurementDetailSheet extends ConsumerWidget {
   const _MeasurementDetailSheet({required this.measurement});
 
   final BodyMeasurement measurement;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final colors = context.colors;
     final typography = context.typography;
+    // LO-4, LO-7: presentazione nel sistema scelto, valori conservati in
+    // chilogrammi e centimetri.
+    final units = ref.watch(unitSystemProvider);
 
     return DecoratedBox(
       decoration: BoxDecoration(
@@ -124,12 +130,20 @@ class _MeasurementDetailSheet extends StatelessWidget {
               const SizedBox(height: AppSpacing.md),
               if (measurement.weightKg != null)
                 Text(
-                  'Peso: ${formatMeasurementValue(measurement.weightKg!)} kg',
+                  context.l10n.measureNamedValueWithUnit(
+                    context.l10n.measureWeight,
+                    formatMeasurementValue(weightToDisplay(measurement.weightKg!, units)),
+                    weightUnit(context, units),
+                  ),
                   style: typography.bodyMedium.copyWith(color: colors.textPrimary),
                 ),
               for (final entry in measurement.circumferences.entries)
                 Text(
-                  '${entry.$1}: ${formatMeasurementValue(entry.$2)} cm',
+                  context.l10n.measureNamedValueWithUnit(
+                    bodyCircumferenceLabel(context, entry.$1),
+                    formatMeasurementValue(lengthToDisplay(entry.$2, units)),
+                    lengthUnit(context, units),
+                  ),
                   style: typography.bodyMedium.copyWith(color: colors.textPrimary),
                 ),
               if (measurement.note != null && measurement.note!.isNotEmpty) ...[

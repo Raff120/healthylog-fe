@@ -52,7 +52,7 @@ class DietPlanManagementScreen extends ConsumerWidget {
         title: Text(title),
         content: Text(message),
         actions: [
-          TextButton(onPressed: () => Navigator.of(dialogContext).pop(false), child: const Text('Annulla')),
+          TextButton(onPressed: () => Navigator.of(dialogContext).pop(false), child: Text(context.l10n.commonCancel)),
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(true),
             child: Text(confirmLabel),
@@ -79,7 +79,7 @@ class DietPlanManagementScreen extends ConsumerWidget {
       context,
       title: context.l10n.plansCompleteConfirmTitle,
       message: context.l10n.plansCompleteConfirmBody,
-      confirmLabel: 'Concludi',
+      confirmLabel: context.l10n.planActionComplete,
     );
     if (confirmed != true) return;
     if (!context.mounted) return;
@@ -92,7 +92,7 @@ class DietPlanManagementScreen extends ConsumerWidget {
       context,
       title: context.l10n.plansWithdrawConfirmTitle,
       message: context.l10n.plansWithdrawConfirmBody,
-      confirmLabel: 'Ritira',
+      confirmLabel: context.l10n.planActionWithdraw,
     );
     if (confirmed != true) return;
     if (!context.mounted) return;
@@ -163,7 +163,7 @@ class DietPlanManagementScreen extends ConsumerWidget {
         backgroundColor: colors.background,
         elevation: 0,
         scrolledUnderElevation: 0,
-        title: Text('Piani', style: typography.titleMedium.copyWith(color: colors.textPrimary)),
+        title: Text(context.l10n.profilePlans, style: typography.titleMedium.copyWith(color: colors.textPrimary)),
       ),
       // 7.1 interfaccia.md: "Pulsante mobile in basso a destra", sempre
       // presente — non solo nello stato vuoto.

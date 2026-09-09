@@ -77,7 +77,7 @@ class DietPlanViewScreen extends ConsumerWidget {
         elevation: 0,
         scrolledUnderElevation: 0,
         title: Text(
-          planState.value?.name ?? 'Piano',
+          planState.value?.name ?? context.l10n.navPlan,
           style: typography.titleMedium.copyWith(color: colors.textPrimary),
         ),
         actions: [
@@ -87,7 +87,7 @@ class DietPlanViewScreen extends ConsumerWidget {
                 if (value == 'delete') _delete(context, ref);
               },
               itemBuilder: (context) => [
-                PopupMenuItem(value: 'delete', child: Text('Elimina', style: TextStyle(color: colors.error))),
+                PopupMenuItem(value: 'delete', child: Text(context.l10n.commonDelete, style: TextStyle(color: colors.error))),
               ],
             ),
         ],

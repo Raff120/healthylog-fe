@@ -71,7 +71,7 @@ class _GenerateInviteCodeSheetState extends State<_GenerateInviteCodeSheet> {
               contentPadding: EdgeInsets.zero,
               value: _hasExpiry,
               onChanged: (value) => setState(() => _hasExpiry = value),
-              title: const Text('Scadenza'),
+              title: Text(context.l10n.inviteExpiry),
               subtitle: Text(
                 _hasExpiry ? context.l10n.inviteExpiresInDays(_defaultExpiryDays) : context.l10n.inviteNoExpiry,
                 style: typography.caption.copyWith(color: colors.textSecondary),
@@ -86,7 +86,7 @@ class _GenerateInviteCodeSheetState extends State<_GenerateInviteCodeSheet> {
               inputFormatters: [FilteringTextInputFormatter.digitsOnly],
             ),
             const SizedBox(height: AppSpacing.md),
-            AppPrimaryButton(label: 'Genera', onPressed: _confirm),
+            AppPrimaryButton(label: context.l10n.commonGenerate, onPressed: _confirm),
           ],
         ),
       ),

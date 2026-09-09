@@ -83,7 +83,7 @@ class _DietPlanScheduleScreenState extends ConsumerState<DietPlanScheduleScreen>
       final confirmed = await _confirmDialog(
         title: context.l10n.editRemoveSlotTitle,
         message: context.l10n.editRemoveSlotBody,
-        confirmLabel: 'Rimuovi',
+        confirmLabel: context.l10n.commonRemove,
       );
       if (confirmed != true) return;
     }
@@ -111,7 +111,7 @@ class _DietPlanScheduleScreenState extends ConsumerState<DietPlanScheduleScreen>
         title: Text(title),
         content: Text(message),
         actions: [
-          TextButton(onPressed: () => Navigator.of(dialogContext).pop(false), child: const Text('Annulla')),
+          TextButton(onPressed: () => Navigator.of(dialogContext).pop(false), child: Text(context.l10n.commonCancel)),
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(true),
             child: Text(confirmLabel, style: TextStyle(color: colors.error)),
@@ -128,7 +128,7 @@ class _DietPlanScheduleScreenState extends ConsumerState<DietPlanScheduleScreen>
     final input = await showNameDescriptionDialog(
       context,
       title: context.l10n.scheduleSaveAsTemplate,
-      confirmLabel: 'Salva',
+      confirmLabel: context.l10n.commonSave,
       initialName: planName,
     );
     if (input == null) return;
@@ -485,7 +485,7 @@ class _DietPlanScheduleScreenState extends ConsumerState<DietPlanScheduleScreen>
                             ),
                             onPressed: _dirty ? _save : null,
                             child: Text(
-                              'Salva',
+                              context.l10n.commonSave,
                               style: typography.label.copyWith(
                                 color: _dirty ? colors.accent : colors.textTertiary,
                               ),
@@ -500,7 +500,7 @@ class _DietPlanScheduleScreenState extends ConsumerState<DietPlanScheduleScreen>
             if (_days != null)
               PopupMenuButton<SlotType>(
                 icon: const Icon(Icons.add),
-                tooltip: 'Aggiungi',
+                tooltip: context.l10n.commonAdd,
                 onSelected: _addSlot,
                 itemBuilder: (context) => _addSlotMenuItems(_currentDay),
               ),
@@ -513,7 +513,7 @@ class _DietPlanScheduleScreenState extends ConsumerState<DietPlanScheduleScreen>
                 PopupMenuItem(value: 'save-as-template', child: Text(context.l10n.scheduleSaveAsTemplate)),
                 // CV-11: l'Attivo non compare, il server la rifiuterebbe comunque.
                 if (planState.value != null && planState.value!.status != PlanStatus.active)
-                  PopupMenuItem(value: 'delete', child: Text('Elimina', style: TextStyle(color: colors.error))),
+                  PopupMenuItem(value: 'delete', child: Text(context.l10n.commonDelete, style: TextStyle(color: colors.error))),
               ],
             ),
           ],

@@ -18,10 +18,10 @@ Future<bool> confirmLeaveGroup(BuildContext context) async {
       title: Text(context.l10n.groupLeaveTitle),
       content: Text(context.l10n.groupLeaveKeepsData),
       actions: [
-        TextButton(onPressed: () => Navigator.of(dialogContext).pop(false), child: const Text('Annulla')),
+        TextButton(onPressed: () => Navigator.of(dialogContext).pop(false), child: Text(context.l10n.commonCancel)),
         TextButton(
           onPressed: () => Navigator.of(dialogContext).pop(true),
-          child: Text('Esci', style: TextStyle(color: colors.error)),
+          child: Text(context.l10n.groupLeave, style: TextStyle(color: colors.error)),
         ),
       ],
     ),
@@ -65,10 +65,10 @@ Future<bool> confirmDissolveGroup(BuildContext context) async {
       title: Text(context.l10n.groupDissolveTitle),
       content: Text(context.l10n.groupDissolveBody),
       actions: [
-        TextButton(onPressed: () => Navigator.of(dialogContext).pop(false), child: const Text('Annulla')),
+        TextButton(onPressed: () => Navigator.of(dialogContext).pop(false), child: Text(context.l10n.commonCancel)),
         TextButton(
           onPressed: () => Navigator.of(dialogContext).pop(true),
-          child: Text('Sciogli', style: TextStyle(color: colors.error)),
+          child: Text(context.l10n.groupDissolve, style: TextStyle(color: colors.error)),
         ),
       ],
     ),
@@ -88,10 +88,10 @@ Future<bool> confirmRemoveMember(BuildContext context, String memberName) async 
       title: Text(context.l10n.groupRemoveMemberTitle),
       content: Text(context.l10n.groupRemoveMemberBody(memberName)),
       actions: [
-        TextButton(onPressed: () => Navigator.of(dialogContext).pop(false), child: const Text('Annulla')),
+        TextButton(onPressed: () => Navigator.of(dialogContext).pop(false), child: Text(context.l10n.commonCancel)),
         TextButton(
           onPressed: () => Navigator.of(dialogContext).pop(true),
-          child: Text('Rimuovi', style: TextStyle(color: colors.error)),
+          child: Text(context.l10n.commonRemove, style: TextStyle(color: colors.error)),
         ),
       ],
     ),
@@ -112,8 +112,8 @@ Future<bool> confirmTransferOwnership(BuildContext context, String memberName) a
         context.l10n.groupTransferOwnershipBody(memberName),
       ),
       actions: [
-        TextButton(onPressed: () => Navigator.of(dialogContext).pop(false), child: const Text('Annulla')),
-        TextButton(onPressed: () => Navigator.of(dialogContext).pop(true), child: const Text('Trasferisci')),
+        TextButton(onPressed: () => Navigator.of(dialogContext).pop(false), child: Text(context.l10n.commonCancel)),
+        TextButton(onPressed: () => Navigator.of(dialogContext).pop(true), child: Text(context.l10n.groupTransferOwnership)),
       ],
     ),
   );

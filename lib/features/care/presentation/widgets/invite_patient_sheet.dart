@@ -140,7 +140,7 @@ class _InvitePatientSheetState extends ConsumerState<_InvitePatientSheet> {
                   ],
                   const SizedBox(height: AppSpacing.md),
                   AppPrimaryButton(
-                    label: 'Cerca',
+                    label: context.l10n.commonSearch,
                     loading: _searching,
                     onPressed: _username.text.trim().isEmpty ? null : _search,
                   ),
@@ -175,7 +175,7 @@ class _InvitePatientSheetState extends ConsumerState<_InvitePatientSheet> {
                   Center(
                     child: TextButton(
                       onPressed: sending ? null : () => setState(() => _found = null),
-                      child: const Text('Indietro'),
+                      child: Text(context.l10n.commonBack),
                     ),
                   ),
                 ],

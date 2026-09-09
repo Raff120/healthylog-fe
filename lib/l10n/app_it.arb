@@ -4,6 +4,7 @@
   "activityWorkouts": "Allenamenti",
   "adherenceBySlotType": "Per tipo di pasto",
   "adherenceByWeekday": "Per giorno della settimana",
+  "adherenceOverall": "Complessivo",
   "adherencePeriodRange": "Periodo dal {start} a {end}",
   "@adherencePeriodRange": {
     "placeholders": {
@@ -16,6 +17,7 @@
     }
   },
   "adherenceWeeklyTrend": "Andamento settimanale",
+  "bodyMeasurementsTitle": "Misurazioni",
   "bodyStatsNoMeasurements": "Nessuna misurazione nel periodo",
   "bodyStatsNutritionistLegend": "I cerchi vuoti sono le misurazioni rilevate dal nutrizionista.",
   "bodyStatsSingleValue": "Un solo valore: nessuna variazione da presentare",
@@ -41,6 +43,7 @@
   "careNoNutritionist": "Nessun nutrizionista collegato",
   "careNutritionistNotice": "Il nutrizionista redige il tuo piano e ne segue l'andamento. Puoi sempre invertire e spuntare i pasti, ma non modificarne il contenuto.",
   "careRequestAccepting": "Accettando, il nutrizionista:",
+  "careRequestExpired": "Decaduta",
   "careRequestKeepAfterRevoke": "Potrai revocare il collegamento in qualsiasi momento. Dopo la revoca conserverà solo gli schemi dei piani che ha redatto e le misurazioni che ha registrato personalmente.",
   "careRequestReceivedOn": "Ricevuta il {date}",
   "@careRequestReceivedOn": {
@@ -72,18 +75,40 @@
   "careRevokeTitle": "Revocare il collegamento?",
   "careRevokeYouKeep": "Conserverai:",
   "careRevokeYouLose": "Non conserverai:",
+  "commonAccept": "Accetta",
+  "commonAdd": "Aggiungi",
+  "commonAll": "Tutti",
+  "commonApply": "Applica",
+  "commonBack": "Indietro",
   "commonCancel": "Annulla",
   "commonClose": "Chiudi",
   "commonConfirm": "Conferma",
+  "commonContinue": "Continua",
+  "commonCopy": "Copia",
+  "commonCreate": "Crea",
+  "commonDecline": "Rifiuta",
   "commonDelete": "Elimina",
+  "commonDescription": "Descrizione",
+  "commonEdit": "Modifica",
+  "commonGenerate": "Genera",
   "commonListAnd": " e ",
   "@commonListAnd": {
     "description": "Congiunzione fra le due sole voci che l’elenco può avere."
   },
+  "commonName": "Denominazione",
   "commonNotSet": "Non impostato",
+  "commonNote": "Nota",
+  "commonRecord": "Registra",
+  "@commonRecord": {
+    "description": "Azione del pulsante primario, distinta da \"Registra allenamento\" della voce di menu."
+  },
+  "commonRegenerate": "Rigenera",
+  "commonRemove": "Rimuovi",
+  "commonRevoke": "Revoca",
   "commonSave": "Salva",
   "commonSearch": "Cerca",
   "commonShare": "Condividi",
+  "commonToday": "Oggi",
   "commonUnderstood": "Ho capito",
   "dayPreviewNoSlots": "Nessuno slot",
   "devicesCurrent": "(questo dispositivo)",
@@ -182,6 +207,7 @@
   "fieldConfirmPassword": "Conferma password",
   "fieldEmail": "Indirizzo e-mail",
   "fieldFirstName": "Nome",
+  "fieldHeight": "Altezza",
   "fieldHeightCm": "Altezza (cm)",
   "fieldLastName": "Cognome",
   "fieldPassword": "Password",
@@ -220,6 +246,8 @@
   "groupRemoveMemberTitle": "Rimuovere dal gruppo?",
   "groupRename": "Modifica denominazione",
   "groupRevokeCook": "Revoca privilegio di Cuoco",
+  "groupRoleCook": "Cuoco",
+  "groupRoleOwner": "Proprietario",
   "groupTransferFirstBody": "Per uscire dal gruppo devi prima trasferirne la proprietà a un altro membro, dal menu accanto al suo nome.",
   "groupTransferFirstTitle": "Trasferisci prima la proprietà",
   "groupTransferOwnership": "Trasferisci proprietà",
@@ -250,6 +278,7 @@
       }
     }
   },
+  "inviteExpiry": "Scadenza",
   "inviteGenerate": "Genera codice",
   "inviteMaxUses": "Numero massimo di utilizzi (facoltativo)",
   "inviteNoActiveCode": "Nessun codice attivo",
@@ -283,9 +312,11 @@
   "loginForgotPassword": "Password dimenticata?",
   "loginSubmit": "Accedi",
   "loginToRegister": "Non hai un account? Registrati",
+  "mealChange": "Cambia",
   "mealChangeStatusTitle": "Cambiare stato?",
   "mealFutureDayBody": "Questo giorno non è ancora arrivato.",
   "mealFutureDayTitle": "Registrare un pasto futuro?",
+  "mealMove": "Sposta",
   "mealOfflineUnavailable": "Non disponibile offline.",
   "mealReplacementNote": "Nota di sostituzione",
   "mealReplacementNoteLost": "La nota di sostituzione andrà perduta in modo definitivo.",
@@ -309,6 +340,49 @@
   "@mealSwappedNotification": {
     "placeholders": {
       "when": {
+        "type": "String"
+      }
+    }
+  },
+  "mealTick": "Spunta",
+  "measureArm": "Braccio",
+  "measureChest": "Torace",
+  "measureHips": "Fianchi",
+  "measureNamedValueWithUnit": "{measure}: {value} {unit}",
+  "@measureNamedValueWithUnit": {
+    "placeholders": {
+      "measure": {
+        "type": "String"
+      },
+      "value": {
+        "type": "String"
+      },
+      "unit": {
+        "type": "String"
+      }
+    }
+  },
+  "measureThigh": "Coscia",
+  "measureValueWithUnit": "{value} {unit}",
+  "@measureValueWithUnit": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      },
+      "unit": {
+        "type": "String"
+      }
+    }
+  },
+  "measureWaist": "Vita",
+  "measureWeight": "Peso",
+  "measureWithUnit": "{measure} ({unit})",
+  "@measureWithUnit": {
+    "placeholders": {
+      "measure": {
+        "type": "String"
+      },
+      "unit": {
         "type": "String"
       }
     }
@@ -595,6 +669,7 @@
       }
     }
   },
+  "patientMeasurementsHeader": "MISURAZIONI",
   "patientMonthStatisticsHeader": "STATISTICHE DEL MESE",
   "patientNoCurrentPlan": "Nessun piano in corso redatto da te.",
   "patientNoMeasurements": "Nessuna misurazione",
@@ -616,6 +691,7 @@
   "patientSortName": "Alfabetico",
   "patientSortRecentActivity": "Attività recente",
   "patientWithdrawBody": "Il paziente non lo vedrà più.",
+  "patientWorkoutsHeader": "ALLENAMENTI",
   "patientsEmpty": "Nessun paziente collegato",
   "patientsInvite": "Invita paziente",
   "patientsInviteHint": "Invita un paziente con il suo nome utente",
@@ -630,8 +706,13 @@
     }
   },
   "patientsSelect": "Seleziona un paziente",
+  "patientsSortBy": "Ordina",
+  "periodMonth": "Mese",
+  "periodPlan": "Piano",
+  "periodWeek": "Settimana",
   "personalDataRoleNotChangeable": "Il ruolo non è modificabile",
   "personalDataSaved": "Dati aggiornati.",
+  "personalDataTargetWeight": "Peso obiettivo",
   "personalDataTargetWeightKg": "Peso obiettivo (kg)",
   "personalDataTitle": "Dati personali",
   "planActionComplete": "Concludi",
@@ -656,6 +737,7 @@
   "planCreateFromTemplateDescription": "Parti da uno schema già pronto e modificalo",
   "planCreateSubmit": "Crea piano",
   "planCreateTitle": "Nuovo piano",
+  "planDayView": "Giorno",
   "planDeleteIrreversible": "L'operazione non può essere annullata.",
   "planDeleteLossAllPeriods": "Andranno perdute in modo definitivo, per tutti i periodi del piano:",
   "planDeleteLossDays": "•  le giornate e le spunte di consumo",
@@ -699,6 +781,7 @@
     }
   },
   "planPatientNoPlanYet": "Il tuo nutrizionista non ha ancora redatto un piano",
+  "planRecipient": "Destinatario",
   "planRecordWorkout": "Registra allenamento",
   "planStartDate": "Data di inizio",
   "planStartsOn": "Il piano inizia il {date}",
@@ -741,6 +824,7 @@
   "planViewPeriods": "Periodi di svolgimento",
   "planViewSwapHistory": "Storico delle inversioni",
   "planViewWeeklySchedule": "Schema settimanale",
+  "planWeekView": "Settimana",
   "plansActivateNow": "Attiva ora",
   "plansAdherencePercent": "{value}%",
   "@plansAdherencePercent": {
@@ -848,6 +932,10 @@
   "settingsTimezone": "Fuso orario",
   "settingsTimezoneSearch": "Cerca fuso orario",
   "settingsTitle": "Impostazioni",
+  "settingsUnitImperial": "Imperiale",
+  "settingsUnitMetric": "Metrico",
+  "settingsUnitRetroactiveNotice": "Il cambio si applica a tutti i dati, compresi grafici e storico.",
+  "settingsUnitSystem": "Unità di misura",
   "sexFemale": "Femmina",
   "sexMale": "Maschio",
   "signedNegative": "−{value}",
@@ -885,6 +973,7 @@
     }
   },
   "slotAdherenceWeightHelp": "Quanto questo pasto incide sull'aderenza. A zero non viene conteggiato.",
+  "slotContent": "Contenuto",
   "slotDescriptiveLabel": "Etichetta descrittiva",
   "slotNotSpecified": "Non specificato",
   "slotRecipeName": "Denominazione della ricetta",
@@ -998,6 +1087,7 @@
   "templateNew": "Nuovo template",
   "templatePreviewTitle": "Anteprima template",
   "templateRename": "Rinomina template",
+  "templateRenameShort": "Rinomina",
   "templateSaved": "Template salvato.",
   "templateScheduleTitle": "Redazione del template",
   "templateUse": "Usa questo template",
@@ -1034,6 +1124,20 @@
   "timezoneEuropeZurich": "Zurigo",
   "timezonePacificAuckland": "Auckland",
   "timezoneUtc": "UTC",
+  "unitCentimetres": "cm",
+  "unitInches": "in",
+  "unitKilocalories": "kcal",
+  "@unitKilocalories": {
+    "description": "LO-5: l’energia è in chilocalorie in entrambi i sistemi."
+  },
+  "unitKilograms": "kg",
+  "@unitKilograms": {
+    "description": "LO-4: peso nel sistema metrico."
+  },
+  "unitPounds": "lb",
+  "@unitPounds": {
+    "description": "LO-4: peso nel sistema imperiale."
+  },
   "usernameHint": "Servirà al tuo nutrizionista per trovarti",
   "validationEmailAlreadyRegistered": "Questo indirizzo è già registrato",
   "validationInvalidFormat": "Formato non valido",
@@ -1091,8 +1195,36 @@
   "workoutActivityTypeRequired": "Indica il tipo di attività",
   "workoutAddOneOff": "Aggiungi allenamento occasionale",
   "workoutAddRecurring": "Aggiungi allenamento ricorrente",
+  "workoutBulletType": "• {type}",
+  "@workoutBulletType": {
+    "placeholders": {
+      "type": {
+        "type": "String"
+      }
+    }
+  },
+  "workoutBulletTypeWithCalories": "• {type} — {calories} kcal",
+  "@workoutBulletTypeWithCalories": {
+    "placeholders": {
+      "type": {
+        "type": "String"
+      },
+      "calories": {
+        "type": "int"
+      }
+    }
+  },
   "workoutCaloriesBurned": "Calorie bruciate",
   "workoutCaloriesOptional": "Se lo sai. Non è obbligatorio.",
+  "workoutCaloriesWithUnit": "{value} kcal",
+  "@workoutCaloriesWithUnit": {
+    "placeholders": {
+      "value": {
+        "type": "int"
+      }
+    }
+  },
+  "workoutCease": "Cessa",
   "workoutClearFilters": "Rimuovi i filtri",
   "workoutDeleteConfirm": "Eliminare questo allenamento?",
   "workoutDeleteKeepsPlanning": "La pianificazione resta: l'allenamento tornerà previsto e non svolto.",
@@ -1124,14 +1256,17 @@
       }
     }
   },
+  "workoutPeriod": "Periodo",
   "workoutPickAtLeastOneDay": "Scegli almeno un giorno",
   "workoutPickPeriod": "Scegli un periodo",
+  "workoutPlanning": "Pianificazione",
   "workoutPlanningNotice": "Le modifiche valgono da oggi in avanti: i giorni trascorsi restano come erano.",
   "workoutRecord": "Registra allenamento",
   "workoutRecordAnyway": "Registra comunque",
   "workoutRecordTitle": "Registra un allenamento",
   "workoutRecurring": "Allenamento ricorrente",
   "workoutRemoveGoal": "Rimuovi obiettivo",
+  "workoutSetGoal": "Imposta",
   "workoutSheetFooter": "Se vuoi, aggiungi calorie e nota. Puoi anche chiudere: l'allenamento è registrato lo stesso.",
   "workoutStatsDistribution": "Distribuzione per tipo",
   "workoutStatsGoalComparison": "Confronto con l’obiettivo",

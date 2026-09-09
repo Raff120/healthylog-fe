@@ -225,7 +225,7 @@ class _CreateDietPlanScreenState extends ConsumerState<CreateDietPlanScreen> {
               key: const Key('patientField'),
               initialValue: _patientId,
               decoration: InputDecoration(
-                labelText: 'Destinatario',
+                labelText: context.l10n.planRecipient,
                 filled: true,
                 fillColor: colors.surface,
                 border: OutlineInputBorder(
@@ -299,7 +299,7 @@ class _CreateDietPlanScreenState extends ConsumerState<CreateDietPlanScreen> {
                 _buildPatientField(),
                 const SizedBox(height: AppSpacing.sm),
               ],
-              AppTextField(label: 'Denominazione', controller: _name, errorText: _errorFor('name')),
+              AppTextField(label: context.l10n.commonName, controller: _name, errorText: _errorFor('name')),
               const SizedBox(height: AppSpacing.sm),
               _DateField(
                 label: context.l10n.planStartDate,

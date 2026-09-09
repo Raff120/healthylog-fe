@@ -50,7 +50,7 @@ class _PlanningSheet extends ConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Text(
-                'Pianificazione',
+                context.l10n.workoutPlanning,
                 style: typography.titleMedium.copyWith(color: colors.textPrimary),
               ),
               const SizedBox(height: AppSpacing.xxs),
@@ -122,12 +122,12 @@ class _PlannedRow extends ConsumerWidget {
             ),
           ),
           IconButton(
-            tooltip: 'Modifica',
+            tooltip: context.l10n.commonEdit,
             icon: const Icon(Icons.edit_outlined, size: 18),
             onPressed: () => showPlannedWorkoutEditor(context, recurrence: plan.recurrence, existing: plan),
           ),
           IconButton(
-            tooltip: 'Cessa',
+            tooltip: context.l10n.workoutCease,
             icon: const Icon(Icons.close, size: 18),
             onPressed: () => ref.read(plannedWorkoutControllerProvider.notifier).cease(plan.id),
           ),
@@ -282,7 +282,7 @@ class _PlannedWorkoutEditorState extends ConsumerState<_PlannedWorkoutEditor> {
                   Text(_error!, style: typography.caption.copyWith(color: colors.error)),
                 ],
                 const SizedBox(height: AppSpacing.lg),
-                AppPrimaryButton(label: 'Salva', loading: saving, onPressed: _submit),
+                AppPrimaryButton(label: context.l10n.commonSave, loading: saving, onPressed: _submit),
                 const SizedBox(height: AppSpacing.xs),
               ],
             ),

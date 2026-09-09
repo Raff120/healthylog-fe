@@ -50,7 +50,7 @@ class GroupScreen extends ConsumerWidget {
         backgroundColor: colors.background,
         elevation: 0,
         scrolledUnderElevation: 0,
-        title: Text('Gruppo', style: typography.titleMedium.copyWith(color: colors.textPrimary)),
+        title: Text(context.l10n.profileGroup, style: typography.titleMedium.copyWith(color: colors.textPrimary)),
       ),
       body: SafeArea(
         child: groupState.when(

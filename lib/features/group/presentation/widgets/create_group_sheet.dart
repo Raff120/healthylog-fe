@@ -58,14 +58,14 @@ class _CreateGroupSheetState extends State<_CreateGroupSheet> {
             Text(context.l10n.groupCreate, style: typography.titleMedium.copyWith(color: colors.textPrimary)),
             const SizedBox(height: AppSpacing.md),
             AppTextField(
-              label: 'Denominazione',
+              label: context.l10n.commonName,
               controller: _nameController,
               textCapitalization: TextCapitalization.sentences,
               onChanged: (_) => setState(() {}),
             ),
             const SizedBox(height: AppSpacing.md),
             AppPrimaryButton(
-              label: 'Crea',
+              label: context.l10n.commonCreate,
               onPressed: _nameController.text.trim().isEmpty ? null : _confirm,
             ),
           ],

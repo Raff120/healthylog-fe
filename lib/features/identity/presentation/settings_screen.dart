@@ -10,6 +10,7 @@ import '../../../core/api/api_exception.dart';
 import '../../../l10n/app_locale.dart';
 import '../../../l10n/l10n_context.dart';
 import '../../../l10n/locale_controller.dart';
+import '../../../l10n/unit_system.dart';
 import '../data/profile_models.dart';
 import '../data/timezones.dart';
 import '../domain/timezone_label.dart';
@@ -50,6 +51,19 @@ class SettingsScreen extends ConsumerWidget {
       // L'interfaccia è già nella lingua scelta: il mancato allineamento
       // del server riguarda le sole comunicazioni per posta, e va detto
       // senza disfare la scelta.
+      if (!context.mounted) return;
+      final code = error.asApiException?.code;
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(describeApiError(context, code ?? ''))));
+    }
+  }
+
+  /// LO-4: la scelta vive sul solo server — serve dopo l'accesso, dove il
+  /// profilo è comunque caricato, e non prima come la lingua.
+  Future<void> _selectUnitSystem(BuildContext context, WidgetRef ref, UnitSystem system) async {
+    try {
+      await ref.read(profileControllerProvider.notifier)
+          .savePreferences(UpdatePreferencesRequest(unitSystem: system));
+    } catch (error) {
       if (!context.mounted) return;
       final code = error.asApiException?.code;
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(describeApiError(context, code ?? ''))));
@@ -105,6 +119,17 @@ class SettingsScreen extends ConsumerWidget {
             _LanguageSelector(
               value: ref.watch(localeControllerProvider).value ?? AppLocale.fallback,
               onChanged: (locale) => _selectLocale(context, ref, locale),
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            _UnitSystemSelector(
+              value: ref.watch(unitSystemProvider),
+              onChanged: (system) => _selectUnitSystem(context, ref, system),
+            ),
+            const SizedBox(height: AppSpacing.xxs),
+            // LO-8: il cambio è retroattivo su tutti i dati, e va detto.
+            Text(
+              l10n.settingsUnitRetroactiveNotice,
+              style: typography.caption.copyWith(color: colors.textSecondary),
             ),
             const SizedBox(height: AppSpacing.lg),
             _SectionHeader(l10n.settingsSectionSecurity),
@@ -204,6 +229,37 @@ class _LanguageSelector extends StatelessWidget {
         AppLocale.it => context.l10n.settingsLanguageItalian,
         AppLocale.en => context.l10n.settingsLanguageEnglish,
       };
+}
+
+/// LO-4: metrico o imperiale (12.2 interfaccia.md).
+class _UnitSystemSelector extends StatelessWidget {
+  const _UnitSystemSelector({required this.value, required this.onChanged});
+
+  final UnitSystem value;
+  final ValueChanged<UnitSystem> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final typography = context.typography;
+
+    return SegmentedButton<UnitSystem>(
+      segments: [
+        ButtonSegment(value: UnitSystem.metric, label: Text(context.l10n.settingsUnitMetric)),
+        ButtonSegment(value: UnitSystem.imperial, label: Text(context.l10n.settingsUnitImperial)),
+      ],
+      selected: {value},
+      onSelectionChanged: (selection) {
+        if (selection.isNotEmpty) onChanged(selection.first);
+      },
+      style: SegmentedButton.styleFrom(
+        backgroundColor: colors.surface,
+        selectedBackgroundColor: colors.accentSubtle,
+        selectedForegroundColor: colors.accent,
+        textStyle: typography.label,
+      ),
+    );
+  }
 }
 
 class _SettingsRow extends StatelessWidget {

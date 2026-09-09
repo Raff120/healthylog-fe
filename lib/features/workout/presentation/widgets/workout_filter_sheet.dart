@@ -49,7 +49,7 @@ class _WorkoutFilterSheetState extends ConsumerState<_WorkoutFilterSheet> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Text('Filtri', style: typography.titleMedium.copyWith(color: colors.textPrimary)),
+              Text(context.l10n.workoutFilters, style: typography.titleMedium.copyWith(color: colors.textPrimary)),
               const SizedBox(height: AppSpacing.md),
               Text(context.l10n.workoutActivityType, style: typography.overline.copyWith(color: colors.textSecondary)),
               const SizedBox(height: AppSpacing.xs),
@@ -78,7 +78,7 @@ class _WorkoutFilterSheetState extends ConsumerState<_WorkoutFilterSheet> {
                   ],
                 ),
               const SizedBox(height: AppSpacing.md),
-              Text('Periodo', style: typography.overline.copyWith(color: colors.textSecondary)),
+              Text(context.l10n.workoutPeriod, style: typography.overline.copyWith(color: colors.textSecondary)),
               const SizedBox(height: AppSpacing.xs),
               OutlinedButton.icon(
                 onPressed: () async {
@@ -108,7 +108,7 @@ class _WorkoutFilterSheetState extends ConsumerState<_WorkoutFilterSheet> {
               ),
               const SizedBox(height: AppSpacing.lg),
               AppPrimaryButton(
-                label: 'Applica',
+                label: context.l10n.commonApply,
                 onPressed: () {
                   ref.read(workoutFilterControllerProvider.notifier).apply(_filters);
                   Navigator.of(context).pop();

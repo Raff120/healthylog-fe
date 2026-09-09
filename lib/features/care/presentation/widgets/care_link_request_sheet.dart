@@ -93,12 +93,12 @@ class _CareLinkRequestSheet extends ConsumerWidget {
               style: typography.caption.copyWith(color: colors.textSecondary),
             ),
             const SizedBox(height: AppSpacing.lg),
-            AppPrimaryButton(label: 'Accetta', loading: acting, onPressed: () => _accept(context, ref)),
+            AppPrimaryButton(label: context.l10n.commonAccept, loading: acting, onPressed: () => _accept(context, ref)),
             const SizedBox(height: AppSpacing.xs),
             Center(
               child: TextButton(
                 onPressed: acting ? null : () => _reject(context, ref),
-                child: Text('Rifiuta', style: TextStyle(color: colors.error)),
+                child: Text(context.l10n.commonDecline, style: TextStyle(color: colors.error)),
               ),
             ),
           ],

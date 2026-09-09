@@ -42,10 +42,10 @@ class PatientActivitySection extends ConsumerWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text('MISURAZIONI', style: typography.overline.copyWith(color: colors.textTertiary)),
+            Text(context.l10n.patientMeasurementsHeader, style: typography.overline.copyWith(color: colors.textTertiary)),
             TextButton(
               onPressed: () => showMeasurementSheet(context, patientId: patientId),
-              child: const Text('Registra'),
+              child: Text(context.l10n.commonRecord),
             ),
           ],
         ),
@@ -66,7 +66,7 @@ class PatientActivitySection extends ConsumerWidget {
                   : null,
             ),
         const SizedBox(height: AppSpacing.lg),
-        Text('ALLENAMENTI', style: typography.overline.copyWith(color: colors.textTertiary)),
+        Text(context.l10n.patientWorkoutsHeader, style: typography.overline.copyWith(color: colors.textTertiary)),
         const SizedBox(height: AppSpacing.xs),
         if (workouts == null || workouts.isEmpty)
           Text(
@@ -105,7 +105,7 @@ class _WorkoutRow extends StatelessWidget {
           ),
           if (workout.caloriesBurned != null)
             Text(
-              '${workout.caloriesBurned} kcal',
+              context.l10n.workoutCaloriesWithUnit(workout.caloriesBurned!),
               style: typography.caption.copyWith(color: colors.textSecondary),
             ),
         ],

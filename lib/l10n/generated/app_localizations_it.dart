@@ -22,12 +22,18 @@ class L10nIt extends L10n {
   String get adherenceByWeekday => 'Per giorno della settimana';
 
   @override
+  String get adherenceOverall => 'Complessivo';
+
+  @override
   String adherencePeriodRange(String start, String end) {
     return 'Periodo dal $start a $end';
   }
 
   @override
   String get adherenceWeeklyTrend => 'Andamento settimanale';
+
+  @override
+  String get bodyMeasurementsTitle => 'Misurazioni';
 
   @override
   String get bodyStatsNoMeasurements => 'Nessuna misurazione nel periodo';
@@ -69,6 +75,9 @@ class L10nIt extends L10n {
 
   @override
   String get careRequestAccepting => 'Accettando, il nutrizionista:';
+
+  @override
+  String get careRequestExpired => 'Decaduta';
 
   @override
   String get careRequestKeepAfterRevoke =>
@@ -135,6 +144,21 @@ class L10nIt extends L10n {
   String get careRevokeYouLose => 'Non conserverai:';
 
   @override
+  String get commonAccept => 'Accetta';
+
+  @override
+  String get commonAdd => 'Aggiungi';
+
+  @override
+  String get commonAll => 'Tutti';
+
+  @override
+  String get commonApply => 'Applica';
+
+  @override
+  String get commonBack => 'Indietro';
+
+  @override
   String get commonCancel => 'Annulla';
 
   @override
@@ -144,13 +168,52 @@ class L10nIt extends L10n {
   String get commonConfirm => 'Conferma';
 
   @override
+  String get commonContinue => 'Continua';
+
+  @override
+  String get commonCopy => 'Copia';
+
+  @override
+  String get commonCreate => 'Crea';
+
+  @override
+  String get commonDecline => 'Rifiuta';
+
+  @override
   String get commonDelete => 'Elimina';
+
+  @override
+  String get commonDescription => 'Descrizione';
+
+  @override
+  String get commonEdit => 'Modifica';
+
+  @override
+  String get commonGenerate => 'Genera';
 
   @override
   String get commonListAnd => ' e ';
 
   @override
+  String get commonName => 'Denominazione';
+
+  @override
   String get commonNotSet => 'Non impostato';
+
+  @override
+  String get commonNote => 'Nota';
+
+  @override
+  String get commonRecord => 'Registra';
+
+  @override
+  String get commonRegenerate => 'Rigenera';
+
+  @override
+  String get commonRemove => 'Rimuovi';
+
+  @override
+  String get commonRevoke => 'Revoca';
 
   @override
   String get commonSave => 'Salva';
@@ -160,6 +223,9 @@ class L10nIt extends L10n {
 
   @override
   String get commonShare => 'Condividi';
+
+  @override
+  String get commonToday => 'Oggi';
 
   @override
   String get commonUnderstood => 'Ho capito';
@@ -402,6 +468,9 @@ class L10nIt extends L10n {
   String get fieldFirstName => 'Nome';
 
   @override
+  String get fieldHeight => 'Altezza';
+
+  @override
   String get fieldHeightCm => 'Altezza (cm)';
 
   @override
@@ -488,6 +557,12 @@ class L10nIt extends L10n {
   String get groupRevokeCook => 'Revoca privilegio di Cuoco';
 
   @override
+  String get groupRoleCook => 'Cuoco';
+
+  @override
+  String get groupRoleOwner => 'Proprietario';
+
+  @override
   String get groupTransferFirstBody =>
       'Per uscire dal gruppo devi prima trasferirne la proprietà a un altro membro, dal menu accanto al suo nome.';
 
@@ -520,6 +595,9 @@ class L10nIt extends L10n {
   String inviteExpiresOn(String date) {
     return 'Scade il $date';
   }
+
+  @override
+  String get inviteExpiry => 'Scadenza';
 
   @override
   String get inviteGenerate => 'Genera codice';
@@ -581,6 +659,9 @@ class L10nIt extends L10n {
   String get loginToRegister => 'Non hai un account? Registrati';
 
   @override
+  String get mealChange => 'Cambia';
+
+  @override
   String get mealChangeStatusTitle => 'Cambiare stato?';
 
   @override
@@ -588,6 +669,9 @@ class L10nIt extends L10n {
 
   @override
   String get mealFutureDayTitle => 'Registrare un pasto futuro?';
+
+  @override
+  String get mealMove => 'Sposta';
 
   @override
   String get mealOfflineUnavailable => 'Non disponibile offline.';
@@ -619,6 +703,42 @@ class L10nIt extends L10n {
   @override
   String mealSwappedNotification(String when) {
     return 'Due pasti del tuo piano sono stati invertiti$when.';
+  }
+
+  @override
+  String get mealTick => 'Spunta';
+
+  @override
+  String get measureArm => 'Braccio';
+
+  @override
+  String get measureChest => 'Torace';
+
+  @override
+  String get measureHips => 'Fianchi';
+
+  @override
+  String measureNamedValueWithUnit(String measure, String value, String unit) {
+    return '$measure: $value $unit';
+  }
+
+  @override
+  String get measureThigh => 'Coscia';
+
+  @override
+  String measureValueWithUnit(String value, String unit) {
+    return '$value $unit';
+  }
+
+  @override
+  String get measureWaist => 'Vita';
+
+  @override
+  String get measureWeight => 'Peso';
+
+  @override
+  String measureWithUnit(String measure, String unit) {
+    return '$measure ($unit)';
   }
 
   @override
@@ -903,6 +1023,9 @@ class L10nIt extends L10n {
   }
 
   @override
+  String get patientMeasurementsHeader => 'MISURAZIONI';
+
+  @override
   String get patientMonthStatisticsHeader => 'STATISTICHE DEL MESE';
 
   @override
@@ -938,6 +1061,9 @@ class L10nIt extends L10n {
   String get patientWithdrawBody => 'Il paziente non lo vedrà più.';
 
   @override
+  String get patientWorkoutsHeader => 'ALLENAMENTI';
+
+  @override
   String get patientsEmpty => 'Nessun paziente collegato';
 
   @override
@@ -961,10 +1087,25 @@ class L10nIt extends L10n {
   String get patientsSelect => 'Seleziona un paziente';
 
   @override
+  String get patientsSortBy => 'Ordina';
+
+  @override
+  String get periodMonth => 'Mese';
+
+  @override
+  String get periodPlan => 'Piano';
+
+  @override
+  String get periodWeek => 'Settimana';
+
+  @override
   String get personalDataRoleNotChangeable => 'Il ruolo non è modificabile';
 
   @override
   String get personalDataSaved => 'Dati aggiornati.';
+
+  @override
+  String get personalDataTargetWeight => 'Peso obiettivo';
 
   @override
   String get personalDataTargetWeightKg => 'Peso obiettivo (kg)';
@@ -1020,6 +1161,9 @@ class L10nIt extends L10n {
 
   @override
   String get planCreateTitle => 'Nuovo piano';
+
+  @override
+  String get planDayView => 'Giorno';
 
   @override
   String get planDeleteIrreversible =>
@@ -1088,6 +1232,9 @@ class L10nIt extends L10n {
   @override
   String get planPatientNoPlanYet =>
       'Il tuo nutrizionista non ha ancora redatto un piano';
+
+  @override
+  String get planRecipient => 'Destinatario';
 
   @override
   String get planRecordWorkout => 'Registra allenamento';
@@ -1167,6 +1314,9 @@ class L10nIt extends L10n {
 
   @override
   String get planViewWeeklySchedule => 'Schema settimanale';
+
+  @override
+  String get planWeekView => 'Settimana';
 
   @override
   String get plansActivateNow => 'Attiva ora';
@@ -1358,6 +1508,19 @@ class L10nIt extends L10n {
   String get settingsTitle => 'Impostazioni';
 
   @override
+  String get settingsUnitImperial => 'Imperiale';
+
+  @override
+  String get settingsUnitMetric => 'Metrico';
+
+  @override
+  String get settingsUnitRetroactiveNotice =>
+      'Il cambio si applica a tutti i dati, compresi grafici e storico.';
+
+  @override
+  String get settingsUnitSystem => 'Unità di misura';
+
+  @override
   String get sexFemale => 'Femmina';
 
   @override
@@ -1389,6 +1552,9 @@ class L10nIt extends L10n {
   @override
   String get slotAdherenceWeightHelp =>
       'Quanto questo pasto incide sull\'aderenza. A zero non viene conteggiato.';
+
+  @override
+  String get slotContent => 'Contenuto';
 
   @override
   String get slotDescriptiveLabel => 'Etichetta descrittiva';
@@ -1528,6 +1694,9 @@ class L10nIt extends L10n {
   String get templateRename => 'Rinomina template';
 
   @override
+  String get templateRenameShort => 'Rinomina';
+
+  @override
   String get templateSaved => 'Template salvato.';
 
   @override
@@ -1635,6 +1804,21 @@ class L10nIt extends L10n {
 
   @override
   String get timezoneUtc => 'UTC';
+
+  @override
+  String get unitCentimetres => 'cm';
+
+  @override
+  String get unitInches => 'in';
+
+  @override
+  String get unitKilocalories => 'kcal';
+
+  @override
+  String get unitKilograms => 'kg';
+
+  @override
+  String get unitPounds => 'lb';
 
   @override
   String get usernameHint => 'Servirà al tuo nutrizionista per trovarti';
@@ -1764,10 +1948,28 @@ class L10nIt extends L10n {
   String get workoutAddRecurring => 'Aggiungi allenamento ricorrente';
 
   @override
+  String workoutBulletType(String type) {
+    return '• $type';
+  }
+
+  @override
+  String workoutBulletTypeWithCalories(String type, int calories) {
+    return '• $type — $calories kcal';
+  }
+
+  @override
   String get workoutCaloriesBurned => 'Calorie bruciate';
 
   @override
   String get workoutCaloriesOptional => 'Se lo sai. Non è obbligatorio.';
+
+  @override
+  String workoutCaloriesWithUnit(int value) {
+    return '$value kcal';
+  }
+
+  @override
+  String get workoutCease => 'Cessa';
 
   @override
   String get workoutClearFilters => 'Rimuovi i filtri';
@@ -1833,10 +2035,16 @@ class L10nIt extends L10n {
   }
 
   @override
+  String get workoutPeriod => 'Periodo';
+
+  @override
   String get workoutPickAtLeastOneDay => 'Scegli almeno un giorno';
 
   @override
   String get workoutPickPeriod => 'Scegli un periodo';
+
+  @override
+  String get workoutPlanning => 'Pianificazione';
 
   @override
   String get workoutPlanningNotice =>
@@ -1856,6 +2064,9 @@ class L10nIt extends L10n {
 
   @override
   String get workoutRemoveGoal => 'Rimuovi obiettivo';
+
+  @override
+  String get workoutSetGoal => 'Imposta';
 
   @override
   String get workoutSheetFooter =>

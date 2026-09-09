@@ -9,6 +9,9 @@ import '../../measurement/presentation/widgets/measurement_list_tile.dart';
 import '../data/statistics_models.dart';
 import '../providers/statistics_providers.dart';
 import 'statistics_formatting.dart';
+import '../../../l10n/units.dart';
+import '../../identity/providers/profile_providers.dart';
+import 'statistics_presentation.dart';
 import 'widgets/measure_line_chart.dart';
 import 'widgets/statistics_headline.dart';
 import 'widgets/statistics_period_menu.dart';
@@ -52,6 +55,9 @@ class BodyStatisticsView extends ConsumerWidget {
     }
 
     final selected = ref.watch(selectedBodyMeasureProvider);
+    // LO-4, LO-7, LO-8: la conversione è di sola presentazione e si
+    // applica per ciò stesso a tutta la serie, quale ne sia l'epoca.
+    final units = ref.watch(unitSystemProvider);
     final series = statistics.series.firstWhere(
       (candidate) => candidate.measure == selected,
       orElse: () => statistics.series.first,
@@ -71,7 +77,7 @@ class BodyStatisticsView extends ConsumerWidget {
                 Padding(
                   padding: const EdgeInsets.only(right: AppSpacing.xs),
                   child: ChoiceChip(
-                    label: Text(candidate.measure.label),
+                    label: Text(bodyMeasureLabel(context, candidate.measure)),
                     selected: candidate.measure == series.measure,
                     onSelected: (_) =>
                         ref.read(selectedBodyMeasureProvider.notifier).select(candidate.measure),
@@ -84,10 +90,19 @@ class BodyStatisticsView extends ConsumerWidget {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
           child: MeasureLineChart(
-            points: series.points,
-            unit: series.unit,
+            points: [
+              for (final point in series.points)
+                MeasurePoint(
+                  date: point.date,
+                  value: bodyMeasureToDisplay(series.measure, point.value, units),
+                  source: point.source,
+                ),
+            ],
+            unit: bodyMeasureUnit(context, series.measure, units),
             // AN-6, AN-7: la linea di riferimento riguarda il solo peso.
-            targetValue: series.measure.hasTarget ? statistics.targetWeightKg : null,
+            targetValue: series.measure.hasTarget && statistics.targetWeightKg != null
+                ? weightToDisplay(statistics.targetWeightKg!, units)
+                : null,
           ),
         ),
         Padding(
@@ -97,8 +112,10 @@ class BodyStatisticsView extends ConsumerWidget {
             children: [
               // AN-10: la differenza rispetto al primo valore del periodo.
               StatisticsHeadline(
-                value: series.change == null ? null : _formatChange(context, series.change!),
-                unit: series.change == null ? null : series.unit,
+                value: series.change == null
+                    ? null
+                    : _formatChange(context, bodyMeasureToDisplay(series.measure, series.change!, units)),
+                unit: series.change == null ? null : bodyMeasureUnit(context, series.measure, units),
                 caption: describePeriod(context, 
                   statistics.period,
                   statistics.from,
@@ -119,7 +136,7 @@ class BodyStatisticsView extends ConsumerWidget {
                   style: typography.caption.copyWith(color: colors.textSecondary),
                 ),
               const SizedBox(height: AppSpacing.lg),
-              Text('Misurazioni', style: typography.overline.copyWith(color: colors.textTertiary)),
+              Text(context.l10n.bodyMeasurementsTitle, style: typography.overline.copyWith(color: colors.textTertiary)),
             ],
           ),
         ),

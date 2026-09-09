@@ -51,7 +51,7 @@ class PlanningCard extends ConsumerWidget {
               ),
               TextButton(
                 onPressed: () => showPlanningSheet(context),
-                child: Text(weekly.isEmpty && oneOff.isEmpty ? 'Imposta' : 'Modifica'),
+                child: Text(weekly.isEmpty && oneOff.isEmpty ? context.l10n.workoutSetGoal : context.l10n.commonEdit),
               ),
             ],
           ),
@@ -89,7 +89,7 @@ class PlanningCard extends ConsumerWidget {
               ),
               TextButton(
                 onPressed: () => showWeeklyGoalSheet(context),
-                child: Text(goal == null ? 'Imposta' : 'Modifica'),
+                child: Text(goal == null ? context.l10n.workoutSetGoal : context.l10n.commonEdit),
               ),
             ],
           ),

@@ -121,6 +121,12 @@ abstract class L10n {
   /// **'Per giorno della settimana'**
   String get adherenceByWeekday;
 
+  /// No description provided for @adherenceOverall.
+  ///
+  /// In it, this message translates to:
+  /// **'Complessivo'**
+  String get adherenceOverall;
+
   /// No description provided for @adherencePeriodRange.
   ///
   /// In it, this message translates to:
@@ -132,6 +138,12 @@ abstract class L10n {
   /// In it, this message translates to:
   /// **'Andamento settimanale'**
   String get adherenceWeeklyTrend;
+
+  /// No description provided for @bodyMeasurementsTitle.
+  ///
+  /// In it, this message translates to:
+  /// **'Misurazioni'**
+  String get bodyMeasurementsTitle;
 
   /// No description provided for @bodyStatsNoMeasurements.
   ///
@@ -198,6 +210,12 @@ abstract class L10n {
   /// In it, this message translates to:
   /// **'Accettando, il nutrizionista:'**
   String get careRequestAccepting;
+
+  /// No description provided for @careRequestExpired.
+  ///
+  /// In it, this message translates to:
+  /// **'Decaduta'**
+  String get careRequestExpired;
 
   /// No description provided for @careRequestKeepAfterRevoke.
   ///
@@ -307,6 +325,36 @@ abstract class L10n {
   /// **'Non conserverai:'**
   String get careRevokeYouLose;
 
+  /// No description provided for @commonAccept.
+  ///
+  /// In it, this message translates to:
+  /// **'Accetta'**
+  String get commonAccept;
+
+  /// No description provided for @commonAdd.
+  ///
+  /// In it, this message translates to:
+  /// **'Aggiungi'**
+  String get commonAdd;
+
+  /// No description provided for @commonAll.
+  ///
+  /// In it, this message translates to:
+  /// **'Tutti'**
+  String get commonAll;
+
+  /// No description provided for @commonApply.
+  ///
+  /// In it, this message translates to:
+  /// **'Applica'**
+  String get commonApply;
+
+  /// No description provided for @commonBack.
+  ///
+  /// In it, this message translates to:
+  /// **'Indietro'**
+  String get commonBack;
+
   /// No description provided for @commonCancel.
   ///
   /// In it, this message translates to:
@@ -325,11 +373,53 @@ abstract class L10n {
   /// **'Conferma'**
   String get commonConfirm;
 
+  /// No description provided for @commonContinue.
+  ///
+  /// In it, this message translates to:
+  /// **'Continua'**
+  String get commonContinue;
+
+  /// No description provided for @commonCopy.
+  ///
+  /// In it, this message translates to:
+  /// **'Copia'**
+  String get commonCopy;
+
+  /// No description provided for @commonCreate.
+  ///
+  /// In it, this message translates to:
+  /// **'Crea'**
+  String get commonCreate;
+
+  /// No description provided for @commonDecline.
+  ///
+  /// In it, this message translates to:
+  /// **'Rifiuta'**
+  String get commonDecline;
+
   /// No description provided for @commonDelete.
   ///
   /// In it, this message translates to:
   /// **'Elimina'**
   String get commonDelete;
+
+  /// No description provided for @commonDescription.
+  ///
+  /// In it, this message translates to:
+  /// **'Descrizione'**
+  String get commonDescription;
+
+  /// No description provided for @commonEdit.
+  ///
+  /// In it, this message translates to:
+  /// **'Modifica'**
+  String get commonEdit;
+
+  /// No description provided for @commonGenerate.
+  ///
+  /// In it, this message translates to:
+  /// **'Genera'**
+  String get commonGenerate;
 
   /// Congiunzione fra le due sole voci che l’elenco può avere.
   ///
@@ -337,11 +427,47 @@ abstract class L10n {
   /// **' e '**
   String get commonListAnd;
 
+  /// No description provided for @commonName.
+  ///
+  /// In it, this message translates to:
+  /// **'Denominazione'**
+  String get commonName;
+
   /// No description provided for @commonNotSet.
   ///
   /// In it, this message translates to:
   /// **'Non impostato'**
   String get commonNotSet;
+
+  /// No description provided for @commonNote.
+  ///
+  /// In it, this message translates to:
+  /// **'Nota'**
+  String get commonNote;
+
+  /// Azione del pulsante primario, distinta da "Registra allenamento" della voce di menu.
+  ///
+  /// In it, this message translates to:
+  /// **'Registra'**
+  String get commonRecord;
+
+  /// No description provided for @commonRegenerate.
+  ///
+  /// In it, this message translates to:
+  /// **'Rigenera'**
+  String get commonRegenerate;
+
+  /// No description provided for @commonRemove.
+  ///
+  /// In it, this message translates to:
+  /// **'Rimuovi'**
+  String get commonRemove;
+
+  /// No description provided for @commonRevoke.
+  ///
+  /// In it, this message translates to:
+  /// **'Revoca'**
+  String get commonRevoke;
 
   /// No description provided for @commonSave.
   ///
@@ -360,6 +486,12 @@ abstract class L10n {
   /// In it, this message translates to:
   /// **'Condividi'**
   String get commonShare;
+
+  /// No description provided for @commonToday.
+  ///
+  /// In it, this message translates to:
+  /// **'Oggi'**
+  String get commonToday;
 
   /// No description provided for @commonUnderstood.
   ///
@@ -769,6 +901,12 @@ abstract class L10n {
   /// **'Nome'**
   String get fieldFirstName;
 
+  /// No description provided for @fieldHeight.
+  ///
+  /// In it, this message translates to:
+  /// **'Altezza'**
+  String get fieldHeight;
+
   /// No description provided for @fieldHeightCm.
   ///
   /// In it, this message translates to:
@@ -913,6 +1051,18 @@ abstract class L10n {
   /// **'Revoca privilegio di Cuoco'**
   String get groupRevokeCook;
 
+  /// No description provided for @groupRoleCook.
+  ///
+  /// In it, this message translates to:
+  /// **'Cuoco'**
+  String get groupRoleCook;
+
+  /// No description provided for @groupRoleOwner.
+  ///
+  /// In it, this message translates to:
+  /// **'Proprietario'**
+  String get groupRoleOwner;
+
   /// No description provided for @groupTransferFirstBody.
   ///
   /// In it, this message translates to:
@@ -966,6 +1116,12 @@ abstract class L10n {
   /// In it, this message translates to:
   /// **'Scade il {date}'**
   String inviteExpiresOn(String date);
+
+  /// No description provided for @inviteExpiry.
+  ///
+  /// In it, this message translates to:
+  /// **'Scadenza'**
+  String get inviteExpiry;
 
   /// No description provided for @inviteGenerate.
   ///
@@ -1063,6 +1219,12 @@ abstract class L10n {
   /// **'Non hai un account? Registrati'**
   String get loginToRegister;
 
+  /// No description provided for @mealChange.
+  ///
+  /// In it, this message translates to:
+  /// **'Cambia'**
+  String get mealChange;
+
   /// No description provided for @mealChangeStatusTitle.
   ///
   /// In it, this message translates to:
@@ -1080,6 +1242,12 @@ abstract class L10n {
   /// In it, this message translates to:
   /// **'Registrare un pasto futuro?'**
   String get mealFutureDayTitle;
+
+  /// No description provided for @mealMove.
+  ///
+  /// In it, this message translates to:
+  /// **'Sposta'**
+  String get mealMove;
 
   /// No description provided for @mealOfflineUnavailable.
   ///
@@ -1134,6 +1302,66 @@ abstract class L10n {
   /// In it, this message translates to:
   /// **'Due pasti del tuo piano sono stati invertiti{when}.'**
   String mealSwappedNotification(String when);
+
+  /// No description provided for @mealTick.
+  ///
+  /// In it, this message translates to:
+  /// **'Spunta'**
+  String get mealTick;
+
+  /// No description provided for @measureArm.
+  ///
+  /// In it, this message translates to:
+  /// **'Braccio'**
+  String get measureArm;
+
+  /// No description provided for @measureChest.
+  ///
+  /// In it, this message translates to:
+  /// **'Torace'**
+  String get measureChest;
+
+  /// No description provided for @measureHips.
+  ///
+  /// In it, this message translates to:
+  /// **'Fianchi'**
+  String get measureHips;
+
+  /// No description provided for @measureNamedValueWithUnit.
+  ///
+  /// In it, this message translates to:
+  /// **'{measure}: {value} {unit}'**
+  String measureNamedValueWithUnit(String measure, String value, String unit);
+
+  /// No description provided for @measureThigh.
+  ///
+  /// In it, this message translates to:
+  /// **'Coscia'**
+  String get measureThigh;
+
+  /// No description provided for @measureValueWithUnit.
+  ///
+  /// In it, this message translates to:
+  /// **'{value} {unit}'**
+  String measureValueWithUnit(String value, String unit);
+
+  /// No description provided for @measureWaist.
+  ///
+  /// In it, this message translates to:
+  /// **'Vita'**
+  String get measureWaist;
+
+  /// No description provided for @measureWeight.
+  ///
+  /// In it, this message translates to:
+  /// **'Peso'**
+  String get measureWeight;
+
+  /// No description provided for @measureWithUnit.
+  ///
+  /// In it, this message translates to:
+  /// **'{measure} ({unit})'**
+  String measureWithUnit(String measure, String unit);
 
   /// No description provided for @measurementAtLeastOneValue.
   ///
@@ -1573,6 +1801,12 @@ abstract class L10n {
   /// **'{measure}: un solo valore nel periodo'**
   String patientMeasureSingleValue(String measure);
 
+  /// No description provided for @patientMeasurementsHeader.
+  ///
+  /// In it, this message translates to:
+  /// **'MISURAZIONI'**
+  String get patientMeasurementsHeader;
+
   /// No description provided for @patientMonthStatisticsHeader.
   ///
   /// In it, this message translates to:
@@ -1639,6 +1873,12 @@ abstract class L10n {
   /// **'Il paziente non lo vedrà più.'**
   String get patientWithdrawBody;
 
+  /// No description provided for @patientWorkoutsHeader.
+  ///
+  /// In it, this message translates to:
+  /// **'ALLENAMENTI'**
+  String get patientWorkoutsHeader;
+
   /// No description provided for @patientsEmpty.
   ///
   /// In it, this message translates to:
@@ -1681,6 +1921,30 @@ abstract class L10n {
   /// **'Seleziona un paziente'**
   String get patientsSelect;
 
+  /// No description provided for @patientsSortBy.
+  ///
+  /// In it, this message translates to:
+  /// **'Ordina'**
+  String get patientsSortBy;
+
+  /// No description provided for @periodMonth.
+  ///
+  /// In it, this message translates to:
+  /// **'Mese'**
+  String get periodMonth;
+
+  /// No description provided for @periodPlan.
+  ///
+  /// In it, this message translates to:
+  /// **'Piano'**
+  String get periodPlan;
+
+  /// No description provided for @periodWeek.
+  ///
+  /// In it, this message translates to:
+  /// **'Settimana'**
+  String get periodWeek;
+
   /// No description provided for @personalDataRoleNotChangeable.
   ///
   /// In it, this message translates to:
@@ -1692,6 +1956,12 @@ abstract class L10n {
   /// In it, this message translates to:
   /// **'Dati aggiornati.'**
   String get personalDataSaved;
+
+  /// No description provided for @personalDataTargetWeight.
+  ///
+  /// In it, this message translates to:
+  /// **'Peso obiettivo'**
+  String get personalDataTargetWeight;
 
   /// No description provided for @personalDataTargetWeightKg.
   ///
@@ -1794,6 +2064,12 @@ abstract class L10n {
   /// In it, this message translates to:
   /// **'Nuovo piano'**
   String get planCreateTitle;
+
+  /// No description provided for @planDayView.
+  ///
+  /// In it, this message translates to:
+  /// **'Giorno'**
+  String get planDayView;
 
   /// No description provided for @planDeleteIrreversible.
   ///
@@ -1908,6 +2184,12 @@ abstract class L10n {
   /// In it, this message translates to:
   /// **'Il tuo nutrizionista non ha ancora redatto un piano'**
   String get planPatientNoPlanYet;
+
+  /// No description provided for @planRecipient.
+  ///
+  /// In it, this message translates to:
+  /// **'Destinatario'**
+  String get planRecipient;
 
   /// No description provided for @planRecordWorkout.
   ///
@@ -2058,6 +2340,12 @@ abstract class L10n {
   /// In it, this message translates to:
   /// **'Schema settimanale'**
   String get planViewWeeklySchedule;
+
+  /// No description provided for @planWeekView.
+  ///
+  /// In it, this message translates to:
+  /// **'Settimana'**
+  String get planWeekView;
 
   /// No description provided for @plansActivateNow.
   ///
@@ -2383,6 +2671,30 @@ abstract class L10n {
   /// **'Impostazioni'**
   String get settingsTitle;
 
+  /// No description provided for @settingsUnitImperial.
+  ///
+  /// In it, this message translates to:
+  /// **'Imperiale'**
+  String get settingsUnitImperial;
+
+  /// No description provided for @settingsUnitMetric.
+  ///
+  /// In it, this message translates to:
+  /// **'Metrico'**
+  String get settingsUnitMetric;
+
+  /// No description provided for @settingsUnitRetroactiveNotice.
+  ///
+  /// In it, this message translates to:
+  /// **'Il cambio si applica a tutti i dati, compresi grafici e storico.'**
+  String get settingsUnitRetroactiveNotice;
+
+  /// No description provided for @settingsUnitSystem.
+  ///
+  /// In it, this message translates to:
+  /// **'Unità di misura'**
+  String get settingsUnitSystem;
+
   /// No description provided for @sexFemale.
   ///
   /// In it, this message translates to:
@@ -2430,6 +2742,12 @@ abstract class L10n {
   /// In it, this message translates to:
   /// **'Quanto questo pasto incide sull\'aderenza. A zero non viene conteggiato.'**
   String get slotAdherenceWeightHelp;
+
+  /// No description provided for @slotContent.
+  ///
+  /// In it, this message translates to:
+  /// **'Contenuto'**
+  String get slotContent;
 
   /// No description provided for @slotDescriptiveLabel.
   ///
@@ -2634,6 +2952,12 @@ abstract class L10n {
   /// In it, this message translates to:
   /// **'Rinomina template'**
   String get templateRename;
+
+  /// No description provided for @templateRenameShort.
+  ///
+  /// In it, this message translates to:
+  /// **'Rinomina'**
+  String get templateRenameShort;
 
   /// No description provided for @templateSaved.
   ///
@@ -2850,6 +3174,36 @@ abstract class L10n {
   /// In it, this message translates to:
   /// **'UTC'**
   String get timezoneUtc;
+
+  /// No description provided for @unitCentimetres.
+  ///
+  /// In it, this message translates to:
+  /// **'cm'**
+  String get unitCentimetres;
+
+  /// No description provided for @unitInches.
+  ///
+  /// In it, this message translates to:
+  /// **'in'**
+  String get unitInches;
+
+  /// LO-5: l’energia è in chilocalorie in entrambi i sistemi.
+  ///
+  /// In it, this message translates to:
+  /// **'kcal'**
+  String get unitKilocalories;
+
+  /// LO-4: peso nel sistema metrico.
+  ///
+  /// In it, this message translates to:
+  /// **'kg'**
+  String get unitKilograms;
+
+  /// LO-4: peso nel sistema imperiale.
+  ///
+  /// In it, this message translates to:
+  /// **'lb'**
+  String get unitPounds;
 
   /// No description provided for @usernameHint.
   ///
@@ -3091,6 +3445,18 @@ abstract class L10n {
   /// **'Aggiungi allenamento ricorrente'**
   String get workoutAddRecurring;
 
+  /// No description provided for @workoutBulletType.
+  ///
+  /// In it, this message translates to:
+  /// **'• {type}'**
+  String workoutBulletType(String type);
+
+  /// No description provided for @workoutBulletTypeWithCalories.
+  ///
+  /// In it, this message translates to:
+  /// **'• {type} — {calories} kcal'**
+  String workoutBulletTypeWithCalories(String type, int calories);
+
   /// No description provided for @workoutCaloriesBurned.
   ///
   /// In it, this message translates to:
@@ -3102,6 +3468,18 @@ abstract class L10n {
   /// In it, this message translates to:
   /// **'Se lo sai. Non è obbligatorio.'**
   String get workoutCaloriesOptional;
+
+  /// No description provided for @workoutCaloriesWithUnit.
+  ///
+  /// In it, this message translates to:
+  /// **'{value} kcal'**
+  String workoutCaloriesWithUnit(int value);
+
+  /// No description provided for @workoutCease.
+  ///
+  /// In it, this message translates to:
+  /// **'Cessa'**
+  String get workoutCease;
 
   /// No description provided for @workoutClearFilters.
   ///
@@ -3205,6 +3583,12 @@ abstract class L10n {
   /// **'{count, plural, =1{1 allenamento a settimana} other{{count} allenamenti a settimana}}'**
   String workoutPerWeekSuffix(int count);
 
+  /// No description provided for @workoutPeriod.
+  ///
+  /// In it, this message translates to:
+  /// **'Periodo'**
+  String get workoutPeriod;
+
   /// No description provided for @workoutPickAtLeastOneDay.
   ///
   /// In it, this message translates to:
@@ -3216,6 +3600,12 @@ abstract class L10n {
   /// In it, this message translates to:
   /// **'Scegli un periodo'**
   String get workoutPickPeriod;
+
+  /// No description provided for @workoutPlanning.
+  ///
+  /// In it, this message translates to:
+  /// **'Pianificazione'**
+  String get workoutPlanning;
 
   /// No description provided for @workoutPlanningNotice.
   ///
@@ -3252,6 +3642,12 @@ abstract class L10n {
   /// In it, this message translates to:
   /// **'Rimuovi obiettivo'**
   String get workoutRemoveGoal;
+
+  /// No description provided for @workoutSetGoal.
+  ///
+  /// In it, this message translates to:
+  /// **'Imposta'**
+  String get workoutSetGoal;
 
   /// No description provided for @workoutSheetFooter.
   ///

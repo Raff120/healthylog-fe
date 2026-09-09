@@ -9,6 +9,7 @@ import '../../../core/api/api_exception.dart';
 import '../../../core/widgets/app_primary_button.dart';
 import '../../../core/widgets/app_text_field.dart';
 import '../../../l10n/l10n_context.dart';
+import '../../../l10n/units.dart';
 import '../data/account_role.dart';
 import '../data/profile_models.dart';
 import '../domain/registration_field_validators.dart';
@@ -65,12 +66,18 @@ class _PersonalDataScreenState extends ConsumerState<PersonalDataScreen> {
     _username.text = profile.username;
     _email.text = profile.email;
     _birthPlace.text = profile.birthPlace;
-    _height.text = profile.height?.toString() ?? '';
+    // LO-4, LO-7: altezza e peso obiettivo sono conservati in centimetri
+    // e chilogrammi e presentati nel sistema scelto. Il pollice è
+    // presentato con un decimale: 0,1 pollici valgono 2,54 mm, meno del
+    // mezzo centimetro su cui l'altezza è arrotondata al ritorno, sicché
+    // il giro di conversione restituisce il centimetro di partenza.
+    final units = ref.read(unitSystemProvider);
+    _height.text = profile.height == null
+        ? ''
+        : _formatDecimal(lengthToDisplay(profile.height!.toDouble(), units));
     _targetWeight.text = profile.targetWeightKg == null
         ? ''
-        : (profile.targetWeightKg! == profile.targetWeightKg!.roundToDouble()
-            ? profile.targetWeightKg!.round().toString()
-            : profile.targetWeightKg!.toString());
+        : _formatDecimal(weightToDisplay(profile.targetWeightKg!, units));
     _birthDate = profile.birthDate;
     _sex = profile.sex;
     _originalUsername = profile.username;
@@ -107,7 +114,7 @@ class _PersonalDataScreenState extends ConsumerState<PersonalDataScreen> {
       'birthPlace': validateName(_birthPlace.text),
       'birthDate': _birthDate == null ? 'REQUIRED' : null,
       'sex': _sex == null ? 'REQUIRED' : null,
-      'height': heightText.isEmpty ? null : (int.tryParse(heightText) == null ? 'INVALID_FORMAT' : null),
+      'height': heightText.isEmpty ? null : (_shownValue(_height) == null ? 'INVALID_FORMAT' : null),
       // PR-9: nessun giudizio sulla congruità del valore, solo la sua
       // leggibilità come numero.
       'targetWeightKg': _targetWeightValue() == null && _targetWeight.text.trim().isNotEmpty
@@ -128,9 +135,28 @@ class _PersonalDataScreenState extends ConsumerState<PersonalDataScreen> {
     return errors.values.every((error) => error == null);
   }
 
-  double? _targetWeightValue() {
-    final text = _targetWeight.text.trim().replaceAll(',', '.');
+  /// LO-10: la virgola decimale è accettata quanto il punto.
+  static double? _shownValue(TextEditingController controller) {
+    final text = controller.text.trim().replaceAll(',', '.');
     return text.isEmpty ? null : double.tryParse(text);
+  }
+
+  /// Senza decimali superflui: 72 anziché 72.0.
+  static String _formatDecimal(double value) {
+    final rounded = double.parse(value.toStringAsFixed(1));
+    return rounded == rounded.roundToDouble() ? rounded.round().toString() : rounded.toString();
+  }
+
+  /// LO-7: il peso obiettivo torna in chilogrammi, unità di conservazione.
+  double? _targetWeightValue() {
+    final shown = _shownValue(_targetWeight);
+    return shown == null ? null : weightToStorage(shown, ref.read(unitSystemProvider));
+  }
+
+  /// PR-6: l'altezza è conservata in centimetri interi.
+  int? _heightValue() {
+    final shown = _shownValue(_height);
+    return shown == null ? null : lengthToStorage(shown, ref.read(unitSystemProvider)).round();
   }
 
   Future<void> _submit() async {
@@ -148,7 +174,7 @@ class _PersonalDataScreenState extends ConsumerState<PersonalDataScreen> {
               birthDate: _birthDate!,
               birthPlace: _birthPlace.text.trim(),
               sex: _sex!,
-              height: _height.text.trim().isEmpty ? null : int.parse(_height.text.trim()),
+              height: _heightValue(),
               // PR-10: il campo lasciato vuoto rimuove il peso obiettivo.
               targetWeightKg: _targetWeightValue(),
             ),
@@ -200,6 +226,8 @@ class _PersonalDataScreenState extends ConsumerState<PersonalDataScreen> {
     final colors = context.colors;
     final typography = context.typography;
     final profileState = ref.watch(profileControllerProvider);
+    // LO-4: le etichette recano l'unità del sistema scelto.
+    final units = ref.watch(unitSystemProvider);
 
     return Scaffold(
       backgroundColor: colors.background,
@@ -306,20 +334,26 @@ class _PersonalDataScreenState extends ConsumerState<PersonalDataScreen> {
                       ),
                       const SizedBox(height: AppSpacing.sm),
                       AppTextField(
-                        label: context.l10n.personalDataTargetWeightKg,
+                        label: context.l10n.measureWithUnit(
+                          context.l10n.personalDataTargetWeight,
+                          weightUnit(context, units),
+                        ),
                         controller: _targetWeight,
                         keyboardType: const TextInputType.numberWithOptions(decimal: true),
                         errorText: _errorFor('targetWeightKg'),
                       ),
                       const SizedBox(height: AppSpacing.sm),
                       AppTextField(
-                        label: context.l10n.fieldHeightCm,
+                        label: context.l10n.measureWithUnit(
+                          context.l10n.fieldHeight,
+                          lengthUnit(context, units),
+                        ),
                         controller: _height,
                         keyboardType: TextInputType.number,
                         errorText: _errorFor('height'),
                       ),
                       const SizedBox(height: AppSpacing.lg),
-                      AppPrimaryButton(label: 'Salva', loading: loading, onPressed: _submit),
+                      AppPrimaryButton(label: context.l10n.commonSave, loading: loading, onPressed: _submit),
                     ],
                   ),
                 ),

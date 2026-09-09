@@ -77,7 +77,7 @@ class _EditPlanDayScreenState extends ConsumerState<EditPlanDayScreen> {
       final confirmed = await _confirmDialog(
         title: context.l10n.editRemoveSlotTitle,
         message: context.l10n.editRemoveSlotBody,
-        confirmLabel: 'Rimuovi',
+        confirmLabel: context.l10n.commonRemove,
       );
       if (confirmed != true) return;
     }
@@ -105,7 +105,7 @@ class _EditPlanDayScreenState extends ConsumerState<EditPlanDayScreen> {
         title: Text(title),
         content: Text(message),
         actions: [
-          TextButton(onPressed: () => Navigator.of(dialogContext).pop(false), child: const Text('Annulla')),
+          TextButton(onPressed: () => Navigator.of(dialogContext).pop(false), child: Text(context.l10n.commonCancel)),
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(true),
             child: Text(confirmLabel, style: TextStyle(color: colors.error)),
@@ -260,7 +260,7 @@ class _EditPlanDayScreenState extends ConsumerState<EditPlanDayScreen> {
             if (_slots != null)
               PopupMenuButton<SlotType>(
                 icon: const Icon(Icons.add),
-                tooltip: 'Aggiungi',
+                tooltip: context.l10n.commonAdd,
                 onSelected: _addSlot,
                 itemBuilder: (context) => _addSlotMenuItems(),
               ),

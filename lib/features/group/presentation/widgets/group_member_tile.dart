@@ -26,9 +26,9 @@ class GroupMemberTile extends StatelessWidget {
   /// `null` quando nessuna azione è disponibile su questa voce (GE-15).
   final ValueChanged<GroupMemberAction>? onAction;
 
-  String get _privilegeLabel {
-    if (member.owner) return 'Proprietario';
-    if (member.cook) return 'Cuoco';
+  String _privilegeLabel(BuildContext context) {
+    if (member.owner) return context.l10n.groupRoleOwner;
+    if (member.cook) return context.l10n.groupRoleCook;
     return '';
   }
 
@@ -36,7 +36,7 @@ class GroupMemberTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.colors;
     final typography = context.typography;
-    final privilege = _privilegeLabel;
+    final privilege = _privilegeLabel(context);
 
     return SizedBox(
       height: AppSpacing.heightListItemTwoLines,

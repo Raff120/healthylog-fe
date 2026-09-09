@@ -63,7 +63,7 @@ class NutritionistScreen extends ConsumerWidget {
         backgroundColor: colors.background,
         elevation: 0,
         scrolledUnderElevation: 0,
-        title: Text('Nutrizionista', style: typography.titleMedium.copyWith(color: colors.textPrimary)),
+        title: Text(context.l10n.profileNutritionist, style: typography.titleMedium.copyWith(color: colors.textPrimary)),
       ),
       body: SafeArea(
         child: linkState.when(

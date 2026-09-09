@@ -7,6 +7,8 @@ import '../../../../l10n/l10n_context.dart';
 import '../../../dietplan/presentation/slot_type_presentation.dart';
 import '../../../statistics/data/statistics_models.dart';
 import '../../../statistics/presentation/statistics_formatting.dart';
+import '../../../identity/providers/profile_providers.dart';
+import '../../../statistics/presentation/statistics_presentation.dart';
 import '../../../statistics/presentation/widgets/breakdown_row.dart';
 import '../../../statistics/presentation/widgets/statistics_headline.dart';
 import '../../../statistics/providers/statistics_providers.dart';
@@ -148,6 +150,10 @@ class _Body extends ConsumerWidget {
     final colors = context.colors;
     final typography = context.typography;
     final statistics = ref.watch(measurementStatisticsProvider(query));
+    // LO-4, LO-7: le unità sono quelle del Nutrizionista che consulta, non
+    // quelle del Paziente: il valore conservato è unico e la scelta è di
+    // sola presentazione.
+    final units = ref.watch(unitSystemProvider);
 
     return statistics.maybeWhen(
       orElse: () => const SizedBox.shrink(),
@@ -167,8 +173,12 @@ class _Body extends ConsumerWidget {
               // determinabile dal sistema.
               Text(
                 series.change == null
-                    ? context.l10n.patientMeasureSingleValue(series.measure.label)
-                    : context.l10n.patientMeasureChange(series.measure.label, _signed(context, series.change!), series.unit),
+                    ? context.l10n.patientMeasureSingleValue(bodyMeasureLabel(context, series.measure))
+                    : context.l10n.patientMeasureChange(
+                        bodyMeasureLabel(context, series.measure),
+                        _signed(context, bodyMeasureToDisplay(series.measure, series.change!, units)),
+                        bodyMeasureUnit(context, series.measure, units),
+                      ),
                 style: typography.bodyMedium.copyWith(color: colors.textPrimary),
               ),
         ],

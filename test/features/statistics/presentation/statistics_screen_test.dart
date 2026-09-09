@@ -240,7 +240,6 @@ void main() {
       'series': [
         {
           'measure': 'WEIGHT',
-          'unit': 'kg',
           'points': [
             {'date': '2026-03-02', 'value': 80.0, 'source': 'USER'},
             {'date': '2026-03-06', 'value': 78.5, 'source': 'NUTRITIONIST'},
@@ -266,7 +265,6 @@ void main() {
       'series': [
         {
           'measure': 'WAIST',
-          'unit': 'cm',
           'points': [
             {'date': '2026-03-02', 'value': 92.0, 'source': 'USER'},
           ],

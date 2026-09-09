@@ -113,7 +113,7 @@ class _JoinGroupSheetState extends ConsumerState<_JoinGroupSheet> {
                   ),
                   const SizedBox(height: AppSpacing.md),
                   AppPrimaryButton(
-                    label: 'Continua',
+                    label: context.l10n.commonContinue,
                     loading: _loadingPreview,
                     onPressed: _codeController.text.trim().isEmpty ? null : _lookUpCode,
                   ),
@@ -136,7 +136,7 @@ class _JoinGroupSheetState extends ConsumerState<_JoinGroupSheet> {
                   Center(
                     child: TextButton(
                       onPressed: joining ? null : () => setState(() => _preview = null),
-                      child: const Text('Indietro'),
+                      child: Text(context.l10n.commonBack),
                     ),
                   ),
                 ],

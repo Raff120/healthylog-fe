@@ -50,10 +50,10 @@ Future<bool> confirmDeletePlan(BuildContext context, PlanStatus status) async {
             )
           : Text(context.l10n.planDeleteIrreversible),
       actions: [
-        TextButton(onPressed: () => Navigator.of(dialogContext).pop(false), child: const Text('Annulla')),
+        TextButton(onPressed: () => Navigator.of(dialogContext).pop(false), child: Text(context.l10n.commonCancel)),
         TextButton(
           onPressed: () => Navigator.of(dialogContext).pop(true),
-          child: Text('Elimina', style: TextStyle(color: colors.error)),
+          child: Text(context.l10n.commonDelete, style: TextStyle(color: colors.error)),
         ),
       ],
     ),

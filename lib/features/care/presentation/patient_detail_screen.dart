@@ -72,7 +72,7 @@ class PatientDetailScreen extends ConsumerWidget {
         title: Text(title),
         content: Text(message),
         actions: [
-          TextButton(onPressed: () => Navigator.of(dialogContext).pop(false), child: const Text('Annulla')),
+          TextButton(onPressed: () => Navigator.of(dialogContext).pop(false), child: Text(context.l10n.commonCancel)),
           TextButton(onPressed: () => Navigator.of(dialogContext).pop(true), child: Text(confirmLabel)),
         ],
       ),
@@ -177,13 +177,13 @@ class PatientDetailScreen extends ConsumerWidget {
                 onResume: () => _act(context, ref, () => ref.read(dietPlanLifecycleControllerProvider.notifier).resume(current.id)),
                 onComplete: () async {
                   final confirmed = await _confirmSimple(context,
-                      title: context.l10n.plansCompleteConfirmTitle, message: context.l10n.plansCompleteConfirmBody, confirmLabel: 'Concludi');
+                      title: context.l10n.plansCompleteConfirmTitle, message: context.l10n.plansCompleteConfirmBody, confirmLabel: context.l10n.planActionComplete);
                   if (!confirmed || !context.mounted) return;
                   await _act(context, ref, () => ref.read(dietPlanLifecycleControllerProvider.notifier).complete(current.id));
                 },
                 onWithdraw: () async {
                   final confirmed = await _confirmSimple(context,
-                      title: context.l10n.plansWithdrawConfirmTitle, message: context.l10n.patientWithdrawBody, confirmLabel: 'Ritira');
+                      title: context.l10n.plansWithdrawConfirmTitle, message: context.l10n.patientWithdrawBody, confirmLabel: context.l10n.planActionWithdraw);
                   if (!confirmed || !context.mounted) return;
                   await _act(context, ref, () => ref.read(dietPlanLifecycleControllerProvider.notifier).withdraw(current.id));
                 },
@@ -237,7 +237,7 @@ class PatientDetailScreen extends ConsumerWidget {
         backgroundColor: colors.background,
         elevation: 0,
         scrolledUnderElevation: 0,
-        title: Text(state.value?.fullName ?? 'Paziente', style: typography.titleMedium.copyWith(color: colors.textPrimary)),
+        title: Text(state.value?.fullName ?? context.l10n.roleUser, style: typography.titleMedium.copyWith(color: colors.textPrimary)),
       ),
       body: SafeArea(child: body),
     );

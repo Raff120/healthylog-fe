@@ -148,7 +148,7 @@ class _PeriodBreakdownSelector extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return AppSegmentedControl(
       labels: [
-        'Complessivo',
+        context.l10n.adherenceOverall,
         for (var index = 0; index < statistics.periods.length; index++) '${index + 1}° periodo',
       ],
       selectedIndex: selectedIndex == null ? 0 : selectedIndex! + 1,

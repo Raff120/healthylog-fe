@@ -91,7 +91,7 @@ class _WeeklyGoalSheetState extends ConsumerState<_WeeklyGoalSheet> {
                 ),
                 const SizedBox(height: AppSpacing.lg),
                 AppPrimaryButton(
-                  label: 'Salva',
+                  label: context.l10n.commonSave,
                   loading: saving,
                   onPressed: () {
                     final value = int.tryParse(_controller.text.trim());

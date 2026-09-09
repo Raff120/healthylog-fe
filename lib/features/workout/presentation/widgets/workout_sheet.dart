@@ -216,14 +216,14 @@ class _WorkoutSheetState extends ConsumerState<_WorkoutSheet> {
                 ),
                 const SizedBox(height: AppSpacing.sm),
                 AppTextField(
-                  label: 'Nota',
+                  label: context.l10n.commonNote,
                   controller: _noteController,
                   minLines: 2,
                   maxLines: 4,
                 ),
                 const SizedBox(height: AppSpacing.lg),
                 AppPrimaryButton(
-                  label: _isEdit ? 'Salva' : 'Registra',
+                  label: _isEdit ? context.l10n.commonSave : context.l10n.commonRecord,
                   loading: saving,
                   onPressed: _submit,
                 ),
@@ -234,7 +234,7 @@ class _WorkoutSheetState extends ConsumerState<_WorkoutSheet> {
                   const SizedBox(height: AppSpacing.xs),
                   TextButton(
                     onPressed: saving ? null : _delete,
-                    child: Text('Elimina', style: TextStyle(color: colors.error)),
+                    child: Text(context.l10n.commonDelete, style: TextStyle(color: colors.error)),
                   ),
                 ],
                 const SizedBox(height: AppSpacing.xs),

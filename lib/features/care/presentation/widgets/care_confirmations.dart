@@ -46,10 +46,10 @@ Future<bool> confirmRevokeCareLink(BuildContext context, {required bool asNutrit
         ],
       ),
       actions: [
-        TextButton(onPressed: () => Navigator.of(dialogContext).pop(false), child: const Text('Annulla')),
+        TextButton(onPressed: () => Navigator.of(dialogContext).pop(false), child: Text(context.l10n.commonCancel)),
         TextButton(
           onPressed: () => Navigator.of(dialogContext).pop(true),
-          child: Text('Revoca', style: TextStyle(color: colors.error)),
+          child: Text(context.l10n.commonRevoke, style: TextStyle(color: colors.error)),
         ),
       ],
     ),

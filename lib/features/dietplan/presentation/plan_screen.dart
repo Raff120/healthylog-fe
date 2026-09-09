@@ -102,7 +102,7 @@ class PlanScreen extends ConsumerWidget {
             : [
                 TextButton(
                   onPressed: () => ref.read(mealSwapSelectionProvider.notifier).cancel(),
-                  child: const Text('Annulla'),
+                  child: Text(context.l10n.commonCancel),
                 ),
               ],
       ),
@@ -344,7 +344,7 @@ class _MealsContent extends ConsumerWidget {
           icon: Icons.pause_circle_outline,
           title: context.l10n.planSuspended,
           text: context.l10n.planSuspendedHint,
-          actionLabel: canManage ? 'Riprendi' : null,
+          actionLabel: canManage ? context.l10n.planActionResume : null,
           actionLoading: resuming,
           onAction: !canManage
               ? null

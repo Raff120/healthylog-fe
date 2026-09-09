@@ -24,7 +24,7 @@ class DietPlanTemplateListScreen extends ConsumerWidget {
   /// a differenza del piano (CD-1), il template non ha un'origine "in
   /// bianco" da nominare in un secondo momento.
   Future<void> _create(BuildContext context, WidgetRef ref) async {
-    final input = await showNameDescriptionDialog(context, title: context.l10n.templateNew, confirmLabel: 'Crea');
+    final input = await showNameDescriptionDialog(context, title: context.l10n.templateNew, confirmLabel: context.l10n.commonCreate);
     if (input == null) return;
     if (!context.mounted) return;
     await ref.read(createDietPlanTemplateControllerProvider.notifier).create(
@@ -58,7 +58,7 @@ class DietPlanTemplateListScreen extends ConsumerWidget {
         backgroundColor: colors.background,
         elevation: 0,
         scrolledUnderElevation: 0,
-        title: Text('Template', style: typography.titleMedium.copyWith(color: colors.textPrimary)),
+        title: Text(context.l10n.navTemplates, style: typography.titleMedium.copyWith(color: colors.textPrimary)),
         // 12.3, 3.1: icona notifiche nell'intestazione di ogni
         // destinazione principale. *Template* lo è per il Nutrizionista;
         // l'Utente vi arriva dalla creazione del piano (CT-1) e vi trova

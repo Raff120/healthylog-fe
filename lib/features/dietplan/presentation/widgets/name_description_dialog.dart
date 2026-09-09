@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../../app/theme/app_spacing.dart';
 import '../../../../app/theme/theme_context.dart';
 import '../../../../core/widgets/app_text_field.dart';
+import '../../../../l10n/l10n_context.dart';
 
 /// Denominazione e descrizione raccolte da [showNameDescriptionDialog].
 class NameDescriptionInput {
@@ -86,13 +87,13 @@ class _NameDescriptionDialogState extends State<_NameDescriptionDialog> {
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          AppTextField(label: 'Denominazione', controller: _nameController),
+          AppTextField(label: context.l10n.commonName, controller: _nameController),
           const SizedBox(height: AppSpacing.sm),
-          AppTextField(label: 'Descrizione', controller: _descriptionController, maxLines: 3),
+          AppTextField(label: context.l10n.commonDescription, controller: _descriptionController, maxLines: 3),
         ],
       ),
       actions: [
-        TextButton(onPressed: () => Navigator.of(context).pop(), child: const Text('Annulla')),
+        TextButton(onPressed: () => Navigator.of(context).pop(), child: Text(context.l10n.commonCancel)),
         TextButton(onPressed: _confirm, child: Text(widget.confirmLabel)),
       ],
     );

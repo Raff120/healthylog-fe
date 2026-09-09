@@ -249,7 +249,7 @@ class _MealCardState extends ConsumerState<MealCard> {
                         child: TextButton.icon(
                           onPressed: () => _startMove(context),
                           icon: Icon(Icons.swap_horiz, size: 18, color: colors.accent),
-                          label: Text('Sposta', style: typography.label.copyWith(color: colors.accent)),
+                          label: Text(context.l10n.mealMove, style: typography.label.copyWith(color: colors.accent)),
                         ),
                       ),
                     ],
@@ -421,11 +421,11 @@ class _MealCardState extends ConsumerState<MealCard> {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: const Text('Annulla'),
+            child: Text(context.l10n.commonCancel),
           ),
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: const Text('Spunta'),
+            child: Text(context.l10n.mealTick),
           ),
         ],
       ),
@@ -445,11 +445,11 @@ class _MealCardState extends ConsumerState<MealCard> {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: const Text('Annulla'),
+            child: Text(context.l10n.commonCancel),
           ),
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: Text('Cambia', style: TextStyle(color: colors.error)),
+            child: Text(context.l10n.mealChange, style: TextStyle(color: colors.error)),
           ),
         ],
       ),

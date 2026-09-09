@@ -108,7 +108,7 @@ class _PatientsScreenState extends ConsumerState<PatientsScreen> {
                     child: Text('PAZIENTI', style: typography.overline.copyWith(color: colors.textTertiary)),
                   ),
                   PopupMenuButton<PatientSort>(
-                    tooltip: 'Ordina',
+                    tooltip: context.l10n.patientsSortBy,
                     onSelected: (sort) => setState(() => _sort = sort),
                     itemBuilder: (context) => [
                       for (final sort in PatientSort.values)
@@ -173,7 +173,7 @@ class _PatientsScreenState extends ConsumerState<PatientsScreen> {
         backgroundColor: colors.background,
         elevation: 0,
         scrolledUnderElevation: 0,
-        title: Text('Pazienti', style: typography.titleMedium.copyWith(color: colors.textPrimary)),
+        title: Text(context.l10n.navPatients, style: typography.titleMedium.copyWith(color: colors.textPrimary)),
         // 12.3, 3.1: icona notifiche nell'intestazione di ogni
         // destinazione principale.
         actions: const [NotificationBell()],
@@ -216,13 +216,13 @@ class _PendingRequestTile extends StatelessWidget {
               children: [
                 Text(request.targetName, style: typography.bodyLarge.copyWith(color: colors.textPrimary)),
                 Text(
-                  expired ? 'Decaduta' : context.l10n.patientsRequestSentOn(_formatDate(request.createdAt)),
+                  expired ? context.l10n.careRequestExpired : context.l10n.patientsRequestSentOn(_formatDate(request.createdAt)),
                   style: typography.caption.copyWith(color: colors.textSecondary),
                 ),
               ],
             ),
           ),
-          if (!expired) TextButton(onPressed: onWithdraw, child: const Text('Revoca')),
+          if (!expired) TextButton(onPressed: onWithdraw, child: Text(context.l10n.commonRevoke)),
         ],
       ),
     );

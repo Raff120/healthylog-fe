@@ -109,11 +109,11 @@ class _WorkoutRow extends StatelessWidget {
             // CB-8: le calorie sul singolo allenamento cui si riferiscono.
             if (calories != null)
               Text(
-                '$calories kcal',
+                context.l10n.workoutCaloriesWithUnit(calories!),
                 style: typography.caption.copyWith(color: colors.textSecondary),
               ),
             IconButton(
-              tooltip: done ? 'Modifica' : context.l10n.workoutMarkAsDone,
+              tooltip: done ? context.l10n.commonEdit : context.l10n.workoutMarkAsDone,
               onPressed: onCheck,
               icon: Icon(
                 done ? Icons.check_circle : Icons.radio_button_unchecked,

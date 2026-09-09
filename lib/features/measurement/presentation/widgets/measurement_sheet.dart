@@ -7,6 +7,9 @@ import '../../../../app/theme/theme_context.dart';
 import '../../../../core/widgets/app_primary_button.dart';
 import '../../../../core/widgets/app_text_field.dart';
 import '../../../../l10n/l10n_context.dart';
+import '../../../../l10n/unit_system.dart';
+import '../../../../l10n/units.dart';
+import '../../../identity/providers/profile_providers.dart';
 import '../../data/measurement_models.dart';
 import '../../data/measurement_requests.dart';
 import '../../providers/measurement_providers.dart';
@@ -48,18 +51,23 @@ class _MeasurementSheet extends ConsumerStatefulWidget {
 }
 
 class _MeasurementSheetState extends ConsumerState<_MeasurementSheet> {
-  late final _weight = _controllerFor(widget.existing?.weightKg);
-  late final _waist = _controllerFor(widget.existing?.circumferences.waist);
-  late final _hips = _controllerFor(widget.existing?.circumferences.hips);
-  late final _chest = _controllerFor(widget.existing?.circumferences.chest);
-  late final _arm = _controllerFor(widget.existing?.circumferences.arm);
-  late final _thigh = _controllerFor(widget.existing?.circumferences.thigh);
+  /// LO-7: i valori arrivano in chilogrammi e centimetri e sono
+  /// presentati nel sistema scelto; al salvataggio ripercorrono la
+  /// conversione all'indietro.
+  late final UnitSystem _units = ref.read(unitSystemProvider);
+
+  late final _weight = _controllerFor(weightToDisplay, widget.existing?.weightKg);
+  late final _waist = _controllerFor(lengthToDisplay, widget.existing?.circumferences.waist);
+  late final _hips = _controllerFor(lengthToDisplay, widget.existing?.circumferences.hips);
+  late final _chest = _controllerFor(lengthToDisplay, widget.existing?.circumferences.chest);
+  late final _arm = _controllerFor(lengthToDisplay, widget.existing?.circumferences.arm);
+  late final _thigh = _controllerFor(lengthToDisplay, widget.existing?.circumferences.thigh);
   late final _note = TextEditingController(text: widget.existing?.note ?? '');
   late DateTime _date = widget.existing?.date ?? _dateOnly(DateTime.now());
   String? _error;
 
-  static TextEditingController _controllerFor(double? value) =>
-      TextEditingController(text: value == null ? '' : _formatNumber(value));
+  TextEditingController _controllerFor(double Function(double, UnitSystem) convert, double? stored) =>
+      TextEditingController(text: stored == null ? '' : _formatNumber(convert(stored, _units)));
 
   @override
   void dispose() {
@@ -69,18 +77,23 @@ class _MeasurementSheetState extends ConsumerState<_MeasurementSheet> {
     super.dispose();
   }
 
-  double? _valueOf(TextEditingController controller) =>
-      double.tryParse(controller.text.trim().replaceAll(',', '.'));
+  /// LO-10: la virgola decimale è accettata quanto il punto, quale che
+  /// sia la lingua: chi digita "72,5" intende settantadue e mezzo.
+  /// LO-7: il valore inserito torna all'unità di conservazione.
+  double? _valueOf(TextEditingController controller, double Function(double, UnitSystem) toStorage) {
+    final shown = double.tryParse(controller.text.trim().replaceAll(',', '.'));
+    return shown == null ? null : toStorage(shown, _units);
+  }
 
   Future<void> _submit() async {
     final circumferences = BodyCircumferences(
-      waist: _valueOf(_waist),
-      hips: _valueOf(_hips),
-      chest: _valueOf(_chest),
-      arm: _valueOf(_arm),
-      thigh: _valueOf(_thigh),
+      waist: _valueOf(_waist, lengthToStorage),
+      hips: _valueOf(_hips, lengthToStorage),
+      chest: _valueOf(_chest, lengthToStorage),
+      arm: _valueOf(_arm, lengthToStorage),
+      thigh: _valueOf(_thigh, lengthToStorage),
     );
-    final weight = _valueOf(_weight);
+    final weight = _valueOf(_weight, weightToStorage);
     // PR-13: la nota non è un valore rilevato — da sola non basta.
     if (weight == null && circumferences.isEmpty) {
       setState(() => _error = context.l10n.measurementAtLeastOneValue);
@@ -133,6 +146,7 @@ class _MeasurementSheetState extends ConsumerState<_MeasurementSheet> {
   Widget build(BuildContext context) {
     final colors = context.colors;
     final typography = context.typography;
+    final l10n = context.l10n;
     final saving = ref.watch(measurementControllerProvider)?.isLoading ?? false;
 
     return Padding(
@@ -166,30 +180,40 @@ class _MeasurementSheetState extends ConsumerState<_MeasurementSheet> {
                 const SizedBox(height: AppSpacing.md),
                 _DateField(date: _date, onTap: _pickDate),
                 const SizedBox(height: AppSpacing.sm),
-                _NumberField(label: 'Peso (kg)', controller: _weight, onChanged: _clearError),
+                // LO-4: l'etichetta reca l'unità del sistema scelto.
+                _NumberField(
+                  label: l10n.measureWithUnit(l10n.measureWeight, weightUnit(context, _units)),
+                  controller: _weight,
+                  onChanged: _clearError,
+                ),
                 const SizedBox(height: AppSpacing.sm),
-                _NumberField(label: 'Vita (cm)', controller: _waist, onChanged: _clearError),
+                for (final field in [
+                  (l10n.measureWaist, _waist),
+                  (l10n.measureHips, _hips),
+                  (l10n.measureChest, _chest),
+                  (l10n.measureArm, _arm),
+                  (l10n.measureThigh, _thigh),
+                ]) ...[
+                  _NumberField(
+                    label: l10n.measureWithUnit(field.$1, lengthUnit(context, _units)),
+                    controller: field.$2,
+                    onChanged: _clearError,
+                  ),
+                  const SizedBox(height: AppSpacing.sm),
+                ],
                 const SizedBox(height: AppSpacing.sm),
-                _NumberField(label: 'Fianchi (cm)', controller: _hips, onChanged: _clearError),
-                const SizedBox(height: AppSpacing.sm),
-                _NumberField(label: 'Torace (cm)', controller: _chest, onChanged: _clearError),
-                const SizedBox(height: AppSpacing.sm),
-                _NumberField(label: 'Braccio (cm)', controller: _arm, onChanged: _clearError),
-                const SizedBox(height: AppSpacing.sm),
-                _NumberField(label: 'Coscia (cm)', controller: _thigh, onChanged: _clearError),
-                const SizedBox(height: AppSpacing.sm),
-                AppTextField(label: 'Nota', controller: _note, minLines: 2, maxLines: 4),
+                AppTextField(label: context.l10n.commonNote, controller: _note, minLines: 2, maxLines: 4),
                 if (_error != null) ...[
                   const SizedBox(height: AppSpacing.xs),
                   Text(_error!, style: typography.caption.copyWith(color: colors.error)),
                 ],
                 const SizedBox(height: AppSpacing.lg),
-                AppPrimaryButton(label: 'Salva', loading: saving, onPressed: _submit),
+                AppPrimaryButton(label: context.l10n.commonSave, loading: saving, onPressed: _submit),
                 if (widget.existing != null) ...[
                   const SizedBox(height: AppSpacing.xs),
                   TextButton(
                     onPressed: saving ? null : _delete,
-                    child: Text('Elimina', style: TextStyle(color: colors.error)),
+                    child: Text(context.l10n.commonDelete, style: TextStyle(color: colors.error)),
                   ),
                 ],
                 const SizedBox(height: AppSpacing.xs),

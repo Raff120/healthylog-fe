@@ -244,7 +244,7 @@ void _openDetailSheet(BuildContext context, PlanDaySlot slot, {required VoidCall
                   child: TextButton.icon(
                     onPressed: onMove,
                     icon: Icon(Icons.swap_horiz, size: 18, color: colors.accent),
-                    label: Text('Sposta', style: typography.label.copyWith(color: colors.accent)),
+                    label: Text(context.l10n.mealMove, style: typography.label.copyWith(color: colors.accent)),
                   ),
                 ),
               ],

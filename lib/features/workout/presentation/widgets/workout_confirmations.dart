@@ -37,8 +37,9 @@ Future<bool> confirmDuplicateWorkout(
               padding: const EdgeInsets.only(bottom: AppSpacing.xxs),
               child: Text(
                 workout.caloriesBurned == null
-                    ? '• ${workout.activityType}'
-                    : '• ${workout.activityType} — ${workout.caloriesBurned} kcal',
+                    ? context.l10n.workoutBulletType(workout.activityType)
+                    : context.l10n.workoutBulletTypeWithCalories(
+                        workout.activityType, workout.caloriesBurned!),
                 style: typography.bodyMedium.copyWith(color: colors.textSecondary),
               ),
             ),
@@ -47,7 +48,7 @@ Future<bool> confirmDuplicateWorkout(
       actions: [
         TextButton(
           onPressed: () => Navigator.of(dialogContext).pop(false),
-          child: const Text('Annulla'),
+          child: Text(context.l10n.commonCancel),
         ),
         TextButton(
           onPressed: () => Navigator.of(dialogContext).pop(true),
@@ -79,11 +80,11 @@ Future<bool> confirmDeleteWorkout(BuildContext context, {required bool fromPlann
       actions: [
         TextButton(
           onPressed: () => Navigator.of(dialogContext).pop(false),
-          child: const Text('Annulla'),
+          child: Text(context.l10n.commonCancel),
         ),
         TextButton(
           onPressed: () => Navigator.of(dialogContext).pop(true),
-          child: Text('Elimina', style: TextStyle(color: colors.error)),
+          child: Text(context.l10n.commonDelete, style: TextStyle(color: colors.error)),
         ),
       ],
     ),
