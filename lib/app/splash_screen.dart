@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'branding/app_mark.dart';
 import 'theme/theme_context.dart';
 
 /// Verifica della sessione all'avvio (5.2 interfaccia.md): il solo
@@ -15,13 +16,10 @@ class SplashScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final typography = context.typography;
 
     return Scaffold(
       backgroundColor: colors.background,
-      body: Center(
-        child: Text('HealthyLog', style: typography.titleLarge.copyWith(color: colors.textPrimary)),
-      ),
+      body: const Center(child: AppMarkWithName()),
     );
   }
 }

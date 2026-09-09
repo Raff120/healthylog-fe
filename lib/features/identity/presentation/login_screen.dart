@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../app/branding/app_mark.dart';
 import '../../../app/theme/app_spacing.dart';
 import '../../../app/theme/theme_context.dart';
 import '../../../core/api/api_error_messages.dart';
@@ -87,12 +88,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Center(
-                    child: Text(
-                      'HealthyLog',
-                      style: typography.titleLarge.copyWith(color: colors.textPrimary),
-                    ),
-                  ),
+                  // 5.2: il marchio in alto, unico punto dell'applicazione
+                  // in cui compare oltre al caricamento iniziale (2.5).
+                  const Center(child: AppMarkWithName()),
                   const SizedBox(height: AppSpacing.xl),
                   AppTextField(
                     label: context.l10n.fieldEmail,
