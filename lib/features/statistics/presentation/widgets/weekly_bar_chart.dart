@@ -43,6 +43,11 @@ class WeeklyBarChart extends StatefulWidget {
   static const _plotHeight = 120.0;
   static const _minBarWidth = 28.0;
 
+  /// Larghezza massima della singola barra: su poche settimane una barra
+  /// larga quanto lo schermo non si legge più come tale, ma come un
+  /// riquadro pieno (segnalato dall'utente, vedi decisioni.md).
+  static const maxBarWidth = 36.0;
+
   @override
   State<WeeklyBarChart> createState() => _WeeklyBarChartState();
 }
@@ -176,7 +181,10 @@ class _Bar extends StatelessWidget {
                       top: Radius.circular(AppSpacing.radiusSm),
                     ),
                   ),
-                  child: const SizedBox(width: double.infinity),
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: WeeklyBarChart.maxBarWidth),
+                    child: const SizedBox(width: double.infinity),
+                  ),
                 ),
               ),
             ),

@@ -10,6 +10,7 @@ import '../providers/statistics_providers.dart';
 import 'statistics_formatting.dart';
 import 'widgets/breakdown_row.dart';
 import 'widgets/statistics_headline.dart';
+import 'widgets/statistics_period_menu.dart';
 import 'widgets/weekly_bar_chart.dart';
 
 /// Segmento **Aderenza** di *Statistiche* (11.1 interfaccia.md): valore
@@ -51,23 +52,34 @@ class AdherenceView extends ConsumerWidget {
           value: shown.value == null ? null : formatPercentage(shown.value!),
           unit: shown.value == null ? null : '%',
           caption: shown.caption,
+          // AD-8: la didascalia è il selettore del periodo. Sul singolo
+          // periodo di svolgimento non lo è: lì la didascalia descrive il
+          // periodo scelto col controllo soprastante (ST-10).
+          onCaptionTap: periodIndex != null
+              ? null
+              : (anchor) => showStatisticsPeriodMenu(anchor, ref, statistics.period),
         ),
         if (excluded != null && periodIndex == null)
           Text(excluded, style: typography.caption.copyWith(color: colors.textSecondary)),
-        const SizedBox(height: AppSpacing.lg),
-        _Section(
-          title: 'Andamento settimanale',
-          child: WeeklyBarChart(
-            bars: [
-              for (final week in statistics.weekly)
-                BarDatum(
-                  label: formatWeekLabel(week.weekStart),
-                  value: week.value,
-                  valueLabel: week.value == null ? '' : '${formatPercentage(week.value!)}%',
-                ),
-            ],
+        // AD-14: l'andamento ha senso su più settimane. Sull'orizzonte
+        // *Settimana* ve n'è una sola, e una barra sola non è un
+        // andamento: la sezione non compare (vedi decisioni.md).
+        if (statistics.weekly.length > 1) ...[
+          const SizedBox(height: AppSpacing.lg),
+          _Section(
+            title: 'Andamento settimanale',
+            child: WeeklyBarChart(
+              bars: [
+                for (final week in statistics.weekly)
+                  BarDatum(
+                    label: formatWeekLabel(week.weekStart),
+                    value: week.value,
+                    valueLabel: week.value == null ? '' : '${formatPercentage(week.value!)}%',
+                  ),
+              ],
+            ),
           ),
-        ),
+        ],
         const SizedBox(height: AppSpacing.lg),
         _Section(
           title: 'Per tipo di pasto',

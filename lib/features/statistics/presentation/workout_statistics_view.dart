@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../app/theme/app_spacing.dart';
 import '../../../app/theme/theme_context.dart';
@@ -6,6 +7,7 @@ import '../data/statistics_models.dart';
 import 'statistics_formatting.dart';
 import 'widgets/breakdown_row.dart';
 import 'widgets/statistics_headline.dart';
+import 'widgets/statistics_period_menu.dart';
 import 'widgets/weekly_bar_chart.dart';
 
 /// Segmento **Allenamenti** di *Statistiche* (11.2 interfaccia.md):
@@ -21,18 +23,16 @@ import 'widgets/weekly_bar_chart.dart';
 /// nessuna media, nessun grafico (CB-9, SA-8). Il dato è inserito a stima
 /// e da fonti eterogenee; aggregarlo gli attribuirebbe un'attendibilità
 /// che non possiede (CB-10).
-class WorkoutStatisticsView extends StatelessWidget {
+class WorkoutStatisticsView extends ConsumerWidget {
   const WorkoutStatisticsView({super.key, required this.statistics});
 
   final WorkoutStatistics statistics;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final colors = context.colors;
     final typography = context.typography;
-    final maxByType = statistics.byActivityType.isEmpty
-        ? 1
-        : statistics.byActivityType.first.count;
+    final maxByType = statistics.byActivityType.isEmpty ? 1 : statistics.byActivityType.first.count;
 
     return ListView(
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.xs),
@@ -46,6 +46,9 @@ class WorkoutStatisticsView extends StatelessWidget {
             statistics.to,
             statistics.planName,
           ),
+          // AD-8: la didascalia è il selettore del periodo, comune ai tre
+          // segmenti.
+          onCaptionTap: (anchor) => showStatisticsPeriodMenu(anchor, ref, statistics.period),
         ),
         // SA-15: sull'orizzonte del piano i giorni di sospensione, esclusi
         // dall'aderenza, concorrono invece qui per intero (SA-14).
@@ -68,9 +71,7 @@ class WorkoutStatisticsView extends StatelessWidget {
                 BreakdownRow(
                   label: '${statistics.goalDone} su ${statistics.goal} previsti',
                   value: null,
-                  fraction: statistics.goal! == 0
-                      ? null
-                      : statistics.goalDone! / statistics.goal!,
+                  fraction: statistics.goal! == 0 ? null : statistics.goalDone! / statistics.goal!,
                 ),
                 if (statistics.goalWeeks > 1)
                   Text(
@@ -93,25 +94,28 @@ class WorkoutStatisticsView extends StatelessWidget {
             style: typography.bodyMedium.copyWith(color: colors.textPrimary),
           ),
         ),
-        const SizedBox(height: AppSpacing.lg),
-        _Section(
-          title: 'Andamento settimanale',
-          child: WeeklyBarChart(
-            bars: [
-              for (final week in statistics.weekly)
-                BarDatum(
-                  label: formatWeekLabel(week.weekStart),
-                  value: week.count.toDouble(),
-                  valueLabel: '${week.count}',
-                ),
-            ],
-            // 11.2: quando l'obiettivo è impostato, una linea orizzontale di
-            // riferimento ne indica il livello, come la linea del peso
-            // obiettivo (AN-6).
-            referenceValue: _referenceGoal()?.toDouble(),
-            referenceLabel: _referenceGoal() == null ? null : 'obiettivo',
+        // SA-11: come per l'aderenza, una barra sola non è un andamento.
+        if (statistics.weekly.length > 1) ...[
+          const SizedBox(height: AppSpacing.lg),
+          _Section(
+            title: 'Andamento settimanale',
+            child: WeeklyBarChart(
+              bars: [
+                for (final week in statistics.weekly)
+                  BarDatum(
+                    label: formatWeekLabel(week.weekStart),
+                    value: week.count.toDouble(),
+                    valueLabel: '${week.count}',
+                  ),
+              ],
+              // 11.2: quando l'obiettivo è impostato, una linea orizzontale di
+              // riferimento ne indica il livello, come la linea del peso
+              // obiettivo (AN-6).
+              referenceValue: _referenceGoal()?.toDouble(),
+              referenceLabel: _referenceGoal() == null ? null : 'obiettivo',
+            ),
           ),
-        ),
+        ],
         const SizedBox(height: AppSpacing.lg),
         _Section(
           title: 'Distribuzione per tipo',

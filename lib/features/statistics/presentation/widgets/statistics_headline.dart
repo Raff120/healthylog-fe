@@ -8,6 +8,12 @@ import '../../../../app/theme/theme_context.dart';
 /// (2.3), unità in `titleMedium`, periodo considerato in `caption` colore
 /// secondario.
 ///
+/// Quando [onCaptionTap] è valorizzato la didascalia **è** il selettore
+/// del periodo (AD-8): reca la freccia del menu e il colore accento delle
+/// azioni. Il comando e la sua etichetta sono la stessa cosa, invece che
+/// due righe distinte che dicono lo stesso — vedi
+/// `showStatisticsPeriodMenu`.
+///
 /// AD-15, SA-16: il valore è reso in colore **primario**, mai in colore di
 /// stato — non è un giudizio. Nessuna soglia, nessun livello, nessuna
 /// denominazione valutativa.
@@ -21,6 +27,7 @@ class StatisticsHeadline extends StatelessWidget {
     required this.unit,
     required this.caption,
     this.emptyText = 'Non ci sono ancora dati',
+    this.onCaptionTap,
   });
 
   /// Assente significa assenza di dati (AD-4), non zero.
@@ -29,6 +36,9 @@ class StatisticsHeadline extends StatelessWidget {
   final String? unit;
   final String caption;
   final String emptyText;
+
+  /// Riceve il contesto della didascalia, cui il menu si ancora.
+  final void Function(BuildContext captionContext)? onCaptionTap;
 
   @override
   Widget build(BuildContext context) {
@@ -64,7 +74,30 @@ class StatisticsHeadline extends StatelessWidget {
               ],
             ),
           const SizedBox(height: AppSpacing.xxs),
-          Text(caption, style: typography.caption.copyWith(color: colors.textSecondary)),
+          if (onCaptionTap == null)
+            Text(caption, style: typography.caption.copyWith(color: colors.textSecondary))
+          else
+            Builder(
+              builder: (captionContext) => InkWell(
+                onTap: () => onCaptionTap!(captionContext),
+                borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: AppSpacing.xxs),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Flexible(
+                        child: Text(
+                          caption,
+                          style: typography.caption.copyWith(color: colors.accent),
+                        ),
+                      ),
+                      Icon(Icons.expand_more, size: 18, color: colors.accent),
+                    ],
+                  ),
+                ),
+              ),
+            ),
         ],
       ),
     );

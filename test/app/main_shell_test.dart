@@ -215,10 +215,9 @@ void main() {
     await tester.tap(find.text('Statistiche'));
     await tester.pumpAndSettle();
 
-    // 11.1: i tre segmenti dell'intestazione e il selettore del periodo.
+    // 11.1: i tre segmenti dell'intestazione.
     expect(find.text('Aderenza'), findsOneWidget);
     expect(find.text('Corpo'), findsOneWidget);
-    expect(find.text('Mese'), findsOneWidget);
     // AD-4: senza slot valutabili la constatazione, non uno zero.
     expect(find.text('Non ci sono ancora dati'), findsOneWidget);
     // La barra resta: la voce di partenza è ancora raggiungibile.

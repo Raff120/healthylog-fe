@@ -61,17 +61,52 @@ Map<String, dynamic> _adherence({
     };
 
 void main() {
-  testWidgets('presenta i tre segmenti e il selettore del periodo (11.1)', (tester) async {
+  testWidgets('presenta i tre segmenti nell\'intestazione (11.1)', (tester) async {
     await _pumpStatistics(tester);
 
     expect(find.text('Aderenza'), findsOneWidget);
     expect(find.text('Allenamenti'), findsOneWidget);
     expect(find.text('Corpo'), findsOneWidget);
+  });
+
+  /// Il selettore del periodo non è una seconda barra di comandi ma la
+  /// didascalia stessa del valore, che apre il menu degli orizzonti.
+  testWidgets('la didascalia del valore apre il menu del periodo (AD-8, AD-10)', (tester) async {
+    await _pumpStatistics(tester, adherence: _adherence(value: 75));
+
+    // Fuori dal menu i tre orizzonti non occupano una riga propria.
+    expect(find.text('Mese'), findsNothing);
+    expect(find.text('Piano'), findsNothing);
+
+    await tester.tap(find.text('Settimana dal 2 marzo al 8 marzo'));
+    await tester.pumpAndSettle();
+
     // AD-8: settimana, mese e intero piano; AD-10: nessun intervallo
     // personalizzato.
     expect(find.text('Settimana'), findsOneWidget);
     expect(find.text('Mese'), findsOneWidget);
     expect(find.text('Piano'), findsOneWidget);
+  });
+
+  /// AD-14: una barra sola non è un andamento — sull'orizzonte
+  /// *Settimana* la sezione non compare.
+  testWidgets('non presenta l\'andamento settimanale su una sola settimana (AD-14)',
+      (tester) async {
+    await _pumpStatistics(tester, adherence: _adherence(value: 75));
+
+    expect(find.text('Andamento settimanale'), findsNothing);
+  });
+
+  testWidgets('presenta l\'andamento su più settimane (AD-14)', (tester) async {
+    await _pumpStatistics(
+      tester,
+      adherence: _adherence(value: 75, weekly: [
+        {'weekStart': '2026-03-02', 'value': 60.0},
+        {'weekStart': '2026-03-09', 'value': 90.0},
+      ]),
+    );
+
+    expect(find.text('Andamento settimanale'), findsOneWidget);
   });
 
   testWidgets('in assenza di dati valutabili constata, non presenta zero (AD-4)', (tester) async {
