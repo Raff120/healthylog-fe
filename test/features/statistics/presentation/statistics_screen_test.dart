@@ -7,6 +7,7 @@ import 'package:healthylog/features/measurement/providers/measurement_providers.
 import 'package:healthylog/features/statistics/presentation/statistics_screen.dart';
 import 'package:healthylog/features/statistics/providers/statistics_providers.dart';
 
+import '../../../support/l10n_test_support.dart';
 import '../../../support/measurement_api_stub.dart';
 import '../../../support/preferences_store_stub.dart';
 import '../../../support/statistics_api_stub.dart';
@@ -36,7 +37,11 @@ Future<void> _pumpStatistics(
         measurementApiProvider.overrideWithValue(stubMeasurementApi()),
         preferencesStoreProvider.overrideWithValue(InMemoryPreferencesStore()),
       ],
-      child: MaterialApp(theme: AppTheme.light, home: const StatisticsScreen()),
+      child: MaterialApp(
+      locale: testLocale,
+      localizationsDelegates: testLocalizationsDelegates,
+      supportedLocales: testSupportedLocales,
+      theme: AppTheme.light, home: const StatisticsScreen()),
     ),
   );
   await tester.pumpAndSettle();

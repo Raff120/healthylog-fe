@@ -20,6 +20,12 @@ class ProfileApi {
     return Profile.fromJson(response.data as Map<String, dynamic>);
   }
 
+  /// LO-2, LO-4: lingua e sistema di unità di misura (12.2 interfaccia.md).
+  Future<Profile> updatePreferences(UpdatePreferencesRequest request) async {
+    final response = await _dio.patch('/me/preferences', data: request.toJson());
+    return Profile.fromJson(response.data as Map<String, dynamic>);
+  }
+
   Future<Profile> updateTimezone(UpdateTimezoneRequest request) async {
     final response = await _dio.patch('/me/timezone', data: request.toJson());
     return Profile.fromJson(response.data as Map<String, dynamic>);

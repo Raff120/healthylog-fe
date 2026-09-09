@@ -7,13 +7,16 @@ import '../../../app/theme/theme_context.dart';
 import '../../../app/theme/theme_mode_controller.dart';
 import '../../../core/api/api_error_messages.dart';
 import '../../../core/api/api_exception.dart';
+import '../../../l10n/app_locale.dart';
+import '../../../l10n/l10n_context.dart';
+import '../../../l10n/locale_controller.dart';
+import '../data/profile_models.dart';
 import '../data/timezones.dart';
 import '../providers/profile_providers.dart';
 
-/// Impostazioni (12.2 interfaccia.md). Versione minima introdotta in F11
-/// (deroga: vedi decisioni.md): le sole sezioni Aspetto e Fuso orario, più
-/// "Dispositivi collegati" — trasferita qui dal Profilo, sua sede propria
-/// — non ancora Lingua, Unità di misura (F29) né Privacy (F31).
+/// Impostazioni (12.2 interfaccia.md). F11 vi introdusse Aspetto, Fuso
+/// orario e "Dispositivi collegati" (deroga: vedi decisioni.md); F29
+/// aggiunge Lingua e Unità di misura. La sezione Privacy resta a F31.
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
 
@@ -34,10 +37,29 @@ class SettingsScreen extends ConsumerWidget {
     }
   }
 
+  /// LO-2: la scelta è scritta sia in locale — fonte della
+  /// presentazione, disponibile anche prima dell'accesso — sia sul
+  /// server, che ne ha bisogno per le comunicazioni per posta (AU-27).
+  Future<void> _selectLocale(BuildContext context, WidgetRef ref, AppLocale locale) async {
+    await ref.read(localeControllerProvider.notifier).select(locale);
+    try {
+      await ref.read(profileControllerProvider.notifier)
+          .savePreferences(UpdatePreferencesRequest(locale: locale));
+    } catch (error) {
+      // L'interfaccia è già nella lingua scelta: il mancato allineamento
+      // del server riguarda le sole comunicazioni per posta, e va detto
+      // senza disfare la scelta.
+      if (!context.mounted) return;
+      final code = error.asApiException?.code;
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(describeApiError(code ?? ''))));
+    }
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final colors = context.colors;
     final typography = context.typography;
+    final l10n = context.l10n;
     final profileState = ref.watch(profileControllerProvider);
     final themeMode = ref.watch(themeModeControllerProvider).value ?? ThemeMode.system;
 
@@ -47,20 +69,20 @@ class SettingsScreen extends ConsumerWidget {
         backgroundColor: colors.background,
         elevation: 0,
         scrolledUnderElevation: 0,
-        title: Text('Impostazioni', style: typography.titleMedium.copyWith(color: colors.textPrimary)),
+        title: Text(l10n.settingsTitle, style: typography.titleMedium.copyWith(color: colors.textPrimary)),
       ),
       body: SafeArea(
         child: ListView(
           padding: const EdgeInsets.all(AppSpacing.md),
           children: [
-            _SectionHeader('Aspetto'),
+            _SectionHeader(l10n.settingsSectionAppearance),
             const SizedBox(height: AppSpacing.xs),
             _ThemeModeSelector(
               value: themeMode,
               onChanged: (mode) => ref.read(themeModeControllerProvider.notifier).setThemeMode(mode),
             ),
             const SizedBox(height: AppSpacing.lg),
-            _SectionHeader('Data e ora'),
+            _SectionHeader(l10n.settingsSectionDateTime),
             const SizedBox(height: AppSpacing.xs),
             profileState.when(
               loading: () => const Center(child: CircularProgressIndicator()),
@@ -70,17 +92,25 @@ class SettingsScreen extends ConsumerWidget {
               ),
               data: (profile) => _SettingsRow(
                 icon: Icons.public_outlined,
-                label: 'Fuso orario',
-                value: _labelFor(profile.timezone),
+                label: l10n.settingsTimezone,
+                value: _labelFor(context, profile.timezone),
                 onTap: () => _pickTimezone(context, ref, profile.timezone),
               ),
             ),
             const SizedBox(height: AppSpacing.lg),
-            _SectionHeader('Sicurezza'),
+            // LO-1, LO-4: lingua e unità di misura (12.2 interfaccia.md).
+            _SectionHeader(l10n.settingsSectionLanguageAndFormats),
+            const SizedBox(height: AppSpacing.xs),
+            _LanguageSelector(
+              value: ref.watch(localeControllerProvider).value ?? AppLocale.fallback,
+              onChanged: (locale) => _selectLocale(context, ref, locale),
+            ),
+            const SizedBox(height: AppSpacing.lg),
+            _SectionHeader(l10n.settingsSectionSecurity),
             const SizedBox(height: AppSpacing.xs),
             _SettingsRow(
               icon: Icons.devices_outlined,
-              label: 'Dispositivi collegati',
+              label: l10n.settingsDevices,
               onTap: () => context.push('/profile/devices'),
             ),
           ],
@@ -89,8 +119,8 @@ class SettingsScreen extends ConsumerWidget {
     );
   }
 
-  String _labelFor(String? timezoneId) {
-    if (timezoneId == null) return 'Non impostato';
+  String _labelFor(BuildContext context, String? timezoneId) {
+    if (timezoneId == null) return context.l10n.commonNotSet;
     final match = kTimezoneOptions.where((option) => option.id == timezoneId);
     return match.isEmpty ? timezoneId : match.first.label;
   }
@@ -121,10 +151,10 @@ class _ThemeModeSelector extends StatelessWidget {
     final typography = context.typography;
 
     return SegmentedButton<ThemeMode>(
-      segments: const [
-        ButtonSegment(value: ThemeMode.light, label: Text('Chiaro')),
-        ButtonSegment(value: ThemeMode.dark, label: Text('Scuro')),
-        ButtonSegment(value: ThemeMode.system, label: Text('Sistema')),
+      segments: [
+        ButtonSegment(value: ThemeMode.light, label: Text(context.l10n.settingsThemeLight)),
+        ButtonSegment(value: ThemeMode.dark, label: Text(context.l10n.settingsThemeDark)),
+        ButtonSegment(value: ThemeMode.system, label: Text(context.l10n.settingsThemeSystem)),
       ],
       selected: {value},
       onSelectionChanged: (selection) {
@@ -138,6 +168,44 @@ class _ThemeModeSelector extends StatelessWidget {
       ),
     );
   }
+}
+
+/// LO-1, LO-2: le due lingue disponibili, ciascuna nel proprio nome —
+/// "Italiano" resta "Italiano" anche nell'interfaccia inglese, che è
+/// come chi cerca la propria lingua se l'aspetta.
+class _LanguageSelector extends StatelessWidget {
+  const _LanguageSelector({required this.value, required this.onChanged});
+
+  final AppLocale value;
+  final ValueChanged<AppLocale> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final typography = context.typography;
+
+    return SegmentedButton<AppLocale>(
+      segments: [
+        for (final locale in supportedAppLocales)
+          ButtonSegment(value: locale, label: Text(_labelOf(context, locale))),
+      ],
+      selected: {value},
+      onSelectionChanged: (selection) {
+        if (selection.isNotEmpty) onChanged(selection.first);
+      },
+      style: SegmentedButton.styleFrom(
+        backgroundColor: colors.surface,
+        selectedBackgroundColor: colors.accentSubtle,
+        selectedForegroundColor: colors.accent,
+        textStyle: typography.label,
+      ),
+    );
+  }
+
+  String _labelOf(BuildContext context, AppLocale locale) => switch (locale) {
+        AppLocale.it => context.l10n.settingsLanguageItalian,
+        AppLocale.en => context.l10n.settingsLanguageEnglish,
+      };
 }
 
 class _SettingsRow extends StatelessWidget {
@@ -223,7 +291,7 @@ class _TimezonePickerSheetState extends State<_TimezonePickerSheet> {
                   onChanged: (_) => setState(() {}),
                   style: typography.bodyLarge.copyWith(color: colors.textPrimary),
                   decoration: InputDecoration(
-                    hintText: 'Cerca fuso orario',
+                    hintText: context.l10n.settingsTimezoneSearch,
                     prefixIcon: const Icon(Icons.search),
                     filled: true,
                     fillColor: colors.surface,

@@ -1,0 +1,30 @@
+{
+  "@@locale": "it",
+  "commonCancel": "Annulla",
+  "commonClose": "Chiudi",
+  "commonConfirm": "Conferma",
+  "commonDelete": "Elimina",
+  "commonNotSet": "Non impostato",
+  "commonSave": "Salva",
+  "commonSearch": "Cerca",
+  "settingsDevices": "Dispositivi collegati",
+  "settingsLanguage": "Lingua",
+  "settingsLanguageEnglish": "English",
+  "@settingsLanguageEnglish": {
+    "description": "LO-1: come sopra."
+  },
+  "settingsLanguageItalian": "Italiano",
+  "@settingsLanguageItalian": {
+    "description": "LO-1: le lingue si presentano nel proprio nome, non tradotte."
+  },
+  "settingsSectionAppearance": "Aspetto",
+  "settingsSectionDateTime": "Data e ora",
+  "settingsSectionLanguageAndFormats": "Lingua e formati",
+  "settingsSectionSecurity": "Sicurezza",
+  "settingsThemeDark": "Scuro",
+  "settingsThemeLight": "Chiaro",
+  "settingsThemeSystem": "Sistema",
+  "settingsTimezone": "Fuso orario",
+  "settingsTimezoneSearch": "Cerca fuso orario",
+  "settingsTitle": "Impostazioni"
+}

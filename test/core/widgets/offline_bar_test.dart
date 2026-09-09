@@ -5,6 +5,8 @@ import 'package:healthylog/app/theme/app_theme.dart';
 import 'package:healthylog/core/api/connectivity_status.dart';
 import 'package:healthylog/core/widgets/offline_bar.dart';
 
+import '../../support/l10n_test_support.dart';
+
 /// Barra di assenza di connessione (4.6, 2.6 interfaccia.md; OF-6, F14).
 void main() {
   testWidgets('compare offline, scompare al ripristino, senza colori né icone di errore', (tester) async {
@@ -14,7 +16,11 @@ void main() {
     await tester.pumpWidget(
       UncontrolledProviderScope(
         container: container,
-        child: MaterialApp(theme: AppTheme.light, home: const Scaffold(body: OfflineBar())),
+        child: MaterialApp(
+      locale: testLocale,
+      localizationsDelegates: testLocalizationsDelegates,
+      supportedLocales: testSupportedLocales,
+      theme: AppTheme.light, home: const Scaffold(body: OfflineBar())),
       ),
     );
     await tester.pumpAndSettle();

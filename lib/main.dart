@@ -6,6 +6,9 @@ import 'package:flutter_web_plugins/url_strategy.dart';
 import 'app/router.dart';
 import 'app/theme/app_theme.dart';
 import 'app/theme/theme_mode_controller.dart';
+import 'l10n/app_locale.dart';
+import 'l10n/generated/app_localizations.dart';
+import 'l10n/locale_controller.dart';
 
 void main() {
   // FE-3, CT-17: indirizzi senza `#`, come richiede il routing della
@@ -33,18 +36,18 @@ class HealthyLogApp extends ConsumerWidget {
       // un errore mostrato, sul modello di SessionController).
       themeMode: ref.watch(themeModeControllerProvider).value ?? ThemeMode.system,
       routerConfig: ref.watch(goRouterProvider),
-      // Comunicazione: l'applicazione è scritta in italiano fin da qui
-      // (CN-1, CN-2) — questo fissa la sola lingua dei widget di
-      // sistema (selettore data e simili) a quella già in uso ovunque
-      // nel codice. La selezione della lingua da parte dell'Utente
-      // (LO-1, LO-2) resta compito di F29, non anticipato qui.
-      locale: const Locale('it'),
+      // LO-1, LO-2: la lingua scelta dall'Utente, indipendente da quella
+      // del sistema operativo. Governa insieme le traduzioni
+      // dell'applicazione e i widget di sistema (selettore della data e
+      // simili), e con esse i formati di data e numero (LO-9, LO-10).
+      locale: ref.watch(appLocaleProvider),
       localizationsDelegates: const [
+        L10n.delegate,
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
-      supportedLocales: const [Locale('it')],
+      supportedLocales: [for (final locale in supportedAppLocales) locale.flutterLocale],
     );
   }
 }

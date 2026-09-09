@@ -10,6 +10,8 @@ import '../../../core/api/api_error_messages.dart';
 import '../../../core/api/api_exception.dart';
 import '../../../core/widgets/app_primary_button.dart';
 import '../../../core/widgets/app_text_field.dart';
+import '../../../l10n/app_locale.dart';
+import '../../../l10n/locale_controller.dart';
 import '../data/account_role.dart';
 import '../data/auth_models.dart';
 import '../domain/registration_field_validators.dart';
@@ -123,6 +125,9 @@ class _RegistrationDetailsScreenState extends ConsumerState<RegistrationDetailsS
             sex: _sex!,
             password: _password.text,
             role: widget.role,
+            // LO-2, AU-27: la lingua in uso, che il server conserva per
+            // le comunicazioni per posta.
+            locale: ref.read(localeControllerProvider).value ?? AppLocale.fallback,
           ),
         );
 

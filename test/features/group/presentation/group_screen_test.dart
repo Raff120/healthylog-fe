@@ -1,3 +1,4 @@
+import '../../../support/l10n_test_support.dart';
 import 'dart:convert';
 import 'dart:typed_data';
 
@@ -118,7 +119,11 @@ Future<void> _pumpGroupScreen(WidgetTester tester, {required CookingGroupApi gro
         profileApiProvider.overrideWithValue(ProfileApi(profileDio)),
         cookingGroupApiProvider.overrideWithValue(groupApi),
       ],
-      child: MaterialApp.router(theme: AppTheme.light, routerConfig: router),
+      child: MaterialApp.router(
+      locale: testLocale,
+      localizationsDelegates: testLocalizationsDelegates,
+      supportedLocales: testSupportedLocales,
+      theme: AppTheme.light, routerConfig: router),
     ),
   );
   await tester.pumpAndSettle();

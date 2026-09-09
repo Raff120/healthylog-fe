@@ -1,3 +1,4 @@
+import '../../../support/l10n_test_support.dart';
 import 'dart:convert';
 import 'dart:typed_data';
 
@@ -135,7 +136,11 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [dietPlanTemplateApiProvider.overrideWithValue(api)],
-        child: MaterialApp.router(theme: AppTheme.light, routerConfig: router),
+        child: MaterialApp.router(
+      locale: testLocale,
+      localizationsDelegates: testLocalizationsDelegates,
+      supportedLocales: testSupportedLocales,
+      theme: AppTheme.light, routerConfig: router),
       ),
     );
     await tester.pumpAndSettle();
@@ -165,7 +170,11 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [dietPlanTemplateApiProvider.overrideWithValue(api)],
-        child: MaterialApp.router(theme: AppTheme.light, routerConfig: router),
+        child: MaterialApp.router(
+      locale: testLocale,
+      localizationsDelegates: testLocalizationsDelegates,
+      supportedLocales: testSupportedLocales,
+      theme: AppTheme.light, routerConfig: router),
       ),
     );
     await tester.pumpAndSettle();
@@ -192,7 +201,11 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [dietPlanTemplateApiProvider.overrideWithValue(api)],
-        child: MaterialApp.router(theme: AppTheme.light, routerConfig: router),
+        child: MaterialApp.router(
+      locale: testLocale,
+      localizationsDelegates: testLocalizationsDelegates,
+      supportedLocales: testSupportedLocales,
+      theme: AppTheme.light, routerConfig: router),
       ),
     );
     await tester.pumpAndSettle();
@@ -211,7 +224,11 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [dietPlanTemplateApiProvider.overrideWithValue(api)],
-        child: MaterialApp(theme: AppTheme.light, home: const DietPlanTemplateListScreen()),
+        child: MaterialApp(
+      locale: testLocale,
+      localizationsDelegates: testLocalizationsDelegates,
+      supportedLocales: testSupportedLocales,
+      theme: AppTheme.light, home: const DietPlanTemplateListScreen()),
       ),
     );
     await tester.pumpAndSettle();
@@ -247,7 +264,11 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [dietPlanTemplateApiProvider.overrideWithValue(api)],
-        child: MaterialApp.router(theme: AppTheme.light, routerConfig: router),
+        child: MaterialApp.router(
+      locale: testLocale,
+      localizationsDelegates: testLocalizationsDelegates,
+      supportedLocales: testSupportedLocales,
+      theme: AppTheme.light, routerConfig: router),
       ),
     );
     await tester.pumpAndSettle();
@@ -283,7 +304,11 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [dietPlanTemplateApiProvider.overrideWithValue(api)],
-        child: MaterialApp.router(theme: AppTheme.light, routerConfig: router),
+        child: MaterialApp.router(
+      locale: testLocale,
+      localizationsDelegates: testLocalizationsDelegates,
+      supportedLocales: testSupportedLocales,
+      theme: AppTheme.light, routerConfig: router),
       ),
     );
     await tester.pumpAndSettle();

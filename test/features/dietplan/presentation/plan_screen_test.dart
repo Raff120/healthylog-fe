@@ -1,3 +1,4 @@
+import '../../../support/l10n_test_support.dart';
 import '../../../support/notification_api_stub.dart';
 import 'dart:convert';
 import 'dart:typed_data';
@@ -415,7 +416,11 @@ Future<void> _pumpDailyView(
           AppDatabase(NativeDatabase.memory()),
         ),
       ],
-      child: MaterialApp(theme: AppTheme.light, home: const PlanScreen()),
+      child: MaterialApp(
+      locale: testLocale,
+      localizationsDelegates: testLocalizationsDelegates,
+      supportedLocales: testSupportedLocales,
+      theme: AppTheme.light, home: const PlanScreen()),
     ),
   );
   await tester.pumpAndSettle();
@@ -448,7 +453,11 @@ Future<void> _pumpDailyViewWithOwnedPlans(
           AppDatabase(NativeDatabase.memory()),
         ),
       ],
-      child: MaterialApp(theme: AppTheme.light, home: const PlanScreen()),
+      child: MaterialApp(
+      locale: testLocale,
+      localizationsDelegates: testLocalizationsDelegates,
+      supportedLocales: testSupportedLocales,
+      theme: AppTheme.light, home: const PlanScreen()),
     ),
   );
   await tester.pumpAndSettle();
@@ -546,7 +555,11 @@ Future<_MemberAwareAdapter> _pumpWithGroup(WidgetTester tester, {bool compact = 
         cookingGroupApiProvider.overrideWithValue(CookingGroupApi(groupDio)),
         appDatabaseProvider.overrideWithValue(AppDatabase(NativeDatabase.memory())),
       ],
-      child: MaterialApp(theme: AppTheme.light, home: const PlanScreen()),
+      child: MaterialApp(
+      locale: testLocale,
+      localizationsDelegates: testLocalizationsDelegates,
+      supportedLocales: testSupportedLocales,
+      theme: AppTheme.light, home: const PlanScreen()),
     ),
   );
   await tester.pumpAndSettle();
@@ -611,7 +624,11 @@ void main() {
               AppDatabase(NativeDatabase.memory()),
             ),
           ],
-          child: MaterialApp(theme: AppTheme.light, home: const PlanScreen()),
+          child: MaterialApp(
+      locale: testLocale,
+      localizationsDelegates: testLocalizationsDelegates,
+      supportedLocales: testSupportedLocales,
+      theme: AppTheme.light, home: const PlanScreen()),
         ),
       );
       await tester.pumpAndSettle();
@@ -669,6 +686,10 @@ void main() {
             ),
           ],
           child: MaterialApp(
+      locale: testLocale,
+      localizationsDelegates: testLocalizationsDelegates,
+      supportedLocales: testSupportedLocales,
+      
             theme: AppTheme.light,
             home: const PlanScreen(),
           ),
@@ -735,7 +756,11 @@ void main() {
               AppDatabase(NativeDatabase.memory()),
             ),
           ],
-          child: MaterialApp(theme: AppTheme.light, home: const PlanScreen()),
+          child: MaterialApp(
+      locale: testLocale,
+      localizationsDelegates: testLocalizationsDelegates,
+      supportedLocales: testSupportedLocales,
+      theme: AppTheme.light, home: const PlanScreen()),
         ),
       );
       await tester.pumpAndSettle();
@@ -788,6 +813,10 @@ void main() {
             ),
           ],
           child: MaterialApp(
+      locale: testLocale,
+      localizationsDelegates: testLocalizationsDelegates,
+      supportedLocales: testSupportedLocales,
+      
             theme: AppTheme.light,
             home: const PlanScreen(),
           ),
@@ -920,6 +949,10 @@ void main() {
             ),
           ],
           child: MaterialApp(
+      locale: testLocale,
+      localizationsDelegates: testLocalizationsDelegates,
+      supportedLocales: testSupportedLocales,
+      
             theme: AppTheme.light,
             home: const PlanScreen(),
           ),
@@ -1029,7 +1062,11 @@ void main() {
             cookingGroupApiProvider.overrideWithValue(_noGroupCookingGroupApi()),
             appDatabaseProvider.overrideWithValue(AppDatabase(NativeDatabase.memory())),
           ],
-          child: MaterialApp(theme: AppTheme.light, home: const PlanScreen()),
+          child: MaterialApp(
+      locale: testLocale,
+      localizationsDelegates: testLocalizationsDelegates,
+      supportedLocales: testSupportedLocales,
+      theme: AppTheme.light, home: const PlanScreen()),
         ),
       );
       await tester.pumpAndSettle();

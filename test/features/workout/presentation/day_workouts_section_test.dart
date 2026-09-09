@@ -1,3 +1,4 @@
+import '../../../support/l10n_test_support.dart';
 import '../../../support/notification_api_stub.dart';
 import 'dart:convert';
 import 'dart:typed_data';
@@ -125,7 +126,11 @@ Future<void> _pump(
         cookingGroupApiProvider.overrideWithValue(CookingGroupApi(groupDio)),
         appDatabaseProvider.overrideWithValue(AppDatabase(NativeDatabase.memory())),
       ],
-      child: MaterialApp(theme: AppTheme.light, home: const PlanScreen()),
+      child: MaterialApp(
+      locale: testLocale,
+      localizationsDelegates: testLocalizationsDelegates,
+      supportedLocales: testSupportedLocales,
+      theme: AppTheme.light, home: const PlanScreen()),
     ),
   );
   await tester.pumpAndSettle();
