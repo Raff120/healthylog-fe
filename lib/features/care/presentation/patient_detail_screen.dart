@@ -54,6 +54,22 @@ class PatientDetailScreen extends ConsumerWidget {
     );
   }
 
+  /// PV-15: il PDF del piano redatto dal Nutrizionista, documentazione
+  /// del proprio operato. È lo stesso documento che l'Utente esporta
+  /// (PV-12), redatto nella lingua del proprietario del piano.
+  Future<void> _export(BuildContext context, WidgetRef ref, String planId) async {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(context.l10n.planExportInProgress)),
+    );
+    await ref.read(dietPlanExportControllerProvider.notifier).export(planId);
+    if (!context.mounted) return;
+    ref.read(dietPlanExportControllerProvider)?.whenOrNull(
+          error: (error, _) => ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(describeApiError(context, error.asApiException?.code ?? ''))),
+          ),
+        );
+  }
+
   Future<void> _act(BuildContext context, WidgetRef ref, Future<void> Function() action) async {
     await action();
     if (!context.mounted) return;
@@ -190,6 +206,7 @@ class PatientDetailScreen extends ConsumerWidget {
                 },
                 onActivateNow: () => _act(context, ref, () => ref.read(dietPlanLifecycleControllerProvider.notifier).activate(current.id)),
                 onEditDay: current.status == PlanStatus.active ? () => _editDay(context) : null,
+                onExport: () => _export(context, ref, current.id),
               ),
             if (others.isNotEmpty) ...[
               const SizedBox(height: AppSpacing.lg),
@@ -276,6 +293,7 @@ class _PatientPlanCard extends StatelessWidget {
     required this.onWithdraw,
     required this.onActivateNow,
     required this.onEditDay,
+    required this.onExport,
   });
 
   final PatientPlanSummary plan;
@@ -287,6 +305,7 @@ class _PatientPlanCard extends StatelessWidget {
   final VoidCallback onWithdraw;
   final VoidCallback onActivateNow;
   final VoidCallback? onEditDay;
+  final VoidCallback onExport;
 
   String _statusLabel(BuildContext context) => switch (plan.status) {
         PlanStatus.active => context.l10n.plansCurrent,
@@ -298,20 +317,25 @@ class _PatientPlanCard extends StatelessWidget {
   List<(String, VoidCallback)> _actions(BuildContext context) {
     final l10n = context.l10n;
     return switch (plan.status) {
+      // PV-15: il Nutrizionista esporta i piani da lui redatti, quale
+      // documentazione del proprio operato (9.2).
       PlanStatus.active => [
           (l10n.planActionEdit, onEdit),
           (l10n.planActionSuspend, onSuspend),
           (l10n.planActionComplete, onComplete),
+          (l10n.planActionExport, onExport),
         ],
       PlanStatus.suspended => [
           (l10n.planActionEdit, onEdit),
           (l10n.planActionResume, onResume),
           (l10n.planActionComplete, onComplete),
+          (l10n.planActionExport, onExport),
         ],
       PlanStatus.scheduled => [
           (l10n.planActionEdit, onEdit),
           (l10n.planActionWithdraw, onWithdraw),
           (l10n.plansActivateNow, onActivateNow),
+          (l10n.planActionExport, onExport),
         ],
       _ => const [],
     };
