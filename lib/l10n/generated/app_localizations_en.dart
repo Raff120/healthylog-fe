@@ -233,6 +233,60 @@ class L10nEn extends L10n {
   String get dayPreviewNoSlots => 'No slots';
 
   @override
+  String get deleteAccountConfirm => 'Request deletion';
+
+  @override
+  String get deleteAccountConfirmTitle => 'Delete the account?';
+
+  @override
+  String get deleteAccountGracePeriod =>
+      'The request opens a seven-day reconsideration period: during it the account is deactivated and no third party accesses it, but the data remain. Signing in again withdraws the request.';
+
+  @override
+  String get deleteAccountGroupDissolution =>
+      'You are the only member of your group: the group will be disbanded.';
+
+  @override
+  String get deleteAccountGroupSuccession =>
+      'You are the Owner of a group: ownership passes automatically to another member.';
+
+  @override
+  String get deleteAccountIntro =>
+      'Deleting removes the following permanently:';
+
+  @override
+  String get deleteAccountLossActivity => '•  your workouts and measurements';
+
+  @override
+  String get deleteAccountLossMemberships =>
+      '•  your templates, notifications and memberships';
+
+  @override
+  String get deleteAccountLossPlans => '•  your diet plans, days and ticks';
+
+  @override
+  String get deleteAccountLossStatistics =>
+      '•  the swap history and the statistics';
+
+  @override
+  String get deleteAccountNutritionistKeeps =>
+      'Your nutritionist keeps the schedules of the plans they wrote and the measurements they recorded personally, stripped of your identifying data.';
+
+  @override
+  String get deleteAccountTitle => 'Delete account';
+
+  @override
+  String deletionPendingBody(String date) {
+    return 'Your account will be permanently deleted on $date. Until then you can withdraw the request.';
+  }
+
+  @override
+  String get deletionPendingCancel => 'Withdraw deletion';
+
+  @override
+  String get deletionPendingTitle => 'Deletion requested';
+
+  @override
   String get devicesCurrent => '(this device)';
 
   @override
@@ -1371,6 +1425,26 @@ class L10nEn extends L10n {
   String get plansWithdrawConfirmTitle => 'Withdraw the plan?';
 
   @override
+  String get privacyPolicyAccept => 'I accept the data processing notice';
+
+  @override
+  String get privacyPolicyAcceptRequired =>
+      'You must accept the notice to continue';
+
+  @override
+  String get privacyPolicyRead => 'Read the notice';
+
+  @override
+  String get privacyPolicyTitle => 'Data processing notice';
+
+  @override
+  String get privacyPolicyUpdatedBody =>
+      'We have updated it: read and accept it to continue.';
+
+  @override
+  String get privacyPolicyUpdatedTitle => 'The notice has changed';
+
+  @override
   String get profileGroup => 'Group';
 
   @override
@@ -1458,6 +1532,9 @@ class L10nEn extends L10n {
   String get scheduleTitle => 'Weekly schedule';
 
   @override
+  String get settingsDeleteAccount => 'Delete account';
+
+  @override
   String get settingsDevices => 'Connected devices';
 
   @override
@@ -1470,6 +1547,9 @@ class L10nEn extends L10n {
   String get settingsLanguageItalian => 'Italiano';
 
   @override
+  String get settingsPrivacyPolicy => 'Notice';
+
+  @override
   String get settingsSectionAppearance => 'Appearance';
 
   @override
@@ -1477,6 +1557,9 @@ class L10nEn extends L10n {
 
   @override
   String get settingsSectionLanguageAndFormats => 'Language and formats';
+
+  @override
+  String get settingsSectionPrivacy => 'Privacy';
 
   @override
   String get settingsSectionSecurity => 'Security';

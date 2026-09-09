@@ -505,6 +505,96 @@ abstract class L10n {
   /// **'Nessuno slot'**
   String get dayPreviewNoSlots;
 
+  /// No description provided for @deleteAccountConfirm.
+  ///
+  /// In it, this message translates to:
+  /// **'Richiedi l\'eliminazione'**
+  String get deleteAccountConfirm;
+
+  /// No description provided for @deleteAccountConfirmTitle.
+  ///
+  /// In it, this message translates to:
+  /// **'Eliminare l\'account?'**
+  String get deleteAccountConfirmTitle;
+
+  /// No description provided for @deleteAccountGracePeriod.
+  ///
+  /// In it, this message translates to:
+  /// **'La richiesta apre un periodo di ripensamento di sette giorni: durante il periodo l\'account è disattivato e nessun terzo vi accede, ma i dati restano. Accedendo di nuovo la richiesta si annulla.'**
+  String get deleteAccountGracePeriod;
+
+  /// No description provided for @deleteAccountGroupDissolution.
+  ///
+  /// In it, this message translates to:
+  /// **'Sei l\'unico membro del tuo gruppo: il gruppo sarà sciolto.'**
+  String get deleteAccountGroupDissolution;
+
+  /// No description provided for @deleteAccountGroupSuccession.
+  ///
+  /// In it, this message translates to:
+  /// **'Sei Proprietario di un gruppo: la proprietà passerà automaticamente a un altro membro.'**
+  String get deleteAccountGroupSuccession;
+
+  /// No description provided for @deleteAccountIntro.
+  ///
+  /// In it, this message translates to:
+  /// **'Con l\'eliminazione andranno perduti in modo definitivo:'**
+  String get deleteAccountIntro;
+
+  /// No description provided for @deleteAccountLossActivity.
+  ///
+  /// In it, this message translates to:
+  /// **'•  gli allenamenti e le misurazioni'**
+  String get deleteAccountLossActivity;
+
+  /// No description provided for @deleteAccountLossMemberships.
+  ///
+  /// In it, this message translates to:
+  /// **'•  i template, le notifiche e le appartenenze'**
+  String get deleteAccountLossMemberships;
+
+  /// No description provided for @deleteAccountLossPlans.
+  ///
+  /// In it, this message translates to:
+  /// **'•  i piani alimentari, le giornate e le spunte'**
+  String get deleteAccountLossPlans;
+
+  /// No description provided for @deleteAccountLossStatistics.
+  ///
+  /// In it, this message translates to:
+  /// **'•  lo storico delle inversioni e le statistiche'**
+  String get deleteAccountLossStatistics;
+
+  /// No description provided for @deleteAccountNutritionistKeeps.
+  ///
+  /// In it, this message translates to:
+  /// **'Il tuo nutrizionista conserverà gli schemi dei piani che ha redatto e le misurazioni che ha registrato personalmente, privi dei tuoi dati identificativi.'**
+  String get deleteAccountNutritionistKeeps;
+
+  /// No description provided for @deleteAccountTitle.
+  ///
+  /// In it, this message translates to:
+  /// **'Elimina account'**
+  String get deleteAccountTitle;
+
+  /// No description provided for @deletionPendingBody.
+  ///
+  /// In it, this message translates to:
+  /// **'Il tuo account sarà eliminato definitivamente il {date}. Fino ad allora puoi annullare la richiesta.'**
+  String deletionPendingBody(String date);
+
+  /// No description provided for @deletionPendingCancel.
+  ///
+  /// In it, this message translates to:
+  /// **'Annulla eliminazione'**
+  String get deletionPendingCancel;
+
+  /// No description provided for @deletionPendingTitle.
+  ///
+  /// In it, this message translates to:
+  /// **'Eliminazione richiesta'**
+  String get deletionPendingTitle;
+
   /// No description provided for @devicesCurrent.
   ///
   /// In it, this message translates to:
@@ -2449,6 +2539,42 @@ abstract class L10n {
   /// **'Ritirare il piano?'**
   String get plansWithdrawConfirmTitle;
 
+  /// No description provided for @privacyPolicyAccept.
+  ///
+  /// In it, this message translates to:
+  /// **'Accetto l\'informativa sul trattamento dei dati'**
+  String get privacyPolicyAccept;
+
+  /// No description provided for @privacyPolicyAcceptRequired.
+  ///
+  /// In it, this message translates to:
+  /// **'Devi accettare l\'informativa per proseguire'**
+  String get privacyPolicyAcceptRequired;
+
+  /// No description provided for @privacyPolicyRead.
+  ///
+  /// In it, this message translates to:
+  /// **'Leggi l\'informativa'**
+  String get privacyPolicyRead;
+
+  /// No description provided for @privacyPolicyTitle.
+  ///
+  /// In it, this message translates to:
+  /// **'Informativa sul trattamento dei dati'**
+  String get privacyPolicyTitle;
+
+  /// No description provided for @privacyPolicyUpdatedBody.
+  ///
+  /// In it, this message translates to:
+  /// **'L\'abbiamo aggiornata: leggila e accettala per proseguire.'**
+  String get privacyPolicyUpdatedBody;
+
+  /// No description provided for @privacyPolicyUpdatedTitle.
+  ///
+  /// In it, this message translates to:
+  /// **'L\'informativa è cambiata'**
+  String get privacyPolicyUpdatedTitle;
+
   /// No description provided for @profileGroup.
   ///
   /// In it, this message translates to:
@@ -2599,6 +2725,12 @@ abstract class L10n {
   /// **'Redazione dello schema'**
   String get scheduleTitle;
 
+  /// No description provided for @settingsDeleteAccount.
+  ///
+  /// In it, this message translates to:
+  /// **'Elimina account'**
+  String get settingsDeleteAccount;
+
   /// No description provided for @settingsDevices.
   ///
   /// In it, this message translates to:
@@ -2623,6 +2755,12 @@ abstract class L10n {
   /// **'Italiano'**
   String get settingsLanguageItalian;
 
+  /// No description provided for @settingsPrivacyPolicy.
+  ///
+  /// In it, this message translates to:
+  /// **'Informativa'**
+  String get settingsPrivacyPolicy;
+
   /// No description provided for @settingsSectionAppearance.
   ///
   /// In it, this message translates to:
@@ -2640,6 +2778,12 @@ abstract class L10n {
   /// In it, this message translates to:
   /// **'Lingua e formati'**
   String get settingsSectionLanguageAndFormats;
+
+  /// No description provided for @settingsSectionPrivacy.
+  ///
+  /// In it, this message translates to:
+  /// **'Privacy'**
+  String get settingsSectionPrivacy;
 
   /// No description provided for @settingsSectionSecurity.
   ///

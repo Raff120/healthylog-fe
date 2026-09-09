@@ -111,6 +111,28 @@
   "commonToday": "Oggi",
   "commonUnderstood": "Ho capito",
   "dayPreviewNoSlots": "Nessuno slot",
+  "deleteAccountConfirm": "Richiedi l'eliminazione",
+  "deleteAccountConfirmTitle": "Eliminare l'account?",
+  "deleteAccountGracePeriod": "La richiesta apre un periodo di ripensamento di sette giorni: durante il periodo l'account è disattivato e nessun terzo vi accede, ma i dati restano. Accedendo di nuovo la richiesta si annulla.",
+  "deleteAccountGroupDissolution": "Sei l'unico membro del tuo gruppo: il gruppo sarà sciolto.",
+  "deleteAccountGroupSuccession": "Sei Proprietario di un gruppo: la proprietà passerà automaticamente a un altro membro.",
+  "deleteAccountIntro": "Con l'eliminazione andranno perduti in modo definitivo:",
+  "deleteAccountLossActivity": "•  gli allenamenti e le misurazioni",
+  "deleteAccountLossMemberships": "•  i template, le notifiche e le appartenenze",
+  "deleteAccountLossPlans": "•  i piani alimentari, le giornate e le spunte",
+  "deleteAccountLossStatistics": "•  lo storico delle inversioni e le statistiche",
+  "deleteAccountNutritionistKeeps": "Il tuo nutrizionista conserverà gli schemi dei piani che ha redatto e le misurazioni che ha registrato personalmente, privi dei tuoi dati identificativi.",
+  "deleteAccountTitle": "Elimina account",
+  "deletionPendingBody": "Il tuo account sarà eliminato definitivamente il {date}. Fino ad allora puoi annullare la richiesta.",
+  "@deletionPendingBody": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "deletionPendingCancel": "Annulla eliminazione",
+  "deletionPendingTitle": "Eliminazione richiesta",
   "devicesCurrent": "(questo dispositivo)",
   "devicesLastUsed": "Ultimo utilizzo: {when}",
   "@devicesLastUsed": {
@@ -881,6 +903,12 @@
   "plansStartHere": "Inizia da qui",
   "plansWithdrawConfirmBody": "Tornerà in Bozza: potrai riprenderlo dalla redazione.",
   "plansWithdrawConfirmTitle": "Ritirare il piano?",
+  "privacyPolicyAccept": "Accetto l'informativa sul trattamento dei dati",
+  "privacyPolicyAcceptRequired": "Devi accettare l'informativa per proseguire",
+  "privacyPolicyRead": "Leggi l'informativa",
+  "privacyPolicyTitle": "Informativa sul trattamento dei dati",
+  "privacyPolicyUpdatedBody": "L'abbiamo aggiornata: leggila e accettala per proseguire.",
+  "privacyPolicyUpdatedTitle": "L'informativa è cambiata",
   "profileGroup": "Gruppo",
   "profileLogout": "Disconnetti",
   "profileLogoutConfirm": "Vuoi disconnetterti da questo dispositivo?",
@@ -914,6 +942,7 @@
   },
   "scheduleTemplateCreated": "Template creato.",
   "scheduleTitle": "Redazione dello schema",
+  "settingsDeleteAccount": "Elimina account",
   "settingsDevices": "Dispositivi collegati",
   "settingsLanguage": "Lingua",
   "settingsLanguageEnglish": "English",
@@ -924,9 +953,11 @@
   "@settingsLanguageItalian": {
     "description": "LO-1: le lingue si presentano nel proprio nome, non tradotte."
   },
+  "settingsPrivacyPolicy": "Informativa",
   "settingsSectionAppearance": "Aspetto",
   "settingsSectionDateTime": "Data e ora",
   "settingsSectionLanguageAndFormats": "Lingua e formati",
+  "settingsSectionPrivacy": "Privacy",
   "settingsSectionSecurity": "Sicurezza",
   "settingsThemeDark": "Scuro",
   "settingsThemeLight": "Chiaro",

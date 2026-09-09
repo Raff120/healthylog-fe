@@ -26,6 +26,23 @@ class ProfileApi {
     return Profile.fromJson(response.data as Map<String, dynamic>);
   }
 
+  /// PV-7, PV-8: accettazione dell'informativa vigente.
+  Future<Profile> acceptPrivacyPolicy() async {
+    final response = await _dio.post('/me/privacy-acceptance');
+    return Profile.fromJson(response.data as Map<String, dynamic>);
+  }
+
+  /// PV-16, PV-17: richiesta di eliminazione e sua revoca.
+  Future<Profile> requestDeletion() async {
+    final response = await _dio.post('/me/deletion');
+    return Profile.fromJson(response.data as Map<String, dynamic>);
+  }
+
+  Future<Profile> cancelDeletion() async {
+    final response = await _dio.delete('/me/deletion');
+    return Profile.fromJson(response.data as Map<String, dynamic>);
+  }
+
   Future<Profile> updateTimezone(UpdateTimezoneRequest request) async {
     final response = await _dio.patch('/me/timezone', data: request.toJson());
     return Profile.fromJson(response.data as Map<String, dynamic>);

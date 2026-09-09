@@ -234,6 +234,61 @@ class L10nIt extends L10n {
   String get dayPreviewNoSlots => 'Nessuno slot';
 
   @override
+  String get deleteAccountConfirm => 'Richiedi l\'eliminazione';
+
+  @override
+  String get deleteAccountConfirmTitle => 'Eliminare l\'account?';
+
+  @override
+  String get deleteAccountGracePeriod =>
+      'La richiesta apre un periodo di ripensamento di sette giorni: durante il periodo l\'account è disattivato e nessun terzo vi accede, ma i dati restano. Accedendo di nuovo la richiesta si annulla.';
+
+  @override
+  String get deleteAccountGroupDissolution =>
+      'Sei l\'unico membro del tuo gruppo: il gruppo sarà sciolto.';
+
+  @override
+  String get deleteAccountGroupSuccession =>
+      'Sei Proprietario di un gruppo: la proprietà passerà automaticamente a un altro membro.';
+
+  @override
+  String get deleteAccountIntro =>
+      'Con l\'eliminazione andranno perduti in modo definitivo:';
+
+  @override
+  String get deleteAccountLossActivity => '•  gli allenamenti e le misurazioni';
+
+  @override
+  String get deleteAccountLossMemberships =>
+      '•  i template, le notifiche e le appartenenze';
+
+  @override
+  String get deleteAccountLossPlans =>
+      '•  i piani alimentari, le giornate e le spunte';
+
+  @override
+  String get deleteAccountLossStatistics =>
+      '•  lo storico delle inversioni e le statistiche';
+
+  @override
+  String get deleteAccountNutritionistKeeps =>
+      'Il tuo nutrizionista conserverà gli schemi dei piani che ha redatto e le misurazioni che ha registrato personalmente, privi dei tuoi dati identificativi.';
+
+  @override
+  String get deleteAccountTitle => 'Elimina account';
+
+  @override
+  String deletionPendingBody(String date) {
+    return 'Il tuo account sarà eliminato definitivamente il $date. Fino ad allora puoi annullare la richiesta.';
+  }
+
+  @override
+  String get deletionPendingCancel => 'Annulla eliminazione';
+
+  @override
+  String get deletionPendingTitle => 'Eliminazione richiesta';
+
+  @override
   String get devicesCurrent => '(questo dispositivo)';
 
   @override
@@ -1384,6 +1439,27 @@ class L10nIt extends L10n {
   String get plansWithdrawConfirmTitle => 'Ritirare il piano?';
 
   @override
+  String get privacyPolicyAccept =>
+      'Accetto l\'informativa sul trattamento dei dati';
+
+  @override
+  String get privacyPolicyAcceptRequired =>
+      'Devi accettare l\'informativa per proseguire';
+
+  @override
+  String get privacyPolicyRead => 'Leggi l\'informativa';
+
+  @override
+  String get privacyPolicyTitle => 'Informativa sul trattamento dei dati';
+
+  @override
+  String get privacyPolicyUpdatedBody =>
+      'L\'abbiamo aggiornata: leggila e accettala per proseguire.';
+
+  @override
+  String get privacyPolicyUpdatedTitle => 'L\'informativa è cambiata';
+
+  @override
   String get profileGroup => 'Gruppo';
 
   @override
@@ -1472,6 +1548,9 @@ class L10nIt extends L10n {
   String get scheduleTitle => 'Redazione dello schema';
 
   @override
+  String get settingsDeleteAccount => 'Elimina account';
+
+  @override
   String get settingsDevices => 'Dispositivi collegati';
 
   @override
@@ -1484,6 +1563,9 @@ class L10nIt extends L10n {
   String get settingsLanguageItalian => 'Italiano';
 
   @override
+  String get settingsPrivacyPolicy => 'Informativa';
+
+  @override
   String get settingsSectionAppearance => 'Aspetto';
 
   @override
@@ -1491,6 +1573,9 @@ class L10nIt extends L10n {
 
   @override
   String get settingsSectionLanguageAndFormats => 'Lingua e formati';
+
+  @override
+  String get settingsSectionPrivacy => 'Privacy';
 
   @override
   String get settingsSectionSecurity => 'Sicurezza';

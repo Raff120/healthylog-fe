@@ -15,6 +15,7 @@ import '../data/profile_models.dart';
 import '../data/timezones.dart';
 import '../domain/timezone_label.dart';
 import '../providers/profile_providers.dart';
+import 'widgets/privacy_policy_sheet.dart';
 
 /// Impostazioni (12.2 interfaccia.md). F11 vi introdusse Aspetto, Fuso
 /// orario e "Dispositivi collegati" (deroga: vedi decisioni.md); F29
@@ -138,6 +139,22 @@ class SettingsScreen extends ConsumerWidget {
               icon: Icons.devices_outlined,
               label: l10n.settingsDevices,
               onTap: () => context.push('/profile/devices'),
+            ),
+            const SizedBox(height: AppSpacing.lg),
+            // PV-9: l'informativa resta consultabile in qualsiasi momento
+            // dal profilo. PV-16: da qui si avvia l'eliminazione (12.2).
+            _SectionHeader(l10n.settingsSectionPrivacy),
+            const SizedBox(height: AppSpacing.xs),
+            _SettingsRow(
+              icon: Icons.privacy_tip_outlined,
+              label: l10n.settingsPrivacyPolicy,
+              onTap: () => showPrivacyPolicySheet(context),
+            ),
+            const SizedBox(height: AppSpacing.xs),
+            _SettingsRow(
+              icon: Icons.delete_outline,
+              label: l10n.settingsDeleteAccount,
+              onTap: () => context.push('/profile/delete-account'),
             ),
           ],
         ),

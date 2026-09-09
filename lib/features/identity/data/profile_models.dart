@@ -22,6 +22,9 @@ class Profile {
     required this.timezone,
     required this.locale,
     required this.unitSystem,
+    required this.privacyAcceptanceRequired,
+    required this.deletionRequestedAt,
+    required this.deletionEffectiveAt,
   });
 
   factory Profile.fromJson(Map<String, dynamic> json) => Profile(
@@ -39,6 +42,13 @@ class Profile {
         timezone: json['timezone'] as String?,
         locale: AppLocale.fromJson(json['locale'] as String?),
         unitSystem: UnitSystem.fromJson(json['unitSystem'] as String?),
+        privacyAcceptanceRequired: json['privacyAcceptanceRequired'] as bool? ?? false,
+        deletionRequestedAt: json['deletionRequestedAt'] == null
+            ? null
+            : DateTime.parse(json['deletionRequestedAt'] as String).toLocal(),
+        deletionEffectiveAt: json['deletionEffectiveAt'] == null
+            ? null
+            : DateTime.parse(json['deletionEffectiveAt'] as String).toLocal(),
       );
 
   final String id;
@@ -67,6 +77,18 @@ class Profile {
   /// LO-4: sistema di unità di misura. Non ne esiste copia locale: serve
   /// solo dopo l'accesso, dove il profilo è comunque caricato.
   final UnitSystem unitSystem;
+
+  /// PV-8: l'aggiornamento sostanziale dell'informativa comporta una
+  /// nuova accettazione, richiesta al successivo accesso.
+  final bool privacyAcceptanceRequired;
+
+  /// PV-17: valorizzato durante il periodo di ripensamento.
+  final DateTime? deletionRequestedAt;
+
+  /// PV-17: quando la cancellazione diventa definitiva.
+  final DateTime? deletionEffectiveAt;
+
+  bool get isDeletionPending => deletionRequestedAt != null;
 }
 
 /// Corpo di `PATCH /me` (PR-1, PR-4, PR-6): rispecchia `UpdateProfileRequest`.

@@ -15,8 +15,10 @@ import '../../../l10n/app_locale.dart';
 import '../../../l10n/locale_controller.dart';
 import '../data/account_role.dart';
 import '../data/auth_models.dart';
+import '../domain/privacy_policy.dart';
 import '../domain/registration_field_validators.dart';
 import '../providers/registration_controller.dart';
+import 'widgets/privacy_policy_sheet.dart';
 import '../providers/username_availability_controller.dart';
 import 'widgets/date_and_sex_fields.dart';
 
@@ -45,6 +47,9 @@ class _RegistrationDetailsScreenState extends ConsumerState<RegistrationDetailsS
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
   bool _submitted = false;
+
+  /// PV-6, PV-7: l'accettazione è esplicita e obbligatoria (5.1).
+  bool _privacyAccepted = false;
   Timer? _usernameDebounce;
   String? _lastCheckedUsername;
 
@@ -113,7 +118,8 @@ class _RegistrationDetailsScreenState extends ConsumerState<RegistrationDetailsS
 
   Future<void> _submit() async {
     setState(() => _submitted = true);
-    if (!_validate()) return;
+    // PV-7: la sua assenza è segnalata come gli altri campi (5.1).
+    if (!_validate() || !_privacyAccepted) return;
 
     await ref.read(registrationControllerProvider.notifier).submit(
           RegisterRequest(
@@ -129,6 +135,9 @@ class _RegistrationDetailsScreenState extends ConsumerState<RegistrationDetailsS
             // LO-2, AU-27: la lingua in uso, che il server conserva per
             // le comunicazioni per posta.
             locale: ref.read(localeControllerProvider).value ?? AppLocale.fallback,
+            // PV-7: la versione presentata, che il server registra
+            // insieme alla data.
+            privacyPolicyVersion: kPrivacyPolicyVersion,
           ),
         );
 
@@ -291,6 +300,16 @@ class _RegistrationDetailsScreenState extends ConsumerState<RegistrationDetailsS
                     onChanged: (value) => setState(() => _sex = value),
                     errorText: _errorFor('sex'),
                   ),
+                  const SizedBox(height: AppSpacing.md),
+                  // PV-6, PV-7: casella di spunta sopra il pulsante di
+                  // invio, con il collegamento al testo integrale (5.1).
+                  _PrivacyAcceptance(
+                    value: _privacyAccepted,
+                    onChanged: (value) => setState(() => _privacyAccepted = value),
+                    errorText: _submitted && !_privacyAccepted
+                        ? context.l10n.privacyPolicyAcceptRequired
+                        : null,
+                  ),
                   const SizedBox(height: AppSpacing.lg),
                   AppPrimaryButton(label: context.l10n.registerSubmit, loading: loading, onPressed: _submit),
                 ],
@@ -299,6 +318,69 @@ class _RegistrationDetailsScreenState extends ConsumerState<RegistrationDetailsS
           ),
         ),
       ),
+    );
+  }
+}
+
+
+/// PV-6, PV-7: accettazione dell'informativa (5.1 interfaccia.md): una
+/// casella di spunta con il testo in `caption` e il collegamento al testo
+/// integrale, che apre un foglio modale scorribile.
+class _PrivacyAcceptance extends StatelessWidget {
+  const _PrivacyAcceptance({required this.value, required this.onChanged, this.errorText});
+
+  final bool value;
+  final ValueChanged<bool> onChanged;
+  final String? errorText;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final typography = context.typography;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Checkbox(
+              value: value,
+              onChanged: (checked) => onChanged(checked ?? false),
+              activeColor: colors.accent,
+            ),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.only(top: AppSpacing.sm),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      context.l10n.privacyPolicyAccept,
+                      style: typography.caption.copyWith(color: colors.textPrimary),
+                    ),
+                    GestureDetector(
+                      onTap: () => showPrivacyPolicySheet(context),
+                      child: Text(
+                        context.l10n.privacyPolicyRead,
+                        style: typography.caption.copyWith(
+                          color: colors.accent,
+                          decoration: TextDecoration.underline,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+        if (errorText != null)
+          Padding(
+            padding: const EdgeInsets.only(left: AppSpacing.md),
+            child: Text(errorText!, style: typography.caption.copyWith(color: colors.error)),
+          ),
+      ],
     );
   }
 }
