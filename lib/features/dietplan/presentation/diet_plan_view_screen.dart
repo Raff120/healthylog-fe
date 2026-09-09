@@ -6,23 +6,34 @@ import '../../../app/theme/app_spacing.dart';
 import '../../../app/theme/theme_context.dart';
 import '../../../core/api/api_error_messages.dart';
 import '../../../core/api/api_exception.dart';
+import '../../statistics/data/statistics_models.dart';
+import '../../statistics/presentation/statistics_formatting.dart';
+import '../../statistics/presentation/widgets/breakdown_row.dart';
+import '../../statistics/presentation/widgets/statistics_headline.dart';
+import '../../statistics/providers/statistics_providers.dart';
+import '../data/meal_swap_log.dart';
 import '../data/plan_status.dart';
 import '../providers/diet_plan_providers.dart';
+import '../providers/meal_swap_providers.dart';
 import 'diet_plan_management_screen.dart' show planPeriodLabel;
+import 'slot_type_presentation.dart';
 import 'widgets/day_preview.dart';
 import 'widgets/delete_plan_dialog.dart';
 
 /// Dettaglio di un piano Concluso (7.5 interfaccia.md, ST-7): sola
-/// lettura, ridotta alla sola composizione dell'intestazione e dello
-/// schema settimanale — periodi, statistiche e storico delle inversioni
-/// restano a F27, che costruirà per intero questa schermata. L'unica
-/// operazione qui presente è l'eliminazione (CV-10); riattivazione
-/// (CV-7) e salvataggio come template (TP-5), pure ammesse da ST-7,
-/// sono rinviate insieme al resto (deciso con l'utente, vedi
-/// decisioni.md).
+/// lettura, nella composizione prescritta — intestazione, periodi di
+/// svolgimento se più d'uno, statistiche del periodo, schema settimanale,
+/// storico delle inversioni.
 ///
-/// F22: la stessa vista serve al Paziente per il piano redatto dal
-/// proprio Nutrizionista, in qualunque stato (UT-8: sola lettura, senza
+/// ST-6: il dettaglio giornaliero delle occorrenze non compare qui; resta
+/// raggiungibile navigando le date in *Piano* (VG-17).
+///
+/// ST-7 ammette anche la riattivazione (CV-7) e il salvataggio come
+/// template (TP-5), tuttora rinviate insieme all'esportazione in PDF
+/// (PV-13, F30): l'unica operazione presente resta l'eliminazione (CV-10).
+///
+/// F22: la stessa vista serve al Paziente per il piano redatto dal proprio
+/// Nutrizionista, in qualunque stato (UT-8: sola lettura, senza
 /// eliminazione né altre azioni) — l'etichetta segue lo stato.
 class DietPlanViewScreen extends ConsumerWidget {
   const DietPlanViewScreen({super.key, required this.planId});
@@ -92,15 +103,152 @@ class DietPlanViewScreen extends ConsumerWidget {
             children: [
               Text(_statusLabel(plan.status), style: typography.overline.copyWith(color: colors.textTertiary)),
               const SizedBox(height: AppSpacing.xxs),
-              Text(planPeriodLabel(plan, _formatDate), style: typography.bodyMedium.copyWith(color: colors.textSecondary)),
-              const SizedBox(height: AppSpacing.md),
+              Text(
+                planPeriodLabel(plan, _formatDate),
+                style: typography.bodyMedium.copyWith(color: colors.textSecondary),
+              ),
+              // ST-4: le statistiche del periodo, nella forma ridotta di
+              // 7.5 — il tocco conduce alla sezione *Statistiche* con il
+              // periodo preselezionato.
+              if (plan.status == PlanStatus.completed) ...[
+                const SizedBox(height: AppSpacing.lg),
+                _SectionTitle('Statistiche del periodo'),
+                _PlanStatistics(planId: plan.id),
+              ],
+              const SizedBox(height: AppSpacing.lg),
+              _SectionTitle('Schema settimanale'),
               for (final day in plan.weeklySchedule) DayPreview(day: day),
+              // ST-5, IN-27: lo storico delle inversioni operate sul piano.
+              const SizedBox(height: AppSpacing.lg),
+              _SectionTitle('Storico delle inversioni'),
+              _SwapHistory(planId: plan.id),
+              const SizedBox(height: AppSpacing.xxl),
             ],
           ),
         ),
       ),
     );
   }
+}
+
+class _SectionTitle extends StatelessWidget {
+  const _SectionTitle(this.title);
+
+  final String title;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final typography = context.typography;
+    return Padding(
+      padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+      child: Text(title, style: typography.overline.copyWith(color: colors.textTertiary)),
+    );
+  }
+}
+
+/// ST-4: aderenza complessiva, per tipo di slot e per giorno della
+/// settimana, in forma ridotta. AD-15: presentate qui come altrove in
+/// forma neutra, senza soglie né colori di giudizio.
+class _PlanStatistics extends ConsumerWidget {
+  const _PlanStatistics({required this.planId});
+
+  final String planId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final colors = context.colors;
+    final typography = context.typography;
+    final statistics = ref.watch(
+      adherenceStatisticsProvider(StatisticsQuery(period: StatisticsPeriod.plan, planId: planId)),
+    );
+
+    return statistics.when(
+      loading: () => const Center(child: Padding(
+        padding: EdgeInsets.all(AppSpacing.md),
+        child: CircularProgressIndicator(),
+      )),
+      error: (error, _) => Text(
+        describeApiError(error.asApiException?.code ?? ''),
+        style: typography.bodyMedium.copyWith(color: colors.textSecondary),
+      ),
+      data: (data) => InkWell(
+        // 7.5: il tocco conduce alla sezione *Statistiche* con il periodo
+        // preselezionato.
+        onTap: () => context.push('/statistics?planId=$planId'),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            StatisticsHeadline(
+              value: data.value == null ? null : formatPercentage(data.value!),
+              unit: data.value == null ? null : '%',
+              caption: 'Aderenza complessiva del piano',
+            ),
+            if (describeExcludedDays(data.suspendedDays, data.uncoveredDays) case final note?)
+              Text(note, style: typography.caption.copyWith(color: colors.textSecondary)),
+            const SizedBox(height: AppSpacing.sm),
+            for (final bucket in data.bySlotType)
+              BreakdownRow(
+                icon: bucket.slotType.icon,
+                label: bucket.slotType.displayName,
+                value: bucket.value == null ? null : '${formatPercentage(bucket.value!)}%',
+                fraction: bucket.value == null ? null : bucket.value! / 100,
+              ),
+            const SizedBox(height: AppSpacing.xs),
+            Text(
+              'Apri le statistiche complete',
+              style: typography.label.copyWith(color: colors.accent),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// ST-5, IN-24, IN-25: elenco cronologico decrescente, di sola lettura.
+class _SwapHistory extends ConsumerWidget {
+  const _SwapHistory({required this.planId});
+
+  final String planId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final colors = context.colors;
+    final typography = context.typography;
+    final history = ref.watch(mealSwapHistoryProvider(planId));
+
+    return history.when(
+      loading: () => const SizedBox.shrink(),
+      error: (error, _) => Text(
+        describeApiError(error.asApiException?.code ?? ''),
+        style: typography.bodyMedium.copyWith(color: colors.textSecondary),
+      ),
+      data: (logs) => logs.isEmpty
+          // 4.4: constatazione neutra, mai la segnalazione di una mancanza.
+          ? Text(
+              'Nessuna inversione su questo piano.',
+              style: typography.bodyMedium.copyWith(color: colors.textSecondary),
+            )
+          : Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                for (final log in logs)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
+                    child: Text(
+                      _describe(log),
+                      style: typography.bodyMedium.copyWith(color: colors.textPrimary),
+                    ),
+                  ),
+              ],
+            ),
+    );
+  }
+
+  String _describe(MealSwapLog log) =>
+      '${formatDay(log.first.date)} ${log.first.type.displayName} '
+      '↔ ${formatDay(log.second.date)} ${log.second.type.displayName}';
 }
 
 String _statusLabel(PlanStatus status) => switch (status) {
