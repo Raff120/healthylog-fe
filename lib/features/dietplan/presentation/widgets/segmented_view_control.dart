@@ -15,11 +15,10 @@ class SegmentedViewControl extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AppSegmentedControl(
-      firstLabel: 'Giorno',
-      secondLabel: 'Settimana',
-      firstSelected: value == PlanViewMode.day,
-      onSelectFirst: () => onChanged(PlanViewMode.day),
-      onSelectSecond: () => onChanged(PlanViewMode.week),
+      labels: const ['Giorno', 'Settimana'],
+      selectedIndex: value == PlanViewMode.day ? 0 : 1,
+      onSelect: (index) =>
+          onChanged(index == 0 ? PlanViewMode.day : PlanViewMode.week),
     );
   }
 }
