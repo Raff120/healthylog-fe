@@ -46,7 +46,7 @@ class _PatientsScreenState extends ConsumerState<PatientsScreen> {
     if (!mounted) return;
     ref.read(careLinkRequestActionControllerProvider)?.whenOrNull(
           error: (error, _) => ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(describeApiError(error.asApiException?.code ?? ''))),
+            SnackBar(content: Text(describeApiError(context, error.asApiException?.code ?? ''))),
           ),
         );
   }
@@ -74,7 +74,7 @@ class _PatientsScreenState extends ConsumerState<PatientsScreen> {
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (error, _) => Center(
         child: Text(
-          describeApiError(error.asApiException?.code ?? ''),
+          describeApiError(context, error.asApiException?.code ?? ''),
           style: typography.bodyMedium.copyWith(color: colors.textSecondary),
         ),
       ),

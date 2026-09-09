@@ -56,7 +56,7 @@ class DietPlanViewScreen extends ConsumerWidget {
     state?.whenOrNull(
       data: (_) => context.pushReplacement('/profile/plans'),
       error: (error, _) => ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(describeApiError(error.asApiException?.code ?? ''))),
+        SnackBar(content: Text(describeApiError(context, error.asApiException?.code ?? ''))),
       ),
     );
   }
@@ -95,7 +95,7 @@ class DietPlanViewScreen extends ConsumerWidget {
           loading: () => const Center(child: CircularProgressIndicator()),
           error: (error, _) => Center(
             child: Text(
-              describeApiError(error.asApiException?.code ?? ''),
+              describeApiError(context, error.asApiException?.code ?? ''),
               style: typography.bodyMedium.copyWith(color: colors.textSecondary),
             ),
           ),
@@ -228,7 +228,7 @@ class _PlanStatistics extends ConsumerWidget {
         child: CircularProgressIndicator(),
       )),
       error: (error, _) => Text(
-        describeApiError(error.asApiException?.code ?? ''),
+        describeApiError(context, error.asApiException?.code ?? ''),
         style: typography.bodyMedium.copyWith(color: colors.textSecondary),
       ),
       data: (data) => InkWell(
@@ -280,7 +280,7 @@ class _SwapHistory extends ConsumerWidget {
     return history.when(
       loading: () => const SizedBox.shrink(),
       error: (error, _) => Text(
-        describeApiError(error.asApiException?.code ?? ''),
+        describeApiError(context, error.asApiException?.code ?? ''),
         style: typography.bodyMedium.copyWith(color: colors.textSecondary),
       ),
       data: (logs) => logs.isEmpty

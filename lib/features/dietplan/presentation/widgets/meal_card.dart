@@ -401,7 +401,7 @@ class _MealCardState extends ConsumerState<MealCard> {
     final state = ref.read(planDaySlotStatusControllerProvider);
     state?.whenOrNull(
       error: (error, _) => ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(describeApiError(error.asApiException?.code ?? ''))),
+        SnackBar(content: Text(describeApiError(context, error.asApiException?.code ?? ''))),
       ),
     );
   }

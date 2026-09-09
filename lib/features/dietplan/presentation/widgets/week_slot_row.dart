@@ -157,7 +157,7 @@ class _WeekSlotRowState extends ConsumerState<WeekSlotRow> {
         if (_incompatibleTapped) {
           // Sempre non nullo qui: `highlight` è già incompatibile.
           final reason = mealSwapRejectionReason(origin, widget.day, widget.slot)!;
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(describeApiError(reason))));
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(describeApiError(context, reason))));
         }
         setState(() => _incompatibleTapped = true);
     }

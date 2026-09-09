@@ -109,7 +109,7 @@ class DietPlanManagementScreen extends ConsumerWidget {
     final state = ref.read(dietPlanLifecycleControllerProvider);
     if (state?.hasError ?? false) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(describeApiError(state?.error?.asApiException?.code ?? ''))),
+        SnackBar(content: Text(describeApiError(context, state?.error?.asApiException?.code ?? ''))),
       );
       return;
     }
@@ -136,7 +136,7 @@ class DietPlanManagementScreen extends ConsumerWidget {
     final state = ref.read(dietPlanLifecycleControllerProvider);
     state?.whenOrNull(
       error: (error, _) => ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(describeApiError(error.asApiException?.code ?? ''))),
+        SnackBar(content: Text(describeApiError(context, error.asApiException?.code ?? ''))),
       ),
     );
   }
@@ -177,7 +177,7 @@ class DietPlanManagementScreen extends ConsumerWidget {
           loading: () => const Center(child: CircularProgressIndicator()),
           error: (error, _) => Center(
             child: Text(
-              describeApiError(error.asApiException?.code ?? ''),
+              describeApiError(context, error.asApiException?.code ?? ''),
               style: typography.bodyMedium.copyWith(color: colors.textSecondary),
             ),
           ),

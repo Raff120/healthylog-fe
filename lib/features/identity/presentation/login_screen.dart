@@ -62,7 +62,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         setState(() {
           _errorMessage = code == 'INVALID_CREDENTIALS'
               ? 'Indirizzo o password non corretti.'
-              : describeApiError(code ?? '');
+              : describeApiError(context, code ?? '');
         });
       },
     );

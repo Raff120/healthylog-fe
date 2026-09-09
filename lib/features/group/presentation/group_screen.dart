@@ -29,7 +29,7 @@ class GroupScreen extends ConsumerWidget {
     if (!context.mounted) return;
     ref.read(createCookingGroupControllerProvider)?.whenOrNull(
           error: (error, _) => ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(describeApiError(error.asApiException?.code ?? ''))),
+            SnackBar(content: Text(describeApiError(context, error.asApiException?.code ?? ''))),
           ),
         );
   }
@@ -64,7 +64,7 @@ class GroupScreen extends ConsumerWidget {
               );
             }
             return Center(
-              child: Text(describeApiError(code ?? ''), style: typography.bodyMedium.copyWith(color: colors.textSecondary)),
+              child: Text(describeApiError(context, code ?? ''), style: typography.bodyMedium.copyWith(color: colors.textSecondary)),
             );
           },
           data: (group) => _GroupDetailView(group: group),
@@ -115,7 +115,7 @@ class _GroupDetailView extends ConsumerWidget {
     if (!context.mounted) return;
     ref.read(renameCookingGroupControllerProvider)?.whenOrNull(
           error: (error, _) => ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(describeApiError(error.asApiException?.code ?? ''))),
+            SnackBar(content: Text(describeApiError(context, error.asApiException?.code ?? ''))),
           ),
         );
   }
@@ -131,7 +131,7 @@ class _GroupDetailView extends ConsumerWidget {
     if (!context.mounted) return;
     ref.read(leaveCookingGroupControllerProvider)?.whenOrNull(
           error: (error, _) => ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(describeApiError(error.asApiException?.code ?? ''))),
+            SnackBar(content: Text(describeApiError(context, error.asApiException?.code ?? ''))),
           ),
         );
   }
@@ -143,7 +143,7 @@ class _GroupDetailView extends ConsumerWidget {
     if (!context.mounted) return;
     ref.read(dissolveCookingGroupControllerProvider)?.whenOrNull(
           error: (error, _) => ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(describeApiError(error.asApiException?.code ?? ''))),
+            SnackBar(content: Text(describeApiError(context, error.asApiException?.code ?? ''))),
           ),
         );
   }

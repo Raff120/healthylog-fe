@@ -33,7 +33,7 @@ class SettingsScreen extends ConsumerWidget {
     } catch (error) {
       if (!context.mounted) return;
       final code = error.asApiException?.code;
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(describeApiError(code ?? ''))));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(describeApiError(context, code ?? ''))));
     }
   }
 
@@ -51,7 +51,7 @@ class SettingsScreen extends ConsumerWidget {
       // senza disfare la scelta.
       if (!context.mounted) return;
       final code = error.asApiException?.code;
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(describeApiError(code ?? ''))));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(describeApiError(context, code ?? ''))));
     }
   }
 
@@ -87,7 +87,7 @@ class SettingsScreen extends ConsumerWidget {
             profileState.when(
               loading: () => const Center(child: CircularProgressIndicator()),
               error: (error, _) => Text(
-                describeApiError(error.asApiException?.code ?? ''),
+                describeApiError(context, error.asApiException?.code ?? ''),
                 style: typography.bodyMedium.copyWith(color: colors.textSecondary),
               ),
               data: (profile) => _SettingsRow(

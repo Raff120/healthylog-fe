@@ -143,7 +143,7 @@ class _RegistrationDetailsScreenState extends ConsumerState<RegistrationDetailsS
           setState(() => _fieldErrors['username'] = code);
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(describeApiError(code ?? ''))),
+            SnackBar(content: Text(describeApiError(context, code ?? ''))),
           );
         }
       },

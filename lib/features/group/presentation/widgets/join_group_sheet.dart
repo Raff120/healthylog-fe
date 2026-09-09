@@ -63,7 +63,7 @@ class _JoinGroupSheetState extends ConsumerState<_JoinGroupSheet> {
       if (!mounted) return;
       setState(() {
         _loadingPreview = false;
-        _codeError = describeApiError(error.asApiException?.code ?? '');
+        _codeError = describeApiError(context, error.asApiException?.code ?? '');
       });
     }
   }
@@ -76,7 +76,7 @@ class _JoinGroupSheetState extends ConsumerState<_JoinGroupSheet> {
     state?.whenOrNull(
       data: (_) => Navigator.of(context).pop(true),
       error: (error, _) => ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(describeApiError(error.asApiException?.code ?? ''))),
+        SnackBar(content: Text(describeApiError(context, error.asApiException?.code ?? ''))),
       ),
     );
   }

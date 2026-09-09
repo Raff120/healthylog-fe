@@ -161,7 +161,7 @@ class _PersonalDataScreenState extends ConsumerState<PersonalDataScreen> {
         setState(() => _fieldErrors['username'] = code);
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(describeApiError(code ?? ''))),
+          SnackBar(content: Text(describeApiError(context, code ?? ''))),
         );
       }
       return;
@@ -213,7 +213,7 @@ class _PersonalDataScreenState extends ConsumerState<PersonalDataScreen> {
           loading: () => const Center(child: CircularProgressIndicator()),
           error: (error, _) => Center(
             child: Text(
-              describeApiError(error.asApiException?.code ?? ''),
+              describeApiError(context, error.asApiException?.code ?? ''),
               style: typography.bodyMedium.copyWith(color: colors.textSecondary),
             ),
           ),

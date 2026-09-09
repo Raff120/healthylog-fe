@@ -33,7 +33,7 @@ class InviteCodeSection extends ConsumerWidget {
     final state = ref.read(generateInviteCodeControllerProvider);
     state?.whenOrNull(
       error: (error, _) => ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(describeApiError(error.asApiException?.code ?? ''))),
+        SnackBar(content: Text(describeApiError(context, error.asApiException?.code ?? ''))),
       ),
     );
   }
@@ -67,7 +67,7 @@ class InviteCodeSection extends ConsumerWidget {
       child: codesState.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, _) => Text(
-          describeApiError(error.asApiException?.code ?? ''),
+          describeApiError(context, error.asApiException?.code ?? ''),
           style: typography.bodyMedium.copyWith(color: colors.textSecondary),
         ),
         data: (codes) {

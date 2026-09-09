@@ -31,7 +31,7 @@ class NutritionistScreen extends ConsumerWidget {
             const SnackBar(content: Text('Collegamento revocato. Hai di nuovo piena facoltà sul tuo piano.')),
           ),
           error: (error, _) => ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(describeApiError(error.asApiException?.code ?? ''))),
+            SnackBar(content: Text(describeApiError(context, error.asApiException?.code ?? ''))),
           ),
         );
   }
@@ -71,14 +71,14 @@ class NutritionistScreen extends ConsumerWidget {
             final code = error.asApiException?.code;
             if (code != 'RESOURCE_NOT_FOUND') {
               return Center(
-                child: Text(describeApiError(code ?? ''), style: typography.bodyMedium.copyWith(color: colors.textSecondary)),
+                child: Text(describeApiError(context, code ?? ''), style: typography.bodyMedium.copyWith(color: colors.textSecondary)),
               );
             }
             return requestsState.when(
               loading: () => const Center(child: CircularProgressIndicator()),
               error: (error, _) => Center(
                 child: Text(
-                  describeApiError(error.asApiException?.code ?? ''),
+                  describeApiError(context, error.asApiException?.code ?? ''),
                   style: typography.bodyMedium.copyWith(color: colors.textSecondary),
                 ),
               ),

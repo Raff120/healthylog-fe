@@ -152,14 +152,14 @@ class _DietPlanTemplateScheduleScreenState extends ConsumerState<DietPlanTemplat
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            matchedRecipeField ? 'Controlla i campi della ricetta segnalati.' : describeApiError('VALIDATION_FAILED'),
+            matchedRecipeField ? 'Controlla i campi della ricetta segnalati.' : describeApiError(context, 'VALIDATION_FAILED'),
           ),
         ),
       );
       return;
     }
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(describeApiError(exception?.code ?? ''))),
+      SnackBar(content: Text(describeApiError(context, exception?.code ?? ''))),
     );
   }
 
@@ -279,7 +279,7 @@ class _DietPlanTemplateScheduleScreenState extends ConsumerState<DietPlanTemplat
             loading: () => const Center(child: CircularProgressIndicator()),
             error: (error, _) => Center(
               child: Text(
-                describeApiError(error.asApiException?.code ?? ''),
+                describeApiError(context, error.asApiException?.code ?? ''),
                 style: typography.bodyMedium.copyWith(color: colors.textSecondary),
               ),
             ),

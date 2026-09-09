@@ -72,7 +72,7 @@ class _InvitePatientSheetState extends ConsumerState<_InvitePatientSheet> {
         if (code == 'RESOURCE_NOT_FOUND') {
           _notFound = true;
         } else {
-          _error = describeApiError(code ?? '');
+          _error = describeApiError(context, code ?? '');
         }
       });
     }
@@ -87,7 +87,7 @@ class _InvitePatientSheetState extends ConsumerState<_InvitePatientSheet> {
     ref.read(sendCareLinkRequestControllerProvider)?.whenOrNull(
           data: (_) => Navigator.of(context).pop(true),
           error: (error, _) => ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(describeApiError(error.asApiException?.code ?? ''))),
+            SnackBar(content: Text(describeApiError(context, error.asApiException?.code ?? ''))),
           ),
         );
   }

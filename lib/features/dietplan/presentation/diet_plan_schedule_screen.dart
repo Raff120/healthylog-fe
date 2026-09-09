@@ -138,7 +138,7 @@ class _DietPlanScheduleScreenState extends ConsumerState<DietPlanScheduleScreen>
     state?.whenOrNull(
       data: (_) => ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Template creato.'))),
       error: (error, _) => ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(describeApiError(error.asApiException?.code ?? ''))),
+        SnackBar(content: Text(describeApiError(context, error.asApiException?.code ?? ''))),
       ),
     );
   }
@@ -197,14 +197,14 @@ class _DietPlanScheduleScreenState extends ConsumerState<DietPlanScheduleScreen>
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            matchedRecipeField ? 'Controlla i campi della ricetta segnalati.' : describeApiError('VALIDATION_FAILED'),
+            matchedRecipeField ? 'Controlla i campi della ricetta segnalati.' : describeApiError(context, 'VALIDATION_FAILED'),
           ),
         ),
       );
       return;
     }
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(describeApiError(exception?.code ?? ''))),
+      SnackBar(content: Text(describeApiError(context, exception?.code ?? ''))),
     );
   }
 
@@ -221,7 +221,7 @@ class _DietPlanScheduleScreenState extends ConsumerState<DietPlanScheduleScreen>
     state?.whenOrNull(
       data: (_) => _leave(),
       error: (error, _) => ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(describeApiError(error.asApiException?.code ?? ''))),
+        SnackBar(content: Text(describeApiError(context, error.asApiException?.code ?? ''))),
       ),
     );
   }
@@ -264,7 +264,7 @@ class _DietPlanScheduleScreenState extends ConsumerState<DietPlanScheduleScreen>
           setState(() => _selectedDay = _days!.first.dayOfWeek);
         }
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(describeApiError(exception?.code ?? ''))),
+          SnackBar(content: Text(describeApiError(context, exception?.code ?? ''))),
         );
       },
     );
@@ -521,7 +521,7 @@ class _DietPlanScheduleScreenState extends ConsumerState<DietPlanScheduleScreen>
             loading: () => const Center(child: CircularProgressIndicator()),
             error: (error, _) => Center(
               child: Text(
-                describeApiError(error.asApiException?.code ?? ''),
+                describeApiError(context, error.asApiException?.code ?? ''),
                 style: typography.bodyMedium.copyWith(color: colors.textSecondary),
               ),
             ),

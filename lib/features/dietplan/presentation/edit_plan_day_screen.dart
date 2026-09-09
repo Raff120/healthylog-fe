@@ -147,13 +147,13 @@ class _EditPlanDayScreenState extends ConsumerState<EditPlanDayScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            matchedRecipeField ? 'Controlla i campi della ricetta segnalati.' : describeApiError('VALIDATION_FAILED'),
+            matchedRecipeField ? 'Controlla i campi della ricetta segnalati.' : describeApiError(context, 'VALIDATION_FAILED'),
           ),
         ),
       );
       return;
     }
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(describeApiError(exception?.code ?? ''))));
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(describeApiError(context, exception?.code ?? ''))));
   }
 
   List<PopupMenuEntry<SlotType>> _addSlotMenuItems() => [
@@ -270,7 +270,7 @@ class _EditPlanDayScreenState extends ConsumerState<EditPlanDayScreen> {
             loading: () => const Center(child: CircularProgressIndicator()),
             error: (error, _) => Center(
               child: Text(
-                describeApiError(error.asApiException?.code ?? ''),
+                describeApiError(context, error.asApiException?.code ?? ''),
                 style: typography.bodyMedium.copyWith(color: colors.textSecondary),
               ),
             ),

@@ -52,7 +52,7 @@ class WeeklyView extends ConsumerWidget {
     ref.listen(mealSwapControllerProvider, (previous, next) {
       next?.whenOrNull(
         error: (error, _) => ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(describeApiError(error.asApiException?.code ?? ''))),
+          SnackBar(content: Text(describeApiError(context, error.asApiException?.code ?? ''))),
         ),
       );
     });
@@ -61,7 +61,7 @@ class WeeklyView extends ConsumerWidget {
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (error, _) => Center(
         child: Text(
-          describeApiError(error.asApiException?.code ?? ''),
+          describeApiError(context, error.asApiException?.code ?? ''),
           style: typography.bodyMedium.copyWith(color: colors.textSecondary),
         ),
       ),

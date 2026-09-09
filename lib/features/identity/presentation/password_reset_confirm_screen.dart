@@ -67,7 +67,7 @@ class _PasswordResetConfirmScreenState extends ConsumerState<PasswordResetConfir
         if (code == 'PASSWORD_RESET_TOKEN_INVALID') {
           setState(() => _expired = true);
         } else {
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(describeApiError(code))));
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(describeApiError(context, code))));
         }
       },
     );

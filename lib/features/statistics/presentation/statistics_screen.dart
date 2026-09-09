@@ -162,7 +162,7 @@ class _Async<T> extends ConsumerWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                describeApiError(code),
+                describeApiError(context, code),
                 style: typography.bodyMedium.copyWith(color: colors.textSecondary),
               ),
               Builder(

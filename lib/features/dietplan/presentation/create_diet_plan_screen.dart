@@ -171,7 +171,7 @@ class _CreateDietPlanScreenState extends ConsumerState<CreateDietPlanScreen> {
           });
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(describeApiError(exception?.code ?? ''))),
+            SnackBar(content: Text(describeApiError(context, exception?.code ?? ''))),
           );
         }
       },
@@ -210,7 +210,7 @@ class _CreateDietPlanScreenState extends ConsumerState<CreateDietPlanScreen> {
         child: Center(child: SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))),
       ),
       error: (error, _) => Text(
-        describeApiError(error.asApiException?.code ?? ''),
+        describeApiError(context, error.asApiException?.code ?? ''),
         style: typography.caption.copyWith(color: colors.error),
       ),
       data: (patients) {

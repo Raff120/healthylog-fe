@@ -37,7 +37,7 @@ class _CareLinkRequestSheet extends ConsumerWidget {
     state?.whenOrNull(
       data: (_) => Navigator.of(context).pop(true),
       error: (error, _) => ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(describeApiError(error.asApiException?.code ?? ''))),
+        SnackBar(content: Text(describeApiError(context, error.asApiException?.code ?? ''))),
       ),
     );
   }
@@ -49,7 +49,7 @@ class _CareLinkRequestSheet extends ConsumerWidget {
     state?.whenOrNull(
       data: (_) => Navigator.of(context).pop(false),
       error: (error, _) => ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(describeApiError(error.asApiException?.code ?? ''))),
+        SnackBar(content: Text(describeApiError(context, error.asApiException?.code ?? ''))),
       ),
     );
   }

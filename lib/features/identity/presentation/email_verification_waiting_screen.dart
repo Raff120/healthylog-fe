@@ -57,7 +57,7 @@ class _EmailVerificationWaitingScreenState extends ConsumerState<EmailVerificati
         if (code == 'VERIFICATION_RESEND_RATE_LIMITED') {
           _startCooldown();
         }
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(describeApiError(code))));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(describeApiError(context, code))));
       },
     );
   }
