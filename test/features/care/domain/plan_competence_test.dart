@@ -16,7 +16,10 @@ DietPlan _plan({required String authorId, AccountRole authorRole = AccountRole.u
       status: PlanStatus.active,
       startDate: DateTime(2026, 9, 1),
       endDate: null,
+      periods: const [],
+      suspensions: const [],
       weeklySchedule: const [],
+      adherence: null,
     );
 
 CareLink _link({String nutritionistId = 'nutri-1', CareLinkStatus status = CareLinkStatus.active}) => CareLink(

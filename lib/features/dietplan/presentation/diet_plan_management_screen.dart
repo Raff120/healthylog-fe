@@ -465,6 +465,17 @@ class _OtherPlanTile extends StatelessWidget {
                   ],
                 ),
               ),
+              // ST-2, 7.1: l'aderenza come numero puro in colore primario,
+              // senza colorazione di merito né barra di avanzamento
+              // (AD-15). Non compare per i Programmati, dove non esiste, né
+              // per quello in corso, la cui collocazione sono le statistiche.
+              if (plan.adherence != null) ...[
+                Text(
+                  '${plan.adherence!.round()}%',
+                  style: typography.label.copyWith(color: colors.textPrimary),
+                ),
+                const SizedBox(width: AppSpacing.xs),
+              ],
               Icon(Icons.chevron_right, color: colors.textTertiary),
             ],
           ),
