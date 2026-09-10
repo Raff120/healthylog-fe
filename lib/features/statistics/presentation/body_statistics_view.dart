@@ -4,8 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../app/theme/app_spacing.dart';
 import '../../../app/theme/theme_context.dart';
 import '../../../l10n/l10n_context.dart';
-import '../../measurement/presentation/measurements_view.dart' show showMeasurementDetail;
-import '../../measurement/presentation/widgets/measurement_list_tile.dart';
+import '../../measurement/presentation/measurement_list.dart';
 import '../data/statistics_models.dart';
 import '../providers/statistics_providers.dart';
 import 'statistics_formatting.dart';
@@ -17,7 +16,10 @@ import 'widgets/statistics_headline.dart';
 
 /// Segmento **Corpo** di *Statistiche* (11.3 interfaccia.md): selettore
 /// della misura, grafico, variazione nel periodo ed elenco delle
-/// misurazioni.
+/// misurazioni — dal quale si registrano, si modificano e si consultano,
+/// essendo questa la loro unica collocazione (vedi decisioni.md). Il
+/// pulsante di registrazione appartiene alla schermata che ospita il
+/// segmento, come in *Attività* apparteneva a quella.
 ///
 /// AN-11: la variazione è presentata in forma neutra, col segno che le
 /// compete e in colore primario — nessun colore di merito, nessuna
@@ -154,7 +156,9 @@ class BodyStatisticsView extends ConsumerWidget {
 }
 
 /// AN-4: l'elenco delle misurazioni del periodo, in ordine cronologico
-/// decrescente, con la medesima struttura di 10.3.
+/// decrescente. Dalla presente feature le misure non hanno altra
+/// collocazione: *Attività* è dedicata ai soli allenamenti (vedi
+/// decisioni.md).
 class _PeriodMeasurements extends ConsumerWidget {
   const _PeriodMeasurements({required this.from, required this.to});
 
@@ -163,22 +167,10 @@ class _PeriodMeasurements extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final colors = context.colors;
     final measurements = ref.watch(periodMeasurementsProvider((from: from, to: to)));
 
     return measurements.maybeWhen(
-      data: (items) => Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          for (final measurement in items) ...[
-            MeasurementListTile(
-              measurement: measurement,
-              onTap: () => showMeasurementDetail(context, measurement),
-            ),
-            Divider(height: 1, color: colors.dividerLight),
-          ],
-        ],
-      ),
+      data: (items) => MeasurementList(items: items),
       orElse: () => const SizedBox.shrink(),
     );
   }

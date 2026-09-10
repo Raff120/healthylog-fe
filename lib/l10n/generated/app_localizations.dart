@@ -97,12 +97,6 @@ abstract class L10n {
     Locale('it'),
   ];
 
-  /// No description provided for @activityMeasurements.
-  ///
-  /// In it, this message translates to:
-  /// **'Misure'**
-  String get activityMeasurements;
-
   /// No description provided for @activityWorkouts.
   ///
   /// In it, this message translates to:
@@ -324,6 +318,42 @@ abstract class L10n {
   /// In it, this message translates to:
   /// **'Non conserverai:'**
   String get careRevokeYouLose;
+
+  /// No description provided for @changePasswordCurrent.
+  ///
+  /// In it, this message translates to:
+  /// **'Password attuale'**
+  String get changePasswordCurrent;
+
+  /// No description provided for @changePasswordCurrentWrong.
+  ///
+  /// In it, this message translates to:
+  /// **'La password attuale non è corretta'**
+  String get changePasswordCurrentWrong;
+
+  /// No description provided for @changePasswordDone.
+  ///
+  /// In it, this message translates to:
+  /// **'Password aggiornata.'**
+  String get changePasswordDone;
+
+  /// No description provided for @changePasswordNew.
+  ///
+  /// In it, this message translates to:
+  /// **'Nuova password'**
+  String get changePasswordNew;
+
+  /// No description provided for @changePasswordSameAsCurrent.
+  ///
+  /// In it, this message translates to:
+  /// **'La nuova password coincide con quella attuale'**
+  String get changePasswordSameAsCurrent;
+
+  /// No description provided for @changePasswordTitle.
+  ///
+  /// In it, this message translates to:
+  /// **'Modifica password'**
+  String get changePasswordTitle;
 
   /// No description provided for @commonAccept.
   ///
@@ -952,7 +982,7 @@ abstract class L10n {
   /// No description provided for @errorVerificationTokenInvalid.
   ///
   /// In it, this message translates to:
-  /// **'Il collegamento non è più valido. Richiedine uno nuovo.'**
+  /// **'Il codice non è valido o è scaduto. Richiedine uno nuovo.'**
   String get errorVerificationTokenInvalid;
 
   /// No description provided for @errorWorkoutFutureDate.
@@ -1086,6 +1116,12 @@ abstract class L10n {
   /// In it, this message translates to:
   /// **'{count, plural, =1{1 membro} other{{count} membri}}'**
   String groupMemberCount(int count);
+
+  /// No description provided for @groupMemberSelf.
+  ///
+  /// In it, this message translates to:
+  /// **'(tu)'**
+  String get groupMemberSelf;
 
   /// No description provided for @groupNone.
   ///
@@ -1482,12 +1518,6 @@ abstract class L10n {
   /// In it, this message translates to:
   /// **'La registri tu: la persona potrà consultarla ma non modificarla.'**
   String get measurementForPatientNotice;
-
-  /// No description provided for @measurementNoneRecorded.
-  ///
-  /// In it, this message translates to:
-  /// **'Nessuna misurazione registrata'**
-  String get measurementNoneRecorded;
 
   /// No description provided for @measurementRecord.
   ///
@@ -1975,6 +2005,12 @@ abstract class L10n {
   /// **'Nessun paziente collegato'**
   String get patientsEmpty;
 
+  /// No description provided for @patientsHeader.
+  ///
+  /// In it, this message translates to:
+  /// **'PAZIENTI'**
+  String get patientsHeader;
+
   /// No description provided for @patientsInvite.
   ///
   /// In it, this message translates to:
@@ -2034,6 +2070,12 @@ abstract class L10n {
   /// In it, this message translates to:
   /// **'Settimana'**
   String get periodWeek;
+
+  /// No description provided for @personalDataChangePassword.
+  ///
+  /// In it, this message translates to:
+  /// **'Modifica password'**
+  String get personalDataChangePassword;
 
   /// No description provided for @personalDataRoleNotChangeable.
   ///
@@ -3403,23 +3445,23 @@ abstract class L10n {
   /// **'Questo nome utente è già in uso'**
   String get validationUsernameAlreadyTaken;
 
-  /// No description provided for @verifyEmailBackToLogin.
+  /// No description provided for @verifyEmailCode.
   ///
   /// In it, this message translates to:
-  /// **'Torna all\'accesso'**
-  String get verifyEmailBackToLogin;
+  /// **'Codice di conferma'**
+  String get verifyEmailCode;
 
-  /// No description provided for @verifyEmailLinkExpiredBody.
+  /// No description provided for @verifyEmailCodeIncomplete.
   ///
   /// In it, this message translates to:
-  /// **'Torna all\'accesso per richiederne uno nuovo.'**
-  String get verifyEmailLinkExpiredBody;
+  /// **'Il codice è di sei cifre'**
+  String get verifyEmailCodeIncomplete;
 
-  /// No description provided for @verifyEmailLinkExpiredTitle.
+  /// No description provided for @verifyEmailConfirm.
   ///
   /// In it, this message translates to:
-  /// **'Il collegamento non è più valido'**
-  String get verifyEmailLinkExpiredTitle;
+  /// **'Conferma'**
+  String get verifyEmailConfirm;
 
   /// No description provided for @verifyEmailResend.
   ///
@@ -3436,7 +3478,7 @@ abstract class L10n {
   /// No description provided for @verifyEmailSentTo.
   ///
   /// In it, this message translates to:
-  /// **'Abbiamo inviato un collegamento di conferma a {email}'**
+  /// **'Abbiamo inviato un codice di conferma a {email}'**
   String verifyEmailSentTo(String email);
 
   /// No description provided for @verifyEmailTitle.

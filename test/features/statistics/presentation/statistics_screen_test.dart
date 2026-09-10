@@ -354,4 +354,39 @@ void main() {
 
     expect(find.text('Nessuna misurazione nel periodo'), findsOneWidget);
   });
+
+  /// PR-11: la registrazione di una misurazione appartiene ora al solo
+  /// segmento *Corpo* — *Attività* non ospita più le misure (vedi
+  /// decisioni.md). Il pulsante non deve comparire sugli altri due
+  /// segmenti, che non hanno nulla da registrare.
+  testWidgets('offre la registrazione di una misurazione dal solo segmento Corpo (PR-11)',
+      (tester) async {
+    await _pumpStatistics(tester, adherence: _adherence(value: 75));
+
+    expect(find.byType(FloatingActionButton), findsNothing);
+
+    await tester.tap(find.text('Corpo'));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(FloatingActionButton), findsOneWidget);
+
+    await tester.tap(find.text('Aderenza'));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(FloatingActionButton), findsNothing);
+  });
+
+  /// 4.4: senza misurazioni nel periodo il contenuto è una
+  /// constatazione — ed è proprio allora che la registrazione serve.
+  testWidgets('la registrazione resta offerta anche senza misurazioni nel periodo', (tester) async {
+    await _pumpStatistics(tester);
+
+    await tester.tap(find.text('Corpo'));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byType(FloatingActionButton));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Registra una misurazione'), findsOneWidget);
+  });
 }

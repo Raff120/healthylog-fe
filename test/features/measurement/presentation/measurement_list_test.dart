@@ -9,14 +9,20 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:healthylog/app/theme/app_theme.dart';
 import 'package:healthylog/core/api/api_error_interceptor.dart';
 import 'package:healthylog/features/measurement/data/measurement_api.dart';
-import 'package:healthylog/features/measurement/presentation/measurements_view.dart';
+import 'package:healthylog/features/measurement/data/measurement_models.dart';
+import 'package:healthylog/features/measurement/presentation/measurement_list.dart';
 import 'package:healthylog/features/measurement/presentation/widgets/measurement_sheet.dart';
 import 'package:healthylog/features/measurement/providers/measurement_providers.dart';
 
-/// Misurazioni (10.3 interfaccia.md): PR-13 (almeno un valore), PR-14
-/// (nessun vincolo di frequenza), PR-17/AN-5 (fonte distinta e non
-/// modificabile dal Paziente), e l'assenza di elaborazioni sulla card
-/// dell'ultima rilevazione (AN-11).
+/// Misurazioni (11.3 interfaccia.md, già 10.3): PR-13 (almeno un
+/// valore), PR-14 (nessun vincolo di frequenza), PR-17/AN-5 (fonte
+/// distinta e non modificabile dal Paziente), AN-11 (nessuna
+/// elaborazione nell'elenco).
+///
+/// L'elenco vive ora nel segmento *Corpo* di *Statistiche*, che gli
+/// passa le misurazioni del periodo: le prove lo esercitano da sé, con
+/// le misurazioni date, e non attraverso la schermata che lo ospita
+/// (vedi decisioni.md).
 
 String _isoDate(DateTime date) =>
     '${date.year.toString().padLeft(4, '0')}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
@@ -78,7 +84,7 @@ class _MeasurementAdapter implements HttpClientAdapter {
       );
 }
 
-Future<_MeasurementAdapter> _pumpView(
+Future<_MeasurementAdapter> _pumpList(
   WidgetTester tester,
   List<Map<String, dynamic>> measurements,
 ) async {
@@ -91,12 +97,15 @@ Future<_MeasurementAdapter> _pumpView(
     ProviderScope(
       overrides: [measurementApiProvider.overrideWithValue(MeasurementApi(dio))],
       child: MaterialApp(
-      locale: testLocale,
-      localizationsDelegates: testLocalizationsDelegates,
-      supportedLocales: testSupportedLocales,
-      
+        locale: testLocale,
+        localizationsDelegates: testLocalizationsDelegates,
+        supportedLocales: testSupportedLocales,
         theme: AppTheme.light,
-        home: const Scaffold(body: MeasurementsView()),
+        home: Scaffold(
+          body: SingleChildScrollView(
+            child: MeasurementList(items: measurements.map(BodyMeasurement.fromJson).toList()),
+          ),
+        ),
       ),
     ),
   );
@@ -180,19 +189,18 @@ void main() {
 
   testWidgets('distingue la fonte delle misurazioni nell\'elenco (AN-5, PR-17)', (tester) async {
     final today = DateTime.now();
-    await _pumpView(tester, [
+    await _pumpList(tester, [
       _measurement(id: 'm-1', date: today, weightKg: 70, role: 'NUTRITIONIST', editable: false),
       _measurement(id: 'm-2', date: today.subtract(const Duration(days: 7)), weightKg: 71),
     ]);
 
-    // L'icona compare sulla sola rilevazione del professionista — una
-    // volta nell'elenco e una nella card dell'ultima misurazione.
-    expect(find.byIcon(Icons.medical_services_outlined), findsNWidgets(2));
+    // L'icona compare sulla sola rilevazione del professionista.
+    expect(find.byIcon(Icons.medical_services_outlined), findsOneWidget);
   });
 
   testWidgets('la misurazione del professionista si consulta ma non si modifica (PR-17)',
       (tester) async {
-    await _pumpView(tester, [
+    await _pumpList(tester, [
       _measurement(
         id: 'm-1',
         date: DateTime.now(),
@@ -212,7 +220,7 @@ void main() {
   });
 
   testWidgets('la misurazione propria si elimina dal foglio, previa conferma (PR-16)', (tester) async {
-    final adapter = await _pumpView(tester, [
+    final adapter = await _pumpList(tester, [
       _measurement(id: 'm-1', date: DateTime.now(), weightKg: 70),
     ]);
 
@@ -233,7 +241,7 @@ void main() {
 
   testWidgets('la misurazione del professionista non offre l\'eliminazione al Paziente (PR-17)',
       (tester) async {
-    await _pumpView(tester, [
+    await _pumpList(tester, [
       _measurement(
         id: 'm-1',
         date: DateTime.now(),
@@ -249,17 +257,18 @@ void main() {
     expect(find.widgetWithText(TextButton, 'Elimina'), findsNothing);
   });
 
-  testWidgets('la card dell\'ultima misurazione non presenta variazioni né confronti (AN-11)',
-      (tester) async {
+  testWidgets('l\'elenco non presenta variazioni né confronti (AN-11, AN-12)', (tester) async {
     final today = DateTime.now();
-    await _pumpView(tester, [
+    await _pumpList(tester, [
       _measurement(id: 'm-1', date: today, weightKg: 70),
       _measurement(id: 'm-2', date: today.subtract(const Duration(days: 7)), weightKg: 72),
     ]);
 
-    // Due volte: la card dell'ultima rilevazione e la sua voce d'elenco.
-    expect(find.text('70 kg'), findsNWidgets(2));
-    // Nessuna differenza calcolata, nessuna freccia direzionale.
+    // Ciascuna voce reca il proprio valore, una volta sola.
+    expect(find.text('70 kg'), findsOneWidget);
+    expect(find.text('72 kg'), findsOneWidget);
+    // Nessuna differenza calcolata, nessuna freccia direzionale: la
+    // variazione compete al solo riquadro di 11.3, in forma neutra.
     expect(find.textContaining('-2'), findsNothing);
     expect(find.byIcon(Icons.arrow_downward), findsNothing);
     expect(find.byIcon(Icons.arrow_upward), findsNothing);

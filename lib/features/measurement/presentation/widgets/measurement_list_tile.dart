@@ -10,7 +10,7 @@ import '../../../identity/providers/profile_providers.dart';
 import '../../data/measurement_models.dart';
 import '../body_circumference_presentation.dart';
 
-/// Voce dell'elenco delle misurazioni (10.3 interfaccia.md): alta 68, in
+/// Voce dell'elenco delle misurazioni (11.3 interfaccia.md): alta 68, in
 /// ordine cronologico decrescente (AN-4), con data, peso e circonferenze
 /// in forma sintetica.
 ///

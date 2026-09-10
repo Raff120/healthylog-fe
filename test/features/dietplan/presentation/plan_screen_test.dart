@@ -531,11 +531,14 @@ Map<String, dynamic> _memberSelectorGroupJson({bool cook = true, bool selfFirst 
 /// usata dagli altri banchi di prova alla larghezza predefinita.
 /// [cook]: se "Io Stesso" è Cuoco del Gruppo (CU-2, CU-3) — vero di
 /// default, come lo è sempre il Proprietario nel dominio reale.
+/// [textScale]: l'ingrandimento del carattere impostato nel sistema
+/// operativo (MP-5), che l'applicazione deve rispettare senza rompersi.
 Future<_MemberAwareAdapter> _pumpWithGroup(
   WidgetTester tester, {
   bool compact = false,
   bool cook = true,
   bool selfFirst = true,
+  double textScale = 1.0,
 }) async {
   if (compact) {
     tester.view.physicalSize = const Size(400, 800);
@@ -567,15 +570,28 @@ Future<_MemberAwareAdapter> _pumpWithGroup(
         appDatabaseProvider.overrideWithValue(AppDatabase(NativeDatabase.memory())),
       ],
       child: MaterialApp(
-      locale: testLocale,
-      localizationsDelegates: testLocalizationsDelegates,
-      supportedLocales: testSupportedLocales,
-      theme: AppTheme.light, home: const PlanScreen()),
+        locale: testLocale,
+        localizationsDelegates: testLocalizationsDelegates,
+        supportedLocales: testSupportedLocales,
+        theme: AppTheme.light,
+        builder: (context, child) => MediaQuery(
+          data: MediaQuery.of(context).copyWith(textScaler: TextScaler.linear(textScale)),
+          child: child!,
+        ),
+        home: const PlanScreen(),
+      ),
     ),
   );
   await tester.pumpAndSettle();
   return planDayAdapter;
 }
+
+/// L'altezza effettiva dell'intestazione delle colonne della vista
+/// affiancata: l'`IntrinsicHeight` che la avvolge è il primo che si
+/// incontra risalendo da un nome di membro.
+double _headerHeight(WidgetTester tester) => tester
+    .getSize(find.ancestor(of: find.text('Io'), matching: find.byType(IntrinsicHeight)).first)
+    .height;
 
 void main() {
   testWidgets(
@@ -1354,6 +1370,43 @@ void main() {
   });
 
   group('modalità affiancata (6.3 interfaccia.md; VG-12, VG-13, VG-14)', () {
+    /// MP-5: l'intestazione delle colonne aveva altezza fissa a 56, pari
+    /// alla somma esatta di avatar, spaziatura e riga di testo al corpo
+    /// nominale. Bastava l'ingrandimento del carattere di sistema — 1,1
+    /// sui Samsung di serie — perché il nome traboccasse di due pixel,
+    /// con la fascia a righe di Flutter sotto ciascun avatar (segnalato
+    /// dall'utente). Un solo pump a carattere ingrandito basta: il
+    /// traboccamento è un'eccezione, e fa fallire la prova da sé.
+    testWidgets(
+      'l\'intestazione non trabocca col carattere ingrandito dal sistema (MP-5)',
+      (tester) async {
+        await _pumpWithGroup(tester, textScale: 1.3);
+
+        await tester.tap(find.byTooltip('Vista affiancata'));
+        await tester.pumpAndSettle();
+
+        expect(find.text('Io'), findsOneWidget);
+        expect(find.text('Maria'), findsOneWidget);
+        // A cedere è l'intestazione, non il testo: cresce oltre il
+        // proprio minimo anziché troncare il nome.
+        expect(_headerHeight(tester), greaterThan(56));
+      },
+    );
+
+    /// L'altezza resta però quella di prima al corpo nominale: la
+    /// correzione non muove la griglia a chi non ingrandisce nulla.
+    testWidgets(
+      'al carattere nominale l\'intestazione conserva la propria altezza (6.3)',
+      (tester) async {
+        await _pumpWithGroup(tester);
+
+        await tester.tap(find.byTooltip('Vista affiancata'));
+        await tester.pumpAndSettle();
+
+        expect(_headerHeight(tester), 56);
+      },
+    );
+
     testWidgets(
       'l\'icona columns mostra i pasti di tutti i membri, raggruppati per slot',
       (tester) async {

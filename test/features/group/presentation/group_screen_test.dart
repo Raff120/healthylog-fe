@@ -103,7 +103,11 @@ class _GroupLifecycleAdapter implements HttpClientAdapter {
   }
 }
 
-Future<void> _pumpGroupScreen(WidgetTester tester, {required CookingGroupApi groupApi}) async {
+Future<void> _pumpGroupScreen(
+  WidgetTester tester, {
+  required CookingGroupApi groupApi,
+  Locale locale = testLocale,
+}) async {
   final profileDio = Dio(BaseOptions(baseUrl: 'http://example.test'))
     ..httpClientAdapter = _JsonAdapter((_) => _jsonResponse(200, _profileJson()))
     ..interceptors.add(ApiErrorInterceptor());
@@ -120,7 +124,7 @@ Future<void> _pumpGroupScreen(WidgetTester tester, {required CookingGroupApi gro
         cookingGroupApiProvider.overrideWithValue(groupApi),
       ],
       child: MaterialApp.router(
-      locale: testLocale,
+      locale: locale,
       localizationsDelegates: testLocalizationsDelegates,
       supportedLocales: testSupportedLocales,
       theme: AppTheme.light, routerConfig: router),
@@ -163,5 +167,19 @@ void main() {
     expect(find.text('Mario Rossi'), findsOneWidget);
     expect(find.text('(tu)'), findsOneWidget);
     expect(find.text('Proprietario'), findsOneWidget);
+  });
+
+  /// LO-1, FR-22: l'indicazione accanto al proprio nome era scritta a
+  /// mano in italiano e restava tale in inglese. La prova la esercita
+  /// nella lingua che ne rivelava l'assenza dalle traduzioni.
+  testWidgets('l\'indicazione del proprio account è tradotta (LO-1, FR-22)', (tester) async {
+    final dio = Dio(BaseOptions(baseUrl: 'http://example.test'))
+      ..httpClientAdapter = _JsonAdapter((_) => _jsonResponse(200, _groupJson()))
+      ..interceptors.add(ApiErrorInterceptor());
+
+    await _pumpGroupScreen(tester, groupApi: CookingGroupApi(dio), locale: const Locale('en'));
+
+    expect(find.text('(you)'), findsOneWidget);
+    expect(find.text('(tu)'), findsNothing);
   });
 }

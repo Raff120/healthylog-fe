@@ -16,7 +16,8 @@ import '../../data/measurement_requests.dart';
 import '../../providers/measurement_providers.dart';
 import 'measurement_confirmations.dart';
 
-/// Registrazione e modifica di una misurazione (10.3 interfaccia.md).
+/// Registrazione e modifica di una misurazione (11.3 interfaccia.md;
+/// già 10.3, prima che le misure passassero a *Statistiche*).
 ///
 /// PR-12: peso e circonferenze sono tutti facoltativi; PR-13: almeno un
 /// valore è richiesto, e il tentativo di salvare un modulo vuoto è
@@ -241,7 +242,7 @@ class _MeasurementSheetState extends ConsumerState<_MeasurementSheet> {
   }
 }
 
-/// Le unità sono indicate accanto a ciascun campo (10.3); la preferenza
+/// Le unità sono indicate accanto a ciascun campo (11.3); la preferenza
 /// dell'Utente sul sistema di misura (LO-4) resta a F29.
 class _NumberField extends StatelessWidget {
   const _NumberField({required this.label, required this.controller, required this.onChanged});

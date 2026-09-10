@@ -17,8 +17,8 @@ import '../features/dietplan/presentation/diet_plan_template_schedule_screen.dar
 import '../features/dietplan/presentation/diet_plan_view_screen.dart';
 import '../features/dietplan/presentation/edit_plan_day_screen.dart';
 import '../features/identity/data/account_role.dart';
+import '../features/identity/presentation/change_password_screen.dart';
 import '../features/identity/presentation/devices_screen.dart';
-import '../features/identity/presentation/email_verification_link_screen.dart';
 import '../features/identity/presentation/email_verification_waiting_screen.dart';
 import '../features/identity/presentation/login_screen.dart';
 import '../features/identity/presentation/password_reset_confirm_screen.dart';
@@ -46,13 +46,22 @@ part 'router.g.dart';
 /// Percorsi raggiungibili solo **prima** di una sessione (5.2
 /// interfaccia.md: "Chi ha una sessione attiva non incontra questa
 /// schermata"). Un accesso già presente vi rimanda a `/home`.
-const _preLoginOnlyPaths = ['/login', '/register', '/verify-email'];
+const _preLoginOnlyPaths = ['/login', '/register'];
 
-/// Percorsi raggiungibili **a prescindere** dalla sessione: collegamenti
-/// aperti da un messaggio di posta (AU-16), che possono capitare mentre
-/// un'altra sessione è già attiva altrove — forzare un instradamento in
-/// base allo stato dell'Utente sarebbe qui spiazzante, non protettivo.
-const _alwaysAllowedPaths = ['/verify-email/confirm', '/password-reset'];
+/// Percorsi raggiungibili **a prescindere** dalla sessione.
+///
+/// Il recupero password è un collegamento aperto da un messaggio (AU-16),
+/// che può capitare mentre un'altra sessione è già attiva altrove:
+/// forzare un instradamento in base allo stato dell'Utente sarebbe qui
+/// spiazzante, non protettivo.
+///
+/// La verifica dell'indirizzo vi figura perché serve a due momenti
+/// diversi: la registrazione, che non ha sessione, e la modifica
+/// dell'indirizzo dal profilo (PR-4), che ne ha una — l'account torna
+/// non confermato ma la sessione resta, e trattarla come schermata di
+/// solo pre-accesso la rendeva irraggiungibile proprio lì (vedi
+/// decisioni.md).
+const _alwaysAllowedPaths = ['/verify-email', '/password-reset'];
 
 /// PV-8: finché l'informativa aggiornata non è accettata, ogni rotta
 /// autenticata riporta qui.
@@ -160,14 +169,12 @@ GoRouter goRouter(Ref ref) {
         builder: (context, state) => RegistrationDetailsScreen(role: state.extra as AccountRole),
       ),
       GoRoute(
+        // AU-11: l'indirizzo da confermare arriva da chi vi conduce —
+        // la registrazione (AC-5) o la modifica dal profilo (PR-4).
+        // Senza di esso non c'è nulla da confermare qui.
         path: '/verify-email',
         redirect: (context, state) => state.extra is String ? null : '/login',
         builder: (context, state) => EmailVerificationWaitingScreen(email: state.extra as String),
-      ),
-      GoRoute(
-        path: '/verify-email/confirm',
-        builder: (context, state) =>
-            EmailVerificationLinkScreen(token: state.uri.queryParameters['token'] ?? ''),
       ),
       GoRoute(
         path: '/password-reset',
@@ -205,6 +212,12 @@ GoRouter goRouter(Ref ref) {
       GoRoute(
         path: '/profile/personal-data',
         builder: (context, state) => const PersonalDataScreen(),
+      ),
+      // AC-19, 12.1: la modifica della password sta sotto i *Dati
+      // personali*, da cui la si raggiunge, e non è un loro campo.
+      GoRoute(
+        path: '/profile/personal-data/password',
+        builder: (context, state) => const ChangePasswordScreen(),
       ),
       GoRoute(path: '/profile/devices', builder: (context, state) => const DevicesScreen()),
       GoRoute(path: '/profile/settings', builder: (context, state) => const SettingsScreen()),

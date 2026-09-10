@@ -12,6 +12,7 @@ import '../../notification/presentation/widgets/notification_bell.dart';
 import '../data/account_role.dart';
 import '../providers/profile_providers.dart';
 import '../providers/sessions_providers.dart';
+import 'widgets/profile_section_tile.dart';
 
 /// Profilo (12.1 interfaccia.md): intestazione personale, elenco delle
 /// sezioni, disconnessione in fondo. "Piani" (7.1 interfaccia.md, F10)
@@ -122,7 +123,7 @@ class ProfileScreen extends ConsumerWidget {
                   ],
                 ),
                 const SizedBox(height: AppSpacing.lg),
-                _ProfileSection(
+                ProfileSectionTile(
                   icon: Icons.person_outline,
                   label: context.l10n.profilePersonalData,
                   onTap: () => context.push('/profile/personal-data'),
@@ -131,26 +132,26 @@ class ProfileScreen extends ConsumerWidget {
                 // collegamento in qualità di paziente sono del solo Utente.
                 if (profile.role == AccountRole.user) ...[
                   const SizedBox(height: AppSpacing.sm),
-                  _ProfileSection(
+                  ProfileSectionTile(
                     icon: Icons.calendar_month_outlined,
                     label: context.l10n.profilePlans,
                     onTap: () => context.push('/profile/plans'),
                   ),
                   const SizedBox(height: AppSpacing.sm),
-                  _ProfileSection(
+                  ProfileSectionTile(
                     icon: Icons.groups_outlined,
                     label: context.l10n.profileGroup,
                     onTap: () => context.push('/group'),
                   ),
                   const SizedBox(height: AppSpacing.sm),
-                  _ProfileSection(
+                  ProfileSectionTile(
                     icon: Icons.medical_services_outlined,
                     label: context.l10n.profileNutritionist,
                     onTap: () => context.push('/profile/nutritionist'),
                   ),
                 ],
                 const SizedBox(height: AppSpacing.sm),
-                _ProfileSection(
+                ProfileSectionTile(
                   icon: Icons.settings_outlined,
                   label: context.l10n.profileSettings,
                   onTap: () => context.push('/profile/settings'),
@@ -164,40 +165,6 @@ class ProfileScreen extends ConsumerWidget {
                 ),
               ],
             ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _ProfileSection extends StatelessWidget {
-  const _ProfileSection({required this.icon, required this.label, required this.onTap});
-
-  final IconData icon;
-  final String label;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    final typography = context.typography;
-
-    return Material(
-      color: colors.surface,
-      borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.sm),
-          child: Row(
-            children: [
-              Icon(icon, color: colors.textSecondary),
-              const SizedBox(width: AppSpacing.sm),
-              Expanded(child: Text(label, style: typography.bodyLarge.copyWith(color: colors.textPrimary))),
-              Icon(Icons.chevron_right, color: colors.textTertiary),
-            ],
           ),
         ),
       ),

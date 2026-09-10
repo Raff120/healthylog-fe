@@ -10,9 +10,6 @@ class L10nEn extends L10n {
   L10nEn([String locale = 'en']) : super(locale);
 
   @override
-  String get activityMeasurements => 'Measurements';
-
-  @override
   String get activityWorkouts => 'Workouts';
 
   @override
@@ -141,6 +138,26 @@ class L10nEn extends L10n {
 
   @override
   String get careRevokeYouLose => 'You do not keep:';
+
+  @override
+  String get changePasswordCurrent => 'Current password';
+
+  @override
+  String get changePasswordCurrentWrong =>
+      'The current password is not correct';
+
+  @override
+  String get changePasswordDone => 'Password updated.';
+
+  @override
+  String get changePasswordNew => 'New password';
+
+  @override
+  String get changePasswordSameAsCurrent =>
+      'The new password is the same as the current one';
+
+  @override
+  String get changePasswordTitle => 'Change password';
 
   @override
   String get commonAccept => 'Accept';
@@ -492,7 +509,7 @@ class L10nEn extends L10n {
 
   @override
   String get errorVerificationTokenInvalid =>
-      'The link is no longer valid. Request a new one.';
+      'The code is not valid or has expired. Request a new one.';
 
   @override
   String get errorWorkoutFutureDate =>
@@ -570,6 +587,9 @@ class L10nEn extends L10n {
     );
     return '$_temp0';
   }
+
+  @override
+  String get groupMemberSelf => '(you)';
 
   @override
   String get groupNone => 'You are not in a group';
@@ -800,9 +820,6 @@ class L10nEn extends L10n {
   @override
   String get measurementForPatientNotice =>
       'You record it: the person can view it but not change it.';
-
-  @override
-  String get measurementNoneRecorded => 'No measurements logged';
 
   @override
   String get measurementRecord => 'Log measurement';
@@ -1110,6 +1127,9 @@ class L10nEn extends L10n {
   String get patientsEmpty => 'No patients linked';
 
   @override
+  String get patientsHeader => 'PATIENTS';
+
+  @override
   String get patientsInvite => 'Invite patient';
 
   @override
@@ -1140,6 +1160,9 @@ class L10nEn extends L10n {
 
   @override
   String get periodWeek => 'Week';
+
+  @override
+  String get personalDataChangePassword => 'Change password';
 
   @override
   String get personalDataRoleNotChangeable => 'Your role cannot be changed';
@@ -1916,14 +1939,13 @@ class L10nEn extends L10n {
   String get validationUsernameAlreadyTaken => 'This username is already taken';
 
   @override
-  String get verifyEmailBackToLogin => 'Back to sign-in';
+  String get verifyEmailCode => 'Confirmation code';
 
   @override
-  String get verifyEmailLinkExpiredBody =>
-      'Go back to sign-in to request a new one.';
+  String get verifyEmailCodeIncomplete => 'The code has six digits';
 
   @override
-  String get verifyEmailLinkExpiredTitle => 'The link is no longer valid';
+  String get verifyEmailConfirm => 'Confirm';
 
   @override
   String get verifyEmailResend => 'Send again';
@@ -1935,7 +1957,7 @@ class L10nEn extends L10n {
 
   @override
   String verifyEmailSentTo(String email) {
-    return 'We sent a confirmation link to $email';
+    return 'We sent a confirmation code to $email';
   }
 
   @override
