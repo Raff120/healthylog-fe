@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:healthylog/app/theme/app_spacing.dart';
 import 'package:healthylog/core/api/api_error_interceptor.dart';
 import 'package:healthylog/core/storage/app_database.dart';
 import 'package:healthylog/core/storage/secure_key_value_store.dart';
@@ -246,6 +247,32 @@ void main() {
         expect(found, ['Piano', 'Attività', 'Statistiche', 'Profilo']);
       });
     }
+  });
+
+  // MP-9: la barra copre con la propria superficie la zona riservata al
+  // bordo inferiore dello schermo — l'indicatore di Home sull'iPhone.
+  // Segnalato dall'utente sulla PWA installata: sotto la barra restava una
+  // fascia di colore diverso, e lo stacco si vedeva. La rientranza sta
+  // dentro la superficie della barra, non fuori.
+  testWidgets('la barra inferiore copre la zona riservata del dispositivo', (
+    tester,
+  ) async {
+    const safeAreaBottom = 34.0;
+    tester.view.padding = const FakeViewPadding(bottom: safeAreaBottom);
+    tester.view.viewPadding = const FakeViewPadding(bottom: safeAreaBottom);
+
+    await _pumpAuthenticatedApp(tester, role: 'USER', size: const Size(400, 800));
+
+    final barra = tester.getRect(find.byKey(const ValueKey('bottomNavBar')));
+    // Nessuna fascia fra la barra e il bordo dello schermo.
+    expect(barra.bottom, 800);
+    // La barra è più alta della zona riservata che si è presa.
+    expect(barra.height, AppSpacing.heightBottomNav + safeAreaBottom);
+    // Le voci restano sopra la zona riservata, non sotto l'indicatore.
+    expect(
+      tester.getRect(find.text('Piano')).bottom,
+      lessThanOrEqualTo(800 - safeAreaBottom),
+    );
   });
 
   testWidgets(

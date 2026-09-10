@@ -117,10 +117,14 @@ class _BottomBarScaffold extends StatelessWidget {
         children: [const OfflineBar(), Expanded(child: child)],
       ),
       bottomNavigationBar: DecoratedBox(
+        key: const ValueKey('bottomNavBar'),
         decoration: BoxDecoration(
           color: colors.surface,
           border: Border(top: BorderSide(color: colors.dividerStrong)),
         ),
+        // La rientranza sta dentro la superficie della barra, non fuori:
+        // sotto la barra non deve restare fascia di colore diverso, che sul
+        // web mostrerebbe lo sfondo della pagina (vedi decisioni.md).
         child: SafeArea(
           top: false,
           child: SizedBox(
