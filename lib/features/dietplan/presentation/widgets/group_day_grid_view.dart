@@ -565,7 +565,13 @@ class _GroupSlotCell extends ConsumerWidget {
                 Expanded(
                   child: SingleChildScrollView(
                     child: Text(
-                      (slot.content?.trim().isNotEmpty ?? false) ? slot.content!.trim() : context.l10n.slotToBeDefined,
+                      // GG-18, 4.1 interfaccia.md: il foglio presenta il
+                      // testo della ricetta. Mostrava invece il
+                      // contenuto dello slot, che a card chiusa la
+                      // denominazione già sostituisce: la ricetta
+                      // risultava così irraggiungibile proprio dove
+                      // serve di più.
+                      _recipeSheetText(context, slot),
                       style: typography.bodyLarge.copyWith(color: colors.textPrimary),
                     ),
                   ),
@@ -577,6 +583,14 @@ class _GroupSlotCell extends ConsumerWidget {
       ),
     );
   }
+}
+
+/// Il testo integrale della ricetta (GG-18); in sua assenza il
+/// contenuto dello slot, che resta l'unica cosa da leggere.
+String _recipeSheetText(BuildContext context, PlanDaySlot slot) {
+  if (slot.recipeText?.trim().isNotEmpty ?? false) return slot.recipeText!.trim();
+  if (slot.content?.trim().isNotEmpty ?? false) return slot.content!.trim();
+  return context.l10n.slotToBeDefined;
 }
 
 class _CompactSpuntaButton extends StatelessWidget {
