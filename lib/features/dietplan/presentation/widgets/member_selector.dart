@@ -136,6 +136,17 @@ class _SideBySideToggle extends ConsumerWidget {
   }
 }
 
+/// 4.2 interfaccia.md: "Il proprio avatar è sempre il primo della riga."
+/// Vale per entrambe le forme del selettore: il menu a discesa non è una
+/// composizione diversa ma la stessa riga dove non c'è larghezza per
+/// distenderla, e vi elencava i membri nell'ordine del Gruppo — per
+/// anzianità di appartenenza — lasciando il proprio account in mezzo
+/// agli altri (segnalato dall'utente).
+List<CookingGroupMember> _selfFirst(CookingGroup group, String currentUserId) => [
+      ...group.members.where((member) => member.userId == currentUserId),
+      ...group.members.where((member) => member.userId != currentUserId),
+    ];
+
 class _MemberAvatarRow extends StatelessWidget {
   const _MemberAvatarRow({
     required this.group,
@@ -158,11 +169,7 @@ class _MemberAvatarRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // 4.2 interfaccia.md: "Il proprio avatar è sempre il primo della riga."
-    final ordered = [
-      group.members.firstWhere((member) => member.userId == currentUserId),
-      ...group.members.where((member) => member.userId != currentUserId),
-    ];
+    final ordered = _selfFirst(group, currentUserId);
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       child: Row(
@@ -264,7 +271,7 @@ class _MemberDropdown extends ConsumerWidget {
         onSelect(value == currentUserId ? null : value);
       },
       itemBuilder: (menuContext) => [
-        for (final member in group.members)
+        for (final member in _selfFirst(group, currentUserId))
           PopupMenuItem(
             value: member.userId,
             child: Text('${member.firstName} ${member.lastName}'),
