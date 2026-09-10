@@ -345,6 +345,31 @@ void main() {
       expect(find.text('Sposta'), findsOneWidget);
     });
 
+    testWidgets(
+      'la card aperta con lo spostamento sta nella colonna stretta di uno schermo compatto (VG-15)',
+      (tester) async {
+        // `compact` (< 600): due colonne visibili, la larghezza minima
+        // di 140 per ciascuna — il caso più angusto per l'azione.
+        tester.view.physicalSize = const Size(400, 800);
+        tester.view.devicePixelRatio = 1.0;
+        addTearDown(tester.view.reset);
+
+        await _pumpGrid(tester, [
+          _member('user-1', 'Io', [
+            _slot('a1', 'LUNCH', 0, 'Pasta al pomodoro con verdure di stagione', note: 'Senza sale'),
+          ]),
+          _member('user-2', 'Maria', [_slot('b1', 'LUNCH', 0, 'Riso e verdure')]),
+        ]);
+
+        await tester.tap(find.text('Pasta al pomodoro con verdure di stagione'));
+        await tester.pumpAndSettle();
+
+        expect(find.text('Senza sale'), findsOneWidget);
+        expect(find.text('Sposta'), findsOneWidget);
+        expect(tester.takeException(), isNull);
+      },
+    );
+
     testWidgets('lo slot già consumato non è ammissibile come origine (MS-8)', (tester) async {
       await _pumpGrid(tester, [
         _member('user-1', 'Io', [
