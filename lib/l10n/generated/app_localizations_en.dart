@@ -143,6 +143,26 @@ class L10nEn extends L10n {
   String get careRevokeYouLose => 'You do not keep:';
 
   @override
+  String get changePasswordCurrent => 'Current password';
+
+  @override
+  String get changePasswordCurrentWrong =>
+      'The current password is not correct';
+
+  @override
+  String get changePasswordDone => 'Password updated.';
+
+  @override
+  String get changePasswordNew => 'New password';
+
+  @override
+  String get changePasswordSameAsCurrent =>
+      'The new password is the same as the current one';
+
+  @override
+  String get changePasswordTitle => 'Change password';
+
+  @override
   String get commonAccept => 'Accept';
 
   @override
@@ -1140,6 +1160,9 @@ class L10nEn extends L10n {
 
   @override
   String get periodWeek => 'Week';
+
+  @override
+  String get personalDataChangePassword => 'Change password';
 
   @override
   String get personalDataRoleNotChangeable => 'Your role cannot be changed';

@@ -325,6 +325,42 @@ abstract class L10n {
   /// **'Non conserverai:'**
   String get careRevokeYouLose;
 
+  /// No description provided for @changePasswordCurrent.
+  ///
+  /// In it, this message translates to:
+  /// **'Password attuale'**
+  String get changePasswordCurrent;
+
+  /// No description provided for @changePasswordCurrentWrong.
+  ///
+  /// In it, this message translates to:
+  /// **'La password attuale non è corretta'**
+  String get changePasswordCurrentWrong;
+
+  /// No description provided for @changePasswordDone.
+  ///
+  /// In it, this message translates to:
+  /// **'Password aggiornata.'**
+  String get changePasswordDone;
+
+  /// No description provided for @changePasswordNew.
+  ///
+  /// In it, this message translates to:
+  /// **'Nuova password'**
+  String get changePasswordNew;
+
+  /// No description provided for @changePasswordSameAsCurrent.
+  ///
+  /// In it, this message translates to:
+  /// **'La nuova password coincide con quella attuale'**
+  String get changePasswordSameAsCurrent;
+
+  /// No description provided for @changePasswordTitle.
+  ///
+  /// In it, this message translates to:
+  /// **'Modifica password'**
+  String get changePasswordTitle;
+
   /// No description provided for @commonAccept.
   ///
   /// In it, this message translates to:
@@ -2034,6 +2070,12 @@ abstract class L10n {
   /// In it, this message translates to:
   /// **'Settimana'**
   String get periodWeek;
+
+  /// No description provided for @personalDataChangePassword.
+  ///
+  /// In it, this message translates to:
+  /// **'Modifica password'**
+  String get personalDataChangePassword;
 
   /// No description provided for @personalDataRoleNotChangeable.
   ///

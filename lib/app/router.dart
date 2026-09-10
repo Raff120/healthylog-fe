@@ -17,6 +17,7 @@ import '../features/dietplan/presentation/diet_plan_template_schedule_screen.dar
 import '../features/dietplan/presentation/diet_plan_view_screen.dart';
 import '../features/dietplan/presentation/edit_plan_day_screen.dart';
 import '../features/identity/data/account_role.dart';
+import '../features/identity/presentation/change_password_screen.dart';
 import '../features/identity/presentation/devices_screen.dart';
 import '../features/identity/presentation/email_verification_waiting_screen.dart';
 import '../features/identity/presentation/login_screen.dart';
@@ -211,6 +212,12 @@ GoRouter goRouter(Ref ref) {
       GoRoute(
         path: '/profile/personal-data',
         builder: (context, state) => const PersonalDataScreen(),
+      ),
+      // AC-19, 12.1: la modifica della password sta sotto i *Dati
+      // personali*, da cui la si raggiunge, e non è un loro campo.
+      GoRoute(
+        path: '/profile/personal-data/password',
+        builder: (context, state) => const ChangePasswordScreen(),
       ),
       GoRoute(path: '/profile/devices', builder: (context, state) => const DevicesScreen()),
       GoRoute(path: '/profile/settings', builder: (context, state) => const SettingsScreen()),
