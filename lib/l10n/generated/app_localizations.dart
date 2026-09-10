@@ -1117,6 +1117,12 @@ abstract class L10n {
   /// **'{count, plural, =1{1 membro} other{{count} membri}}'**
   String groupMemberCount(int count);
 
+  /// No description provided for @groupMemberSelf.
+  ///
+  /// In it, this message translates to:
+  /// **'(tu)'**
+  String get groupMemberSelf;
+
   /// No description provided for @groupNone.
   ///
   /// In it, this message translates to:
@@ -1998,6 +2004,12 @@ abstract class L10n {
   /// In it, this message translates to:
   /// **'Nessun paziente collegato'**
   String get patientsEmpty;
+
+  /// No description provided for @patientsHeader.
+  ///
+  /// In it, this message translates to:
+  /// **'PAZIENTI'**
+  String get patientsHeader;
 
   /// No description provided for @patientsInvite.
   ///

@@ -598,6 +598,9 @@ class L10nIt extends L10n {
   }
 
   @override
+  String get groupMemberSelf => '(tu)';
+
+  @override
   String get groupNone => 'Non fai parte di un gruppo';
 
   @override
@@ -1133,6 +1136,9 @@ class L10nIt extends L10n {
 
   @override
   String get patientsEmpty => 'Nessun paziente collegato';
+
+  @override
+  String get patientsHeader => 'PAZIENTI';
 
   @override
   String get patientsInvite => 'Invita paziente';

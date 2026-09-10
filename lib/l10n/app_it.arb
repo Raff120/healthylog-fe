@@ -257,6 +257,7 @@
       }
     }
   },
+  "groupMemberSelf": "(tu)",
   "groupNone": "Non fai parte di un gruppo",
   "groupNoneDescription": "Un gruppo serve a organizzare i pasti di più persone che cucinano insieme",
   "groupOnlyMember": "Sei l'unico membro",
@@ -719,6 +720,7 @@
   "patientWithdrawBody": "Il paziente non lo vedrà più.",
   "patientWorkoutsHeader": "ALLENAMENTI",
   "patientsEmpty": "Nessun paziente collegato",
+  "patientsHeader": "PAZIENTI",
   "patientsInvite": "Invita paziente",
   "patientsInviteHint": "Invita un paziente con il suo nome utente",
   "patientsPendingRequests": "RICHIESTE PENDENTI",

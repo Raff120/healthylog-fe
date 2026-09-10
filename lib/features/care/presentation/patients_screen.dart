@@ -106,7 +106,10 @@ class _PatientsScreenState extends ConsumerState<PatientsScreen> {
               Row(
                 children: [
                   Expanded(
-                    child: Text('PAZIENTI', style: typography.overline.copyWith(color: colors.textTertiary)),
+                    child: Text(
+                      context.l10n.patientsHeader,
+                      style: typography.overline.copyWith(color: colors.textTertiary),
+                    ),
                   ),
                   PopupMenuButton<PatientSort>(
                     tooltip: context.l10n.patientsSortBy,
