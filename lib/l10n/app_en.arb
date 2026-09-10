@@ -1,6 +1,5 @@
 {
   "@@locale": "en",
-  "activityMeasurements": "Measurements",
   "activityWorkouts": "Workouts",
   "adherenceBySlotType": "By meal type",
   "adherenceByWeekday": "By day of the week",
@@ -237,7 +236,6 @@
   "measurementDeleteConfirm": "Delete this measurement?",
   "measurementEditTitle": "Edit measurement",
   "measurementForPatientNotice": "You record it: the person can view it but not change it.",
-  "measurementNoneRecorded": "No measurements logged",
   "measurementRecord": "Log measurement",
   "measurementRecordTitle": "Log a measurement",
   "memberSelectorSideBySide": "Side-by-side view",

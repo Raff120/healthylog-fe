@@ -10,9 +10,6 @@ class L10nIt extends L10n {
   L10nIt([String locale = 'it']) : super(locale);
 
   @override
-  String get activityMeasurements => 'Misure';
-
-  @override
   String get activityWorkouts => 'Allenamenti';
 
   @override
@@ -830,9 +827,6 @@ class L10nIt extends L10n {
   @override
   String get measurementForPatientNotice =>
       'La registri tu: la persona potrà consultarla ma non modificarla.';
-
-  @override
-  String get measurementNoneRecorded => 'Nessuna misurazione registrata';
 
   @override
   String get measurementRecord => 'Registra misurazione';

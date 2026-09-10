@@ -34,7 +34,7 @@ class _PersonalDataScreenState extends ConsumerState<PersonalDataScreen> {
   final _birthPlace = TextEditingController();
   final _height = TextEditingController();
   // PR-8: peso obiettivo, facoltativo. Sta nel profilo e non fra le
-  // misurazioni (10.3 interfaccia.md): non è un dato rilevato ma un
+  // misurazioni (11.3 interfaccia.md): non è un dato rilevato ma un
   // riferimento che l'Utente si dà.
   final _targetWeight = TextEditingController();
 

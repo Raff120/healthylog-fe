@@ -1,6 +1,5 @@
 {
   "@@locale": "it",
-  "activityMeasurements": "Misure",
   "activityWorkouts": "Allenamenti",
   "adherenceBySlotType": "Per tipo di pasto",
   "adherenceByWeekday": "Per giorno della settimana",
@@ -420,7 +419,6 @@
   "measurementDeleteConfirm": "Eliminare questa misurazione?",
   "measurementEditTitle": "Modifica misurazione",
   "measurementForPatientNotice": "La registri tu: la persona potrà consultarla ma non modificarla.",
-  "measurementNoneRecorded": "Nessuna misurazione registrata",
   "measurementRecord": "Registra misurazione",
   "measurementRecordTitle": "Registra una misurazione",
   "memberSelectorSideBySide": "Vista affiancata",

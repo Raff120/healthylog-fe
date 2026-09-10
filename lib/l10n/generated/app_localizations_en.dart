@@ -10,9 +10,6 @@ class L10nEn extends L10n {
   L10nEn([String locale = 'en']) : super(locale);
 
   @override
-  String get activityMeasurements => 'Measurements';
-
-  @override
   String get activityWorkouts => 'Workouts';
 
   @override
@@ -820,9 +817,6 @@ class L10nEn extends L10n {
   @override
   String get measurementForPatientNotice =>
       'You record it: the person can view it but not change it.';
-
-  @override
-  String get measurementNoneRecorded => 'No measurements logged';
 
   @override
   String get measurementRecord => 'Log measurement';

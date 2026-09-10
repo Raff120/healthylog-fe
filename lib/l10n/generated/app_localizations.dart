@@ -97,12 +97,6 @@ abstract class L10n {
     Locale('it'),
   ];
 
-  /// No description provided for @activityMeasurements.
-  ///
-  /// In it, this message translates to:
-  /// **'Misure'**
-  String get activityMeasurements;
-
   /// No description provided for @activityWorkouts.
   ///
   /// In it, this message translates to:
@@ -1518,12 +1512,6 @@ abstract class L10n {
   /// In it, this message translates to:
   /// **'La registri tu: la persona potrà consultarla ma non modificarla.'**
   String get measurementForPatientNotice;
-
-  /// No description provided for @measurementNoneRecorded.
-  ///
-  /// In it, this message translates to:
-  /// **'Nessuna misurazione registrata'**
-  String get measurementNoneRecorded;
 
   /// No description provided for @measurementRecord.
   ///

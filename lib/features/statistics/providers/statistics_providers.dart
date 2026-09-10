@@ -95,7 +95,7 @@ Future<MeasurementStatistics> measurementStatistics(Ref ref, StatisticsQuery que
     ref.watch(statisticsApiProvider).measurements(query.period, planId: query.planId, userId: query.userId);
 
 /// AN-4, 11.3: l'elenco tabellare delle misurazioni del periodo, in coda
-/// al grafico — la medesima struttura di 10.3. Distinto da
+/// al grafico, dove ora si registrano e si modificano. Distinto da
 /// `measurements`, che non è circoscritto a un intervallo.
 @riverpod
 Future<List<BodyMeasurement>> periodMeasurements(

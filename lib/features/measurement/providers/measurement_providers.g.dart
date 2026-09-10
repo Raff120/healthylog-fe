@@ -254,7 +254,7 @@ final class MeasurementControllerProvider
 }
 
 String _$measurementControllerHash() =>
-    r'7a5a76bc10e44c0e54caae9a7decb83fcb228585';
+    r'20bd196e61a4753f66d1c0f51f1409ac8ffc8cbf';
 
 /// PR-11, PR-16, NU-12: registrazione, modifica ed eliminazione.
 

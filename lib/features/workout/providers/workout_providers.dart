@@ -10,19 +10,6 @@ part 'workout_providers.g.dart';
 @riverpod
 WorkoutApi workoutApi(Ref ref) => WorkoutApi(ref.watch(apiClientProvider));
 
-/// I due segmenti di *Attività* (10.1 interfaccia.md): allenamenti e
-/// misure, due contenuti affini che non meritano voci di navigazione
-/// distinte.
-enum ActivityViewMode { workouts, measurements }
-
-@riverpod
-class SelectedActivityView extends _$SelectedActivityView {
-  @override
-  ActivityViewMode build() => ActivityViewMode.workouts;
-
-  void select(ActivityViewMode mode) => state = mode;
-}
-
 /// RA-12: i filtri dell'elenco — tipo di attività e periodo — presentati
 /// come chip rimovibili singolarmente sotto l'intestazione.
 class WorkoutFilters {
