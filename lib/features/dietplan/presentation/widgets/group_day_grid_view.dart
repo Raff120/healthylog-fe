@@ -27,55 +27,119 @@ const double _rowHeight = 96;
 const _sideBySideRefreshInterval = Duration(seconds: 60);
 
 /// Una riga della griglia (VG-14): un momento della giornata comune a
-/// tutti i membri, individuato dall'ordine dello slot nel piano (GG-8) —
-/// lo stesso ordinamento con cui il backend materializza le giornate,
-/// condiviso da chi ha uno schema con più o meno spuntini degli altri
-/// (composizioni disomogenee, 6.3 interfaccia.md).
+/// tutti i membri.
+///
+/// Il raggruppamento è per **tipo di slot**, non per posizione
+/// nell'ordinamento: colazione, pranzo e cena sono al più uno per
+/// giornata (GG-5) e individuano da sé la propria riga, quale che sia il
+/// numero di slot che li precedono. Allinearli per `order`, come si
+/// faceva, collocava il pranzo di chi non fa colazione nella riga della
+/// colazione (segnalato dall'utente).
+///
+/// Gli spuntini, numericamente liberi (GG-4), si allineano invece per
+/// posizione dentro il tratto di giornata delimitato dai tre pasti
+/// principali: il primo spuntino del mattino di ciascuno sta con quello
+/// degli altri, il secondo con il secondo, e le righe eccedenti recano
+/// il tratto di assenza per chi non le prevede (6.3 interfaccia.md,
+/// "composizioni disomogenee").
 class _GroupRow {
-  const _GroupRow({required this.order, required this.type, required this.label});
+  const _GroupRow({required this.type, required this.label, required this.slots});
 
-  final int order;
   final SlotType type;
 
   /// La denominazione descrittiva dello spuntino (GG-10) solo se tutti i
-  /// membri che lo prevedono a questo ordine concordano; altrimenti
+  /// membri che lo prevedono in questa riga concordano; altrimenti
   /// l'etichetta generica del tipo (6.3 interfaccia.md: "la riga
   /// riporta la denominazione generica").
   final String? label;
 
+  /// Lo slot di ciascun membro in questa riga, per identificativo:
+  /// assente per chi non lo prevede.
+  final Map<String, PlanDaySlot> slots;
+
   String displayLabel(BuildContext context) => label ?? slotTypeLabel(context, type);
 }
 
-List<_GroupRow> _buildRows(List<MemberPlanDay> members) {
-  final byOrder = <int, (SlotType, Set<String?>)>{};
-  for (final member in members) {
-    for (final slot in member.slots) {
-      final existing = byOrder[slot.order];
-      if (existing == null) {
-        byOrder[slot.order] = (slot.type, {slot.label});
-      } else {
-        existing.$2.add(slot.label);
-      }
-    }
-  }
-  final orders = byOrder.keys.toList()..sort();
-  return [
-    for (final order in orders)
-      _GroupRow(
-        order: order,
-        type: byOrder[order]!.$1,
-        label: byOrder[order]!.$1 == SlotType.snack && byOrder[order]!.$2.length == 1
-            ? byOrder[order]!.$2.single
-            : null,
-      ),
-  ];
+/// I tre pasti principali nella sequenza della giornata. Sono le ancore
+/// dell'allineamento: al più uno per giornata (GG-5), e quindi in
+/// quest'ordine per chiunque.
+const _anchorTypes = [SlotType.breakfast, SlotType.lunch, SlotType.dinner];
+
+/// Il rango dell'ancora, `null` per lo spuntino — che non delimita
+/// alcun tratto, essendone previsto un numero libero (GG-4).
+int? _anchorRank(SlotType type) {
+  final rank = _anchorTypes.indexOf(type);
+  return rank == -1 ? null : rank;
 }
 
-PlanDaySlot? _slotAt(MemberPlanDay member, int order) {
-  for (final slot in member.slots) {
-    if (slot.order == order) return slot;
+List<_GroupRow> _buildRows(List<MemberPlanDay> members) {
+  // Il tratto di giornata a cui appartiene uno spuntino: 0 prima della
+  // colazione, 1 fra colazione e pranzo, 2 fra pranzo e cena, 3 dopo
+  // cena. Per ciascun tratto, gli spuntini nella loro sequenza.
+  final snacksBySegment = <int, List<Map<String, PlanDaySlot>>>{};
+  final anchorSlots = <SlotType, Map<String, PlanDaySlot>>{};
+
+  for (final member in members) {
+    final slots = [...member.slots]..sort((a, b) => a.order.compareTo(b.order));
+
+    // Il rango del pasto principale che segue ciascuna posizione: è esso
+    // a collocare lo spuntino, sicché quello del mattino di chi non fa
+    // colazione sta comunque con quello degli altri.
+    final nextAnchor = List<int?>.filled(slots.length, null);
+    int? following;
+    for (var i = slots.length - 1; i >= 0; i--) {
+      nextAnchor[i] = following;
+      following = _anchorRank(slots[i].type) ?? following;
+    }
+
+    int? previous;
+    final countBySegment = <int, int>{};
+    for (var i = 0; i < slots.length; i++) {
+      final slot = slots[i];
+      final rank = _anchorRank(slot.type);
+      if (rank != null) {
+        (anchorSlots[slot.type] ??= {})[member.userId] = slot;
+        previous = rank;
+        continue;
+      }
+      // Nessun pasto principale a seguire: lo spuntino sta nel tratto
+      // che si apre dopo l'ultimo incontrato — dopo cena, o in coda a
+      // una giornata che alla cena non arriva.
+      final segment = nextAnchor[i] ?? (previous == null ? 0 : previous + 1);
+      final index = countBySegment[segment] ?? 0;
+      countBySegment[segment] = index + 1;
+      final rows = snacksBySegment.putIfAbsent(segment, () => []);
+      while (rows.length <= index) {
+        rows.add(<String, PlanDaySlot>{});
+      }
+      rows[index][member.userId] = slot;
+    }
   }
-  return null;
+
+  final rows = <_GroupRow>[];
+  void addSnacks(int segment) {
+    for (final slots in snacksBySegment[segment] ?? const <Map<String, PlanDaySlot>>[]) {
+      rows.add(_GroupRow(type: SlotType.snack, label: _sharedLabel(slots.values), slots: slots));
+    }
+  }
+
+  for (var segment = 0; segment < _anchorTypes.length; segment++) {
+    addSnacks(segment);
+    final slots = anchorSlots[_anchorTypes[segment]];
+    if (slots != null) {
+      rows.add(_GroupRow(type: _anchorTypes[segment], label: null, slots: slots));
+    }
+  }
+  addSnacks(_anchorTypes.length);
+  return rows;
+}
+
+/// GG-10: la denominazione descrittiva vale per l'intera riga solo se
+/// tutti i membri che vi prevedono uno spuntino concordano — un solo
+/// valore distinto, `null` compreso.
+String? _sharedLabel(Iterable<PlanDaySlot> slots) {
+  final labels = {for (final slot in slots) slot.label};
+  return labels.length == 1 ? labels.single : null;
 }
 
 /// Modalità affiancata (VG-12, VG-13, VG-14, 6.3 interfaccia.md): i
@@ -328,7 +392,7 @@ class _DataRow extends StatelessWidget {
                   child: Padding(
                     padding: const EdgeInsets.all(AppSpacing.xxs),
                     child: _GroupSlotCell(
-                      slot: _slotAt(member, row.order),
+                      slot: row.slots[member.userId],
                       date: date,
                       // CU-2, CU-3: sempre sulla propria colonna, o su
                       // qualunque altra se Cuoco.
