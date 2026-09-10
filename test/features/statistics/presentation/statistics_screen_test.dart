@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:healthylog/app/theme/app_theme.dart';
 import 'package:healthylog/core/storage/preferences_store.dart';
+import 'package:healthylog/core/widgets/app_segmented_control.dart';
 import 'package:healthylog/features/measurement/providers/measurement_providers.dart';
 import 'package:healthylog/features/statistics/presentation/statistics_screen.dart';
 import 'package:healthylog/features/statistics/providers/statistics_providers.dart';
@@ -82,6 +83,21 @@ void main() {
     // Quanto valga il fattore non si verifica qui: il banco di prova
     // rende ogni carattere quadrato, e le larghezze non sono quelle del
     // carattere reale. Ciò che conta è che il fattore sia uno solo.
+  });
+
+  /// L'intestazione riserva al selettore la larghezza dell'etichetta più
+  /// lunga: le altre vi stanno centrate, non addossate al bordo dello
+  /// schermo.
+  testWidgets('l\'etichetta del periodo è centrata nello spazio riservato', (tester) async {
+    await _pumpStatistics(tester, adherence: _adherence(value: 75));
+
+    final etichetta = tester.getRect(find.text('Mese'));
+    final freccia = tester.getRect(find.byIcon(Icons.keyboard_arrow_down));
+    final pillole = tester.getRect(find.byType(AppSegmentedControl));
+
+    // Margine a sinistra del testo e a destra della freccia, dentro lo
+    // spazio che va dal bordo dello schermo all'inizio delle pillole.
+    expect(etichetta.left, closeTo(pillole.left - freccia.right, 1));
   });
 
   testWidgets('presenta i tre segmenti nell\'intestazione (11.1)', (tester) async {

@@ -56,7 +56,11 @@ class StatisticsPeriodSelector extends ConsumerWidget {
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs),
         child: Row(
-          mainAxisSize: MainAxisSize.min,
+          // L'intestazione riserva al selettore una larghezza fissa, che
+          // basta all'etichetta più lunga: le altre vi stanno centrate,
+          // non addossate al bordo dello schermo, dove sembrerebbero
+          // cadute da una parte (segnalato dall'utente).
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Flexible(
               child: Text(
