@@ -8,6 +8,7 @@ import 'app/router.dart';
 import 'app/theme/app_theme.dart';
 import 'app/theme/theme_mode_controller.dart';
 import 'core/device/keyboard_insets.dart';
+import 'core/device/page_chrome.dart';
 import 'l10n/app_locale.dart';
 import 'l10n/generated/app_localizations.dart';
 import 'l10n/locale_controller.dart';
@@ -42,11 +43,14 @@ class HealthyLogApp extends ConsumerWidget {
       // un errore mostrato, sul modello di SessionController).
       themeMode: ref.watch(themeModeControllerProvider).value ?? ThemeMode.system,
       routerConfig: ref.watch(goRouterProvider),
-      // MP-2, MP-5: sul web la tastiera di sistema non è riferita dal
-      // motore, e senza questo involucro nulla si discosterebbe da essa
-      // (`keyboard_insets.dart`). Trasparente sulle piattaforme native.
-      builder: (context, child) =>
-          withKeyboardInsets(child: child ?? const SizedBox.shrink()),
+      // Due correzioni del solo web, trasparenti altrove: la pagina che
+      // ospita l'applicazione prende il tema in uso e non quello del
+      // sistema operativo (`page_chrome.dart`), e la tastiera di sistema
+      // — che il motore non riferisce — è misurata e immessa in
+      // `MediaQuery` (`keyboard_insets.dart`). MP-2, MP-5, MP-9.
+      builder: (context, child) => PageChromeSync(
+        child: withKeyboardInsets(child: child ?? const SizedBox.shrink()),
+      ),
       // LO-1, LO-2: la lingua scelta dall'Utente, indipendente da quella
       // del sistema operativo. Governa insieme le traduzioni
       // dell'applicazione e i widget di sistema (selettore della data e
