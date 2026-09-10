@@ -11,19 +11,20 @@ import '../../notification/presentation/widgets/notification_bell.dart';
 import '../data/statistics_models.dart';
 import '../providers/statistics_providers.dart';
 import 'adherence_view.dart';
-import 'widgets/statistics_period_menu.dart';
+import 'widgets/statistics_period_selector.dart';
 import 'body_statistics_view.dart';
 import 'workout_statistics_view.dart';
 
 /// *Statistiche* (11 interfaccia.md): terza destinazione dell'Utente.
 ///
 /// Tre segmenti nell'intestazione — **Aderenza** · **Allenamenti** ·
-/// **Corpo**. Il selettore del periodo comune ai tre (AD-8) non è una
-/// seconda barra di comandi ma la didascalia stessa del valore
-/// complessivo, che apre il menu degli orizzonti: due pillole identiche
-/// impilate si leggevano come lo stesso comando ripetuto (segnalato
-/// dall'utente, vedi decisioni.md). Il periodo scelto è conservato tra le
-/// sessioni (3.2).
+/// **Corpo** — e a loro sinistra il selettore del periodo comune ai tre
+/// (AD-8), dove *Piano* tiene il selettore del membro del Gruppo (4.2).
+/// Non è una seconda barra di comandi impilata sotto la prima — due
+/// pillole identiche si leggevano come lo stesso comando ripetuto — ma
+/// nemmeno vive dentro il contenuto, dove sparirebbe insieme a esso
+/// (segnalato dall'utente due volte, vedi decisioni.md). Il periodo
+/// scelto è conservato tra le sessioni (3.2).
 ///
 /// **Tono della sezione** (11.1): l'intera schermata presenta i dati in
 /// forma neutra — nessuna soglia di merito, nessun colore di giudizio,
@@ -50,6 +51,16 @@ class StatisticsScreen extends ConsumerWidget {
         elevation: 0,
         scrolledUnderElevation: 0,
         centerTitle: true,
+        // AD-8: il selettore del periodo governa la schermata, non il
+        // contenuto, e sta perciò nell'intestazione — dove resta
+        // raggiungibile anche quando il contenuto è una constatazione di
+        // assenza.
+        leading: const StatisticsPeriodSelector(),
+        leadingWidth: StatisticsPeriodSelector.widthIn(context),
+        // Tre segmenti e un selettore nella stessa riga: la rientranza
+        // predefinita del titolo andrebbe tolta alle voci, che a schermo
+        // stretto rimpicciolirebbero per pochi punti di margine.
+        titleSpacing: 0,
         title: AppSegmentedControl(
           labels: [context.l10n.statisticsAdherence, context.l10n.statisticsWorkouts, context.l10n.statisticsBody],
           selectedIndex: StatisticsViewMode.values.indexOf(mode),
@@ -67,7 +78,6 @@ class StatisticsScreen extends ConsumerWidget {
           error: (_, _) => const _PeriodSelectorFallback(),
           data: (selectedPeriod) => _Content(
             mode: mode,
-            period: selectedPeriod,
             query: StatisticsQuery(
               period: selectedPeriod,
               // 7.5: fuori dal dettaglio di un piano concluso non si
@@ -95,27 +105,23 @@ class _PeriodSelectorFallback extends StatelessWidget {
 }
 
 class _Content extends ConsumerWidget {
-  const _Content({required this.mode, required this.period, required this.query});
+  const _Content({required this.mode, required this.query});
 
   final StatisticsViewMode mode;
-  final StatisticsPeriod period;
   final StatisticsQuery query;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return switch (mode) {
       StatisticsViewMode.adherence => _Async(
-          period: period,
           value: ref.watch(adherenceStatisticsProvider(query)),
           builder: (statistics) => AdherenceView(statistics: statistics),
         ),
       StatisticsViewMode.workouts => _Async(
-          period: period,
           value: ref.watch(workoutStatisticsProvider(query)),
           builder: (statistics) => WorkoutStatisticsView(statistics: statistics),
         ),
       StatisticsViewMode.body => _Async(
-          period: period,
           value: ref.watch(measurementStatisticsProvider(query)),
           builder: (statistics) => BodyStatisticsView(statistics: statistics),
         ),
@@ -127,19 +133,16 @@ class _Content extends ConsumerWidget {
 /// schermate. L'orizzonte *Piano* senza alcun piano cui riferirsi produce
 /// una constatazione, non un errore (4.4).
 ///
-/// Il selettore del periodo vive nella didascalia del valore complessivo,
-/// che qui non esiste: lo stato di assenza e quello di errore offrono
-/// perciò essi stessi il cambio di orizzonte, senza il quale non vi
-/// sarebbe modo di uscirne.
-class _Async<T> extends ConsumerWidget {
-  const _Async({required this.period, required this.value, required this.builder});
+/// Nessuno di questi stati offre il cambio di orizzonte: il selettore sta
+/// nell'intestazione e non scompare con il contenuto.
+class _Async<T> extends StatelessWidget {
+  const _Async({required this.value, required this.builder});
 
-  final StatisticsPeriod period;
   final AsyncValue<T> value;
   final Widget Function(T) builder;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final colors = context.colors;
     final typography = context.typography;
 
@@ -148,31 +151,16 @@ class _Async<T> extends ConsumerWidget {
       error: (error, _) {
         final code = error.asApiException?.code ?? '';
         if (code == 'RESOURCE_NOT_FOUND') {
-          return Builder(
-            builder: (anchorContext) => EmptyStateView(
-              icon: Icons.show_chart,
-              title: context.l10n.statisticsNoPlanForPeriod,
-              text: context.l10n.statisticsAppearWithPlan,
-              actionLabel: context.l10n.statisticsChangePeriod,
-              onAction: () => showStatisticsPeriodMenu(anchorContext, ref, period),
-            ),
+          return EmptyStateView(
+            icon: Icons.show_chart,
+            title: context.l10n.statisticsNoPlanForPeriod,
+            text: context.l10n.statisticsAppearWithPlan,
           );
         }
         return Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                describeApiError(context, code),
-                style: typography.bodyMedium.copyWith(color: colors.textSecondary),
-              ),
-              Builder(
-                builder: (anchorContext) => TextButton(
-                  onPressed: () => showStatisticsPeriodMenu(anchorContext, ref, period),
-                  child: Text(context.l10n.statisticsChangePeriod),
-                ),
-              ),
-            ],
+          child: Text(
+            describeApiError(context, code),
+            style: typography.bodyMedium.copyWith(color: colors.textSecondary),
           ),
         );
       },

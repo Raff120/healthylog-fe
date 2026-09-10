@@ -13,7 +13,6 @@ import '../providers/statistics_providers.dart';
 import 'statistics_formatting.dart';
 import 'widgets/breakdown_row.dart';
 import 'widgets/statistics_headline.dart';
-import 'widgets/statistics_period_menu.dart';
 import 'widgets/weekly_bar_chart.dart';
 
 /// Segmento **Aderenza** di *Statistiche* (11.1 interfaccia.md): valore
@@ -55,12 +54,6 @@ class AdherenceView extends ConsumerWidget {
           value: shown.value == null ? null : formatPercentage(shown.value!),
           unit: shown.value == null ? null : '%',
           caption: shown.caption,
-          // AD-8: la didascalia è il selettore del periodo. Sul singolo
-          // periodo di svolgimento non lo è: lì la didascalia descrive il
-          // periodo scelto col controllo soprastante (ST-10).
-          onCaptionTap: periodIndex != null
-              ? null
-              : (anchor) => showStatisticsPeriodMenu(anchor, ref, statistics.period),
         ),
         if (excluded != null && periodIndex == null)
           Text(excluded, style: typography.caption.copyWith(color: colors.textSecondary)),

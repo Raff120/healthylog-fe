@@ -7,7 +7,7 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'app/router.dart';
 import 'app/theme/app_theme.dart';
 import 'app/theme/theme_mode_controller.dart';
-import 'core/device/keyboard_insets.dart';
+import 'core/device/device_insets.dart';
 import 'core/device/page_chrome.dart';
 import 'l10n/app_locale.dart';
 import 'l10n/generated/app_localizations.dart';
@@ -45,11 +45,12 @@ class HealthyLogApp extends ConsumerWidget {
       routerConfig: ref.watch(goRouterProvider),
       // Due correzioni del solo web, trasparenti altrove: la pagina che
       // ospita l'applicazione prende il tema in uso e non quello del
-      // sistema operativo (`page_chrome.dart`), e la tastiera di sistema
-      // — che il motore non riferisce — è misurata e immessa in
-      // `MediaQuery` (`keyboard_insets.dart`). MP-2, MP-5, MP-9.
+      // sistema operativo (`page_chrome.dart`), e le misure del
+      // dispositivo che il motore non riferisce — tastiera di sistema e
+      // zone riservate — sono immesse in `MediaQuery`
+      // (`device_insets.dart`). MP-2, MP-5, MP-9.
       builder: (context, child) => PageChromeSync(
-        child: withKeyboardInsets(child: child ?? const SizedBox.shrink()),
+        child: withDeviceInsets(child: child ?? const SizedBox.shrink()),
       ),
       // LO-1, LO-2: la lingua scelta dall'Utente, indipendente da quella
       // del sistema operativo. Governa insieme le traduzioni

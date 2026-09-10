@@ -9,11 +9,9 @@ import '../../../../l10n/l10n_context.dart';
 /// (2.3), unità in `titleMedium`, periodo considerato in `caption` colore
 /// secondario.
 ///
-/// Quando [onCaptionTap] è valorizzato la didascalia **è** il selettore
-/// del periodo (AD-8): reca la freccia del menu e il colore accento delle
-/// azioni. Il comando e la sua etichetta sono la stessa cosa, invece che
-/// due righe distinte che dicono lo stesso — vedi
-/// `showStatisticsPeriodMenu`.
+/// La didascalia dichiara il periodo, non lo governa: il comando sta
+/// nell'intestazione (`StatisticsPeriodSelector`), dove resta
+/// raggiungibile anche là dove un valore complessivo non esista.
 ///
 /// AD-15, SA-16: il valore è reso in colore **primario**, mai in colore di
 /// stato — non è un giudizio. Nessuna soglia, nessun livello, nessuna
@@ -28,7 +26,6 @@ class StatisticsHeadline extends StatelessWidget {
     required this.unit,
     required this.caption,
     this.emptyText,
-    this.onCaptionTap,
   });
 
   /// Assente significa assenza di dati (AD-4), non zero.
@@ -39,9 +36,6 @@ class StatisticsHeadline extends StatelessWidget {
   /// AD-4: in assenza vale la constatazione predefinita, risolta alla
   /// costruzione perché richiede il contesto.
   final String? emptyText;
-
-  /// Riceve il contesto della didascalia, cui il menu si ancora.
-  final void Function(BuildContext captionContext)? onCaptionTap;
 
   @override
   Widget build(BuildContext context) {
@@ -77,30 +71,7 @@ class StatisticsHeadline extends StatelessWidget {
               ],
             ),
           const SizedBox(height: AppSpacing.xxs),
-          if (onCaptionTap == null)
-            Text(caption, style: typography.caption.copyWith(color: colors.textSecondary))
-          else
-            Builder(
-              builder: (captionContext) => InkWell(
-                onTap: () => onCaptionTap!(captionContext),
-                borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: AppSpacing.xxs),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Flexible(
-                        child: Text(
-                          caption,
-                          style: typography.caption.copyWith(color: colors.accent),
-                        ),
-                      ),
-                      Icon(Icons.expand_more, size: 18, color: colors.accent),
-                    ],
-                  ),
-                ),
-              ),
-            ),
+          Text(caption, style: typography.caption.copyWith(color: colors.textSecondary)),
         ],
       ),
     );

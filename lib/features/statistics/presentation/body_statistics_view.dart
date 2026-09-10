@@ -14,7 +14,6 @@ import '../../identity/providers/profile_providers.dart';
 import 'statistics_presentation.dart';
 import 'widgets/measure_line_chart.dart';
 import 'widgets/statistics_headline.dart';
-import 'widgets/statistics_period_menu.dart';
 
 /// Segmento **Corpo** di *Statistiche* (11.3 interfaccia.md): selettore
 /// della misura, grafico, variazione nel periodo ed elenco delle
@@ -123,9 +122,6 @@ class BodyStatisticsView extends ConsumerWidget {
                   statistics.planName,
                 ),
                 emptyText: context.l10n.bodyStatsSingleValue,
-                // AD-8, AN-13: la didascalia è il selettore del periodo.
-                onCaptionTap: (anchor) =>
-                    showStatisticsPeriodMenu(anchor, ref, statistics.period),
               ),
               // AN-5: la legenda della fonte compare solo se le due fonti
               // coesistono — altrimenti non vi è nulla da distinguere.
