@@ -24,6 +24,7 @@ import '../providers/diet_plan_providers.dart';
 import '../providers/meal_swap_providers.dart';
 import '../providers/plan_day_providers.dart';
 import 'widgets/date_selector.dart';
+import 'widgets/day_pager.dart';
 import 'widgets/group_day_grid_view.dart';
 import 'widgets/meal_card.dart';
 import 'widgets/member_selector.dart';
@@ -183,7 +184,7 @@ class _SideBySideContent extends ConsumerWidget {
   }
 }
 
-class _SingleMemberContent extends ConsumerWidget {
+class _SingleMemberContent extends StatelessWidget {
   const _SingleMemberContent({required this.selectedDate, required this.member, required this.onSelect});
 
   final DateTime selectedDate;
@@ -191,46 +192,51 @@ class _SingleMemberContent extends ConsumerWidget {
   final ValueChanged<DateTime> onSelect;
 
   @override
+  Widget build(BuildContext context) {
+    // 6.2: "lo scorrimento orizzontale del contenuto cambia giorno" — lo
+    // stesso gesto della riga dei giorni, qui applicato al contenuto
+    // sottostante. Il giorno accanto segue il dito e si assesta a gesto
+    // concluso: vedi DayPager.
+    return DayPager(
+      key: const Key('dailyViewContentSwipe'),
+      selectedDate: selectedDate,
+      onSelect: onSelect,
+      dayBuilder: (context, date) => _DayPage(date: date, member: member),
+    );
+  }
+}
+
+/// Una giornata dentro il pager. Ciascuna pagina attende il proprio
+/// giorno per conto suo: lo scorrimento resta possibile mentre il
+/// giorno di arrivo si sta caricando, e il caricamento di quello accanto
+/// comincia appena il gesto lo scopre, non a gesto concluso.
+class _DayPage extends ConsumerWidget {
+  const _DayPage({required this.date, required this.member});
+
+  final DateTime date;
+  final String? member;
+
+  @override
   Widget build(BuildContext context, WidgetRef ref) {
     final typography = context.typography;
     final colors = context.colors;
-    final dayState = ref.watch(planDayProvider(selectedDate, userId: member));
+    final dayState = ref.watch(planDayProvider(date, userId: member));
 
-    // 6.2: "lo scorrimento orizzontale del contenuto cambia giorno" — lo
-    // stesso gesto della riga dei giorni, qui applicato al contenuto
-    // sottostante.
-    return GestureDetector(
-      key: const Key('dailyViewContentSwipe'),
-      onHorizontalDragEnd: (details) {
-        final velocity = details.primaryVelocity ?? 0;
-        if (velocity < -200) {
-          onSelect(selectedDate.add(const Duration(days: 1)));
-        } else if (velocity > 200) {
-          onSelect(selectedDate.subtract(const Duration(days: 1)));
-        }
-      },
+    return AnimatedSwitcher(
+      duration: AppSpacing.motionStateTransition,
       child: dayState.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const Center(
+          key: ValueKey('loading'),
+          child: CircularProgressIndicator(),
+        ),
         error: (error, _) => Center(
+          key: const ValueKey('error'),
           child: Text(
             describeApiError(context, error.asApiException?.code ?? ''),
             style: typography.bodyMedium.copyWith(color: colors.textSecondary),
           ),
         ),
-        data: (day) => AnimatedSwitcher(
-          duration: AppSpacing.motionScreenTransition,
-          transitionBuilder: (child, animation) => SlideTransition(
-            position: Tween(
-              begin: const Offset(0.05, 0),
-              end: Offset.zero,
-            ).animate(animation),
-            child: FadeTransition(opacity: animation, child: child),
-          ),
-          child: KeyedSubtree(
-            key: ValueKey(isoDate(day.date)),
-            child: _DayContent(day: day),
-          ),
-        ),
+        data: (day) => _DayContent(key: const ValueKey('data'), day: day),
       ),
     );
   }
@@ -282,7 +288,7 @@ class _WeeklyTab extends StatelessWidget {
 /// sono condizioni che impediscono la consultazione, solo che la
 /// segnalano.
 class _DayContent extends ConsumerWidget {
-  const _DayContent({required this.day});
+  const _DayContent({super.key, required this.day});
 
   final PlanDay day;
 

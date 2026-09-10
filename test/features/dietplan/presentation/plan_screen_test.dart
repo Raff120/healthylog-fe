@@ -754,6 +754,75 @@ void main() {
   );
 
   testWidgets(
+    'il gesto interrotto a metà scopre il giorno accanto e torna indietro da sé (6.2)',
+    (tester) async {
+      final today = dateOnly(DateTime.now());
+      final tomorrow = today.add(const Duration(days: 1));
+      final adapter = _ByDateAdapter((date) {
+        if (date == isoDate(tomorrow)) {
+          return _dayJsonFor(date, 'Pesce al forno');
+        }
+        return _dayJsonFor(date, 'Pasta al pomodoro');
+      });
+      final dio = Dio(BaseOptions(baseUrl: 'http://example.test'));
+      dio.httpClientAdapter = adapter;
+      dio.interceptors.add(ApiErrorInterceptor());
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            careApiProvider.overrideWithValue(stubCareApi()),
+            notificationApiProvider.overrideWithValue(stubNotificationApi()),
+            workoutApiProvider.overrideWithValue(stubWorkoutApi()),
+            planDayApiProvider.overrideWithValue(PlanDayApi(dio)),
+            cookingGroupApiProvider.overrideWithValue(_noGroupCookingGroupApi()),
+            appDatabaseProvider.overrideWithValue(
+              AppDatabase(NativeDatabase.memory()),
+            ),
+          ],
+          child: MaterialApp(
+            locale: testLocale,
+            localizationsDelegates: testLocalizationsDelegates,
+            supportedLocales: testSupportedLocales,
+            theme: AppTheme.light,
+            home: const PlanScreen(),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final gesture = await tester.startGesture(
+        tester.getCenter(find.byKey(const Key('dailyViewContentSwipe'))),
+      );
+      // Meno della metà della larghezza: il gesto non basta a cambiare
+      // giorno, ma il contenuto lo segue comunque.
+      await tester.pump();
+      await gesture.moveBy(const Offset(-50, 0));
+      await tester.pump();
+      await gesture.moveBy(const Offset(-250, 0));
+      await tester.pump();
+      // Il giorno accanto è costruito appena il gesto lo scopre e si
+      // carica lì per lì: nessun pumpAndSettle, che l'indicatore di
+      // attesa non lascerebbe concludere.
+      for (var i = 0; i < 20; i++) {
+        await tester.pump(const Duration(milliseconds: 50));
+      }
+
+      // 6.2: i due giorni sono in campo insieme mentre il dito si muove
+      // — è questo a rendere il passaggio un movimento e non un cambio.
+      expect(find.text('Pasta al pomodoro'), findsOneWidget);
+      expect(find.text('Pesce al forno'), findsOneWidget);
+
+      await gesture.up();
+      await tester.pumpAndSettle();
+
+      // Lasciato a metà, il giorno resta quello di partenza.
+      expect(find.text('Pasta al pomodoro'), findsOneWidget);
+      expect(find.text('Pesce al forno'), findsNothing);
+    },
+  );
+
+  testWidgets(
     'le frecce del selettore passano alla settimana adiacente anche nella vista giornaliera (VG-16, VG-17)',
     (tester) async {
       final today = dateOnly(DateTime.now());
