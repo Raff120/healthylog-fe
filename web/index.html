@@ -36,7 +36,10 @@
        dichiarazione, che è distinta da quella priva di prefisso. -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <!-- MP-9: il colore della barra segue il tema in uso. -->
+  <!-- MP-9: il colore della barra segue il tema del sistema operativo
+       finché l'applicazione non è caricata; da lì in avanti queste
+       dichiarazioni sono sostituite da una sola, che porta il tema scelto
+       dall'Utente (`page_chrome.dart`). -->
   <meta name="color-scheme" content="light dark">
   <meta name="theme-color" content="#FAF9F7" media="(prefers-color-scheme: light)">
   <meta name="theme-color" content="#141312" media="(prefers-color-scheme: dark)">
@@ -57,6 +60,11 @@
       `backgroundLight` e `backgroundDark` della palette (`app_palette.dart`):
       è l'unico punto fuori dal tema in cui un colore debba comparire, non
       essendovi modo di attingere alla palette da qui.
+
+      Valgono per il primo disegno, prima che l'applicazione sia caricata, e
+      seguono perciò il tema del sistema operativo — il solo noto a quel
+      momento. Caricata l'applicazione, lo sfondo prende il tema che
+      l'Utente ha scelto (`page_chrome.dart`).
     */
     :root {
       color-scheme: light dark;
@@ -81,15 +89,22 @@
       legge `env(safe-area-inset-*)` e `MediaQuery.padding` resta nullo sul
       web, sicché `SafeArea` non produrrebbe alcuna spaziatura (vedi
       decisioni.md).
+
+      La rientranza è uno scostamento dei lati, non una spaziatura interna:
+      il motore misura l'elemento ospite con `clientHeight`, che comprende
+      la spaziatura, mentre vi dipinge dentro un elemento alto il 100% del
+      solo riquadro del contenuto. Dichiarata come spaziatura, la rientranza
+      entrerebbe nella misura ma non nella superficie dipinta, e
+      l'applicazione risulterebbe più alta della propria finestra della
+      somma delle zone riservate: il fondo — la barra di navigazione —
+      finirebbe tagliato (vedi decisioni.md).
     */
     #healthylog {
       position: fixed;
-      inset: 0;
-      padding-top: env(safe-area-inset-top);
-      padding-right: env(safe-area-inset-right);
-      padding-bottom: env(safe-area-inset-bottom);
-      padding-left: env(safe-area-inset-left);
-      box-sizing: border-box;
+      top: env(safe-area-inset-top);
+      right: env(safe-area-inset-right);
+      bottom: env(safe-area-inset-bottom);
+      left: env(safe-area-inset-left);
     }
   </style>
 </head>
