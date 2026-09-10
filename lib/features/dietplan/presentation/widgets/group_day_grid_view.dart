@@ -508,7 +508,10 @@ class _GroupSlotCellState extends ConsumerState<_GroupSlotCell> {
     if (slot == null) {
       // 6.3 interfaccia.md: "non uno spazio vuoto" — distingue "non
       // previsto" da "non ancora caricato".
-      return Center(child: Container(height: 1, color: colors.textTertiary));
+      return Center(
+        key: const Key('groupSlotAbsent'),
+        child: Container(height: 1, color: colors.textTertiary),
+      );
     }
 
     final hasContent = slot.content?.trim().isNotEmpty ?? false;
