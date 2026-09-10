@@ -495,25 +495,31 @@ Map<String, dynamic> _memberSelectorProfileJson() => {
 /// [cook]: false rappresenta qui solo il caso di prova "membro semplice
 /// non Cuoco" per UT-12/CC-23, non uno stato raggiungibile davvero da un
 /// Proprietario.
-Map<String, dynamic> _memberSelectorGroupJson({bool cook = true}) => {
+/// [selfFirst]: se il proprio account preceda gli altri nell'ordine del
+/// Gruppo, che è quello di anzianità di appartenenza — `CookingGroup`
+/// ordina i membri per `joinedAt`, quale che sia l'ordine del JSON.
+/// Falso riproduce il Gruppo altrui in cui si è entrati dopo, dove
+/// l'ordine del server non coincide con quello che il selettore deve
+/// presentare (4.2).
+Map<String, dynamic> _memberSelectorGroupJson({bool cook = true, bool selfFirst = true}) => {
       'id': 'group-1',
       'name': 'Casa',
-      'ownerId': 'user-1',
+      'ownerId': selfFirst ? 'user-1' : 'user-2',
       'members': [
         {
           'userId': 'user-1',
           'firstName': 'Io',
           'lastName': 'Stesso',
-          'owner': true,
+          'owner': selfFirst,
           'cook': cook,
-          'joinedAt': '2026-09-01T00:00:00Z',
+          'joinedAt': selfFirst ? '2026-09-01T00:00:00Z' : '2026-09-03T00:00:00Z',
         },
         {
           'userId': 'user-2',
           'firstName': 'Maria',
           'lastName': 'Verdi',
-          'owner': false,
-          'cook': false,
+          'owner': !selfFirst,
+          'cook': !selfFirst,
           'joinedAt': '2026-09-02T00:00:00Z',
         },
       ],
@@ -525,7 +531,12 @@ Map<String, dynamic> _memberSelectorGroupJson({bool cook = true}) => {
 /// usata dagli altri banchi di prova alla larghezza predefinita.
 /// [cook]: se "Io Stesso" è Cuoco del Gruppo (CU-2, CU-3) — vero di
 /// default, come lo è sempre il Proprietario nel dominio reale.
-Future<_MemberAwareAdapter> _pumpWithGroup(WidgetTester tester, {bool compact = false, bool cook = true}) async {
+Future<_MemberAwareAdapter> _pumpWithGroup(
+  WidgetTester tester, {
+  bool compact = false,
+  bool cook = true,
+  bool selfFirst = true,
+}) async {
   if (compact) {
     tester.view.physicalSize = const Size(400, 800);
     tester.view.devicePixelRatio = 1.0;
@@ -539,7 +550,7 @@ Future<_MemberAwareAdapter> _pumpWithGroup(WidgetTester tester, {bool compact = 
     ..httpClientAdapter = _JsonAdapter(_memberSelectorProfileJson())
     ..interceptors.add(ApiErrorInterceptor());
   final groupDio = Dio(BaseOptions(baseUrl: 'http://example.test'))
-    ..httpClientAdapter = _JsonAdapter(_memberSelectorGroupJson(cook: cook))
+    ..httpClientAdapter = _JsonAdapter(_memberSelectorGroupJson(cook: cook, selfFirst: selfFirst))
     ..interceptors.add(ApiErrorInterceptor());
 
   await tester.pumpWidget(
@@ -1217,6 +1228,42 @@ void main() {
   });
 
   group('selettore del membro (4.2 interfaccia.md; VG-7, VG-9, VG-11)', () {
+    testWidgets(
+      'il proprio account è il primo, nella riga di avatar come nel menu a discesa',
+      (tester) async {
+        // Il Gruppo elenca prima Maria: l'ordine di anzianità non è
+        // quello che il selettore deve presentare.
+        await _pumpWithGroup(tester, selfFirst: false);
+
+        expect(
+          tester.getTopLeft(find.byTooltip('Io Stesso')).dx,
+          lessThan(tester.getTopLeft(find.byTooltip('Maria Verdi')).dx),
+        );
+      },
+    );
+
+    testWidgets(
+      'anche il menu a discesa presenta per primo il proprio account (segnalato dall\'utente)',
+      (tester) async {
+        await _pumpWithGroup(tester, compact: true, selfFirst: false);
+
+        // Il selettore, non il menu "⋮" della giornata: lo distingue il
+        // `chevron-down` di 4.2.
+        await tester.tap(
+          find.ancestor(
+            of: find.byIcon(Icons.keyboard_arrow_down),
+            matching: find.byType(PopupMenuButton<String>),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        expect(
+          tester.getTopLeft(find.text('Io Stesso')).dy,
+          lessThan(tester.getTopLeft(find.text('Maria Verdi')).dy),
+        );
+      },
+    );
+
     testWidgets(
       'il tocco su un altro membro presenta il suo piano con la riga di contesto, in sola consultazione (VG-9, VG-11)',
       (tester) async {

@@ -11,8 +11,11 @@ import '../../../../core/api/api_error_messages.dart';
 import '../../../../core/api/api_exception.dart';
 import '../../data/group_plan_day.dart';
 import '../../data/plan_day.dart';
+import '../../data/plan_day_coverage.dart';
 import '../../data/slot_status.dart';
 import '../../data/slot_type.dart';
+import '../../domain/plan_day_date.dart';
+import '../../providers/meal_swap_providers.dart';
 import '../../providers/plan_day_providers.dart';
 import '../slot_type_presentation.dart';
 
@@ -27,55 +30,119 @@ const double _rowHeight = 96;
 const _sideBySideRefreshInterval = Duration(seconds: 60);
 
 /// Una riga della griglia (VG-14): un momento della giornata comune a
-/// tutti i membri, individuato dall'ordine dello slot nel piano (GG-8) —
-/// lo stesso ordinamento con cui il backend materializza le giornate,
-/// condiviso da chi ha uno schema con più o meno spuntini degli altri
-/// (composizioni disomogenee, 6.3 interfaccia.md).
+/// tutti i membri.
+///
+/// Il raggruppamento è per **tipo di slot**, non per posizione
+/// nell'ordinamento: colazione, pranzo e cena sono al più uno per
+/// giornata (GG-5) e individuano da sé la propria riga, quale che sia il
+/// numero di slot che li precedono. Allinearli per `order`, come si
+/// faceva, collocava il pranzo di chi non fa colazione nella riga della
+/// colazione (segnalato dall'utente).
+///
+/// Gli spuntini, numericamente liberi (GG-4), si allineano invece per
+/// posizione dentro il tratto di giornata delimitato dai tre pasti
+/// principali: il primo spuntino del mattino di ciascuno sta con quello
+/// degli altri, il secondo con il secondo, e le righe eccedenti recano
+/// il tratto di assenza per chi non le prevede (6.3 interfaccia.md,
+/// "composizioni disomogenee").
 class _GroupRow {
-  const _GroupRow({required this.order, required this.type, required this.label});
+  const _GroupRow({required this.type, required this.label, required this.slots});
 
-  final int order;
   final SlotType type;
 
   /// La denominazione descrittiva dello spuntino (GG-10) solo se tutti i
-  /// membri che lo prevedono a questo ordine concordano; altrimenti
+  /// membri che lo prevedono in questa riga concordano; altrimenti
   /// l'etichetta generica del tipo (6.3 interfaccia.md: "la riga
   /// riporta la denominazione generica").
   final String? label;
 
+  /// Lo slot di ciascun membro in questa riga, per identificativo:
+  /// assente per chi non lo prevede.
+  final Map<String, PlanDaySlot> slots;
+
   String displayLabel(BuildContext context) => label ?? slotTypeLabel(context, type);
 }
 
-List<_GroupRow> _buildRows(List<MemberPlanDay> members) {
-  final byOrder = <int, (SlotType, Set<String?>)>{};
-  for (final member in members) {
-    for (final slot in member.slots) {
-      final existing = byOrder[slot.order];
-      if (existing == null) {
-        byOrder[slot.order] = (slot.type, {slot.label});
-      } else {
-        existing.$2.add(slot.label);
-      }
-    }
-  }
-  final orders = byOrder.keys.toList()..sort();
-  return [
-    for (final order in orders)
-      _GroupRow(
-        order: order,
-        type: byOrder[order]!.$1,
-        label: byOrder[order]!.$1 == SlotType.snack && byOrder[order]!.$2.length == 1
-            ? byOrder[order]!.$2.single
-            : null,
-      ),
-  ];
+/// I tre pasti principali nella sequenza della giornata. Sono le ancore
+/// dell'allineamento: al più uno per giornata (GG-5), e quindi in
+/// quest'ordine per chiunque.
+const _anchorTypes = [SlotType.breakfast, SlotType.lunch, SlotType.dinner];
+
+/// Il rango dell'ancora, `null` per lo spuntino — che non delimita
+/// alcun tratto, essendone previsto un numero libero (GG-4).
+int? _anchorRank(SlotType type) {
+  final rank = _anchorTypes.indexOf(type);
+  return rank == -1 ? null : rank;
 }
 
-PlanDaySlot? _slotAt(MemberPlanDay member, int order) {
-  for (final slot in member.slots) {
-    if (slot.order == order) return slot;
+List<_GroupRow> _buildRows(List<MemberPlanDay> members) {
+  // Il tratto di giornata a cui appartiene uno spuntino: 0 prima della
+  // colazione, 1 fra colazione e pranzo, 2 fra pranzo e cena, 3 dopo
+  // cena. Per ciascun tratto, gli spuntini nella loro sequenza.
+  final snacksBySegment = <int, List<Map<String, PlanDaySlot>>>{};
+  final anchorSlots = <SlotType, Map<String, PlanDaySlot>>{};
+
+  for (final member in members) {
+    final slots = [...member.slots]..sort((a, b) => a.order.compareTo(b.order));
+
+    // Il rango del pasto principale che segue ciascuna posizione: è esso
+    // a collocare lo spuntino, sicché quello del mattino di chi non fa
+    // colazione sta comunque con quello degli altri.
+    final nextAnchor = List<int?>.filled(slots.length, null);
+    int? following;
+    for (var i = slots.length - 1; i >= 0; i--) {
+      nextAnchor[i] = following;
+      following = _anchorRank(slots[i].type) ?? following;
+    }
+
+    int? previous;
+    final countBySegment = <int, int>{};
+    for (var i = 0; i < slots.length; i++) {
+      final slot = slots[i];
+      final rank = _anchorRank(slot.type);
+      if (rank != null) {
+        (anchorSlots[slot.type] ??= {})[member.userId] = slot;
+        previous = rank;
+        continue;
+      }
+      // Nessun pasto principale a seguire: lo spuntino sta nel tratto
+      // che si apre dopo l'ultimo incontrato — dopo cena, o in coda a
+      // una giornata che alla cena non arriva.
+      final segment = nextAnchor[i] ?? (previous == null ? 0 : previous + 1);
+      final index = countBySegment[segment] ?? 0;
+      countBySegment[segment] = index + 1;
+      final rows = snacksBySegment.putIfAbsent(segment, () => []);
+      while (rows.length <= index) {
+        rows.add(<String, PlanDaySlot>{});
+      }
+      rows[index][member.userId] = slot;
+    }
   }
-  return null;
+
+  final rows = <_GroupRow>[];
+  void addSnacks(int segment) {
+    for (final slots in snacksBySegment[segment] ?? const <Map<String, PlanDaySlot>>[]) {
+      rows.add(_GroupRow(type: SlotType.snack, label: _sharedLabel(slots.values), slots: slots));
+    }
+  }
+
+  for (var segment = 0; segment < _anchorTypes.length; segment++) {
+    addSnacks(segment);
+    final slots = anchorSlots[_anchorTypes[segment]];
+    if (slots != null) {
+      rows.add(_GroupRow(type: _anchorTypes[segment], label: null, slots: slots));
+    }
+  }
+  addSnacks(_anchorTypes.length);
+  return rows;
+}
+
+/// GG-10: la denominazione descrittiva vale per l'intera riga solo se
+/// tutti i membri che vi prevedono uno spuntino concordano — un solo
+/// valore distinto, `null` compreso.
+String? _sharedLabel(Iterable<PlanDaySlot> slots) {
+  final labels = {for (final slot in slots) slot.label};
+  return labels.length == 1 ? labels.single : null;
 }
 
 /// Modalità affiancata (VG-12, VG-13, VG-14, 6.3 interfaccia.md): i
@@ -314,31 +381,40 @@ class _DataRow extends StatelessWidget {
     final colors = context.colors;
     return DecoratedBox(
       decoration: BoxDecoration(border: Border(bottom: BorderSide(color: colors.dividerLight))),
-      child: SizedBox(
-        height: _rowHeight,
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            SizedBox(width: _labelColumnWidth, child: _RowLabel(row: row)),
-            for (final member in members)
-              SizedBox(
-                width: columnWidth,
-                child: DecoratedBox(
-                  decoration: BoxDecoration(color: member.userId == currentUserId ? colors.surfaceAlt : null),
-                  child: Padding(
-                    padding: const EdgeInsets.all(AppSpacing.xxs),
-                    child: _GroupSlotCell(
-                      slot: _slotAt(member, row.order),
-                      date: date,
-                      // CU-2, CU-3: sempre sulla propria colonna, o su
-                      // qualunque altra se Cuoco.
-                      canCheck: member.userId == currentUserId || isCook,
-                      memberUserId: member.userId == currentUserId ? null : member.userId,
+      // L'altezza della riga è ora un minimo, non una misura fissa: la
+      // card espansa (4.1) la fa crescere, e le celle affiancate
+      // crescono con essa restando allineate — è la riga a cedere, non
+      // la griglia. `IntrinsicHeight` costa una misurazione in più per
+      // riga, trascurabile su una griglia di poche righe e poche
+      // colonne quale è per natura quella di un Gruppo.
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(minHeight: _rowHeight),
+        child: IntrinsicHeight(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              SizedBox(width: _labelColumnWidth, child: _RowLabel(row: row)),
+              for (final member in members)
+                SizedBox(
+                  width: columnWidth,
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(color: member.userId == currentUserId ? colors.surfaceAlt : null),
+                    child: Padding(
+                      padding: const EdgeInsets.all(AppSpacing.xxs),
+                      child: _GroupSlotCell(
+                        slot: row.slots[member.userId],
+                        member: member,
+                        date: date,
+                        isSelf: member.userId == currentUserId,
+                        // CU-2, CU-3: sempre sulla propria colonna, o su
+                        // qualunque altra se Cuoco.
+                        canOperate: member.userId == currentUserId || isCook,
+                      ),
                     ),
                   ),
                 ),
-              ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -376,45 +452,141 @@ class _RowLabel extends StatelessWidget {
   }
 }
 
-/// Card compatta e non espandibile (4.1, 6.3 interfaccia.md): le colonne
-/// sono strette e l'espansione di una sfalserebbe le altre.
-class _GroupSlotCell extends ConsumerWidget {
-  const _GroupSlotCell({required this.slot, required this.date, required this.canCheck, this.memberUserId});
+/// Card di uno slot nella colonna di un membro (4.1, 6.3
+/// interfaccia.md). È un **pannello espandibile** come quella della
+/// vista giornaliera: chiusa presenta l'essenziale e consente la spunta,
+/// aperta il contenuto integrale, la nota accessoria e l'inversione.
+///
+/// 6.3 la voleva non espandibile "perché l'espansione di una sfalserebbe
+/// le altre": non accade, essendo la riga a crescere per intero (vedi
+/// `_DataRow` e decisioni.md).
+class _GroupSlotCell extends ConsumerStatefulWidget {
+  const _GroupSlotCell({
+    required this.slot,
+    required this.member,
+    required this.date,
+    required this.isSelf,
+    required this.canOperate,
+  });
 
+  /// `null` quando il membro non prevede alcuno slot in questa riga.
   final PlanDaySlot? slot;
+
+  final MemberPlanDay member;
   final DateTime date;
 
-  /// CU-2, CU-3: il proprio piano sempre; quello di un altro membro solo
-  /// se si è Cuoco del Gruppo.
-  final bool canCheck;
+  /// La propria colonna: nessun `userId` da inviare al server, ed è la
+  /// sola su cui operi anche chi non è Cuoco.
+  final bool isSelf;
 
-  /// `null` per il proprio piano; altrimenti l'identificativo del
-  /// membro su cui il Cuoco sta operando (CU-3, EP-2).
-  final String? memberUserId;
+  /// CU-2, CU-3, UT-12: il proprio piano sempre; quello di un altro
+  /// membro solo se si è Cuoco del Gruppo. Vale tanto per la spunta
+  /// quanto per l'inversione (VG-13, IG-1).
+  final bool canOperate;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<_GroupSlotCell> createState() => _GroupSlotCellState();
+}
+
+class _GroupSlotCellState extends ConsumerState<_GroupSlotCell> {
+  bool _expanded = false;
+
+  /// CU-3, EP-2: `null` per il proprio piano; altrimenti il membro su
+  /// cui il Cuoco sta operando.
+  String? get _memberUserId => widget.isSelf ? null : widget.member.userId;
+
+  @override
+  Widget build(BuildContext context) {
     // `ref.watch` (non solo `read`) tiene vivo il controller autoDispose
     // per la durata dell'operazione, sullo stesso criterio di MealCard.
     ref.watch(planDaySlotStatusControllerProvider);
     final colors = context.colors;
     final typography = context.typography;
     final consumption = context.consumptionColors;
-    final slot = this.slot;
+    final slot = widget.slot;
 
     if (slot == null) {
       // 6.3 interfaccia.md: "non uno spazio vuoto" — distingue "non
       // previsto" da "non ancora caricato".
-      return Center(child: Container(height: 1, color: colors.textTertiary));
+      return Center(
+        key: const Key('groupSlotAbsent'),
+        child: Container(height: 1, color: colors.textTertiary),
+      );
     }
 
     final hasContent = slot.content?.trim().isNotEmpty ?? false;
     final hasRecipe = slot.recipeName?.trim().isNotEmpty ?? false;
+    final hasNote = slot.note?.trim().isNotEmpty ?? false;
     final borderColor = switch (slot.status) {
       SlotStatus.consumed => consumption.consumed,
       SlotStatus.skipped => consumption.skipped,
       SlotStatus.toConsume => colors.dividerStrong,
     };
+
+    // 6.3 interfaccia.md: il tocco sulla denominazione della ricetta
+    // apre il foglio della ricetta, "che a chi cucina serve più che a
+    // chiunque altro" — resta un bersaglio distinto da quello che
+    // espande, anche da card aperta.
+    final body = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (hasRecipe)
+          GestureDetector(
+            onTap: () => _openRecipeSheet(context, slot),
+            child: Text(
+              slot.recipeName!.trim(),
+              style: typography.label.copyWith(color: colors.textPrimary),
+              maxLines: _expanded ? null : 3,
+              overflow: _expanded ? TextOverflow.visible : TextOverflow.ellipsis,
+            ),
+          ),
+        // A card chiusa con una ricetta il contenuto cede il posto alla
+        // denominazione, che è il dato utile a chi cucina; aperta,
+        // compaiono entrambi.
+        if (!hasRecipe || _expanded) ...[
+          if (hasRecipe) const SizedBox(height: AppSpacing.xxs),
+          Text(
+            hasContent ? slot.content!.trim() : context.l10n.slotToBeDefined,
+            style: typography.bodyMedium.copyWith(
+              color: hasContent ? colors.textPrimary : colors.textTertiary,
+            ),
+            maxLines: _expanded ? null : 3,
+            overflow: _expanded ? TextOverflow.visible : TextOverflow.ellipsis,
+          ),
+        ],
+        // GG-14: la nota accessoria non è fra ciò che 6.3 esclude dalla
+        // modalità affiancata, ed è spesso proprio un'avvertenza per chi
+        // prepara.
+        if (_expanded && hasNote) ...[
+          const SizedBox(height: AppSpacing.xs),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Icon(Icons.info_outline, size: 16, color: colors.textSecondary),
+              const SizedBox(width: AppSpacing.xxs),
+              Expanded(
+                child: Text(
+                  slot.note!.trim(),
+                  style: typography.bodyMedium.copyWith(color: colors.textSecondary),
+                ),
+              ),
+            ],
+          ),
+        ],
+        if (_expanded && _canMove(slot)) ...[
+          const SizedBox(height: AppSpacing.xs),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: TextButton.icon(
+              onPressed: () => _startMove(slot),
+              icon: Icon(Icons.swap_horiz, size: 18, color: colors.accent),
+              label: Text(context.l10n.mealMove, style: typography.label.copyWith(color: colors.accent)),
+            ),
+          ),
+        ],
+      ],
+    );
 
     return DecoratedBox(
       decoration: BoxDecoration(
@@ -422,64 +594,90 @@ class _GroupSlotCell extends ConsumerWidget {
         borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
         border: Border(left: BorderSide(color: borderColor, width: 3)),
       ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs, vertical: AppSpacing.xxs),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Expanded(
-              child: GestureDetector(
-                onTap: hasRecipe ? () => _openRecipeSheet(context, slot) : null,
-                child: hasRecipe
-                    ? Text(
-                        slot.recipeName!.trim(),
-                        style: typography.label.copyWith(color: colors.textPrimary),
-                        maxLines: 3,
-                        overflow: TextOverflow.ellipsis,
-                      )
-                    : Text(
-                        hasContent ? slot.content!.trim() : context.l10n.slotToBeDefined,
-                        style: typography.bodyMedium.copyWith(
-                          color: hasContent ? colors.textPrimary : colors.textTertiary,
-                        ),
-                        maxLines: 3,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-              ),
-            ),
-            if (canCheck) ...[
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: () => setState(() => _expanded = !_expanded),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs, vertical: AppSpacing.xxs),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Chiusa, il corpo occupa l'altezza della riga e tiene i
+              // comandi in basso; aperta, li spinge in fondo a sé.
+              if (_expanded) body else Expanded(child: body),
               const SizedBox(height: AppSpacing.xxs),
               Row(
-                mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  _CompactSpuntaButton(
-                    icon: Icons.check,
-                    active: slot.status == SlotStatus.consumed,
-                    color: consumption.consumed,
-                    onTap: () => _updateStatus(ref, slot, SlotStatus.consumed),
+                  // 4.1 interfaccia.md: l'indicatore segnala che la card
+                  // è espandibile, ruotando di 180° all'apertura.
+                  AnimatedRotation(
+                    turns: _expanded ? 0.5 : 0,
+                    duration: AppSpacing.motionStateTransition,
+                    child: Icon(Icons.keyboard_arrow_down, size: 16, color: colors.textTertiary),
                   ),
-                  const SizedBox(width: AppSpacing.xxs),
-                  _CompactSpuntaButton(
-                    icon: Icons.close,
-                    active: slot.status == SlotStatus.skipped,
-                    color: consumption.skipped,
-                    onTap: () => _updateStatus(ref, slot, SlotStatus.skipped),
-                  ),
+                  const Spacer(),
+                  if (widget.canOperate) ...[
+                    _CompactSpuntaButton(
+                      icon: Icons.check,
+                      active: slot.status == SlotStatus.consumed,
+                      color: consumption.consumed,
+                      onTap: () => _updateStatus(slot, SlotStatus.consumed),
+                    ),
+                    const SizedBox(width: AppSpacing.xxs),
+                    _CompactSpuntaButton(
+                      icon: Icons.close,
+                      active: slot.status == SlotStatus.skipped,
+                      color: consumption.skipped,
+                      onTap: () => _updateStatus(slot, SlotStatus.skipped),
+                    ),
+                  ],
                 ],
               ),
             ],
-          ],
+          ),
         ),
       ),
     );
   }
 
-  void _updateStatus(WidgetRef ref, PlanDaySlot slot, SlotStatus tapped) {
+  void _updateStatus(PlanDaySlot slot, SlotStatus tapped) {
     final next = slot.status == tapped ? SlotStatus.toConsume : tapped;
     ref
         .read(planDaySlotStatusControllerProvider.notifier)
-        .updateStatus(date, slot.slotId, next, userId: memberUserId);
+        .updateStatus(widget.date, slot.slotId, next, userId: _memberUserId);
+  }
+
+  /// MS-8, condizioni 1/3/4 applicate a questo solo slot — lo stesso
+  /// criterio di `isMealSwapOriginEligible`, qui su una giornata di
+  /// gruppo anziché su un `PlanDay`. La facoltà è quella di [canOperate]
+  /// (VG-13, IG-1, CU-2: il Cuoco su ogni colonna; UT-12: gli altri
+  /// sulla propria).
+  bool _canMove(PlanDaySlot slot) =>
+      widget.canOperate &&
+      widget.member.coverage == PlanDayCoverage.active &&
+      widget.member.planId != null &&
+      slot.status != SlotStatus.consumed &&
+      !dateOnly(widget.date).isBefore(dateOnly(DateTime.now()));
+
+  /// VG-13, IG-1: l'inversione è disponibile anche in modalità
+  /// affiancata. La scelta della destinazione resta però compito della
+  /// vista settimanale (VS-8, 6.5 interfaccia.md), il solo contesto in
+  /// cui origine e destinazione sono visibili insieme: l'avvio vi
+  /// conduce, dopo aver reso corrente il membro di quella colonna —
+  /// sicché la settimanale ne mostra le giornate e l'intestazione ne
+  /// dichiara il nome (VG-11).
+  void _startMove(PlanDaySlot slot) {
+    ref.read(selectedGroupMemberProvider.notifier).select(_memberUserId);
+    ref.read(sideBySideModeProvider.notifier).disable();
+    ref.read(mealSwapSelectionProvider.notifier).start(MealSwapOrigin(
+          planId: widget.member.planId!,
+          date: dateOnly(widget.date),
+          slotId: slot.slotId,
+          type: slot.type,
+          status: slot.status,
+        ));
+    ref.read(selectedPlanViewProvider.notifier).select(PlanViewMode.week);
   }
 
   void _openRecipeSheet(BuildContext context, PlanDaySlot slot) {
@@ -501,7 +699,7 @@ class _GroupSlotCell extends ConsumerWidget {
                 Expanded(
                   child: SingleChildScrollView(
                     child: Text(
-                      (slot.content?.trim().isNotEmpty ?? false) ? slot.content!.trim() : context.l10n.slotToBeDefined,
+                      _recipeSheetText(context, slot),
                       style: typography.bodyLarge.copyWith(color: colors.textPrimary),
                     ),
                   ),
@@ -513,6 +711,14 @@ class _GroupSlotCell extends ConsumerWidget {
       ),
     );
   }
+}
+
+/// Il testo integrale della ricetta (GG-18); in sua assenza il
+/// contenuto dello slot, che resta l'unica cosa da leggere.
+String _recipeSheetText(BuildContext context, PlanDaySlot slot) {
+  if (slot.recipeText?.trim().isNotEmpty ?? false) return slot.recipeText!.trim();
+  if (slot.content?.trim().isNotEmpty ?? false) return slot.content!.trim();
+  return context.l10n.slotToBeDefined;
 }
 
 class _CompactSpuntaButton extends StatelessWidget {
