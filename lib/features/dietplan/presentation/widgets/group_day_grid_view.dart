@@ -21,7 +21,12 @@ import '../slot_type_presentation.dart';
 
 const double _labelColumnWidth = 72;
 const double _memberColumnWidth = 140;
-const double _headerHeight = 56;
+
+/// Altezza **minima** dell'intestazione, non misura fissa: avatar a 32,
+/// spaziatura e riga di testo la esauriscono per intero al corpo
+/// nominale, sicché il minimo ingrandimento del carattere di sistema
+/// (MP-5) la faceva traboccare. Vedi decisioni.md.
+const double _minHeaderHeight = 56;
 const double _rowHeight = 96;
 
 /// SY-20, 10 tecnica: unico contesto in cui più persone operano sui
@@ -290,6 +295,11 @@ double _columnWidthFor(AppBreakpoint breakpoint, double availableWidth, int memb
 /// Intestazione delle colonne (6.3 interfaccia.md): riga fissa in cima,
 /// che permane allo scorrimento verticale (garantito qui dallo stare
 /// fuori dallo `SingleChildScrollView` verticale del corpo).
+///
+/// L'altezza è un minimo e non una misura fissa, come per le righe di
+/// dati: l'ingrandimento del carattere impostato nel sistema operativo
+/// (MP-5) allunga il nome, e a cedere dev'essere l'intestazione, non il
+/// testo.
 class _HeaderRow extends StatelessWidget {
   const _HeaderRow({required this.members, required this.currentUserId, required this.columnWidth});
 
@@ -305,17 +315,22 @@ class _HeaderRow extends StatelessWidget {
         color: colors.surface,
         border: Border(bottom: BorderSide(color: colors.dividerLight)),
       ),
-      child: SizedBox(
-        height: _headerHeight,
-        child: Row(
-          children: [
-            const SizedBox(width: _labelColumnWidth),
-            for (final member in members)
-              SizedBox(
-                width: columnWidth,
-                child: _HeaderCell(member: member, isSelf: member.userId == currentUserId),
-              ),
-          ],
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(minHeight: _minHeaderHeight),
+        child: IntrinsicHeight(
+          child: Row(
+            // Il fondo che distingue la propria colonna (6.3) deve
+            // coprire l'intestazione per intero, quale ne sia l'altezza.
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const SizedBox(width: _labelColumnWidth),
+              for (final member in members)
+                SizedBox(
+                  width: columnWidth,
+                  child: _HeaderCell(member: member, isSelf: member.userId == currentUserId),
+                ),
+            ],
+          ),
         ),
       ),
     );
@@ -336,23 +351,34 @@ class _HeaderCell extends StatelessWidget {
       // La colonna propria si distingue con un fondo appena diverso
       // (6.3 interfaccia.md), senza dover leggere il nome.
       decoration: BoxDecoration(color: isSelf ? colors.surfaceAlt : null),
-      child: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            CircleAvatar(
-              radius: 16,
-              backgroundColor: colors.surfaceAlt,
-              child: Icon(Icons.person_outline, size: 18, color: colors.textSecondary),
-            ),
-            const SizedBox(height: AppSpacing.xxs),
-            Text(
-              member.firstName,
-              style: typography.label.copyWith(color: colors.textPrimary),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ],
+      child: Padding(
+        // Solo orizzontale: il nome troncato non deve toccare il filo
+        // della colonna accanto. Verticalmente il contenuto esaurisce
+        // il minimo di 56 e non va compresso — a carattere ingrandito è
+        // l'intestazione a crescere.
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xxs),
+        child: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              CircleAvatar(
+                radius: 16,
+                backgroundColor: colors.surfaceAlt,
+                child: Icon(Icons.person_outline, size: 18, color: colors.textSecondary),
+              ),
+              const SizedBox(height: AppSpacing.xxs),
+              // Il nome è troncato prima di andare a capo (6.3): a
+              // crescere è il corpo del carattere, non il numero di
+              // righe, e l'intestazione resta della stessa altezza per
+              // tutti i membri.
+              Text(
+                member.firstName,
+                style: typography.label.copyWith(color: colors.textPrimary),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
+          ),
         ),
       ),
     );
