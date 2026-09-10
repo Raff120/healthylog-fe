@@ -501,7 +501,7 @@ class L10nIt extends L10n {
 
   @override
   String get errorVerificationTokenInvalid =>
-      'Il collegamento non è più valido. Richiedine uno nuovo.';
+      'Il codice non è valido o è scaduto. Richiedine uno nuovo.';
 
   @override
   String get errorWorkoutFutureDate =>
@@ -1935,14 +1935,13 @@ class L10nIt extends L10n {
       'Questo nome utente è già in uso';
 
   @override
-  String get verifyEmailBackToLogin => 'Torna all\'accesso';
+  String get verifyEmailCode => 'Codice di conferma';
 
   @override
-  String get verifyEmailLinkExpiredBody =>
-      'Torna all\'accesso per richiederne uno nuovo.';
+  String get verifyEmailCodeIncomplete => 'Il codice è di sei cifre';
 
   @override
-  String get verifyEmailLinkExpiredTitle => 'Il collegamento non è più valido';
+  String get verifyEmailConfirm => 'Conferma';
 
   @override
   String get verifyEmailResend => 'Invia di nuovo';
@@ -1954,7 +1953,7 @@ class L10nIt extends L10n {
 
   @override
   String verifyEmailSentTo(String email) {
-    return 'Abbiamo inviato un collegamento di conferma a $email';
+    return 'Abbiamo inviato un codice di conferma a $email';
   }
 
   @override

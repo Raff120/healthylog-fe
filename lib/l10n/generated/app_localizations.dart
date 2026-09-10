@@ -952,7 +952,7 @@ abstract class L10n {
   /// No description provided for @errorVerificationTokenInvalid.
   ///
   /// In it, this message translates to:
-  /// **'Il collegamento non è più valido. Richiedine uno nuovo.'**
+  /// **'Il codice non è valido o è scaduto. Richiedine uno nuovo.'**
   String get errorVerificationTokenInvalid;
 
   /// No description provided for @errorWorkoutFutureDate.
@@ -3403,23 +3403,23 @@ abstract class L10n {
   /// **'Questo nome utente è già in uso'**
   String get validationUsernameAlreadyTaken;
 
-  /// No description provided for @verifyEmailBackToLogin.
+  /// No description provided for @verifyEmailCode.
   ///
   /// In it, this message translates to:
-  /// **'Torna all\'accesso'**
-  String get verifyEmailBackToLogin;
+  /// **'Codice di conferma'**
+  String get verifyEmailCode;
 
-  /// No description provided for @verifyEmailLinkExpiredBody.
+  /// No description provided for @verifyEmailCodeIncomplete.
   ///
   /// In it, this message translates to:
-  /// **'Torna all\'accesso per richiederne uno nuovo.'**
-  String get verifyEmailLinkExpiredBody;
+  /// **'Il codice è di sei cifre'**
+  String get verifyEmailCodeIncomplete;
 
-  /// No description provided for @verifyEmailLinkExpiredTitle.
+  /// No description provided for @verifyEmailConfirm.
   ///
   /// In it, this message translates to:
-  /// **'Il collegamento non è più valido'**
-  String get verifyEmailLinkExpiredTitle;
+  /// **'Conferma'**
+  String get verifyEmailConfirm;
 
   /// No description provided for @verifyEmailResend.
   ///
@@ -3436,7 +3436,7 @@ abstract class L10n {
   /// No description provided for @verifyEmailSentTo.
   ///
   /// In it, this message translates to:
-  /// **'Abbiamo inviato un collegamento di conferma a {email}'**
+  /// **'Abbiamo inviato un codice di conferma a {email}'**
   String verifyEmailSentTo(String email);
 
   /// No description provided for @verifyEmailTitle.

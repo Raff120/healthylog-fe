@@ -492,7 +492,7 @@ class L10nEn extends L10n {
 
   @override
   String get errorVerificationTokenInvalid =>
-      'The link is no longer valid. Request a new one.';
+      'The code is not valid or has expired. Request a new one.';
 
   @override
   String get errorWorkoutFutureDate =>
@@ -1916,14 +1916,13 @@ class L10nEn extends L10n {
   String get validationUsernameAlreadyTaken => 'This username is already taken';
 
   @override
-  String get verifyEmailBackToLogin => 'Back to sign-in';
+  String get verifyEmailCode => 'Confirmation code';
 
   @override
-  String get verifyEmailLinkExpiredBody =>
-      'Go back to sign-in to request a new one.';
+  String get verifyEmailCodeIncomplete => 'The code has six digits';
 
   @override
-  String get verifyEmailLinkExpiredTitle => 'The link is no longer valid';
+  String get verifyEmailConfirm => 'Confirm';
 
   @override
   String get verifyEmailResend => 'Send again';
@@ -1935,7 +1934,7 @@ class L10nEn extends L10n {
 
   @override
   String verifyEmailSentTo(String email) {
-    return 'We sent a confirmation link to $email';
+    return 'We sent a confirmation code to $email';
   }
 
   @override
