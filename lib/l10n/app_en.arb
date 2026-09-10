@@ -480,7 +480,6 @@
   "statisticsAdherence": "Adherence",
   "statisticsAppearWithPlan": "Plan statistics appear once a plan exists.",
   "statisticsBody": "Body",
-  "statisticsChangePeriod": "Change period",
   "statisticsExclusionDaysSuspended": "{count, plural, =1{1 suspended day} other{{count} suspended days}}",
   "statisticsExclusionDaysUncovered": "{count, plural, =1{1 day without a plan} other{{count} days without a plan}}",
   "statisticsExclusionNotice": "The calculation excludes {what}.",

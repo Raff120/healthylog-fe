@@ -28,12 +28,17 @@ class SelectedStatisticsView extends _$SelectedStatisticsView {
 
 /// 11.1: il selettore del periodo è comune ai tre segmenti ed è
 /// conservato tra le sessioni (3.2), come la preferenza del tema.
+///
+/// Alla prima apertura vale il mese e non la settimana (richiesta
+/// dell'utente, vedi decisioni.md): su una settimana sola l'andamento non
+/// si vede — la sezione settimanale di AD-14 non compare nemmeno — e le
+/// misurazioni corporee, che si registrano di rado, cadono spesso fuori.
 @riverpod
 class SelectedStatisticsPeriod extends _$SelectedStatisticsPeriod {
   @override
   Future<StatisticsPeriod> build() async {
     final stored = await ref.watch(preferencesStoreProvider).read(_periodKey);
-    return stored == null ? StatisticsPeriod.week : StatisticsPeriod.fromParam(stored);
+    return stored == null ? StatisticsPeriod.month : StatisticsPeriod.fromParam(stored);
   }
 
   Future<void> select(StatisticsPeriod period) async {

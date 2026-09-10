@@ -1669,9 +1669,6 @@ class L10nEn extends L10n {
   String get statisticsBody => 'Body';
 
   @override
-  String get statisticsChangePeriod => 'Change period';
-
-  @override
   String statisticsExclusionDaysSuspended(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,

@@ -85,31 +85,55 @@
 
     /*
       L'applicazione occupa lo schermo intero, rientrata dalle zone riservate
-      del dispositivo. La rientranza va dichiarata qui: il motore Flutter non
-      legge `env(safe-area-inset-*)` e `MediaQuery.padding` resta nullo sul
-      web, sicché `SafeArea` non produrrebbe alcuna spaziatura (vedi
-      decisioni.md).
+      del dispositivo su tre lati. La rientranza va dichiarata qui: il motore
+      Flutter non legge `env(safe-area-inset-*)` e `MediaQuery.padding` resta
+      nullo sul web, sicché `SafeArea` non produrrebbe alcuna spaziatura
+      (vedi decisioni.md).
 
-      La rientranza è uno scostamento dei lati, non una spaziatura interna:
-      il motore misura l'elemento ospite con `clientHeight`, che comprende
-      la spaziatura, mentre vi dipinge dentro un elemento alto il 100% del
-      solo riquadro del contenuto. Dichiarata come spaziatura, la rientranza
+      È uno scostamento dei lati, non una spaziatura interna: il motore
+      misura l'elemento ospite con `clientHeight`, che comprende la
+      spaziatura, mentre vi dipinge dentro un elemento alto il 100% del solo
+      riquadro del contenuto. Dichiarata come spaziatura, la rientranza
       entrerebbe nella misura ma non nella superficie dipinta, e
       l'applicazione risulterebbe più alta della propria finestra della
       somma delle zone riservate: il fondo — la barra di navigazione —
       finirebbe tagliato (vedi decisioni.md).
+
+      Il lato inferiore fa eccezione: là l'applicazione arriva al bordo dello
+      schermo e la zona riservata la dipinge lei, ricevendone la misura come
+      `MediaQuery.padding` (`device_insets.dart`). Sottrarla qui lascerebbe
+      una fascia di colore proprio sotto la barra di navigazione, che ha il
+      colore della superficie e non quello del fondo: uno stacco visibile che
+      nessun valore dichiarato in questa pagina potrebbe evitare, non
+      sapendosi di qui che cosa l'applicazione stia mostrando.
     */
     #healthylog {
       position: fixed;
       top: env(safe-area-inset-top);
       right: env(safe-area-inset-right);
-      bottom: env(safe-area-inset-bottom);
+      bottom: 0;
       left: env(safe-area-inset-left);
+    }
+
+    /*
+      Sonda della zona riservata inferiore: non si vede e non riceve tocchi,
+      esiste perché di lì l'applicazione ne legga la misura. `env()` si
+      risolve solo dove è usato, e il motore non riferisce queste misure.
+    */
+    #healthylog-safe-area-bottom {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 0;
+      height: env(safe-area-inset-bottom);
+      visibility: hidden;
+      pointer-events: none;
     }
   </style>
 </head>
 <body>
   <div id="healthylog"></div>
+  <div id="healthylog-safe-area-bottom" aria-hidden="true"></div>
   <script src="flutter_bootstrap.js" async></script>
 </body>
 </html>

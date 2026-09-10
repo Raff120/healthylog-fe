@@ -1019,7 +1019,6 @@
   "statisticsAdherence": "Aderenza",
   "statisticsAppearWithPlan": "Le statistiche del piano compaiono quando ne esiste uno.",
   "statisticsBody": "Corpo",
-  "statisticsChangePeriod": "Cambia periodo",
   "statisticsExclusionDaysSuspended": "{count, plural, =1{1 giorno di sospensione} other{{count} giorni di sospensione}}",
   "@statisticsExclusionDaysSuspended": {
     "placeholders": {

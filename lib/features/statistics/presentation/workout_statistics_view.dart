@@ -8,7 +8,6 @@ import '../data/statistics_models.dart';
 import 'statistics_formatting.dart';
 import 'widgets/breakdown_row.dart';
 import 'widgets/statistics_headline.dart';
-import 'widgets/statistics_period_menu.dart';
 import 'widgets/weekly_bar_chart.dart';
 
 /// Segmento **Allenamenti** di *Statistiche* (11.2 interfaccia.md):
@@ -47,9 +46,6 @@ class WorkoutStatisticsView extends ConsumerWidget {
             statistics.to,
             statistics.planName,
           ),
-          // AD-8: la didascalia è il selettore del periodo, comune ai tre
-          // segmenti.
-          onCaptionTap: (anchor) => showStatisticsPeriodMenu(anchor, ref, statistics.period),
         ),
         // SA-15: sull'orizzonte del piano i giorni di sospensione, esclusi
         // dall'aderenza, concorrono invece qui per intero (SA-14).
