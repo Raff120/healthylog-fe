@@ -3,55 +3,23 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../app/theme/app_spacing.dart';
 import '../../../app/theme/theme_context.dart';
-import '../../../core/api/api_error_messages.dart';
-import '../../../core/api/api_exception.dart';
-import '../../../core/widgets/empty_state_view.dart';
 import '../../../l10n/formats.dart';
 import '../../../l10n/l10n_context.dart';
 import '../../../l10n/units.dart';
 import '../../identity/providers/profile_providers.dart';
 import '../data/measurement_models.dart';
-import '../providers/measurement_providers.dart';
 import 'body_circumference_presentation.dart';
-import 'widgets/last_measurement_card.dart';
 import 'widgets/measurement_list_tile.dart';
 import 'widgets/measurement_sheet.dart';
 
-/// Segmento **Misure** di *Attività* (10.3 interfaccia.md): l'ultima
-/// misurazione in evidenza, l'elenco cronologico e — dalla schermata che
-/// lo ospita — il pulsante mobile per la registrazione.
+/// Elenco cronologico delle misurazioni (AN-4), voci separate da un
+/// filo. Non scorre di suo: vive dentro il contenuto che lo ospita —
+/// il segmento *Corpo* di *Statistiche* (11.3), in coda al grafico.
 ///
-/// PR-15: il sistema non sollecita la registrazione né segnala l'assenza
-/// di misurazioni recenti; lo stato vuoto è una constatazione (4.4).
-class MeasurementsView extends ConsumerWidget {
-  const MeasurementsView({super.key});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final colors = context.colors;
-    final typography = context.typography;
-    final measurements = ref.watch(measurementsProvider);
-
-    return measurements.when(
-      loading: () => const Center(child: CircularProgressIndicator()),
-      error: (error, _) => Center(
-        child: Text(
-          describeApiError(context, error.asApiException?.code ?? ''),
-          style: typography.bodyMedium.copyWith(color: colors.textSecondary),
-        ),
-      ),
-      data: (items) => items.isEmpty
-          ? EmptyStateView(
-              icon: Icons.straighten_outlined,
-              title: context.l10n.measurementNoneRecorded,
-            )
-          : _MeasurementsList(items: items),
-    );
-  }
-}
-
-class _MeasurementsList extends StatelessWidget {
-  const _MeasurementsList({required this.items});
+/// Risiede nella feature *measurement* e non in *statistics* perché la
+/// misurazione è sua: *Statistiche* la presenta, non la possiede (FE-6).
+class MeasurementList extends StatelessWidget {
+  const MeasurementList({super.key, required this.items});
 
   final List<BodyMeasurement> items;
 
@@ -59,29 +27,28 @@ class _MeasurementsList extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.colors;
 
-    return ListView.separated(
-      padding: const EdgeInsets.only(bottom: AppSpacing.xxl),
-      itemCount: items.length + 1,
-      separatorBuilder: (context, index) =>
-          index == 0 ? const SizedBox.shrink() : Divider(height: 1, color: colors.dividerLight),
-      itemBuilder: (context, index) {
-        if (index == 0) return LastMeasurementCard(measurement: items.first);
-        final measurement = items[index - 1];
-        return MeasurementListTile(
-          measurement: measurement,
-          // PR-17: sulla misurazione del professionista il tocco apre la
-          // sola consultazione — il foglio la presenta comunque, ed è il
-          // salvataggio a non essere offerto.
-          onTap: () => showMeasurementDetail(context, measurement),
-        );
-      },
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        for (final measurement in items) ...[
+          MeasurementListTile(
+            measurement: measurement,
+            // PR-16, PR-17: il tocco conduce alla modifica sulle proprie
+            // misurazioni, alla sola consultazione su quelle del
+            // professionista.
+            onTap: () => showMeasurementDetail(context, measurement),
+          ),
+          Divider(height: 1, color: colors.dividerLight),
+        ],
+      ],
     );
   }
 }
 
-/// PR-17, 10.3: le misurazioni rilevate dal professionista si consultano,
+/// PR-17, 11.3: le misurazioni rilevate dal professionista si consultano,
 /// non si modificano; per le proprie il tocco conduce alla modifica
-/// (PR-16).
+/// (PR-16). Il foglio le presenta comunque: è il salvataggio a non
+/// essere offerto.
 Future<void> showMeasurementDetail(BuildContext context, BodyMeasurement measurement) {
   if (measurement.editable) {
     return showMeasurementSheet(context, existing: measurement);

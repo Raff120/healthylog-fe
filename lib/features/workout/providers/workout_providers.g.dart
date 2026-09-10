@@ -50,59 +50,6 @@ final class WorkoutApiProvider
 
 String _$workoutApiHash() => r'96a73893de7d0dc3b7067615c1e1edfa844f3613';
 
-@ProviderFor(SelectedActivityView)
-final selectedActivityViewProvider = SelectedActivityViewProvider._();
-
-final class SelectedActivityViewProvider
-    extends $NotifierProvider<SelectedActivityView, ActivityViewMode> {
-  SelectedActivityViewProvider._()
-    : super(
-        from: null,
-        argument: null,
-        retry: null,
-        name: r'selectedActivityViewProvider',
-        isAutoDispose: true,
-        dependencies: null,
-        $allTransitiveDependencies: null,
-      );
-
-  @override
-  String debugGetCreateSourceHash() => _$selectedActivityViewHash();
-
-  @$internal
-  @override
-  SelectedActivityView create() => SelectedActivityView();
-
-  /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(ActivityViewMode value) {
-    return $ProviderOverride(
-      origin: this,
-      providerOverride: $SyncValueProvider<ActivityViewMode>(value),
-    );
-  }
-}
-
-String _$selectedActivityViewHash() =>
-    r'6f89ebe6d7f9a2c3618522ef115b21b4e8b9e905';
-
-abstract class _$SelectedActivityView extends $Notifier<ActivityViewMode> {
-  ActivityViewMode build();
-  @$mustCallSuper
-  @override
-  WhenComplete runBuild() {
-    final ref = this.ref as $Ref<ActivityViewMode, ActivityViewMode>;
-    final element =
-        ref.element
-            as $ClassProviderElement<
-              AnyNotifier<ActivityViewMode, ActivityViewMode>,
-              ActivityViewMode,
-              Object?,
-              Object?
-            >;
-    return element.handleCreate(ref, build);
-  }
-}
-
 @ProviderFor(WorkoutFilterController)
 final workoutFilterControllerProvider = WorkoutFilterControllerProvider._();
 

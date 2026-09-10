@@ -33,7 +33,7 @@ class BodyCircumferences {
         'thigh': thigh,
       };
 
-  /// 10.3 interfaccia.md: le circonferenze rilevate in forma sintetica,
+  /// 11.3 interfaccia.md: le circonferenze rilevate in forma sintetica,
   /// nell'ordine di PR-12. La denominazione non è qui ma in
   /// `presentation/body_circumference_presentation.dart`: dipende dalla
   /// lingua selezionata (LO-1).

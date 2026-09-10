@@ -17,6 +17,10 @@ import '../../../support/measurement_api_stub.dart';
 
 /// *Attività* (10.1 interfaccia.md): pianificazione, obiettivo, elenco e
 /// filtri. RA-11, RA-13, CB-8, CB-9, OS-10, RA-18.
+///
+/// La destinazione è dedicata ai soli allenamenti: le misure sono
+/// passate al segmento *Corpo* di *Statistiche* (11.3, vedi
+/// decisioni.md).
 
 String _isoDate(DateTime date) =>
     '${date.year.toString().padLeft(4, '0')}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
@@ -202,5 +206,22 @@ void main() {
     // filtro è un parametro dell'interrogazione, non una cernita a valle.
     expect(adapter.listQueries.last['activityType'], 'Corsa');
     expect(find.widgetWithText(InputChip, 'Corsa'), findsOneWidget);
+  });
+
+  /// La destinazione ospitava le misure dietro un segmented control.
+  /// Non più: nessun secondo segmento, e il pulsante mobile registra
+  /// sempre e solo un allenamento (vedi decisioni.md).
+  testWidgets('non offre più le misure: nessun segmento, nessuna loro registrazione',
+      (tester) async {
+    await _pumpActivity(tester);
+
+    expect(find.text('Misure'), findsNothing);
+    expect(find.text('Allenamenti'), findsOneWidget);
+
+    await tester.tap(find.byType(FloatingActionButton));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Registra un allenamento'), findsOneWidget);
+    expect(find.text('Registra una misurazione'), findsNothing);
   });
 }

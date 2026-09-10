@@ -64,7 +64,10 @@ class GroupMemberTile extends StatelessWidget {
                     ),
                     if (isSelf) ...[
                       const SizedBox(width: AppSpacing.xxs),
-                      Text('(tu)', style: typography.caption.copyWith(color: colors.textSecondary)),
+                      Text(
+                        context.l10n.groupMemberSelf,
+                        style: typography.caption.copyWith(color: colors.textSecondary),
+                      ),
                     ],
                   ],
                 ),

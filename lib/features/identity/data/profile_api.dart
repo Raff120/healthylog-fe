@@ -26,6 +26,16 @@ class ProfileApi {
     return Profile.fromJson(response.data as Map<String, dynamic>);
   }
 
+  /// AC-19, AU-20: modifica della password previa indicazione di
+  /// quella corrente. Non restituisce il profilo — nulla di quanto esso
+  /// espone cambia — né chiude le sessioni attive.
+  Future<void> changePassword(String currentPassword, String newPassword) {
+    return _dio.patch(
+      '/me/password',
+      data: {'currentPassword': currentPassword, 'newPassword': newPassword},
+    );
+  }
+
   /// PV-7, PV-8: accettazione dell'informativa vigente.
   Future<Profile> acceptPrivacyPolicy() async {
     final response = await _dio.post('/me/privacy-acceptance');

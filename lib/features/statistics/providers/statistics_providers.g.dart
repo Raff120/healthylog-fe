@@ -105,16 +105,31 @@ abstract class _$SelectedStatisticsView extends $Notifier<StatisticsViewMode> {
 
 /// 11.1: il selettore del periodo è comune ai tre segmenti ed è
 /// conservato tra le sessioni (3.2), come la preferenza del tema.
+///
+/// Alla prima apertura vale il mese e non la settimana (richiesta
+/// dell'utente, vedi decisioni.md): su una settimana sola l'andamento non
+/// si vede — la sezione settimanale di AD-14 non compare nemmeno — e le
+/// misurazioni corporee, che si registrano di rado, cadono spesso fuori.
 
 @ProviderFor(SelectedStatisticsPeriod)
 final selectedStatisticsPeriodProvider = SelectedStatisticsPeriodProvider._();
 
 /// 11.1: il selettore del periodo è comune ai tre segmenti ed è
 /// conservato tra le sessioni (3.2), come la preferenza del tema.
+///
+/// Alla prima apertura vale il mese e non la settimana (richiesta
+/// dell'utente, vedi decisioni.md): su una settimana sola l'andamento non
+/// si vede — la sezione settimanale di AD-14 non compare nemmeno — e le
+/// misurazioni corporee, che si registrano di rado, cadono spesso fuori.
 final class SelectedStatisticsPeriodProvider
     extends $AsyncNotifierProvider<SelectedStatisticsPeriod, StatisticsPeriod> {
   /// 11.1: il selettore del periodo è comune ai tre segmenti ed è
   /// conservato tra le sessioni (3.2), come la preferenza del tema.
+  ///
+  /// Alla prima apertura vale il mese e non la settimana (richiesta
+  /// dell'utente, vedi decisioni.md): su una settimana sola l'andamento non
+  /// si vede — la sezione settimanale di AD-14 non compare nemmeno — e le
+  /// misurazioni corporee, che si registrano di rado, cadono spesso fuori.
   SelectedStatisticsPeriodProvider._()
     : super(
         from: null,
@@ -135,10 +150,15 @@ final class SelectedStatisticsPeriodProvider
 }
 
 String _$selectedStatisticsPeriodHash() =>
-    r'ead8b28bdb5ed06ca28eb1b83b40d6b592abcf59';
+    r'b7282804b34869fe69eb9ae7d839d4b17262383e';
 
 /// 11.1: il selettore del periodo è comune ai tre segmenti ed è
 /// conservato tra le sessioni (3.2), come la preferenza del tema.
+///
+/// Alla prima apertura vale il mese e non la settimana (richiesta
+/// dell'utente, vedi decisioni.md): su una settimana sola l'andamento non
+/// si vede — la sezione settimanale di AD-14 non compare nemmeno — e le
+/// misurazioni corporee, che si registrano di rado, cadono spesso fuori.
 
 abstract class _$SelectedStatisticsPeriod
     extends $AsyncNotifier<StatisticsPeriod> {

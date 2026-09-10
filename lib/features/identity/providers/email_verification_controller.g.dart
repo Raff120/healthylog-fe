@@ -8,22 +8,37 @@ part of 'email_verification_controller.dart';
 
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
-/// Reinvio del collegamento di verifica (AU-15). Il conto alla rovescia
-/// prima della riattivazione (AU-22, 5.3 interfaccia.md) è gestito dalla
-/// schermata; qui c'è solo la chiamata e il suo esito.
+/// Conferma dell'indirizzo per codice (AU-11) e reinvio del codice
+/// (AU-15). Il conto alla rovescia prima della riattivazione del reinvio
+/// (AU-22, 5.3 interfaccia.md) è gestito dalla schermata; qui ci sono
+/// solo le chiamate e il loro esito.
+///
+/// Un solo controllore per le due azioni, che appartengono alla medesima
+/// schermata e non possono essere in corso insieme: il suo stato è la
+/// sua attesa, e distinguerne due obbligherebbe la schermata a comporli.
 
 @ProviderFor(EmailVerificationController)
 final emailVerificationControllerProvider =
     EmailVerificationControllerProvider._();
 
-/// Reinvio del collegamento di verifica (AU-15). Il conto alla rovescia
-/// prima della riattivazione (AU-22, 5.3 interfaccia.md) è gestito dalla
-/// schermata; qui c'è solo la chiamata e il suo esito.
+/// Conferma dell'indirizzo per codice (AU-11) e reinvio del codice
+/// (AU-15). Il conto alla rovescia prima della riattivazione del reinvio
+/// (AU-22, 5.3 interfaccia.md) è gestito dalla schermata; qui ci sono
+/// solo le chiamate e il loro esito.
+///
+/// Un solo controllore per le due azioni, che appartengono alla medesima
+/// schermata e non possono essere in corso insieme: il suo stato è la
+/// sua attesa, e distinguerne due obbligherebbe la schermata a comporli.
 final class EmailVerificationControllerProvider
     extends $NotifierProvider<EmailVerificationController, AsyncValue<void>?> {
-  /// Reinvio del collegamento di verifica (AU-15). Il conto alla rovescia
-  /// prima della riattivazione (AU-22, 5.3 interfaccia.md) è gestito dalla
-  /// schermata; qui c'è solo la chiamata e il suo esito.
+  /// Conferma dell'indirizzo per codice (AU-11) e reinvio del codice
+  /// (AU-15). Il conto alla rovescia prima della riattivazione del reinvio
+  /// (AU-22, 5.3 interfaccia.md) è gestito dalla schermata; qui ci sono
+  /// solo le chiamate e il loro esito.
+  ///
+  /// Un solo controllore per le due azioni, che appartengono alla medesima
+  /// schermata e non possono essere in corso insieme: il suo stato è la
+  /// sua attesa, e distinguerne due obbligherebbe la schermata a comporli.
   EmailVerificationControllerProvider._()
     : super(
         from: null,
@@ -52,11 +67,16 @@ final class EmailVerificationControllerProvider
 }
 
 String _$emailVerificationControllerHash() =>
-    r'672759139d432715078e0013f96e4242e7de1cb1';
+    r'f6c11344575d51d6479c8d8d31a200208821a343';
 
-/// Reinvio del collegamento di verifica (AU-15). Il conto alla rovescia
-/// prima della riattivazione (AU-22, 5.3 interfaccia.md) è gestito dalla
-/// schermata; qui c'è solo la chiamata e il suo esito.
+/// Conferma dell'indirizzo per codice (AU-11) e reinvio del codice
+/// (AU-15). Il conto alla rovescia prima della riattivazione del reinvio
+/// (AU-22, 5.3 interfaccia.md) è gestito dalla schermata; qui ci sono
+/// solo le chiamate e il loro esito.
+///
+/// Un solo controllore per le due azioni, che appartengono alla medesima
+/// schermata e non possono essere in corso insieme: il suo stato è la
+/// sua attesa, e distinguerne due obbligherebbe la schermata a comporli.
 
 abstract class _$EmailVerificationController
     extends $Notifier<AsyncValue<void>?> {

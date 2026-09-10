@@ -13,7 +13,7 @@ import '../../../workout/providers/workout_providers.dart';
 
 /// Misurazioni e allenamenti del Paziente nel dettaglio (9.2
 /// interfaccia.md), con il pulsante *Registra misurazione* che apre il
-/// modulo di 10.3 (NU-12).
+/// modulo di 11.3 (NU-12).
 ///
 /// ST-16bis, CS-6: quanto vi compare è circoscritto ai periodi coperti
 /// dai piani redatti dal Nutrizionista — salvo le misurazioni da lui

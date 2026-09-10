@@ -16,6 +16,7 @@ import '../domain/registration_field_validators.dart';
 import '../providers/profile_providers.dart';
 import '../providers/username_availability_controller.dart';
 import 'widgets/date_and_sex_fields.dart';
+import 'widgets/profile_section_tile.dart';
 
 /// Modifica dei dati personali (12.1 interfaccia.md, PR-1, PR-4, PR-6).
 class PersonalDataScreen extends ConsumerStatefulWidget {
@@ -33,7 +34,7 @@ class _PersonalDataScreenState extends ConsumerState<PersonalDataScreen> {
   final _birthPlace = TextEditingController();
   final _height = TextEditingController();
   // PR-8: peso obiettivo, facoltativo. Sta nel profilo e non fra le
-  // misurazioni (10.3 interfaccia.md): non è un dato rilevato ma un
+  // misurazioni (11.3 interfaccia.md): non è un dato rilevato ma un
   // riferimento che l'Utente si dà.
   final _targetWeight = TextEditingController();
 
@@ -354,6 +355,18 @@ class _PersonalDataScreenState extends ConsumerState<PersonalDataScreen> {
                       ),
                       const SizedBox(height: AppSpacing.lg),
                       AppPrimaryButton(label: context.l10n.commonSave, loading: loading, onPressed: _submit),
+                      const SizedBox(height: AppSpacing.lg),
+                      // AC-19: la password si modifica da qui, ma non è
+                      // un campo di questo modulo — richiede quella
+                      // corrente e ha un salvataggio proprio. La voce ha
+                      // l'aspetto delle sezioni del Profilo (12.1),
+                      // perché è ciò che è: un passaggio in avanti, non
+                      // un campo.
+                      ProfileSectionTile(
+                        icon: Icons.lock_outline,
+                        label: context.l10n.personalDataChangePassword,
+                        onTap: () => context.push('/profile/personal-data/password'),
+                      ),
                     ],
                   ),
                 ),

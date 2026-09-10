@@ -32,8 +32,11 @@ class IdentityApi {
     return TokenPair.fromJson(response.data as Map<String, dynamic>);
   }
 
-  Future<void> verifyEmail(String token) {
-    return _dio.post('/auth/verify-email', data: {'token': token});
+  /// AU-11: conferma per codice ricevuto per posta. L'indirizzo
+  /// accompagna il codice, che essendo breve non identifica da solo
+  /// alcun account.
+  Future<void> verifyEmail(String email, String code) {
+    return _dio.post('/auth/verify-email', data: {'email': email, 'code': code});
   }
 
   Future<void> resendVerification(String email) {

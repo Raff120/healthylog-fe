@@ -4,6 +4,7 @@ import '../../../core/api/api_client.dart';
 import '../data/measurement_api.dart';
 import '../data/measurement_models.dart';
 import '../data/measurement_requests.dart';
+import '../../statistics/providers/statistics_providers.dart';
 
 part 'measurement_providers.g.dart';
 
@@ -47,5 +48,13 @@ class MeasurementController extends _$MeasurementController {
     if (state?.hasError ?? true) return;
     ref.invalidate(measurementsProvider);
     if (patientId != null) ref.invalidate(patientMeasurementsProvider(patientId));
+    // 11.3: le misure si registrano ora dal segmento *Corpo*, che le
+    // legge dalle statistiche e dall'elenco del periodo — non da
+    // `measurements`. Senza questa invalidazione la misurazione appena
+    // registrata non comparirebbe dove la si è registrata. Le due
+    // famiglie sono invalidate per intero: il criterio (periodo, piano,
+    // soggetto) non è noto qui, e sono poche.
+    ref.invalidate(measurementStatisticsProvider);
+    ref.invalidate(periodMeasurementsProvider);
   }
 }
