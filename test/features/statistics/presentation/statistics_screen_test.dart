@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:healthylog/app/theme/app_theme.dart';
@@ -66,6 +67,23 @@ Map<String, dynamic> _adherence({
     };
 
 void main() {
+  /// Il selettore del periodo divide l'intestazione con i tre segmenti:
+  /// ristretti, questi rimpiccioliscono di un fattore solo, uguale per
+  /// tutti. Rimpicciolendo ciascuno per conto proprio, le voci del
+  /// medesimo comando finirebbero di corpo diverso.
+  testWidgets('le tre voci restano dello stesso corpo accanto al selettore', (tester) async {
+    await _pumpStatistics(tester, adherence: _adherence(value: 75));
+
+    double corpo(String voce) =>
+        tester.renderObject<RenderParagraph>(find.text(voce)).text.style!.fontSize!;
+
+    expect(corpo('Allenamenti'), corpo('Aderenza'));
+    expect(corpo('Corpo'), corpo('Aderenza'));
+    // Quanto valga il fattore non si verifica qui: il banco di prova
+    // rende ogni carattere quadrato, e le larghezze non sono quelle del
+    // carattere reale. Ciò che conta è che il fattore sia uno solo.
+  });
+
   testWidgets('presenta i tre segmenti nell\'intestazione (11.1)', (tester) async {
     await _pumpStatistics(tester);
 
@@ -74,23 +92,55 @@ void main() {
     expect(find.text('Corpo'), findsOneWidget);
   });
 
-  /// Il selettore del periodo non è una seconda barra di comandi ma la
-  /// didascalia stessa del valore, che apre il menu degli orizzonti.
-  testWidgets('la didascalia del valore apre il menu del periodo (AD-8, AD-10)', (tester) async {
+  /// Il selettore del periodo sta nell'intestazione, accanto alle pillole
+  /// dei segmenti: governa la schermata e non il contenuto.
+  testWidgets('il selettore del periodo apre i tre orizzonti (AD-8, AD-10)', (tester) async {
     await _pumpStatistics(tester, adherence: _adherence(value: 75));
 
-    // Fuori dal menu i tre orizzonti non occupano una riga propria.
-    expect(find.text('Mese'), findsNothing);
+    // L'orizzonte in uso è dichiarato nell'intestazione; gli altri due
+    // non occupano una riga propria finché il menu è chiuso.
+    expect(find.text('Mese'), findsOneWidget);
+    expect(find.text('Settimana'), findsNothing);
     expect(find.text('Piano'), findsNothing);
 
-    await tester.tap(find.text('Settimana dal 2 mar al 8 mar'));
+    await tester.tap(find.text('Mese'));
     await tester.pumpAndSettle();
 
     // AD-8: settimana, mese e intero piano; AD-10: nessun intervallo
     // personalizzato.
     expect(find.text('Settimana'), findsOneWidget);
-    expect(find.text('Mese'), findsOneWidget);
+    expect(find.text('Mese'), findsWidgets);
     expect(find.text('Piano'), findsOneWidget);
+  });
+
+  /// 3.2: alla prima apertura vale il mese, non la settimana.
+  testWidgets('alla prima apertura l\'orizzonte è il mese', (tester) async {
+    await _pumpStatistics(tester, adherence: _adherence(value: 75));
+
+    expect(find.text('Mese'), findsOneWidget);
+  });
+
+  /// Il difetto: nel segmento *Corpo* privo di misurazioni il contenuto è
+  /// una constatazione, e il selettore del periodo — che viveva dentro il
+  /// contenuto — spariva con esso. Non c'era allora modo di cambiare
+  /// orizzonte se non passando a un altro segmento (segnalato
+  /// dall'utente).
+  testWidgets('il periodo resta cambiabile anche senza misurazioni nel periodo', (tester) async {
+    await _pumpStatistics(tester);
+
+    await tester.tap(find.text('Corpo'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Nessuna misurazione nel periodo'), findsOneWidget);
+
+    await tester.tap(find.text('Mese'));
+    await tester.pumpAndSettle();
+    expect(find.text('Settimana'), findsOneWidget);
+
+    await tester.tap(find.text('Settimana'));
+    await tester.pumpAndSettle();
+    expect(find.text('Settimana'), findsOneWidget);
+    expect(find.text('Mese'), findsNothing);
   });
 
   /// AD-14: una barra sola non è un andamento — sull'orizzonte

@@ -2977,12 +2977,6 @@ abstract class L10n {
   /// **'Corpo'**
   String get statisticsBody;
 
-  /// No description provided for @statisticsChangePeriod.
-  ///
-  /// In it, this message translates to:
-  /// **'Cambia periodo'**
-  String get statisticsChangePeriod;
-
   /// No description provided for @statisticsExclusionDaysSuspended.
   ///
   /// In it, this message translates to:
