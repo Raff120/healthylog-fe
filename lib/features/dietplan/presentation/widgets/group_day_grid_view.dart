@@ -378,31 +378,40 @@ class _DataRow extends StatelessWidget {
     final colors = context.colors;
     return DecoratedBox(
       decoration: BoxDecoration(border: Border(bottom: BorderSide(color: colors.dividerLight))),
-      child: SizedBox(
-        height: _rowHeight,
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            SizedBox(width: _labelColumnWidth, child: _RowLabel(row: row)),
-            for (final member in members)
-              SizedBox(
-                width: columnWidth,
-                child: DecoratedBox(
-                  decoration: BoxDecoration(color: member.userId == currentUserId ? colors.surfaceAlt : null),
-                  child: Padding(
-                    padding: const EdgeInsets.all(AppSpacing.xxs),
-                    child: _GroupSlotCell(
-                      slot: row.slots[member.userId],
-                      date: date,
-                      // CU-2, CU-3: sempre sulla propria colonna, o su
-                      // qualunque altra se Cuoco.
-                      canCheck: member.userId == currentUserId || isCook,
-                      memberUserId: member.userId == currentUserId ? null : member.userId,
+      // L'altezza della riga è ora un minimo, non una misura fissa: la
+      // card espansa (4.1) la fa crescere, e le celle affiancate
+      // crescono con essa restando allineate — è la riga a cedere, non
+      // la griglia. `IntrinsicHeight` costa una misurazione in più per
+      // riga, trascurabile su una griglia di poche righe e poche
+      // colonne quale è per natura quella di un Gruppo.
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(minHeight: _rowHeight),
+        child: IntrinsicHeight(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              SizedBox(width: _labelColumnWidth, child: _RowLabel(row: row)),
+              for (final member in members)
+                SizedBox(
+                  width: columnWidth,
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(color: member.userId == currentUserId ? colors.surfaceAlt : null),
+                    child: Padding(
+                      padding: const EdgeInsets.all(AppSpacing.xxs),
+                      child: _GroupSlotCell(
+                        slot: row.slots[member.userId],
+                        member: member,
+                        date: date,
+                        isSelf: member.userId == currentUserId,
+                        // CU-2, CU-3: sempre sulla propria colonna, o su
+                        // qualunque altra se Cuoco.
+                        canOperate: member.userId == currentUserId || isCook,
+                      ),
                     ),
                   ),
                 ),
-              ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -440,31 +449,57 @@ class _RowLabel extends StatelessWidget {
   }
 }
 
-/// Card compatta e non espandibile (4.1, 6.3 interfaccia.md): le colonne
-/// sono strette e l'espansione di una sfalserebbe le altre.
-class _GroupSlotCell extends ConsumerWidget {
-  const _GroupSlotCell({required this.slot, required this.date, required this.canCheck, this.memberUserId});
+/// Card di uno slot nella colonna di un membro (4.1, 6.3
+/// interfaccia.md). È un **pannello espandibile** come quella della
+/// vista giornaliera: chiusa presenta l'essenziale e consente la spunta,
+/// aperta il contenuto integrale e la nota accessoria.
+///
+/// 6.3 la voleva non espandibile "perché l'espansione di una sfalserebbe
+/// le altre": non accade, essendo la riga a crescere per intero (vedi
+/// `_DataRow` e decisioni.md).
+class _GroupSlotCell extends ConsumerStatefulWidget {
+  const _GroupSlotCell({
+    required this.slot,
+    required this.member,
+    required this.date,
+    required this.isSelf,
+    required this.canOperate,
+  });
 
+  /// `null` quando il membro non prevede alcuno slot in questa riga.
   final PlanDaySlot? slot;
+
+  final MemberPlanDay member;
   final DateTime date;
 
-  /// CU-2, CU-3: il proprio piano sempre; quello di un altro membro solo
-  /// se si è Cuoco del Gruppo.
-  final bool canCheck;
+  /// La propria colonna: nessun `userId` da inviare al server, ed è la
+  /// sola su cui operi anche chi non è Cuoco.
+  final bool isSelf;
 
-  /// `null` per il proprio piano; altrimenti l'identificativo del
-  /// membro su cui il Cuoco sta operando (CU-3, EP-2).
-  final String? memberUserId;
+  /// CU-2, CU-3, UT-12: il proprio piano sempre; quello di un altro
+  /// membro solo se si è Cuoco del Gruppo.
+  final bool canOperate;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<_GroupSlotCell> createState() => _GroupSlotCellState();
+}
+
+class _GroupSlotCellState extends ConsumerState<_GroupSlotCell> {
+  bool _expanded = false;
+
+  /// CU-3, EP-2: `null` per il proprio piano; altrimenti il membro su
+  /// cui il Cuoco sta operando.
+  String? get _memberUserId => widget.isSelf ? null : widget.member.userId;
+
+  @override
+  Widget build(BuildContext context) {
     // `ref.watch` (non solo `read`) tiene vivo il controller autoDispose
     // per la durata dell'operazione, sullo stesso criterio di MealCard.
     ref.watch(planDaySlotStatusControllerProvider);
     final colors = context.colors;
     final typography = context.typography;
     final consumption = context.consumptionColors;
-    final slot = this.slot;
+    final slot = widget.slot;
 
     if (slot == null) {
       // 6.3 interfaccia.md: "non uno spazio vuoto" — distingue "non
@@ -474,11 +509,66 @@ class _GroupSlotCell extends ConsumerWidget {
 
     final hasContent = slot.content?.trim().isNotEmpty ?? false;
     final hasRecipe = slot.recipeName?.trim().isNotEmpty ?? false;
+    final hasNote = slot.note?.trim().isNotEmpty ?? false;
     final borderColor = switch (slot.status) {
       SlotStatus.consumed => consumption.consumed,
       SlotStatus.skipped => consumption.skipped,
       SlotStatus.toConsume => colors.dividerStrong,
     };
+
+    // 6.3 interfaccia.md: il tocco sulla denominazione della ricetta
+    // apre il foglio della ricetta, "che a chi cucina serve più che a
+    // chiunque altro" — resta un bersaglio distinto da quello che
+    // espande, anche da card aperta.
+    final body = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (hasRecipe)
+          GestureDetector(
+            onTap: () => _openRecipeSheet(context, slot),
+            child: Text(
+              slot.recipeName!.trim(),
+              style: typography.label.copyWith(color: colors.textPrimary),
+              maxLines: _expanded ? null : 3,
+              overflow: _expanded ? TextOverflow.visible : TextOverflow.ellipsis,
+            ),
+          ),
+        // A card chiusa con una ricetta il contenuto cede il posto alla
+        // denominazione, che è il dato utile a chi cucina; aperta,
+        // compaiono entrambi.
+        if (!hasRecipe || _expanded) ...[
+          if (hasRecipe) const SizedBox(height: AppSpacing.xxs),
+          Text(
+            hasContent ? slot.content!.trim() : context.l10n.slotToBeDefined,
+            style: typography.bodyMedium.copyWith(
+              color: hasContent ? colors.textPrimary : colors.textTertiary,
+            ),
+            maxLines: _expanded ? null : 3,
+            overflow: _expanded ? TextOverflow.visible : TextOverflow.ellipsis,
+          ),
+        ],
+        // GG-14: la nota accessoria non è fra ciò che 6.3 esclude dalla
+        // modalità affiancata, ed è spesso proprio un'avvertenza per chi
+        // prepara.
+        if (_expanded && hasNote) ...[
+          const SizedBox(height: AppSpacing.xs),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Icon(Icons.info_outline, size: 16, color: colors.textSecondary),
+              const SizedBox(width: AppSpacing.xxs),
+              Expanded(
+                child: Text(
+                  slot.note!.trim(),
+                  style: typography.bodyMedium.copyWith(color: colors.textSecondary),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ],
+    );
 
     return DecoratedBox(
       decoration: BoxDecoration(
@@ -486,64 +576,58 @@ class _GroupSlotCell extends ConsumerWidget {
         borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
         border: Border(left: BorderSide(color: borderColor, width: 3)),
       ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs, vertical: AppSpacing.xxs),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Expanded(
-              child: GestureDetector(
-                onTap: hasRecipe ? () => _openRecipeSheet(context, slot) : null,
-                child: hasRecipe
-                    ? Text(
-                        slot.recipeName!.trim(),
-                        style: typography.label.copyWith(color: colors.textPrimary),
-                        maxLines: 3,
-                        overflow: TextOverflow.ellipsis,
-                      )
-                    : Text(
-                        hasContent ? slot.content!.trim() : context.l10n.slotToBeDefined,
-                        style: typography.bodyMedium.copyWith(
-                          color: hasContent ? colors.textPrimary : colors.textTertiary,
-                        ),
-                        maxLines: 3,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-              ),
-            ),
-            if (canCheck) ...[
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: () => setState(() => _expanded = !_expanded),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs, vertical: AppSpacing.xxs),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Chiusa, il corpo occupa l'altezza della riga e tiene i
+              // comandi in basso; aperta, li spinge in fondo a sé.
+              if (_expanded) body else Expanded(child: body),
               const SizedBox(height: AppSpacing.xxs),
               Row(
-                mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  _CompactSpuntaButton(
-                    icon: Icons.check,
-                    active: slot.status == SlotStatus.consumed,
-                    color: consumption.consumed,
-                    onTap: () => _updateStatus(ref, slot, SlotStatus.consumed),
+                  // 4.1 interfaccia.md: l'indicatore segnala che la card
+                  // è espandibile, ruotando di 180° all'apertura.
+                  AnimatedRotation(
+                    turns: _expanded ? 0.5 : 0,
+                    duration: AppSpacing.motionStateTransition,
+                    child: Icon(Icons.keyboard_arrow_down, size: 16, color: colors.textTertiary),
                   ),
-                  const SizedBox(width: AppSpacing.xxs),
-                  _CompactSpuntaButton(
-                    icon: Icons.close,
-                    active: slot.status == SlotStatus.skipped,
-                    color: consumption.skipped,
-                    onTap: () => _updateStatus(ref, slot, SlotStatus.skipped),
-                  ),
+                  const Spacer(),
+                  if (widget.canOperate) ...[
+                    _CompactSpuntaButton(
+                      icon: Icons.check,
+                      active: slot.status == SlotStatus.consumed,
+                      color: consumption.consumed,
+                      onTap: () => _updateStatus(slot, SlotStatus.consumed),
+                    ),
+                    const SizedBox(width: AppSpacing.xxs),
+                    _CompactSpuntaButton(
+                      icon: Icons.close,
+                      active: slot.status == SlotStatus.skipped,
+                      color: consumption.skipped,
+                      onTap: () => _updateStatus(slot, SlotStatus.skipped),
+                    ),
+                  ],
                 ],
               ),
             ],
-          ],
+          ),
         ),
       ),
     );
   }
 
-  void _updateStatus(WidgetRef ref, PlanDaySlot slot, SlotStatus tapped) {
+  void _updateStatus(PlanDaySlot slot, SlotStatus tapped) {
     final next = slot.status == tapped ? SlotStatus.toConsume : tapped;
     ref
         .read(planDaySlotStatusControllerProvider.notifier)
-        .updateStatus(date, slot.slotId, next, userId: memberUserId);
+        .updateStatus(widget.date, slot.slotId, next, userId: _memberUserId);
   }
 
   void _openRecipeSheet(BuildContext context, PlanDaySlot slot) {
@@ -565,12 +649,6 @@ class _GroupSlotCell extends ConsumerWidget {
                 Expanded(
                   child: SingleChildScrollView(
                     child: Text(
-                      // GG-18, 4.1 interfaccia.md: il foglio presenta il
-                      // testo della ricetta. Mostrava invece il
-                      // contenuto dello slot, che a card chiusa la
-                      // denominazione già sostituisce: la ricetta
-                      // risultava così irraggiungibile proprio dove
-                      // serve di più.
                       _recipeSheetText(context, slot),
                       style: typography.bodyLarge.copyWith(color: colors.textPrimary),
                     ),
