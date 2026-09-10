@@ -11,8 +11,11 @@ import '../../../../core/api/api_error_messages.dart';
 import '../../../../core/api/api_exception.dart';
 import '../../data/group_plan_day.dart';
 import '../../data/plan_day.dart';
+import '../../data/plan_day_coverage.dart';
 import '../../data/slot_status.dart';
 import '../../data/slot_type.dart';
+import '../../domain/plan_day_date.dart';
+import '../../providers/meal_swap_providers.dart';
 import '../../providers/plan_day_providers.dart';
 import '../slot_type_presentation.dart';
 
@@ -452,7 +455,7 @@ class _RowLabel extends StatelessWidget {
 /// Card di uno slot nella colonna di un membro (4.1, 6.3
 /// interfaccia.md). È un **pannello espandibile** come quella della
 /// vista giornaliera: chiusa presenta l'essenziale e consente la spunta,
-/// aperta il contenuto integrale e la nota accessoria.
+/// aperta il contenuto integrale, la nota accessoria e l'inversione.
 ///
 /// 6.3 la voleva non espandibile "perché l'espansione di una sfalserebbe
 /// le altre": non accade, essendo la riga a crescere per intero (vedi
@@ -477,7 +480,8 @@ class _GroupSlotCell extends ConsumerStatefulWidget {
   final bool isSelf;
 
   /// CU-2, CU-3, UT-12: il proprio piano sempre; quello di un altro
-  /// membro solo se si è Cuoco del Gruppo.
+  /// membro solo se si è Cuoco del Gruppo. Vale tanto per la spunta
+  /// quanto per l'inversione (VG-13, IG-1).
   final bool canOperate;
 
   @override
@@ -567,6 +571,17 @@ class _GroupSlotCellState extends ConsumerState<_GroupSlotCell> {
             ],
           ),
         ],
+        if (_expanded && _canMove(slot)) ...[
+          const SizedBox(height: AppSpacing.xs),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: TextButton.icon(
+              onPressed: () => _startMove(slot),
+              icon: Icon(Icons.swap_horiz, size: 18, color: colors.accent),
+              label: Text(context.l10n.mealMove, style: typography.label.copyWith(color: colors.accent)),
+            ),
+          ),
+        ],
       ],
     );
 
@@ -628,6 +643,38 @@ class _GroupSlotCellState extends ConsumerState<_GroupSlotCell> {
     ref
         .read(planDaySlotStatusControllerProvider.notifier)
         .updateStatus(widget.date, slot.slotId, next, userId: _memberUserId);
+  }
+
+  /// MS-8, condizioni 1/3/4 applicate a questo solo slot — lo stesso
+  /// criterio di `isMealSwapOriginEligible`, qui su una giornata di
+  /// gruppo anziché su un `PlanDay`. La facoltà è quella di [canOperate]
+  /// (VG-13, IG-1, CU-2: il Cuoco su ogni colonna; UT-12: gli altri
+  /// sulla propria).
+  bool _canMove(PlanDaySlot slot) =>
+      widget.canOperate &&
+      widget.member.coverage == PlanDayCoverage.active &&
+      widget.member.planId != null &&
+      slot.status != SlotStatus.consumed &&
+      !dateOnly(widget.date).isBefore(dateOnly(DateTime.now()));
+
+  /// VG-13, IG-1: l'inversione è disponibile anche in modalità
+  /// affiancata. La scelta della destinazione resta però compito della
+  /// vista settimanale (VS-8, 6.5 interfaccia.md), il solo contesto in
+  /// cui origine e destinazione sono visibili insieme: l'avvio vi
+  /// conduce, dopo aver reso corrente il membro di quella colonna —
+  /// sicché la settimanale ne mostra le giornate e l'intestazione ne
+  /// dichiara il nome (VG-11).
+  void _startMove(PlanDaySlot slot) {
+    ref.read(selectedGroupMemberProvider.notifier).select(_memberUserId);
+    ref.read(sideBySideModeProvider.notifier).disable();
+    ref.read(mealSwapSelectionProvider.notifier).start(MealSwapOrigin(
+          planId: widget.member.planId!,
+          date: dateOnly(widget.date),
+          slotId: slot.slotId,
+          type: slot.type,
+          status: slot.status,
+        ));
+    ref.read(selectedPlanViewProvider.notifier).select(PlanViewMode.week);
   }
 
   void _openRecipeSheet(BuildContext context, PlanDaySlot slot) {
