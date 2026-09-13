@@ -79,6 +79,7 @@ class DietPlan {
     required this.authorId,
     required this.authorRole,
     required this.name,
+    this.notes,
     required this.status,
     required this.startDate,
     required this.endDate,
@@ -94,6 +95,7 @@ class DietPlan {
         authorId: json['authorId'] as String,
         authorRole: AccountRole.fromJson(json['authorRole'] as String),
         name: json['name'] as String,
+        notes: json['notes'] as String?,
         status: PlanStatus.fromJson(json['status'] as String),
         startDate: DateTime.parse(json['startDate'] as String),
         endDate: json['endDate'] == null ? null : DateTime.parse(json['endDate'] as String),
@@ -114,6 +116,11 @@ class DietPlan {
   final String authorId;
   final AccountRole authorRole;
   final String name;
+
+  /// PA-13: le note generali, riportate intatte nel modulo di
+  /// `PATCH /diet-plans/{id}`, che le sostituisce per intero.
+  final String? notes;
+
   final PlanStatus status;
   final DateTime startDate;
   final DateTime? endDate;

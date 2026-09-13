@@ -901,6 +901,12 @@ abstract class L10n {
   /// **'Questa giornata non è coperta da un piano attivo.'**
   String get errorPlanNotActive;
 
+  /// No description provided for @errorPlanNotEditable.
+  ///
+  /// In it, this message translates to:
+  /// **'Il piano è concluso e non è più modificabile.'**
+  String get errorPlanNotEditable;
+
   /// No description provided for @errorPlanPeriodOverlap.
   ///
   /// In it, this message translates to:
@@ -2328,6 +2334,42 @@ abstract class L10n {
   /// In it, this message translates to:
   /// **'Il tuo nutrizionista non ha ancora redatto un piano'**
   String get planPatientNoPlanYet;
+
+  /// No description provided for @planPeriodEdit.
+  ///
+  /// In it, this message translates to:
+  /// **'Modifica periodo'**
+  String get planPeriodEdit;
+
+  /// No description provided for @planPeriodEndBeforeStart.
+  ///
+  /// In it, this message translates to:
+  /// **'La data di fine precede quella di inizio.'**
+  String get planPeriodEndBeforeStart;
+
+  /// No description provided for @planPeriodEndNotFuture.
+  ///
+  /// In it, this message translates to:
+  /// **'Il piano è in corso: la fine cade dopo oggi. Per terminarlo oggi usa «Concludi».'**
+  String get planPeriodEndNotFuture;
+
+  /// No description provided for @planPeriodSaved.
+  ///
+  /// In it, this message translates to:
+  /// **'Periodo aggiornato.'**
+  String get planPeriodSaved;
+
+  /// No description provided for @planPeriodStartLocked.
+  ///
+  /// In it, this message translates to:
+  /// **'Il piano è già in corso: la data di inizio non si modifica.'**
+  String get planPeriodStartLocked;
+
+  /// No description provided for @planPeriodStartNotFuture.
+  ///
+  /// In it, this message translates to:
+  /// **'Il piano è programmato: l\'inizio cade dopo oggi. Per avviarlo oggi usa «Attiva ora».'**
+  String get planPeriodStartNotFuture;
 
   /// No description provided for @planRecipient.
   ///

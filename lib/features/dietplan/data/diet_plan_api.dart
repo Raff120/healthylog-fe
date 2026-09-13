@@ -20,6 +20,12 @@ class DietPlanApi {
     return DietPlan.fromJson(response.data as Map<String, dynamic>);
   }
 
+  /// 4.4 tecnica: denominazione, periodo di validità e note.
+  Future<DietPlan> update(String id, UpdateDietPlanRequest request) async {
+    final response = await _dio.patch('/diet-plans/$id', data: request.toJson());
+    return DietPlan.fromJson(response.data as Map<String, dynamic>);
+  }
+
   Future<DietPlan> updateSchedule(String id, UpdateWeeklyScheduleRequest request) async {
     final response = await _dio.put('/diet-plans/$id/schedule', data: request.toJson());
     return DietPlan.fromJson(response.data as Map<String, dynamic>);

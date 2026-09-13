@@ -19,6 +19,8 @@ import '../../identity/data/account_role.dart';
 import '../../identity/providers/profile_providers.dart';
 import '../providers/diet_plan_providers.dart';
 import '../providers/diet_plan_template_providers.dart';
+import 'plan_overlap_message.dart';
+import 'widgets/date_field.dart';
 
 /// Creazione del piano, da zero o da template (7.2 interfaccia.md, CD-1,
 /// CD-4, CT-1). Se [sourceTemplate] è già valorizzato (provenienza:
@@ -157,22 +159,7 @@ class _CreateDietPlanScreenState extends ConsumerState<CreateDietPlanScreen> {
       error: (error, _) {
         final exception = error.asApiException;
         if (exception?.code == 'PLAN_PERIOD_OVERLAP') {
-          final body = exception?.body as Map?;
-          final conflictingName = body?['conflictingPlanName'] as String?;
-          final conflictingStart = body?['conflictingStartDate'] as String?;
-          final conflictingEnd = body?['conflictingEndDate'] as String?;
-          setState(() {
-            // AS-15: al Nutrizionista il piano altrui è indicato per il solo
-            // periodo occupato, senza denominazione.
-            _overlapMessage = conflictingName != null
-                ? context.l10n.planOverlapWithName(conflictingName)
-                : conflictingStart != null
-                    ? (conflictingEnd == null
-                        ? context.l10n.planOverlapNoticeOpen(_formatIso(conflictingStart))
-                        : context.l10n.planOverlapNotice(
-                            _formatIso(conflictingStart), _formatIso(conflictingEnd)))
-                    : context.l10n.errorPlanPeriodOverlap;
-          });
+          setState(() => _overlapMessage = describePlanOverlap(context, error));
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text(describeApiError(context, exception?.code ?? ''))),
@@ -191,12 +178,6 @@ class _CreateDietPlanScreenState extends ConsumerState<CreateDietPlanScreen> {
       'TOO_LONG' => context.l10n.validationTooLong,
       _ => context.l10n.validationInvalidValue,
     };
-  }
-
-
-  String _formatIso(String iso) {
-    final parsed = DateTime.tryParse(iso);
-    return parsed == null ? iso : formatDate(context, parsed);
   }
 
   /// CD-2, 7.2 interfaccia.md: "Destinatario — solo per il Nutrizionista:
@@ -300,7 +281,7 @@ class _CreateDietPlanScreenState extends ConsumerState<CreateDietPlanScreen> {
               ],
               AppTextField(label: context.l10n.commonName, controller: _name, errorText: _errorFor('name')),
               const SizedBox(height: AppSpacing.sm),
-              _DateField(
+              DateField(
                 label: context.l10n.planStartDate,
                 value: _startDate,
                 errorText: _errorFor('startDate'),
@@ -328,7 +309,7 @@ class _CreateDietPlanScreenState extends ConsumerState<CreateDietPlanScreen> {
               ),
               if (!_indefinite) ...[
                 const SizedBox(height: AppSpacing.sm),
-                _DateField(
+                DateField(
                   label: context.l10n.planEndDate,
                   value: _endDate,
                   errorText: null,
@@ -432,62 +413,6 @@ class _OriginCard extends StatelessWidget {
           ),
         ),
       ),
-    );
-  }
-}
-
-/// Campo data generico (7.2 interfaccia.md), sul modello di `BirthDateField`
-/// (identity/presentation/widgets): qui non promosso a widget condiviso,
-/// le due sole occorrenze restano in questa schermata.
-class _DateField extends StatelessWidget {
-  const _DateField({
-    required this.label,
-    required this.value,
-    required this.errorText,
-    required this.onTap,
-    required this.formatter,
-  });
-
-  final String label;
-  final DateTime? value;
-  final String? errorText;
-  final VoidCallback onTap;
-  final String Function(DateTime) formatter;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    final typography = context.typography;
-    final hasError = errorText != null;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-          child: Container(
-            height: AppSpacing.heightTextField,
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-            decoration: BoxDecoration(
-              color: colors.surface,
-              borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-              border: Border.all(color: hasError ? colors.error : colors.dividerStrong),
-            ),
-            alignment: Alignment.centerLeft,
-            child: Text(
-              value == null ? label : formatter(value!),
-              style: typography.bodyLarge.copyWith(
-                color: value == null ? colors.textSecondary : colors.textPrimary,
-              ),
-            ),
-          ),
-        ),
-        if (hasError) ...[
-          const SizedBox(height: AppSpacing.xxs),
-          Text(errorText!, style: typography.caption.copyWith(color: colors.error)),
-        ],
-      ],
     );
   }
 }

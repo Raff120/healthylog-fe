@@ -464,6 +464,10 @@ class L10nEn extends L10n {
   String get errorPlanNotActive => 'This day is not covered by an active plan.';
 
   @override
+  String get errorPlanNotEditable =>
+      'The plan is completed and can no longer be edited.';
+
+  @override
   String get errorPlanPeriodOverlap => 'The period overlaps an existing plan.';
 
   @override
@@ -1303,6 +1307,28 @@ class L10nEn extends L10n {
   @override
   String get planPatientNoPlanYet =>
       'Your nutritionist has not written a plan yet';
+
+  @override
+  String get planPeriodEdit => 'Edit period';
+
+  @override
+  String get planPeriodEndBeforeStart =>
+      'The end date is before the start date.';
+
+  @override
+  String get planPeriodEndNotFuture =>
+      'The plan is under way: the end falls after today. To end it today, use “Complete”.';
+
+  @override
+  String get planPeriodSaved => 'Period updated.';
+
+  @override
+  String get planPeriodStartLocked =>
+      'The plan is already under way: its start date cannot be changed.';
+
+  @override
+  String get planPeriodStartNotFuture =>
+      'The plan is scheduled: the start falls after today. To start it today, use “Activate now”.';
 
   @override
   String get planRecipient => 'Recipient';

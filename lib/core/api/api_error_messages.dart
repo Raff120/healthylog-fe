@@ -30,6 +30,7 @@ String describeApiError(BuildContext context, String code) {
     'PLAN_ACTIVE_CANNOT_DELETE' => l10n.errorPlanActiveCannotDelete,
     'PLAN_PERIOD_OVERLAP' => l10n.errorPlanPeriodOverlap,
     'PLAN_NOT_ACTIVE' => l10n.errorPlanNotActive,
+    'PLAN_NOT_EDITABLE' => l10n.errorPlanNotEditable,
     'TIMEZONE_INVALID' => l10n.errorTimezoneInvalid,
     // 6.4 funzionale, IN-21: ragioni di rifiuto dell'inversione, desunte
     // dalle regole — usate sia per il rifiuto del server sia, sul client,

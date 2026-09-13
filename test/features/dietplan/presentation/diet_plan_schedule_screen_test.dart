@@ -416,4 +416,96 @@ void main() {
     expect(deleteCalled, isTrue);
     expect(find.text('Gestione piano'), findsOneWidget);
   });
+
+  testWidgets('"Modifica periodo" su un piano Attivo blocca l\'inizio e salva la fine con PATCH (PA-6, 4.4 tecnica)',
+      (tester) async {
+    final dio = Dio(BaseOptions(baseUrl: 'http://example.test'));
+    Map<String, dynamic>? patchBody;
+    dio.httpClientAdapter = _JsonAdapter((options) {
+      if (options.method == 'PATCH') {
+        patchBody = Map<String, dynamic>.from(options.data as Map);
+        return _planJson(status: 'ACTIVE');
+      }
+      return _planJson(status: 'ACTIVE')..['endDate'] = '2026-12-31';
+    });
+    dio.interceptors.add(ApiErrorInterceptor());
+
+    await _pumpScheduleScreen(tester, DietPlanApi(dio));
+
+    await tester.tap(find.byType(PopupMenuButton<String>));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Modifica periodo'));
+    await tester.pumpAndSettle();
+
+    expect(find.textContaining('la data di inizio non si modifica'), findsOneWidget);
+
+    await tester.tap(find.descendant(of: find.byType(AlertDialog), matching: find.byType(Switch)));
+    await tester.pumpAndSettle();
+    await tester.tap(find.descendant(of: find.byType(AlertDialog), matching: find.text('Salva')));
+    await tester.pumpAndSettle();
+
+    expect(patchBody, isNotNull);
+    expect(patchBody!['name'], 'Dieta di prova');
+    expect(patchBody!['startDate'], '2026-09-07');
+    expect(patchBody!['endDate'], isNull);
+    expect(find.byType(AlertDialog), findsNothing);
+    expect(find.text('Periodo aggiornato.'), findsOneWidget);
+  });
+
+  testWidgets('un periodo sovrapposto è segnalato nel dialogo, che resta aperto (PA-8, CD-3)', (tester) async {
+    final dio = Dio(BaseOptions(baseUrl: 'http://example.test'));
+    dio.httpClientAdapter = _JsonAdapter((options) {
+      if (options.method == 'PATCH') {
+        return const _ErrorResponse(409, {
+          'code': 'PLAN_PERIOD_OVERLAP',
+          'conflictingPlanId': 'plan-2',
+          'conflictingPlanName': 'Piano estate',
+          'conflictingStartDate': '2026-10-01',
+          'conflictingEndDate': null,
+        });
+      }
+      return _planJson();
+    });
+    dio.interceptors.add(ApiErrorInterceptor());
+
+    await _pumpScheduleScreen(tester, DietPlanApi(dio));
+
+    await tester.tap(find.byType(PopupMenuButton<String>));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Modifica periodo'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.descendant(of: find.byType(AlertDialog), matching: find.text('Salva')));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(AlertDialog), findsOneWidget);
+    expect(find.text('Si sovrappone a «Piano estate».'), findsOneWidget);
+  });
+
+  testWidgets('una fine non successiva a oggi su un piano Sospeso è segnalata sul campo (CV-5)', (tester) async {
+    final dio = Dio(BaseOptions(baseUrl: 'http://example.test'));
+    dio.httpClientAdapter = _JsonAdapter((options) {
+      if (options.method == 'PATCH') {
+        return const _ErrorResponse(400, {
+          'code': 'VALIDATION_FAILED',
+          'fields': [
+            {'field': 'endDate', 'code': 'NOT_FUTURE'},
+          ],
+        });
+      }
+      return _planJson(status: 'SUSPENDED')..['endDate'] = '2026-12-31';
+    });
+    dio.interceptors.add(ApiErrorInterceptor());
+
+    await _pumpScheduleScreen(tester, DietPlanApi(dio));
+
+    await tester.tap(find.byType(PopupMenuButton<String>));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Modifica periodo'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.descendant(of: find.byType(AlertDialog), matching: find.text('Salva')));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(AlertDialog), findsOneWidget);
+    expect(find.textContaining('Per terminarlo oggi usa «Concludi»'), findsOneWidget);
+  });
 }
