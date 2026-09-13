@@ -42,6 +42,20 @@ class DietPlanScheduleController extends _$DietPlanScheduleController {
     state = AsyncValue.data(plan);
     return plan;
   }
+
+  /// 4.4 tecnica: denominazione, periodo e note. Sostituisce il piano
+  /// senza toccare lo schema in redazione (la schermata non si
+  /// reinizializza da un piano già caricato), e invalida gli elenchi che
+  /// ne mostrano il periodo.
+  Future<DietPlan> updateDetails(UpdateDietPlanRequest request) async {
+    final plan = await ref.read(dietPlanApiProvider).update(planId, request);
+    state = AsyncValue.data(plan);
+    ref.invalidate(ownedDietPlansProvider);
+    // F22: il dettaglio del Paziente elenca i piani redatti dal Nutrizionista.
+    ref.invalidate(patientDetailControllerProvider);
+    ref.invalidate(patientsProvider);
+    return plan;
+  }
 }
 
 /// CV-2: conferma del piano in redazione.

@@ -33,6 +33,30 @@ class CreateDietPlanRequest {
       };
 }
 
+/// Corpo di `PATCH /diet-plans/{id}` (4.4 tecnica): denominazione,
+/// periodo di validità e note. Riporta l'intero modulo — `endDate` e
+/// `notes` assenti sono rimossi dal server.
+class UpdateDietPlanRequest {
+  const UpdateDietPlanRequest({
+    required this.name,
+    required this.startDate,
+    this.endDate,
+    this.notes,
+  });
+
+  final String name;
+  final DateTime startDate;
+  final DateTime? endDate;
+  final String? notes;
+
+  Map<String, dynamic> toJson() => {
+        'name': name,
+        'startDate': _isoDate(startDate),
+        'endDate': endDate == null ? null : _isoDate(endDate!),
+        'notes': notes,
+      };
+}
+
 /// Corpo di `POST /diet-plans/{id}/save-as-template` (TP-5, CD-18).
 class SaveDietPlanAsTemplateRequest {
   const SaveDietPlanAsTemplateRequest({required this.name, this.description});

@@ -23,6 +23,7 @@ import 'widgets/day_selector.dart';
 import 'widgets/day_sidebar.dart';
 import 'widgets/delete_plan_dialog.dart';
 import 'widgets/name_description_dialog.dart';
+import 'widgets/plan_period_dialog.dart';
 import 'widgets/slot_card.dart';
 
 final RegExp _recipeNameFieldPattern = RegExp(r'^days\[(\d+)\]\.slots\[(\d+)\]\.recipeName$');
@@ -119,6 +120,16 @@ class _DietPlanScheduleScreenState extends ConsumerState<DietPlanScheduleScreen>
         ],
       ),
     );
+  }
+
+  /// PA-6, `PATCH /diet-plans/{id}`: il periodo di validità, con le date
+  /// modificabili secondo lo stato (vedi `showPlanPeriodDialog`). Non
+  /// condizionata alle modifiche pendenti dello schema, che il PATCH non
+  /// tocca e che la sostituzione del piano nel controller non azzera.
+  Future<void> _editPeriod(DietPlan plan) async {
+    final updated = await showPlanPeriodDialog(context, plan: plan);
+    if (updated == null || !mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(context.l10n.planPeriodSaved)));
   }
 
   /// TP-5, CD-18: disponibile in ogni momento della redazione (7.3
@@ -506,10 +517,15 @@ class _DietPlanScheduleScreenState extends ConsumerState<DietPlanScheduleScreen>
               ),
             PopupMenuButton<String>(
               onSelected: (value) {
+                if (value == 'edit-period') _editPeriod(planState.value!);
                 if (value == 'save-as-template') _saveAsTemplate(planState.value?.name ?? '');
                 if (value == 'delete') _delete(planState.value!.status);
               },
               itemBuilder: (context) => [
+                // ST-7: il Concluso non arriva a questa schermata, ma la
+                // condizione resta esplicita — il server lo rifiuterebbe.
+                if (planState.value != null && planState.value!.status != PlanStatus.completed)
+                  PopupMenuItem(value: 'edit-period', child: Text(context.l10n.planPeriodEdit)),
                 PopupMenuItem(value: 'save-as-template', child: Text(context.l10n.scheduleSaveAsTemplate)),
                 // CV-11: l'Attivo non compare, il server la rifiuterebbe comunque.
                 if (planState.value != null && planState.value!.status != PlanStatus.active)
