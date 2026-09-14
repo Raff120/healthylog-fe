@@ -4,15 +4,21 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../app/app_config.dart';
 import '../auth/session_controller.dart';
 import 'api_error_interceptor.dart';
+import 'client_headers_interceptor.dart';
 import 'connectivity_interceptor.dart';
 import 'token_refresh_interceptor.dart';
 
 part 'api_client.g.dart';
 
+/// VR-1, VR-12: versione del contratto contro cui questo client è scritto.
+/// È una costante del codice e non della configurazione: cambiarla
+/// significa adottare un contratto diverso, cioè scrivere codice nuovo.
+const apiVersion = 1;
+
 Dio _buildDio() {
   return Dio(
     BaseOptions(
-      baseUrl: AppConfig.apiBaseUrl,
+      baseUrl: '${AppConfig.apiBaseUrl}/v$apiVersion',
       contentType: 'application/json; charset=utf-8',
       responseType: ResponseType.json,
     ),
@@ -38,7 +44,7 @@ Dio _buildDio() {
 @Riverpod(keepAlive: true)
 Dio publicApiClient(Ref ref) {
   final dio = _buildDio();
-  dio.interceptors.addAll([ConnectivityInterceptor(ref), ApiErrorInterceptor()]);
+  dio.interceptors.addAll([ClientHeadersInterceptor(ref), ConnectivityInterceptor(ref), ApiErrorInterceptor()]);
   return dio;
 }
 
@@ -62,6 +68,7 @@ Dio publicApiClient(Ref ref) {
 Dio apiClient(Ref ref) {
   final dio = _buildDio();
   dio.interceptors.addAll([
+    ClientHeadersInterceptor(ref),
     InterceptorsWrapper(
       onRequest: (options, handler) {
         final accessToken = ref.read(sessionControllerProvider).value?.accessToken;
