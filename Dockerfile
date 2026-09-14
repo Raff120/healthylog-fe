@@ -31,7 +31,15 @@ COPY . .
 # Dietro il reverse proxy le API stanno sul medesimo dominio (CT-16): la base
 # e' relativa, e il codice non ha bisogno di alcuna modifica.
 ARG API_BASE_URL=/api
-RUN flutter build web --release --dart-define=API_BASE_URL="${API_BASE_URL}"
+# Versione e numero di build, calcolati dall'integrazione continua (vedi
+# .github/scripts/next-version.sh). Il numero di build accompagna ogni
+# richiesta (VR-13); il web non e' soggetto al build minimo (MP-17).
+ARG BUILD_NAME=1.0.0
+ARG BUILD_NUMBER=1
+RUN flutter build web --release \
+        --build-name="${BUILD_NAME}" \
+        --build-number="${BUILD_NUMBER}" \
+        --dart-define=API_BASE_URL="${API_BASE_URL}"
 
 # --- Distribuzione ----------------------------------------------------------
 FROM nginx:1.27-alpine AS runtime

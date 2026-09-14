@@ -66,7 +66,8 @@ dependencies:
   # Già in albero come dipendenza transitiva del framework; dichiarato
   # perché il codice lo usa direttamente (TS-9: nessun componente nuovo).
   web: any
-
+  package_info_plus: ^10.2.1
+  url_launcher: ^6.3.2
 dev_dependencies:
   flutter_test:
     sdk: flutter

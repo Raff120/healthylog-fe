@@ -39,8 +39,14 @@ enum BodyMeasure {
 
   final String param;
 
-  static BodyMeasure fromJson(String value) =>
-      BodyMeasure.values.firstWhere((measure) => measure.param == value);
+  /// VR-10: `null` per una grandezza che questa versione del client non
+  /// conosce, anziché un errore che farebbe fallire l'intera statistica.
+  static BodyMeasure? tryFromJson(String value) {
+    for (final measure in BodyMeasure.values) {
+      if (measure.param == value) return measure;
+    }
+    return null;
+  }
 
   /// AN-6, AN-7: la linea di riferimento del peso obiettivo riguarda il
   /// solo peso, non le circonferenze.
@@ -60,6 +66,8 @@ class AdherenceBucket {
   final String key;
   final double? value;
 
+  /// Le voci con chiave non riconosciuta sono già escluse alla lettura di
+  /// [AdherenceStatistics] (VR-10).
   SlotType get slotType => SlotType.fromJson(key);
 
   Weekday get weekday => Weekday.fromJson(key);
@@ -125,11 +133,15 @@ class AdherenceStatistics {
         value: (json['value'] as num?)?.toDouble(),
         suspendedDays: (json['suspendedDays'] as num).toInt(),
         uncoveredDays: (json['uncoveredDays'] as num).toInt(),
+        // VR-10: una voce riferita a un tipo di slot o a un giorno non
+        // riconosciuti è omessa dalla disaggregazione.
         bySlotType: (json['bySlotType'] as List)
             .map((e) => AdherenceBucket.fromJson(e as Map<String, dynamic>))
+            .where((bucket) => SlotType.tryFromJson(bucket.key) != null)
             .toList(),
         byWeekday: (json['byWeekday'] as List)
             .map((e) => AdherenceBucket.fromJson(e as Map<String, dynamic>))
+            .where((bucket) => Weekday.tryFromJson(bucket.key) != null)
             .toList(),
         weekly: (json['weekly'] as List)
             .map((e) => AdherenceWeek.fromJson(e as Map<String, dynamic>))
@@ -292,13 +304,19 @@ class MeasureSeries {
     required this.change,
   });
 
-  factory MeasureSeries.fromJson(Map<String, dynamic> json) => MeasureSeries(
-        measure: BodyMeasure.fromJson(json['measure'] as String),
-        points: (json['points'] as List)
-            .map((e) => MeasurePoint.fromJson(e as Map<String, dynamic>))
-            .toList(),
-        change: (json['change'] as num?)?.toDouble(),
-      );
+  /// VR-10: `null` per una grandezza sconosciuta — la statistica ne omette
+  /// la serie.
+  static MeasureSeries? tryFromJson(Map<String, dynamic> json) {
+    final measure = BodyMeasure.tryFromJson(json['measure'] as String);
+    if (measure == null) return null;
+    return MeasureSeries(
+      measure: measure,
+      points: (json['points'] as List)
+          .map((e) => MeasurePoint.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      change: (json['change'] as num?)?.toDouble(),
+    );
+  }
 
   final BodyMeasure measure;
   final List<MeasurePoint> points;
@@ -328,7 +346,8 @@ class MeasurementStatistics {
         planName: json['planName'] as String?,
         targetWeightKg: (json['targetWeightKg'] as num?)?.toDouble(),
         series: (json['series'] as List)
-            .map((e) => MeasureSeries.fromJson(e as Map<String, dynamic>))
+            .map((e) => MeasureSeries.tryFromJson(e as Map<String, dynamic>))
+            .nonNulls
             .toList(),
       );
 

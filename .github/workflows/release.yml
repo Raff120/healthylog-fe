@@ -1,6 +1,9 @@
-# Rilascio della PWA: a ogni avanzamento di main l'analisi e i test sono
-# eseguiti, l'immagine e' costruita e pubblicata sul registry, e il repository
-# di distribuzione e' avvisato perche' aggiorni l'ambiente di esercizio.
+# Rilascio del client: a ogni avanzamento di main versione e numero di build
+# sono calcolati, l'analisi e i test sono eseguiti, l'immagine della PWA e'
+# costruita e pubblicata sul registry, l'APK e' costruito e firmato, la
+# versione e' fissata con un tag e una release di GitHub che reca l'APK, e il
+# repository di distribuzione e' avvisato perche' aggiorni l'ambiente di
+# esercizio.
 name: Rilascio
 
 on:
@@ -8,12 +11,47 @@ on:
     branches: [main]
   workflow_dispatch:
 
+# Due rilasci ravvicinati non devono calcolare la stessa versione: il secondo
+# attende che il primo abbia creato il proprio tag.
+concurrency:
+  group: rilascio
+  cancel-in-progress: false
+
 env:
   # GHCR ammette soltanto nomi in minuscolo.
   IMAGE_NAME: ghcr.io/raff120/healthylog-fe
   FLUTTER_VERSION: 3.47.2
+  # Versione adottata dal primo rilascio numerato, in assenza di tag.
+  INITIAL_VERSION: 1.0.0
+  # Indirizzo delle API per le versioni native (VR-12): assoluto, a
+  # differenza della PWA servita sul medesimo dominio.
+  NATIVE_API_BASE_URL: https://healthylog.it/api
 
 jobs:
+
+  version:
+    name: Calcolo di versione e build
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.compute.outputs.version }}
+      build: ${{ steps.compute.outputs.build }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Tag e storia completa: la versione dipende dai commit successivi
+          # all'ultimo tag, il build dal numero dei commit.
+          fetch-depth: 0
+
+      - name: Calcolo
+        id: compute
+        run: |
+          version="$(.github/scripts/next-version.sh "$INITIAL_VERSION")"
+          # VR-21: unico per tutte le piattaforme e crescente a ogni rilascio,
+          # poiche' main avanza soltanto.
+          build="$(git rev-list --count HEAD)"
+          echo "Versione del rilascio: $version (build $build)"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "build=$build" >> "$GITHUB_OUTPUT"
 
   test:
     name: Verifica
@@ -41,7 +79,7 @@ jobs:
 
   publish:
     name: Costruzione e pubblicazione dell'immagine
-    needs: test
+    needs: [version, test]
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -66,11 +104,105 @@ jobs:
           build-args: |
             FLUTTER_VERSION=${{ env.FLUTTER_VERSION }}
             API_BASE_URL=/api
+            BUILD_NAME=${{ needs.version.outputs.version }}
+            BUILD_NUMBER=${{ needs.version.outputs.build }}
           tags: |
             ${{ env.IMAGE_NAME }}:latest
             ${{ env.IMAGE_NAME }}:${{ github.sha }}
+            ${{ env.IMAGE_NAME }}:v${{ needs.version.outputs.version }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+  android:
+    name: Costruzione dell'APK
+    needs: [version, test]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - name: Chiave di firma
+        # Senza una chiave stabile ogni APK sarebbe firmato con una chiave di
+        # debug diversa, e il dispositivo rifiuterebbe di installarlo sopra il
+        # precedente. In assenza dei segreti il rilascio procede, ma lo segnala.
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          if [ -z "$ANDROID_KEYSTORE_BASE64" ]; then
+            echo "::warning::Segreti di firma assenti: l'APK e' firmato con la chiave di debug e non si installera' sopra una versione precedente."
+            exit 0
+          fi
+          echo "$ANDROID_KEYSTORE_BASE64" | base64 --decode > android/app/upload-keystore.jks
+          {
+            echo "storeFile=upload-keystore.jks"
+            echo "storePassword=$ANDROID_KEYSTORE_PASSWORD"
+            echo "keyAlias=$ANDROID_KEY_ALIAS"
+            echo "keyPassword=$ANDROID_KEY_PASSWORD"
+          } > android/key.properties
+
+      - name: Risoluzione delle dipendenze
+        run: flutter pub get
+
+      - name: Costruzione
+        # VR-18: l'APK distribuito dalla release di GitHub indica come pagina
+        # dell'aggiornamento la release piu' recente del repository.
+        run: |
+          flutter build apk --release \
+            --build-name="${{ needs.version.outputs.version }}" \
+            --build-number="${{ needs.version.outputs.build }}" \
+            --dart-define=API_BASE_URL="$NATIVE_API_BASE_URL" \
+            --dart-define=ANDROID_UPDATE_URL="${{ github.server_url }}/${{ github.repository }}/releases/latest"
+          mv build/app/outputs/flutter-apk/app-release.apk "healthylog-v${{ needs.version.outputs.version }}.apk"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: apk
+          path: healthylog-v${{ needs.version.outputs.version }}.apk
+          if-no-files-found: error
+
+  release:
+    name: Tag e release della versione
+    needs: [version, publish, android]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: apk
+
+      - name: Creazione del tag e della release con l'APK
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSION: ${{ needs.version.outputs.version }}
+          BUILD: ${{ needs.version.outputs.build }}
+        run: |
+          tag="v$VERSION"
+          if git rev-parse --quiet --verify "refs/tags/$tag" >/dev/null; then
+            echo "Il tag $tag esiste gia': nessuna nuova release."
+            exit 0
+          fi
+          gh release create "$tag" "healthylog-v$VERSION.apk" \
+            --target "$GITHUB_SHA" \
+            --title "$tag (build $BUILD)" \
+            --generate-notes
 
   notify:
     name: Avviso al repository di distribuzione

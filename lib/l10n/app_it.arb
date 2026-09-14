@@ -1184,6 +1184,12 @@
   "@unitPounds": {
     "description": "LO-4: peso nel sistema imperiale."
   },
+  "updateRequiredAction": "Aggiorna",
+  "updateRequiredBody": "Questa versione non è più supportata. Aggiorna l’app per continuare: il tuo account e i tuoi dati restano dove sono.",
+  "@updateRequiredBody": {
+    "description": "5.5 interfaccia.md, MP-16: rassicura sul solo punto che conta e non spiega perché la versione sia superata."
+  },
+  "updateRequiredTitle": "Aggiorna HealthyLog",
   "usernameHint": "Servirà al tuo nutrizionista per trovarti",
   "validationEmailAlreadyRegistered": "Questo indirizzo è già registrato",
   "validationInvalidFormat": "Formato non valido",

@@ -29,6 +29,10 @@ class DietPlanSlot {
         adherenceWeight: (json['adherenceWeight'] as num).toDouble(),
       );
 
+  /// VR-10: `null` per un tipo sconosciuto — il giorno ne omette lo slot.
+  static DietPlanSlot? tryFromJson(Map<String, dynamic> json) =>
+      SlotType.tryFromJson(json['type'] as String) == null ? null : DietPlanSlot.fromJson(json);
+
   final String slotId;
   final SlotType type;
   final String? label;
@@ -47,9 +51,14 @@ class DietPlanWeekDay {
   factory DietPlanWeekDay.fromJson(Map<String, dynamic> json) => DietPlanWeekDay(
         dayOfWeek: Weekday.fromJson(json['dayOfWeek'] as String),
         slots: (json['slots'] as List)
-            .map((e) => DietPlanSlot.fromJson(e as Map<String, dynamic>))
+            .map((e) => DietPlanSlot.tryFromJson(e as Map<String, dynamic>))
+            .nonNulls
             .toList(),
       );
+
+  /// VR-10: `null` per un giorno non riconosciuto, che lo schema omette.
+  static DietPlanWeekDay? tryFromJson(Map<String, dynamic> json) =>
+      Weekday.tryFromJson(json['dayOfWeek'] as String) == null ? null : DietPlanWeekDay.fromJson(json);
 
   final Weekday dayOfWeek;
   final List<DietPlanSlot> slots;
@@ -106,10 +115,17 @@ class DietPlan {
             .map((e) => DietPlanPeriod.fromJson(e as Map<String, dynamic>))
             .toList(),
         weeklySchedule: (json['weeklySchedule'] as List)
-            .map((e) => DietPlanWeekDay.fromJson(e as Map<String, dynamic>))
+            .map((e) => DietPlanWeekDay.tryFromJson(e as Map<String, dynamic>))
+            .nonNulls
             .toList(),
         adherence: (json['adherence'] as num?)?.toDouble(),
       );
+
+  /// VR-10: `null` per uno stato sconosciuto — l'elenco dei piani lo omette
+  /// (vedi [PlanStatus.tryFromJson]). Il piano letto da solo conserva invece
+  /// la lettura di [DietPlan.fromJson].
+  static DietPlan? tryFromJson(Map<String, dynamic> json) =>
+      PlanStatus.tryFromJson(json['status'] as String) == null ? null : DietPlan.fromJson(json);
 
   final String id;
   final String ownerId;

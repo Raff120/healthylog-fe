@@ -48,7 +48,8 @@ class DietPlanApi {
   /// Bozza compresa — ordinati per data di inizio decrescente.
   Future<List<DietPlan>> list() async {
     final response = await _dio.get('/diet-plans');
-    return (response.data as List).map((e) => DietPlan.fromJson(e as Map<String, dynamic>)).toList();
+    // VR-10: i piani in uno stato sconosciuto sono omessi.
+    return (response.data as List).map((e) => DietPlan.tryFromJson(e as Map<String, dynamic>)).nonNulls.toList();
   }
 
   /// AS-11: da Programmato a Bozza.
