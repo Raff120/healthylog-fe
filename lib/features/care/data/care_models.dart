@@ -16,6 +16,18 @@ enum CareLinkRequestStatus {
         'WITHDRAWN' => CareLinkRequestStatus.withdrawn,
         _ => CareLinkRequestStatus.pending,
       };
+
+  /// VR-10: `null` per uno stato sconosciuto. Presentata come in attesa,
+  /// la richiesta offrirebbe accettazione e rifiuto su un atto il cui
+  /// stato è ignoto: l'elenco la omette.
+  static CareLinkRequestStatus? tryFromJson(String value) => switch (value) {
+        'PENDING' => CareLinkRequestStatus.pending,
+        'ACCEPTED' => CareLinkRequestStatus.accepted,
+        'REJECTED' => CareLinkRequestStatus.rejected,
+        'EXPIRED' => CareLinkRequestStatus.expired,
+        'WITHDRAWN' => CareLinkRequestStatus.withdrawn,
+        _ => null,
+      };
 }
 
 /// Stato del collegamento (rispecchia `it.healthylog.model.CareLinkStatus`).
@@ -60,6 +72,10 @@ class CareLinkRequest {
         createdAt: DateTime.parse(json['createdAt'] as String),
         resolvedAt: json['resolvedAt'] == null ? null : DateTime.parse(json['resolvedAt'] as String),
       );
+
+  /// VR-10: `null` per uno stato sconosciuto, che l'elenco omette.
+  static CareLinkRequest? tryFromJson(Map<String, dynamic> json) =>
+      CareLinkRequestStatus.tryFromJson(json['status'] as String) == null ? null : CareLinkRequest.fromJson(json);
 
   final String id;
   final String nutritionistId;
@@ -158,6 +174,10 @@ class PatientPlanSummary {
         endDate: json['endDate'] == null ? null : DateTime.parse(json['endDate'] as String),
       );
 
+  /// VR-10: `null` per uno stato sconosciuto (vedi [PlanStatus.tryFromJson]).
+  static PatientPlanSummary? tryFromJson(Map<String, dynamic> json) =>
+      PlanStatus.tryFromJson(json['status'] as String) == null ? null : PatientPlanSummary.fromJson(json);
+
   final String id;
   final String name;
   final PlanStatus status;
@@ -231,7 +251,10 @@ class PatientDetail {
         username: json['username'] as String?,
         careLinkId: json['careLinkId'] as String,
         linkedAt: DateTime.parse(json['linkedAt'] as String),
-        plans: (json['plans'] as List).map((e) => PatientPlanSummary.fromJson(e as Map<String, dynamic>)).toList(),
+        plans: (json['plans'] as List)
+            .map((e) => PatientPlanSummary.tryFromJson(e as Map<String, dynamic>))
+            .nonNulls
+            .toList(),
         lastActivityAt: json['lastActivityAt'] == null ? null : DateTime.parse(json['lastActivityAt'] as String),
       );
 

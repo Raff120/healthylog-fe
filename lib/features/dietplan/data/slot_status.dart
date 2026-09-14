@@ -12,6 +12,16 @@ enum SlotStatus {
         _ => SlotStatus.toConsume,
       };
 
+  /// VR-10: `null` per uno stato che questa versione del client non
+  /// conosce. Presentarlo come da consumare inviterebbe a spuntare uno
+  /// slot il cui stato effettivo è ignoto: l'elemento è omesso.
+  static SlotStatus? tryFromJson(String value) => switch (value) {
+        'TO_CONSUME' => SlotStatus.toConsume,
+        'CONSUMED' => SlotStatus.consumed,
+        'SKIPPED' => SlotStatus.skipped,
+        _ => null,
+      };
+
   /// Corpo di `PATCH /plan-days/{date}/slots/{slotId}` (F13, SP-1).
   String toJson() => switch (this) {
         SlotStatus.toConsume => 'TO_CONSUME',

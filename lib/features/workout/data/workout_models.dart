@@ -29,7 +29,17 @@ enum Weekday {
 
   final String param;
 
-  static Weekday fromJson(String value) => Weekday.values.firstWhere((day) => day.param == value);
+  /// Per valori già riconosciuti (vedi [tryFromJson]): un valore ignoto
+  /// ricade sul lunedì anziché sollevare errore (VR-10).
+  static Weekday fromJson(String value) => tryFromJson(value) ?? Weekday.monday;
+
+  /// VR-10: `null` per un valore non riconosciuto, che l'elenco omette.
+  static Weekday? tryFromJson(String value) {
+    for (final day in Weekday.values) {
+      if (day.param == value) return day;
+    }
+    return null;
+  }
 
   /// `DateTime.weekday` va da 1 (lunedì) a 7 (domenica).
   static Weekday fromDateTime(DateTime date) => Weekday.values[date.weekday - 1];
@@ -88,8 +98,10 @@ class PlannedWorkout {
   factory PlannedWorkout.fromJson(Map<String, dynamic> json) => PlannedWorkout(
         id: json['id'] as String,
         recurrence: WorkoutRecurrence.fromJson(json['recurrence'] as String),
+        // VR-10: i giorni non riconosciuti sono omessi.
         daysOfWeek: (json['daysOfWeek'] as List? ?? const [])
-            .map((day) => Weekday.fromJson(day as String))
+            .map((day) => Weekday.tryFromJson(day as String))
+            .nonNulls
             .toList(),
         date: json['date'] == null ? null : DateTime.parse(json['date'] as String),
         activityType: json['activityType'] as String,

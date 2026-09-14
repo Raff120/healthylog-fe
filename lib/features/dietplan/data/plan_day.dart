@@ -32,6 +32,14 @@ class PlanDaySlot {
     statusChangedBy: json['statusChangedBy'] as String?,
   );
 
+  /// VR-10: `null` se tipo o stato non sono noti a questa versione del
+  /// client — la giornata che lo contiene ne omette lo slot.
+  static PlanDaySlot? tryFromJson(Map<String, dynamic> json) =>
+      SlotType.tryFromJson(json['type'] as String) == null ||
+              SlotStatus.tryFromJson(json['status'] as String) == null
+          ? null
+          : PlanDaySlot.fromJson(json);
+
   final String slotId;
   final SlotType type;
   final String? label;
@@ -98,7 +106,8 @@ class PlanDay {
         ? null
         : DateTime.parse(json['planEndDate'] as String),
     slots: (json['slots'] as List)
-        .map((e) => PlanDaySlot.fromJson(e as Map<String, dynamic>))
+        .map((e) => PlanDaySlot.tryFromJson(e as Map<String, dynamic>))
+        .nonNulls
         .toList(),
   );
 

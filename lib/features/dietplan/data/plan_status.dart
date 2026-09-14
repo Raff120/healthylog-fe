@@ -15,4 +15,16 @@ enum PlanStatus {
         'COMPLETED' => PlanStatus.completed,
         _ => PlanStatus.draft,
       };
+
+  /// VR-10: `null` per uno stato che questa versione del client non
+  /// conosce. Negli elenchi il piano è omesso: presentato come Bozza ne
+  /// offrirebbe la modifica e l'eliminazione.
+  static PlanStatus? tryFromJson(String value) => switch (value) {
+        'DRAFT' => PlanStatus.draft,
+        'SCHEDULED' => PlanStatus.scheduled,
+        'ACTIVE' => PlanStatus.active,
+        'SUSPENDED' => PlanStatus.suspended,
+        'COMPLETED' => PlanStatus.completed,
+        _ => null,
+      };
 }

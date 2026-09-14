@@ -36,6 +36,14 @@ class MealSwapLog {
         second: MealSwapReference.fromJson(json['second'] as Map<String, dynamic>),
       );
 
+  /// VR-10: `null` se uno dei due slot reca un tipo sconosciuto — lo
+  /// storico ne omette la voce.
+  static MealSwapLog? tryFromJson(Map<String, dynamic> json) =>
+      SlotType.tryFromJson((json['first'] as Map<String, dynamic>)['type'] as String) == null ||
+              SlotType.tryFromJson((json['second'] as Map<String, dynamic>)['type'] as String) == null
+          ? null
+          : MealSwapLog.fromJson(json);
+
   final String id;
 
   /// CU-4: chi ha disposto l'inversione — l'Utente stesso o il Cuoco del

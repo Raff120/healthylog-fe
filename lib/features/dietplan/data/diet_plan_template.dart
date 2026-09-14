@@ -18,8 +18,10 @@ class DietPlanTemplate {
         name: json['name'] as String,
         description: json['description'] as String?,
         notes: json['notes'] as String?,
+        // VR-10: i giorni non riconosciuti sono omessi.
         weeklySchedule: (json['weeklySchedule'] as List)
-            .map((e) => DietPlanWeekDay.fromJson(e as Map<String, dynamic>))
+            .map((e) => DietPlanWeekDay.tryFromJson(e as Map<String, dynamic>))
+            .nonNulls
             .toList(),
         updatedAt: DateTime.parse(json['updatedAt'] as String),
       );
