@@ -7,6 +7,7 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'app/router.dart';
 import 'app/theme/app_theme.dart';
 import 'app/theme/theme_mode_controller.dart';
+import 'core/api/client_build.dart';
 import 'core/device/device_insets.dart';
 import 'core/device/page_chrome.dart';
 import 'l10n/app_locale.dart';
@@ -24,7 +25,13 @@ void main() async {
   // richiede per formattare in una lingua diversa da quella predefinita.
   WidgetsFlutterBinding.ensureInitialized();
   await initializeDateFormatting();
-  runApp(const ProviderScope(child: HealthyLogApp()));
+  // VR-19: il numero di build installato è letto una volta, prima del primo
+  // fotogramma, e accompagna da lì ogni richiesta (VR-13).
+  final installedBuild = await readInstalledBuild();
+  runApp(ProviderScope(
+    overrides: [clientBuildProvider.overrideWithValue(installedBuild)],
+    child: const HealthyLogApp(),
+  ));
 }
 
 class HealthyLogApp extends ConsumerWidget {

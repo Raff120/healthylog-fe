@@ -1940,6 +1940,16 @@ class L10nEn extends L10n {
   String get unitPounds => 'lb';
 
   @override
+  String get updateRequiredAction => 'Update';
+
+  @override
+  String get updateRequiredBody =>
+      'This version is no longer supported. Update the app to continue: your account and your data stay where they are.';
+
+  @override
+  String get updateRequiredTitle => 'Update HealthyLog';
+
+  @override
   String get usernameHint => 'Your nutritionist will use it to find you';
 
   @override

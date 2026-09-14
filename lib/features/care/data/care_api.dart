@@ -25,7 +25,11 @@ class CareApi {
   /// CP-10, VA-9: ricevute per l'Utente, inviate per il Nutrizionista.
   Future<List<CareLinkRequest>> listRequests() async {
     final response = await _dio.get('/care-link-requests');
-    return (response.data as List).map((e) => CareLinkRequest.fromJson(e as Map<String, dynamic>)).toList();
+    // VR-10: le richieste in uno stato sconosciuto sono omesse.
+    return (response.data as List)
+        .map((e) => CareLinkRequest.tryFromJson(e as Map<String, dynamic>))
+        .nonNulls
+        .toList();
   }
 
   Future<CareLink> accept(String requestId) async {

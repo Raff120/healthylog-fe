@@ -5,6 +5,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../core/auth/session.dart';
 import '../core/auth/session_controller.dart';
+import '../core/update/client_update_controller.dart';
 import '../features/care/presentation/nutritionist_screen.dart';
 import '../features/care/presentation/patient_detail_screen.dart';
 import '../features/dietplan/data/diet_plan_template.dart';
@@ -40,6 +41,7 @@ import '../features/workout/presentation/activity_screen.dart';
 import 'navigation/main_shell.dart';
 import 'navigation/role_home_screen.dart';
 import 'splash_screen.dart';
+import 'update_required_screen.dart';
 
 part 'router.g.dart';
 
@@ -71,6 +73,10 @@ const _privacyAcceptancePath = '/privacy-acceptance';
 /// riporta alla schermata che ne constata la richiesta.
 const _deletionPendingPath = '/account-deletion';
 
+/// MP-15, VR-17: finché la versione installata è superata, ogni rotta —
+/// autenticata o no — riporta qui.
+const _updateRequiredPath = '/update-required';
+
 bool _startsWithAny(String path, List<String> prefixes) =>
     prefixes.any((prefix) => path == prefix || path.startsWith('$prefix/'));
 
@@ -87,16 +93,21 @@ class _SessionRouterRefresh extends ChangeNotifier {
     // nella forma che resta nulla finché non c'è sessione: interrogare il
     // server prima dell'accesso non avrebbe senso.
     _profileSubscription = _ref.listen(currentProfileOrNullProvider, (_, _) => notifyListeners());
+    // VR-17: lo sbarramento dell'aggiornamento può scattare in qualsiasi
+    // momento, alla risposta di una chiamata qualunque.
+    _updateSubscription = _ref.listen(clientUpdateControllerProvider, (_, _) => notifyListeners());
   }
 
   final Ref _ref;
   late final ProviderSubscription<AsyncValue<AuthSession?>> _subscription;
   late final ProviderSubscription<Profile?> _profileSubscription;
+  late final ProviderSubscription<AsyncValue<bool>> _updateSubscription;
 
   @override
   void dispose() {
     _subscription.close();
     _profileSubscription.close();
+    _updateSubscription.close();
     super.dispose();
   }
 }
@@ -118,6 +129,15 @@ GoRouter goRouter(Ref ref) {
     redirect: (context, state) {
       final session = ref.read(sessionControllerProvider);
       final path = state.matchedLocation;
+
+      // MP-15, VR-17: la versione superata precede ogni altro sbarramento,
+      // compresa l'attesa del ripristino della sessione — che, fallito proprio
+      // per la versione superata, non si risolverebbe altrimenti in nulla.
+      final updateRequired = ref.read(clientUpdateControllerProvider).value ?? false;
+      if (updateRequired) {
+        return path == _updateRequiredPath ? null : _updateRequiredPath;
+      }
+      if (path == _updateRequiredPath) return '/splash';
 
       // Ripristino ancora in corso (TK-8): resta sulla sola schermata
       // pensata per attenderlo (5.2 interfaccia.md), che infatti non
@@ -155,6 +175,7 @@ GoRouter goRouter(Ref ref) {
     },
     routes: [
       GoRoute(path: '/splash', builder: (context, state) => const SplashScreen()),
+      GoRoute(path: _updateRequiredPath, builder: (context, state) => const UpdateRequiredScreen()),
       GoRoute(path: '/login', builder: (context, state) => const LoginScreen()),
       GoRoute(
         path: '/register',

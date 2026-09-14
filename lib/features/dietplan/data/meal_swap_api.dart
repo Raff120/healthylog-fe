@@ -33,8 +33,10 @@ class MealSwapApi {
   /// cronologico decrescente e di sola lettura (IN-25).
   Future<List<MealSwapLog>> history(String planId) async {
     final response = await _dio.get('/diet-plans/$planId/swaps');
+    // VR-10: le voci con tipi di slot sconosciuti sono omesse.
     return (response.data as List)
-        .map((e) => MealSwapLog.fromJson(e as Map<String, dynamic>))
+        .map((e) => MealSwapLog.tryFromJson(e as Map<String, dynamic>))
+        .nonNulls
         .toList();
   }
 }

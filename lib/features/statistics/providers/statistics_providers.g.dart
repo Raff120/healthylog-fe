@@ -520,14 +520,14 @@ final class MeasurementStatisticsFamily extends $Family
 }
 
 /// AN-4, 11.3: l'elenco tabellare delle misurazioni del periodo, in coda
-/// al grafico — la medesima struttura di 10.3. Distinto da
+/// al grafico, dove ora si registrano e si modificano. Distinto da
 /// `measurements`, che non è circoscritto a un intervallo.
 
 @ProviderFor(periodMeasurements)
 final periodMeasurementsProvider = PeriodMeasurementsFamily._();
 
 /// AN-4, 11.3: l'elenco tabellare delle misurazioni del periodo, in coda
-/// al grafico — la medesima struttura di 10.3. Distinto da
+/// al grafico, dove ora si registrano e si modificano. Distinto da
 /// `measurements`, che non è circoscritto a un intervallo.
 
 final class PeriodMeasurementsProvider
@@ -541,7 +541,7 @@ final class PeriodMeasurementsProvider
         $FutureModifier<List<BodyMeasurement>>,
         $FutureProvider<List<BodyMeasurement>> {
   /// AN-4, 11.3: l'elenco tabellare delle misurazioni del periodo, in coda
-  /// al grafico — la medesima struttura di 10.3. Distinto da
+  /// al grafico, dove ora si registrano e si modificano. Distinto da
   /// `measurements`, che non è circoscritto a un intervallo.
   PeriodMeasurementsProvider._({
     required PeriodMeasurementsFamily super.from,
@@ -591,7 +591,7 @@ String _$periodMeasurementsHash() =>
     r'42faa3ac404349dcdcab84c5de3d9d5cf689ae92';
 
 /// AN-4, 11.3: l'elenco tabellare delle misurazioni del periodo, in coda
-/// al grafico — la medesima struttura di 10.3. Distinto da
+/// al grafico, dove ora si registrano e si modificano. Distinto da
 /// `measurements`, che non è circoscritto a un intervallo.
 
 final class PeriodMeasurementsFamily extends $Family
@@ -610,7 +610,7 @@ final class PeriodMeasurementsFamily extends $Family
       );
 
   /// AN-4, 11.3: l'elenco tabellare delle misurazioni del periodo, in coda
-  /// al grafico — la medesima struttura di 10.3. Distinto da
+  /// al grafico, dove ora si registrano e si modificano. Distinto da
   /// `measurements`, che non è circoscritto a un intervallo.
 
   PeriodMeasurementsProvider call(({DateTime from, DateTime to}) range) =>

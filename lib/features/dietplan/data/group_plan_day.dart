@@ -33,8 +33,10 @@ class MemberPlanDay {
     planEndDate: json['planEndDate'] == null
         ? null
         : DateTime.parse(json['planEndDate'] as String),
+    // VR-10: gli slot di tipo o stato sconosciuti sono omessi.
     slots: (json['slots'] as List)
-        .map((e) => PlanDaySlot.fromJson(e as Map<String, dynamic>))
+        .map((e) => PlanDaySlot.tryFromJson(e as Map<String, dynamic>))
+        .nonNulls
         .toList(),
   );
 

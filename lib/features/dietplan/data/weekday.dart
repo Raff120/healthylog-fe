@@ -32,4 +32,16 @@ enum Weekday {
         'SUNDAY' => Weekday.sunday,
         _ => Weekday.monday,
       };
+
+  /// VR-10: `null` per un valore non riconosciuto, che l'elenco omette.
+  static Weekday? tryFromJson(String value) => switch (value) {
+        'MONDAY' => Weekday.monday,
+        'TUESDAY' => Weekday.tuesday,
+        'WEDNESDAY' => Weekday.wednesday,
+        'THURSDAY' => Weekday.thursday,
+        'FRIDAY' => Weekday.friday,
+        'SATURDAY' => Weekday.saturday,
+        'SUNDAY' => Weekday.sunday,
+        _ => null,
+      };
 }
