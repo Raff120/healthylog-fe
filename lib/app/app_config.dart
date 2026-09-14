@@ -13,4 +13,15 @@ class AppConfig {
     'API_BASE_URL',
     defaultValue: 'http://localhost:8080',
   );
+
+  /// VR-18: pagina dell'aggiornamento per le versioni Android distribuite
+  /// fuori dallo store (l'APK della release di GitHub). Assente, vale la
+  /// scheda dell'applicazione su Google Play.
+  static const String androidUpdateUrl = String.fromEnvironment('ANDROID_UPDATE_URL');
+
+  /// VR-18: identificativo dell'applicazione su App Store (iOS e macOS).
+  static const String appleStoreId = String.fromEnvironment('APPLE_STORE_ID');
+
+  /// VR-18: identificativo del prodotto su Microsoft Store (Windows).
+  static const String microsoftStoreProductId = String.fromEnvironment('MICROSOFT_STORE_PRODUCT_ID');
 }

@@ -5,6 +5,7 @@ import '../../app/app_config.dart';
 import '../auth/session_controller.dart';
 import 'api_error_interceptor.dart';
 import 'client_headers_interceptor.dart';
+import 'client_update_interceptor.dart';
 import 'connectivity_interceptor.dart';
 import 'token_refresh_interceptor.dart';
 
@@ -44,7 +45,12 @@ Dio _buildDio() {
 @Riverpod(keepAlive: true)
 Dio publicApiClient(Ref ref) {
   final dio = _buildDio();
-  dio.interceptors.addAll([ClientHeadersInterceptor(ref), ConnectivityInterceptor(ref), ApiErrorInterceptor()]);
+  dio.interceptors.addAll([
+    ClientHeadersInterceptor(ref),
+    ClientUpdateInterceptor(ref),
+    ConnectivityInterceptor(ref),
+    ApiErrorInterceptor(),
+  ]);
   return dio;
 }
 
@@ -78,6 +84,7 @@ Dio apiClient(Ref ref) {
         handler.next(options);
       },
     ),
+    ClientUpdateInterceptor(ref),
     ConnectivityInterceptor(ref),
     TokenRefreshInterceptor(ref, dio),
     ApiErrorInterceptor(),

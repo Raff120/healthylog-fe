@@ -97,7 +97,12 @@ class SessionController extends _$SessionController {
       await ref.read(refreshTokenStorageProvider).write(tokens.refreshToken);
       return AuthSession(accessToken: tokens.accessToken, refreshToken: tokens.refreshToken);
     } catch (error) {
-      if (error.asApiException?.code == 'NETWORK_ERROR') {
+      final code = error.asApiException?.code;
+      // MP-16, VR-17: un client superato non ha una sessione revocata. Token e
+      // base dati locale restano, e tornano disponibili con la versione
+      // aggiornata; lo sbarramento lo presenta il router.
+      if (code == 'CLIENT_UPDATE_REQUIRED') rethrow;
+      if (code == 'NETWORK_ERROR') {
         // F14: un'assenza di rete non è una revoca. Rilanciato senza
         // toccare token o base dati locale, altrimenti la consultazione
         // offline (OF-19) smetterebbe di funzionare proprio quando la

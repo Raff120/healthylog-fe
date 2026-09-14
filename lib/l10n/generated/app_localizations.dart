@@ -3439,6 +3439,24 @@ abstract class L10n {
   /// **'lb'**
   String get unitPounds;
 
+  /// No description provided for @updateRequiredAction.
+  ///
+  /// In it, this message translates to:
+  /// **'Aggiorna'**
+  String get updateRequiredAction;
+
+  /// 5.5 interfaccia.md, MP-16: rassicura sul solo punto che conta e non spiega perché la versione sia superata.
+  ///
+  /// In it, this message translates to:
+  /// **'Questa versione non è più supportata. Aggiorna l’app per continuare: il tuo account e i tuoi dati restano dove sono.'**
+  String get updateRequiredBody;
+
+  /// No description provided for @updateRequiredTitle.
+  ///
+  /// In it, this message translates to:
+  /// **'Aggiorna HealthyLog'**
+  String get updateRequiredTitle;
+
   /// No description provided for @usernameHint.
   ///
   /// In it, this message translates to:
