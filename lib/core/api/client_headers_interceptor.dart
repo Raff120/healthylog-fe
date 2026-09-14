@@ -21,12 +21,12 @@ class ClientHeadersInterceptor extends Interceptor {
   final String? Function() platform;
 
   @override
-  Future<void> onRequest(RequestOptions options, RequestInterceptorHandler handler) async {
+  void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
     final declaredPlatform = platform();
     if (declaredPlatform != null) {
       options.headers[platformHeader] = declaredPlatform;
     }
-    final build = await _ref.read(clientBuildProvider.future);
+    final build = _ref.read(clientBuildProvider);
     if (build != null) {
       options.headers[buildHeader] = '$build';
     }
