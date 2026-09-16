@@ -13,6 +13,7 @@ import '../../data/group_plan_day.dart';
 import '../../data/plan_day.dart';
 import '../../data/plan_day_coverage.dart';
 import '../../data/slot_status.dart';
+import 'slot_items_view.dart';
 import '../../data/slot_type.dart';
 import '../../domain/plan_day_date.dart';
 import '../../providers/meal_swap_providers.dart';
@@ -540,8 +541,6 @@ class _GroupSlotCellState extends ConsumerState<_GroupSlotCell> {
       );
     }
 
-    final hasContent = slot.content?.trim().isNotEmpty ?? false;
-    final hasRecipe = slot.recipeName?.trim().isNotEmpty ?? false;
     final hasNote = slot.note?.trim().isNotEmpty ?? false;
     final borderColor = switch (slot.status) {
       SlotStatus.consumed => consumption.consumed,
@@ -549,38 +548,22 @@ class _GroupSlotCellState extends ConsumerState<_GroupSlotCell> {
       SlotStatus.toConsume => colors.dividerStrong,
     };
 
-    // 6.3 interfaccia.md: il tocco sulla denominazione della ricetta
-    // apre il foglio della ricetta, "che a chi cucina serve più che a
-    // chiunque altro" — resta un bersaglio distinto da quello che
-    // espande, anche da card aperta.
+    // 6.3 interfaccia.md: chiusa, la cella presenta gli elementi con le
+    // quantità troncati a tre righe; aperta, gli elementi integrali con le
+    // alternative. Il tocco sulla riga di una ricetta apre il foglio della
+    // ricetta anziché espandere, "che a chi cucina serve più che a chiunque
+    // altro": resta un bersaglio distinto da quello che espande.
     final body = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
-        if (hasRecipe)
-          GestureDetector(
-            onTap: () => _openRecipeSheet(context, slot),
-            child: Text(
-              slot.recipeName!.trim(),
-              style: typography.label.copyWith(color: colors.textPrimary),
-              maxLines: _expanded ? null : 3,
-              overflow: _expanded ? TextOverflow.visible : TextOverflow.ellipsis,
-            ),
-          ),
-        // A card chiusa con una ricetta il contenuto cede il posto alla
-        // denominazione, che è il dato utile a chi cucina; aperta,
-        // compaiono entrambi.
-        if (!hasRecipe || _expanded) ...[
-          if (hasRecipe) const SizedBox(height: AppSpacing.xxs),
-          Text(
-            hasContent ? slot.content!.trim() : context.l10n.slotToBeDefined,
-            style: typography.bodyMedium.copyWith(
-              color: hasContent ? colors.textPrimary : colors.textTertiary,
-            ),
-            maxLines: _expanded ? null : 3,
-            overflow: _expanded ? TextOverflow.visible : TextOverflow.ellipsis,
-          ),
-        ],
+        SlotItemsView(
+          items: slot.items,
+          expanded: _expanded,
+          dense: true,
+          maxItems: 3,
+          onRecipeTap: (name, text) => _openRecipeSheet(context, name, text),
+        ),
         // GG-14: la nota accessoria non è fra ciò che 6.3 esclude dalla
         // modalità affiancata, ed è spesso proprio un'avvertenza per chi
         // prepara.
@@ -706,7 +689,7 @@ class _GroupSlotCellState extends ConsumerState<_GroupSlotCell> {
     ref.read(selectedPlanViewProvider.notifier).select(PlanViewMode.week);
   }
 
-  void _openRecipeSheet(BuildContext context, PlanDaySlot slot) {
+  void _openRecipeSheet(BuildContext context, String name, String recipeText) {
     final colors = context.colors;
     final typography = context.typography;
     showModalBottomSheet<void>(
@@ -720,12 +703,12 @@ class _GroupSlotCellState extends ConsumerState<_GroupSlotCell> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(slot.recipeName!.trim(), style: typography.titleMedium.copyWith(color: colors.textPrimary)),
+                Text(name, style: typography.titleMedium.copyWith(color: colors.textPrimary)),
                 const SizedBox(height: AppSpacing.sm),
                 Expanded(
                   child: SingleChildScrollView(
                     child: Text(
-                      _recipeSheetText(context, slot),
+                      recipeText,
                       style: typography.bodyLarge.copyWith(color: colors.textPrimary),
                     ),
                   ),
@@ -737,14 +720,6 @@ class _GroupSlotCellState extends ConsumerState<_GroupSlotCell> {
       ),
     );
   }
-}
-
-/// Il testo integrale della ricetta (GG-18); in sua assenza il
-/// contenuto dello slot, che resta l'unica cosa da leggere.
-String _recipeSheetText(BuildContext context, PlanDaySlot slot) {
-  if (slot.recipeText?.trim().isNotEmpty ?? false) return slot.recipeText!.trim();
-  if (slot.content?.trim().isNotEmpty ?? false) return slot.content!.trim();
-  return context.l10n.slotToBeDefined;
 }
 
 class _CompactSpuntaButton extends StatelessWidget {
