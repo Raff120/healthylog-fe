@@ -21,7 +21,7 @@ PlanDayApi planDayApi(Ref ref) => PlanDayApi(ref.watch(apiClientProvider));
 
 @riverpod
 PlanDayLocalCache planDayLocalCache(Ref ref) =>
-    PlanDayLocalCache(ref, ref.watch(planDayLocalStoreProvider));
+    PlanDayLocalCache(ref.watch(planDayLocalStoreProvider));
 
 /// Giornata selezionata nella vista giornaliera (VG-2: quella corrente
 /// all'apertura). La sola navigazione libera (VG-16, VG-17) e il ritorno

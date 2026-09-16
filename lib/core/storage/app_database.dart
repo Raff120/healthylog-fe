@@ -32,8 +32,25 @@ class AppDatabase extends _$AppDatabase {
     return AppDatabase(DatabaseConnection.delayed(impl.openConnection(keyStore: keyStore)));
   }
 
+  /// La versione sale quando muta la **forma** di ciò che è conservato, non
+  /// solo la struttura delle tabelle: la 2 introduce gli elementi dello slot
+  /// in luogo del contenuto testuale (PL-11bis).
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
+
+  @override
+  MigrationStrategy get migration => MigrationStrategy(
+        onCreate: (m) => m.createAll(),
+        onUpgrade: (m, from, to) async {
+          // PL-11bis: le occorrenze conservate sono JSON nella forma che
+          // conosceva la versione che le ha scritte, e reinterpretarle
+          // presenterebbe slot vuoti — peggio che non averle. Si svuotano, e
+          // la cache si ricostituisce alla prima lettura riuscita (PL-11).
+          // Nessuna perdita: è una cache di sola lettura (PL-6), non la sede
+          // di alcun dato.
+          await delete(localPlanDays).go();
+        },
+      );
 }
 
 @Riverpod(keepAlive: true)
