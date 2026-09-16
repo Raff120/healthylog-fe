@@ -14,6 +14,7 @@ import 'package:healthylog/features/dietplan/providers/meal_swap_providers.dart'
 import 'package:healthylog/features/dietplan/providers/plan_day_providers.dart';
 
 import '../../../../support/l10n_test_support.dart';
+import '../../../../support/slot_items_json.dart';
 
 /// Risponde alla sola lettura della giornata di gruppo (EP-1) con il
 /// corpo fornito dal banco di prova.
@@ -58,10 +59,8 @@ Map<String, dynamic> _slot(
       'type': type,
       'label': label,
       'order': order,
-      'content': content,
+      'items': itemsJson(content, recipeName: recipeName, recipeText: recipeText),
       'note': note,
-      'recipeName': recipeName,
-      'recipeText': recipeText,
       'status': status,
     };
 
@@ -256,7 +255,7 @@ void main() {
     });
 
     testWidgets(
-      'con una ricetta il contenuto compare solo da aperta, e la denominazione apre il foglio (GG-15, GG-18)',
+      'la ricetta è un elemento fra gli altri, e la sua riga apre il foglio (GG-15, GG-18)',
       (tester) async {
         await _pumpGrid(tester, [
           _member('user-1', 'Io', [
@@ -271,14 +270,12 @@ void main() {
           ]),
         ]);
 
-        expect(find.text('Pasta fresca'), findsOneWidget);
-        expect(find.text('Pasta al pomodoro'), findsNothing);
+        // 6.3: chiusa, la cella presenta gli elementi — l'alimento e la
+        // ricetta insieme, non più l'uno in luogo dell'altra.
+        expect(find.text('Pasta al pomodoro', findRichText: true), findsOneWidget);
+        expect(find.text('Pasta fresca', findRichText: true), findsOneWidget);
 
-        await tester.tap(find.byIcon(Icons.keyboard_arrow_down));
-        await tester.pumpAndSettle();
-        expect(find.text('Pasta al pomodoro'), findsOneWidget);
-
-        await tester.tap(find.text('Pasta fresca'));
+        await tester.tap(find.text('Pasta fresca', findRichText: true));
         await tester.pumpAndSettle();
 
         expect(find.text('Cuocere la pasta...'), findsOneWidget);

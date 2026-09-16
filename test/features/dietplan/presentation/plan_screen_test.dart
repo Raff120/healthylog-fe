@@ -27,6 +27,7 @@ import 'package:healthylog/features/workout/providers/workout_providers.dart';
 
 import '../../../support/care_api_stub.dart';
 import '../../../support/workout_api_stub.dart';
+import '../../../support/slot_items_json.dart';
 
 /// VG-3, VG-4: tutti gli slot della giornata restano sempre visibili,
 /// quale sia il loro stato di consumo — nessuno nascosto né evidenziato
@@ -71,10 +72,8 @@ Map<String, dynamic> _dayJson() => {
       'type': 'BREAKFAST',
       'label': null,
       'order': 0,
-      'content': 'Yogurt e cereali',
+      'items': itemsJson('Yogurt e cereali'),
       'note': null,
-      'recipeName': null,
-      'recipeText': null,
       'status': 'TO_CONSUME',
     },
     {
@@ -82,10 +81,8 @@ Map<String, dynamic> _dayJson() => {
       'type': 'LUNCH',
       'label': null,
       'order': 1,
-      'content': 'Pasta al pomodoro',
+      'items': itemsJson('Pasta al pomodoro', recipeName: 'Pasta al pomodoro fresca', recipeText: 'Cuocere la pasta...'),
       'note': 'Con parmigiano a parte',
-      'recipeName': 'Pasta al pomodoro fresca',
-      'recipeText': 'Cuocere la pasta...',
       'status': 'CONSUMED',
     },
     {
@@ -93,10 +90,8 @@ Map<String, dynamic> _dayJson() => {
       'type': 'SNACK',
       'label': 'Spuntino del pomeriggio',
       'order': 2,
-      'content': 'Frutta secca',
+      'items': itemsJson('Frutta secca'),
       'note': null,
-      'recipeName': null,
-      'recipeText': null,
       'status': 'SKIPPED',
     },
   ],
@@ -243,10 +238,8 @@ class _MemberAwareAdapter implements HttpClientAdapter {
                   'type': 'BREAKFAST',
                   'label': null,
                   'order': 0,
-                  'content': 'Yogurt e cereali',
+                  'items': itemsJson('Yogurt e cereali'),
                   'note': null,
-                  'recipeName': null,
-                  'recipeText': null,
                   'status': 'TO_CONSUME',
                 },
               ],
@@ -267,10 +260,8 @@ class _MemberAwareAdapter implements HttpClientAdapter {
                   'type': 'BREAKFAST',
                   'label': null,
                   'order': 0,
-                  'content': 'Pasta di Maria',
+                  'items': itemsJson('Pasta di Maria'),
                   'note': null,
-                  'recipeName': null,
-                  'recipeText': null,
                   'status': 'CONSUMED',
                 },
               ],
@@ -300,10 +291,8 @@ class _MemberAwareAdapter implements HttpClientAdapter {
             'type': 'BREAKFAST',
             'label': null,
             'order': 0,
-            'content': content,
+            'items': itemsJson(content),
             'note': null,
-            'recipeName': null,
-            'recipeText': null,
             'status': status,
             // CU-4: sul proprio piano, l'ultima spunta risulta apposta
             // da Maria — assente nella proiezione del piano altrui
@@ -385,10 +374,8 @@ Map<String, dynamic> _dayJsonFor(String date, String content) => {
       'type': 'LUNCH',
       'label': null,
       'order': 0,
-      'content': content,
+      'items': itemsJson(content),
       'note': null,
-      'recipeName': null,
-      'recipeText': null,
       'status': 'TO_CONSUME',
     },
   ],
@@ -600,23 +587,28 @@ void main() {
       await _pumpDailyView(tester, _dayJson());
 
       expect(find.text('Yogurt e cereali'), findsOneWidget);
-      expect(find.text('Pasta al pomodoro'), findsOneWidget);
-      expect(find.text('Frutta secca'), findsOneWidget);
-      // GG-15: la denominazione della ricetta è visibile già a card chiusa.
-      expect(find.text('Pasta al pomodoro fresca'), findsOneWidget);
+      // 4.1: gli elementi sono resi in un'unica riga di testo composita —
+      // denominazione e quantità in due stili — e il finder guarda dentro.
+      expect(find.text('Pasta al pomodoro', findRichText: true), findsOneWidget);
+      expect(find.text('Frutta secca', findRichText: true), findsOneWidget);
+      // GG-15: la ricetta è un elemento, e la sua denominazione è visibile
+      // già a card chiusa.
+      expect(find.text('Pasta al pomodoro fresca', findRichText: true), findsOneWidget);
       // GG-10: lo spuntino usa la denominazione descrittiva del piano.
       expect(find.text('Spuntino del pomeriggio'), findsOneWidget);
       expect(find.text('Spuntino'), findsNothing);
       // La nota accessoria compare solo da aperta (4.1 interfaccia.md).
       expect(find.text('Con parmigiano a parte'), findsNothing);
 
-      await tester.tap(find.text('Pasta al pomodoro'));
+      await tester.tap(find.text('Pasta al pomodoro', findRichText: true));
       await tester.pumpAndSettle();
 
       expect(find.text('Con parmigiano a parte'), findsOneWidget);
 
-      // GG-15, GG-18: "Vedi ricetta" apre il foglio con il testo integrale.
-      await tester.tap(find.text('Vedi ricetta'));
+      // GG-15, GG-18, 4.1: la riga della ricetta apre il foglio col testo
+      // integrale — non più un pulsante dedicato, non essendoci più una sola
+      // ricetta per slot.
+      await tester.tap(find.text('Pasta al pomodoro fresca', findRichText: true));
       await tester.pumpAndSettle();
 
       expect(find.text('Pasta al pomodoro fresca'), findsWidgets);
@@ -1282,13 +1274,11 @@ void main() {
           dayResponseFor: (date) => _dayJsonFor(date, 'Pasta al pomodoro'),
           rangeResponseFor: (from, to) {
             final days = _weekJson(weekStart);
-            days[0]
-              ..['recipeName'] = 'Pasta al pomodoro fresca'
-              ..['recipeText'] = 'Cuocere la pasta...'
-              ..['note'] = 'Con parmigiano a parte';
+            // VS-4: il foglio reca il contenuto integrale, e la ricetta è un
+            // elemento dello slot come gli altri (GG-15).
             days[0]['slots'][0]
-              ..['recipeName'] = 'Pasta al pomodoro fresca'
-              ..['recipeText'] = 'Cuocere la pasta...'
+              ..['items'] = itemsJson('Pasto di lunedì',
+                  recipeName: 'Pasta al pomodoro fresca', recipeText: 'Cuocere la pasta...')
               ..['note'] = 'Con parmigiano a parte';
             return days;
           },
@@ -1300,10 +1290,14 @@ void main() {
 
         expect(find.text('Con parmigiano a parte'), findsNothing);
 
-        await tester.tap(find.text('Pasto di lunedì').first);
+        // VS-3: la riga reca le denominazioni separate da « · », e la ricetta
+        // è una di esse.
+        await tester.tap(find.textContaining('Pasto di lunedì').first);
         await tester.pumpAndSettle();
 
-        expect(find.text('Pasta al pomodoro fresca'), findsOneWidget);
+        // Due volte: fra gli elementi, e come intestazione del proprio testo —
+        // che con più ricette per slot è ciò che dice a quale appartenga.
+        expect(find.text('Pasta al pomodoro fresca', findRichText: true), findsWidgets);
         expect(find.text('Cuocere la pasta...'), findsOneWidget);
         expect(find.text('Con parmigiano a parte'), findsOneWidget);
         // La vista settimanale resta sotto il foglio, non sostituita (VS-4).

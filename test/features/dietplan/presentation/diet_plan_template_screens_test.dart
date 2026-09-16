@@ -14,6 +14,7 @@ import 'package:healthylog/features/dietplan/presentation/create_diet_plan_scree
 import 'package:healthylog/features/dietplan/presentation/diet_plan_template_list_screen.dart';
 import 'package:healthylog/features/dietplan/presentation/diet_plan_template_preview_screen.dart';
 import 'package:healthylog/features/dietplan/providers/diet_plan_template_providers.dart';
+import '../../../support/slot_items_json.dart';
 
 /// CT-1, CT-2, CT-4, CT-5, CT-6: elenco e anteprima dei template, e scelta
 /// dell'origine alla creazione del piano. Verifica per intero, con un
@@ -94,10 +95,8 @@ Map<String, dynamic> _templateJson() {
                   'type': 'BREAKFAST',
                   'label': null,
                   'order': 0,
-                  'content': day == 'MONDAY' ? 'Frutta fresca' : null,
+                  'items': itemsJson(day == 'MONDAY' ? 'Frutta fresca' : null),
                   'note': null,
-                  'recipeName': null,
-                  'recipeText': null,
                   'adherenceWeight': 1.0,
                 },
               ],

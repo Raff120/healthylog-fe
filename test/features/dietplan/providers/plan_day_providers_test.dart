@@ -30,7 +30,8 @@ class _SucceedThenFailAdapter implements HttpClientAdapter {
       return ResponseBody.fromString(
         '{"date":"${isoDate(_date)}","coverage":"ACTIVE","planId":"p1","planName":"Dieta",'
         '"planStartDate":"2026-01-01","planEndDate":null,"slots":[{"slotId":"s1","type":"LUNCH",'
-        '"label":null,"order":0,"content":"Pasta","note":null,"recipeName":null,"recipeText":null,'
+        '"label":null,"order":0,"items":[{"itemId":"i1","kind":"FOOD","name":"Pasta",'
+        '"quantity":80,"unit":"GRAM","recipeText":null,"alternatives":[]}],"note":null,'
         '"status":"TO_CONSUME"}]}',
         200,
         headers: {
@@ -78,11 +79,11 @@ void main() {
     addTearDown(container.dispose);
 
     final online = await container.read(planDayProvider(date).future);
-    expect(online.slots.single.content, 'Pasta');
+    expect(online.slots.single.items.single.name, 'Pasta');
 
     container.invalidate(planDayProvider(date));
     final offline = await container.read(planDayProvider(date).future);
-    expect(offline.slots.single.content, 'Pasta');
+    expect(offline.slots.single.items.single.name, 'Pasta');
   });
 
   test('senza copia locale per la data, un errore di rete si propaga', () async {
