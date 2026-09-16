@@ -96,7 +96,7 @@ final class PublicApiClientProvider extends $FunctionalProvider<Dio, Dio, Dio>
   }
 }
 
-String _$publicApiClientHash() => r'fdbfb27bfd48215a66928c3e2384dcbf695468e5';
+String _$publicApiClientHash() => r'deb0ddc206fbff8c4b57d8e13cc5e3508ce9b67d';
 
 /// Client HTTP che allega il token di accesso corrente quando presente
 /// (TK-6) e rinnova trasparentemente alla scadenza (TK-13, TK-14). Per
@@ -186,4 +186,4 @@ final class ApiClientProvider extends $FunctionalProvider<Dio, Dio, Dio>
   }
 }
 
-String _$apiClientHash() => r'd37f5f36a17c7410d2f27bfcc485db2a5c6c94fa';
+String _$apiClientHash() => r'e852bd1e4232f33404b7b6412356a5a4b867b80e';
