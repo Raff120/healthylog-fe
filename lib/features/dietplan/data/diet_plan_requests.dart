@@ -1,3 +1,4 @@
+import 'slot_item.dart';
 import 'slot_type.dart';
 import 'weekday.dart';
 
@@ -74,30 +75,26 @@ class UpdateDietPlanSlotRequest {
     this.slotId,
     required this.type,
     this.label,
-    this.content,
+    this.items = const [],
     this.note,
-    this.recipeName,
-    this.recipeText,
     this.adherenceWeight,
   });
 
   final String? slotId;
   final SlotType type;
   final String? label;
-  final String? content;
+  /// Gli elementi nell'ordine in cui vanno presentati (GG-21): l'ordinamento
+  /// non è un campo, è la posizione nell'elenco.
+  final List<SlotItem> items;
   final String? note;
-  final String? recipeName;
-  final String? recipeText;
   final double? adherenceWeight;
 
   Map<String, dynamic> toJson() => {
         'slotId': slotId,
         'type': type.toJson(),
         'label': label,
-        'content': content,
+        'items': items.map((e) => e.toJson()).toList(),
         'note': note,
-        'recipeName': recipeName,
-        'recipeText': recipeText,
         'adherenceWeight': adherenceWeight,
       };
 }
