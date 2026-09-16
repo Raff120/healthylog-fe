@@ -87,7 +87,7 @@ final class MaintenanceControllerProvider
 }
 
 String _$maintenanceControllerHash() =>
-    r'82cfbcebf92dd0cf19d27e392aa752fbb040890b';
+    r'60bbc0239a11a16fc4dc310abd574b2f5a9257e8';
 
 /// Manutenzione del servizio (MN-1, MM-7): `true` quando il servizio l'ha
 /// dichiarata rispondendo `MAINTENANCE` a una chiamata qualsiasi.
