@@ -374,11 +374,43 @@ class L10nEn extends L10n {
   String get editDiscardTitle => 'Unsaved changes';
 
   @override
-  String get editRecipeFieldsInvalid => 'Check the highlighted recipe fields.';
+  String get editItemAdd => 'Add item';
 
   @override
-  String get editRecipeNameRequired =>
-      'A name is required when the recipe text is present';
+  String get editItemAlternativeAdd => 'Add alternative';
+
+  @override
+  String get editItemKindFood => 'Food';
+
+  @override
+  String get editItemKindRecipe => 'Recipe';
+
+  @override
+  String get editItemName => 'Name';
+
+  @override
+  String get editItemNameRequired => 'The name is required';
+
+  @override
+  String get editItemQuantity => 'Quantity';
+
+  @override
+  String get editItemQuantityInvalid => 'Invalid quantity';
+
+  @override
+  String get editItemQuantityRequired => 'Enter the quantity as well';
+
+  @override
+  String get editItemUnit => 'Unit';
+
+  @override
+  String get editItemUnitRequired => 'Enter the unit as well';
+
+  @override
+  String get editItemsInvalid => 'Check the items marked below';
+
+  @override
+  String get editItemsTitle => 'Items';
 
   @override
   String get editRemoveSlotBody => 'The content you entered will be lost.';
@@ -788,9 +820,6 @@ class L10nEn extends L10n {
   @override
   String get mealReplacementNoteLost =>
       'The replacement note will be permanently lost.';
-
-  @override
-  String get mealSeeRecipe => 'View recipe';
 
   @override
   String mealStatusByCook(String verb, String name) {
@@ -1716,16 +1745,10 @@ class L10nEn extends L10n {
       'How much this meal counts towards adherence. At zero it is not counted.';
 
   @override
-  String get slotContent => 'Content';
-
-  @override
   String get slotDescriptiveLabel => 'Descriptive label';
 
   @override
   String get slotNotSpecified => 'Not specified';
-
-  @override
-  String get slotRecipeName => 'Recipe name';
 
   @override
   String get slotRecipeText => 'Recipe text';

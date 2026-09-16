@@ -49,3 +49,7 @@ String slotItemLabel(BuildContext context, String name, num? quantity, String? u
   final formatted = formatSlotItemQuantity(context, quantity, unitCode);
   return formatted == null ? name : '$name  $formatted';
 }
+
+/// Denominazione dell'unità per il menu della redazione (7.3): al plurale,
+/// che è la forma in cui si sceglie un'unità — «fette», non «fetta».
+String unitMenuLabel(BuildContext context, QuantityUnit unit) => _unitName(context, unit, 2);

@@ -376,12 +376,43 @@ class L10nIt extends L10n {
   String get editDiscardTitle => 'Modifiche non salvate';
 
   @override
-  String get editRecipeFieldsInvalid =>
-      'Controlla i campi della ricetta segnalati.';
+  String get editItemAdd => 'Aggiungi elemento';
 
   @override
-  String get editRecipeNameRequired =>
-      'Serve una denominazione se è presente il testo della ricetta';
+  String get editItemAlternativeAdd => 'Aggiungi alternativa';
+
+  @override
+  String get editItemKindFood => 'Alimento';
+
+  @override
+  String get editItemKindRecipe => 'Ricetta';
+
+  @override
+  String get editItemName => 'Denominazione';
+
+  @override
+  String get editItemNameRequired => 'La denominazione è obbligatoria';
+
+  @override
+  String get editItemQuantity => 'Quantità';
+
+  @override
+  String get editItemQuantityInvalid => 'Quantità non valida';
+
+  @override
+  String get editItemQuantityRequired => 'Indica anche la quantità';
+
+  @override
+  String get editItemUnit => 'Unità';
+
+  @override
+  String get editItemUnitRequired => 'Indica anche l\'unità';
+
+  @override
+  String get editItemsInvalid => 'Controlla gli elementi segnalati';
+
+  @override
+  String get editItemsTitle => 'Elementi';
 
   @override
   String get editRemoveSlotBody => 'Il contenuto compilato andrà perso.';
@@ -798,9 +829,6 @@ class L10nIt extends L10n {
   @override
   String get mealReplacementNoteLost =>
       'La nota di sostituzione andrà perduta in modo definitivo.';
-
-  @override
-  String get mealSeeRecipe => 'Vedi ricetta';
 
   @override
   String mealStatusByCook(String verb, String name) {
@@ -1731,16 +1759,10 @@ class L10nIt extends L10n {
       'Quanto questo pasto incide sull\'aderenza. A zero non viene conteggiato.';
 
   @override
-  String get slotContent => 'Contenuto';
-
-  @override
   String get slotDescriptiveLabel => 'Etichetta descrittiva';
 
   @override
   String get slotNotSpecified => 'Non specificato';
-
-  @override
-  String get slotRecipeName => 'Denominazione della ricetta';
 
   @override
   String get slotRecipeText => 'Testo della ricetta';

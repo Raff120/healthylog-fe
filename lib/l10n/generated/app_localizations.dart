@@ -745,17 +745,83 @@ abstract class L10n {
   /// **'Modifiche non salvate'**
   String get editDiscardTitle;
 
-  /// No description provided for @editRecipeFieldsInvalid.
+  /// No description provided for @editItemAdd.
   ///
   /// In it, this message translates to:
-  /// **'Controlla i campi della ricetta segnalati.'**
-  String get editRecipeFieldsInvalid;
+  /// **'Aggiungi elemento'**
+  String get editItemAdd;
 
-  /// No description provided for @editRecipeNameRequired.
+  /// No description provided for @editItemAlternativeAdd.
   ///
   /// In it, this message translates to:
-  /// **'Serve una denominazione se è presente il testo della ricetta'**
-  String get editRecipeNameRequired;
+  /// **'Aggiungi alternativa'**
+  String get editItemAlternativeAdd;
+
+  /// No description provided for @editItemKindFood.
+  ///
+  /// In it, this message translates to:
+  /// **'Alimento'**
+  String get editItemKindFood;
+
+  /// No description provided for @editItemKindRecipe.
+  ///
+  /// In it, this message translates to:
+  /// **'Ricetta'**
+  String get editItemKindRecipe;
+
+  /// No description provided for @editItemName.
+  ///
+  /// In it, this message translates to:
+  /// **'Denominazione'**
+  String get editItemName;
+
+  /// No description provided for @editItemNameRequired.
+  ///
+  /// In it, this message translates to:
+  /// **'La denominazione è obbligatoria'**
+  String get editItemNameRequired;
+
+  /// No description provided for @editItemQuantity.
+  ///
+  /// In it, this message translates to:
+  /// **'Quantità'**
+  String get editItemQuantity;
+
+  /// No description provided for @editItemQuantityInvalid.
+  ///
+  /// In it, this message translates to:
+  /// **'Quantità non valida'**
+  String get editItemQuantityInvalid;
+
+  /// No description provided for @editItemQuantityRequired.
+  ///
+  /// In it, this message translates to:
+  /// **'Indica anche la quantità'**
+  String get editItemQuantityRequired;
+
+  /// No description provided for @editItemUnit.
+  ///
+  /// In it, this message translates to:
+  /// **'Unità'**
+  String get editItemUnit;
+
+  /// No description provided for @editItemUnitRequired.
+  ///
+  /// In it, this message translates to:
+  /// **'Indica anche l\'unità'**
+  String get editItemUnitRequired;
+
+  /// No description provided for @editItemsInvalid.
+  ///
+  /// In it, this message translates to:
+  /// **'Controlla gli elementi segnalati'**
+  String get editItemsInvalid;
+
+  /// No description provided for @editItemsTitle.
+  ///
+  /// In it, this message translates to:
+  /// **'Elementi'**
+  String get editItemsTitle;
 
   /// No description provided for @editRemoveSlotBody.
   ///
@@ -1440,12 +1506,6 @@ abstract class L10n {
   /// In it, this message translates to:
   /// **'La nota di sostituzione andrà perduta in modo definitivo.'**
   String get mealReplacementNoteLost;
-
-  /// No description provided for @mealSeeRecipe.
-  ///
-  /// In it, this message translates to:
-  /// **'Vedi ricetta'**
-  String get mealSeeRecipe;
 
   /// CU-4: l’attribuzione dell’operazione compiuta dal Cuoco.
   ///
@@ -3025,12 +3085,6 @@ abstract class L10n {
   /// **'Quanto questo pasto incide sull\'aderenza. A zero non viene conteggiato.'**
   String get slotAdherenceWeightHelp;
 
-  /// No description provided for @slotContent.
-  ///
-  /// In it, this message translates to:
-  /// **'Contenuto'**
-  String get slotContent;
-
   /// No description provided for @slotDescriptiveLabel.
   ///
   /// In it, this message translates to:
@@ -3042,12 +3096,6 @@ abstract class L10n {
   /// In it, this message translates to:
   /// **'Non specificato'**
   String get slotNotSpecified;
-
-  /// No description provided for @slotRecipeName.
-  ///
-  /// In it, this message translates to:
-  /// **'Denominazione della ricetta'**
-  String get slotRecipeName;
 
   /// No description provided for @slotRecipeText.
   ///

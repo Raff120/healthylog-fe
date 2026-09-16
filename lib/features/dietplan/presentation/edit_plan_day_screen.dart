@@ -12,6 +12,7 @@ import '../../../l10n/formats.dart';
 import '../../../l10n/l10n_context.dart';
 import '../data/diet_plan_requests.dart';
 import '../data/plan_day.dart';
+import '../domain/slot_item_errors.dart';
 import '../data/plan_day_coverage.dart';
 import '../data/slot_status.dart';
 import '../data/slot_type.dart';
@@ -21,7 +22,6 @@ import 'editable_slot.dart';
 import 'slot_type_presentation.dart';
 import 'widgets/slot_card.dart';
 
-final RegExp _recipeNameFieldPattern = RegExp(r'^slots\[(\d+)\]\.recipeName$');
 
 /// Modifica della singola occorrenza giornaliera (5.3 funzionale, MD-8,
 /// MD-9, MD-10): altera il contenuto di una sola data senza toccare lo
@@ -135,21 +135,13 @@ class _EditPlanDayScreenState extends ConsumerState<EditPlanDayScreen> {
     final exception = error.asApiException;
     if (exception?.code == 'VALIDATION_FAILED') {
       final fields = (exception?.body as Map?)?['fields'] as List?;
-      var matchedRecipeField = false;
-      for (final item in fields ?? const []) {
-        final field = (item as Map)['field'] as String?;
-        final match = field == null ? null : _recipeNameFieldPattern.firstMatch(field);
-        if (match == null) continue;
-        matchedRecipeField = true;
-        final slot = _slots![int.parse(match.group(1)!)];
-        slot.recipeNameError = context.l10n.editRecipeNameRequired;
-        slot.expanded = true;
-      }
+      final outcome = applySlotItemErrors(context, fields, (dayIndex, slotIndex) =>
+          slotIndex >= _slots!.length ? null : _slots![slotIndex]);
       setState(() {});
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            matchedRecipeField ? context.l10n.editRecipeFieldsInvalid : describeApiError(context, 'VALIDATION_FAILED'),
+            outcome.matched ? context.l10n.editItemsInvalid : describeApiError(context, 'VALIDATION_FAILED'),
           ),
         ),
       );
@@ -366,7 +358,9 @@ class _ConsumedSlotCard extends StatelessWidget {
                   style: typography.bodyLarge.copyWith(color: colors.textSecondary),
                 ),
                 Text(
-                  slot.contentController.text.trim().isEmpty ? context.l10n.slotNotSpecified : slot.contentController.text.trim(),
+                  slot.items.isEmpty
+                      ? context.l10n.slotNotSpecified
+                      : slot.items.map((item) => item.nameController.text.trim()).join(' · '),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: typography.caption.copyWith(color: colors.textTertiary),
