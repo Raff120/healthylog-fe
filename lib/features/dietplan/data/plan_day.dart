@@ -1,4 +1,5 @@
 import 'plan_day_coverage.dart';
+import 'slot_item.dart';
 import 'slot_status.dart';
 import 'slot_type.dart';
 
@@ -9,10 +10,8 @@ class PlanDaySlot {
     required this.type,
     required this.label,
     required this.order,
-    required this.content,
+    required this.items,
     required this.note,
-    required this.recipeName,
-    required this.recipeText,
     required this.status,
     required this.replacementNote,
     this.statusChangedBy,
@@ -23,10 +22,8 @@ class PlanDaySlot {
     type: SlotType.fromJson(json['type'] as String),
     label: json['label'] as String?,
     order: json['order'] as int,
-    content: json['content'] as String?,
+    items: slotItemsFromJson(json['items']),
     note: json['note'] as String?,
-    recipeName: json['recipeName'] as String?,
-    recipeText: json['recipeText'] as String?,
     status: SlotStatus.fromJson(json['status'] as String),
     replacementNote: json['replacementNote'] as String?,
     statusChangedBy: json['statusChangedBy'] as String?,
@@ -44,10 +41,9 @@ class PlanDaySlot {
   final SlotType type;
   final String? label;
   final int order;
-  final String? content;
+  /// Elementi copiati dallo schema alla materializzazione (GG-19, OG-8).
+  final List<SlotItem> items;
   final String? note;
-  final String? recipeName;
-  final String? recipeText;
   final SlotStatus status;
 
   /// Valorizzata solo se [status] è [SlotStatus.skipped] (SC-4). Assente
@@ -70,10 +66,8 @@ class PlanDaySlot {
     'type': type.toJson(),
     'label': label,
     'order': order,
-    'content': content,
+    'items': items.map((e) => e.toJson()).toList(),
     'note': note,
-    'recipeName': recipeName,
-    'recipeText': recipeText,
     'status': status.toJson(),
     'replacementNote': replacementNote,
     'statusChangedBy': statusChangedBy,

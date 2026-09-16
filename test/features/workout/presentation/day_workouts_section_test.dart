@@ -23,6 +23,7 @@ import 'package:healthylog/features/workout/providers/workout_providers.dart';
 
 import '../../../support/care_api_stub.dart';
 import '../../../support/workout_api_stub.dart';
+import '../../../support/slot_items_json.dart';
 
 /// Sezione degli allenamenti nella vista giornaliera (AL-12, VG-6, 6.2
 /// interfaccia.md): sopra i pasti, distinta da essi, con la sola spunta;
@@ -67,10 +68,8 @@ Map<String, dynamic> _dayJson({String coverage = 'ACTIVE'}) => {
                 'type': 'BREAKFAST',
                 'label': null,
                 'order': 0,
-                'content': 'Yogurt',
+                'items': itemsJson('Yogurt'),
                 'note': null,
-                'recipeName': null,
-                'recipeText': null,
                 'status': 'TO_CONSUME',
                 'replacementNote': null,
                 'statusChangedBy': null,

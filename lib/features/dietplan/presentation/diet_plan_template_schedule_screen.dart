@@ -11,6 +11,7 @@ import '../data/diet_plan_requests.dart';
 import '../data/diet_plan_template.dart';
 import '../data/slot_type.dart';
 import '../data/weekday.dart';
+import '../domain/slot_item_errors.dart';
 import '../providers/diet_plan_template_providers.dart';
 import 'editable_slot.dart';
 import 'slot_type_presentation.dart';
@@ -18,7 +19,6 @@ import 'widgets/day_selector.dart';
 import 'widgets/day_sidebar.dart';
 import 'widgets/slot_card.dart';
 
-final RegExp _recipeNameFieldPattern = RegExp(r'^days\[(\d+)\]\.slots\[(\d+)\]\.recipeName$');
 
 /// Redazione dello schema del template (7.4 interfaccia.md, "medesima
 /// schermata di 7.3, priva dei campi di data e destinatario", TP-12):
@@ -136,24 +136,18 @@ class _DietPlanTemplateScheduleScreenState extends ConsumerState<DietPlanTemplat
     final exception = error.asApiException;
     if (exception?.code == 'VALIDATION_FAILED') {
       final fields = (exception?.body as Map?)?['fields'] as List?;
-      var matchedRecipeField = false;
-      for (final item in fields ?? const []) {
-        final field = (item as Map)['field'] as String?;
-        final match = field == null ? null : _recipeNameFieldPattern.firstMatch(field);
-        if (match == null) continue;
-        matchedRecipeField = true;
-        final dayIndex = int.parse(match.group(1)!);
-        final slotIndex = int.parse(match.group(2)!);
+      final outcome = applySlotItemErrors(context, fields, (dayIndex, slotIndex) {
+        if (dayIndex == null || dayIndex >= _days!.length) return null;
         final day = _days![dayIndex];
-        final slot = day.slots[slotIndex];
-        slot.recipeNameError = context.l10n.editRecipeNameRequired;
-        slot.expanded = true;
-        setState(() => _selectedDay = day.dayOfWeek);
-      }
+        return slotIndex >= day.slots.length ? null : day.slots[slotIndex];
+      });
+      setState(() {
+        if (outcome.dayIndex != null) _selectedDay = _days![outcome.dayIndex!].dayOfWeek;
+      });
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            matchedRecipeField ? context.l10n.editRecipeFieldsInvalid : describeApiError(context, 'VALIDATION_FAILED'),
+            outcome.matched ? context.l10n.editItemsInvalid : describeApiError(context, 'VALIDATION_FAILED'),
           ),
         ),
       );

@@ -6,6 +6,7 @@ import '../../../../app/theme/theme_context.dart';
 import '../../../../core/api/api_error_messages.dart';
 import '../../../../l10n/l10n_context.dart';
 import '../../data/plan_day.dart';
+import 'slot_items_view.dart';
 import '../../data/slot_status.dart';
 import '../../data/slot_type.dart';
 import '../../providers/meal_swap_providers.dart';
@@ -40,7 +41,10 @@ class _WeekSlotRowState extends ConsumerState<WeekSlotRow> {
     final typography = context.typography;
     final consumption = context.consumptionColors;
     final slot = widget.slot;
-    final hasContent = slot.content?.trim().isNotEmpty ?? false;
+    // VS-3: nella griglia settimanale contano le denominazioni, senza
+    // quantità: la riga è una sola e deve restare leggibile.
+    final names = slot.items.map((item) => item.name).join(' · ');
+    final hasContent = names.isNotEmpty;
 
     // CU-2, VS-17: il Cuoco può disporre l'inversione anche sul piano di
     // un membro del proprio Gruppo; il membro semplice resta in sola
@@ -101,7 +105,7 @@ class _WeekSlotRowState extends ConsumerState<WeekSlotRow> {
                 const SizedBox(width: AppSpacing.xs),
                 Expanded(
                   child: Text(
-                    hasContent ? slot.content!.trim() : context.l10n.slotToBeDefined,
+                    hasContent ? names : context.l10n.slotToBeDefined,
                     style: typography.bodyMedium.copyWith(
                       color: hasContent ? colors.textPrimary : colors.textTertiary,
                     ),
@@ -172,9 +176,19 @@ class _WeekSlotRowState extends ConsumerState<WeekSlotRow> {
 void _openDetailSheet(BuildContext context, PlanDaySlot slot, {required VoidCallback? onMove}) {
   final colors = context.colors;
   final typography = context.typography;
-  final hasContent = slot.content?.trim().isNotEmpty ?? false;
-  final hasRecipe = slot.recipeName?.trim().isNotEmpty ?? false;
   final hasNote = slot.note?.trim().isNotEmpty ?? false;
+  // VS-4: qui il contenuto è integrale, ricette comprese — il foglio è già
+  // l'approfondimento, e un secondo foglio sopra il primo sarebbe di troppo.
+  final recipes = [
+    for (final item in slot.items)
+      ...[
+        if (item.isRecipe && (item.recipeText?.trim().isNotEmpty ?? false))
+          (item.name, item.recipeText!.trim()),
+        for (final alternative in item.alternatives)
+          if (alternative.isRecipe && (alternative.recipeText?.trim().isNotEmpty ?? false))
+            (alternative.name, alternative.recipeText!.trim()),
+      ],
+  ];
 
   showModalBottomSheet<void>(
     context: context,
@@ -200,22 +214,18 @@ void _openDetailSheet(BuildContext context, PlanDaySlot slot, {required VoidCall
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      if (hasRecipe) ...[
+                      SlotItemsView(items: slot.items, expanded: true),
+                      for (final recipe in recipes) ...[
+                        const SizedBox(height: AppSpacing.md),
                         Text(
-                          slot.recipeName!.trim(),
+                          recipe.$1,
                           style: typography.titleMedium.copyWith(color: colors.textPrimary),
                         ),
-                        const SizedBox(height: AppSpacing.sm),
-                      ],
-                      Text(
-                        hasContent ? slot.content!.trim() : context.l10n.slotToBeDefined,
-                        style: typography.bodyLarge.copyWith(
-                          color: hasContent ? colors.textPrimary : colors.textTertiary,
+                        const SizedBox(height: AppSpacing.xxs),
+                        Text(
+                          recipe.$2,
+                          style: typography.bodyMedium.copyWith(color: colors.textPrimary),
                         ),
-                      ),
-                      if (hasRecipe && (slot.recipeText?.trim().isNotEmpty ?? false)) ...[
-                        const SizedBox(height: AppSpacing.md),
-                        Text(slot.recipeText!.trim(), style: typography.bodyMedium.copyWith(color: colors.textPrimary)),
                       ],
                       if (hasNote) ...[
                         const SizedBox(height: AppSpacing.md),

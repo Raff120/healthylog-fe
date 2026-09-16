@@ -17,6 +17,7 @@ import 'package:healthylog/features/dietplan/providers/meal_swap_providers.dart'
 import 'package:healthylog/features/statistics/providers/statistics_providers.dart';
 
 import '../../../support/statistics_api_stub.dart';
+import '../../../support/slot_items_json.dart';
 
 /// 7.5 interfaccia.md, ST-7: dettaglio di sola lettura di un piano
 /// Concluso — intestazione, periodi di svolgimento (ST-9), statistiche del
@@ -68,10 +69,8 @@ Map<String, dynamic> _planJson({List<Map<String, dynamic>> periods = const []}) 
               'type': 'BREAKFAST',
               'label': null,
               'order': 0,
-              'content': 'Yogurt e cereali',
+              'items': itemsJson('Yogurt e cereali'),
               'note': null,
-              'recipeName': null,
-              'recipeText': null,
               'adherenceWeight': 1.0,
             },
           ],

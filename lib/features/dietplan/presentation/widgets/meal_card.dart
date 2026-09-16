@@ -12,6 +12,7 @@ import '../../../group/providers/cooking_group_providers.dart';
 import '../../../identity/providers/profile_providers.dart';
 import '../../data/plan_day.dart';
 import '../../data/slot_status.dart';
+import 'slot_items_view.dart';
 import '../../data/slot_type.dart';
 import '../../domain/plan_day_date.dart';
 import '../../providers/meal_swap_providers.dart';
@@ -144,8 +145,6 @@ class _MealCardState extends ConsumerState<MealCard> {
     final consumption = context.consumptionColors;
     final slot = widget.slot;
 
-    final hasContent = slot.content?.trim().isNotEmpty ?? false;
-    final hasRecipe = slot.recipeName?.trim().isNotEmpty ?? false;
     final hasNote = slot.note?.trim().isNotEmpty ?? false;
     // CU-4: il nome del Cuoco che ha spuntato al posto proprio, quando
     // diverso da sé — mai per la propria spunta ordinaria, né per una
@@ -187,61 +186,14 @@ class _MealCardState extends ConsumerState<MealCard> {
                         color: colors.textSecondary,
                       ),
                     ),
-                    if (hasRecipe) ...[
-                      const SizedBox(height: AppSpacing.xxs),
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Icon(
-                            Icons.soup_kitchen_outlined,
-                            size: 16,
-                            color: colors.textSecondary,
-                          ),
-                          const SizedBox(width: AppSpacing.xxs),
-                          Expanded(
-                            child: Text(
-                              slot.recipeName!.trim(),
-                              style: typography.titleMedium.copyWith(
-                                color: colors.textPrimary,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
                     const SizedBox(height: AppSpacing.xxs),
-                    Text(
-                      hasContent ? slot.content!.trim() : context.l10n.slotToBeDefined,
-                      style: typography.bodyLarge.copyWith(
-                        color: hasContent
-                            ? colors.textPrimary
-                            : colors.textTertiary,
-                      ),
-                      maxLines: _expanded ? null : 2,
-                      overflow: _expanded
-                          ? TextOverflow.visible
-                          : TextOverflow.ellipsis,
+                    // 4.1: elementi uno per riga; a card aperta integrali,
+                    // con le alternative rientrate sotto ciascuno (GG-25).
+                    SlotItemsView(
+                      items: slot.items,
+                      expanded: _expanded,
+                      onRecipeTap: (name, text) => _openRecipeSheet(context, name, text),
                     ),
-                    if (_expanded && hasRecipe) ...[
-                      const SizedBox(height: AppSpacing.sm),
-                      Align(
-                        alignment: Alignment.centerLeft,
-                        child: TextButton.icon(
-                          onPressed: () => _openRecipeSheet(context, slot),
-                          icon: Icon(
-                            Icons.soup_kitchen_outlined,
-                            size: 18,
-                            color: colors.accent,
-                          ),
-                          label: Text(
-                            context.l10n.mealSeeRecipe,
-                            style: typography.label.copyWith(
-                              color: colors.accent,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
                     if (_expanded && _canMove) ...[
                       const SizedBox(height: AppSpacing.sm),
                       Align(
@@ -316,7 +268,9 @@ class _MealCardState extends ConsumerState<MealCard> {
                   ],
                 ),
               ),
-              if (hasContent) ...[
+              // Uno slot privo di elementi resta previsto ma non specificato
+              // (GG-13): non si spunta ciò che non è stato scritto.
+              if (slot.items.isNotEmpty) ...[
                 const SizedBox(width: AppSpacing.xs),
                 _SpuntaButtons(
                   status: slot.status,
@@ -470,7 +424,7 @@ class _MealCardState extends ConsumerState<MealCard> {
   /// libero e non strutturato: reso così com'è scritto (andate a capo ed
   /// elenchi puntati eventualmente già presenti), senza dedurne sezioni
   /// né alcuna interattività.
-  void _openRecipeSheet(BuildContext context, PlanDaySlot slot) {
+  void _openRecipeSheet(BuildContext context, String name, String recipeText) {
     final colors = context.colors;
     final typography = context.typography;
     showModalBottomSheet<void>(
@@ -485,7 +439,7 @@ class _MealCardState extends ConsumerState<MealCard> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  slot.recipeName!.trim(),
+                  name,
                   style: typography.titleLarge.copyWith(
                     color: colors.textPrimary,
                   ),
@@ -494,9 +448,7 @@ class _MealCardState extends ConsumerState<MealCard> {
                 Expanded(
                   child: SingleChildScrollView(
                     child: Text(
-                      slot.recipeText?.trim().isNotEmpty == true
-                          ? slot.recipeText!.trim()
-                          : '',
+                      recipeText,
                       style: typography.bodyLarge.copyWith(
                         color: colors.textPrimary,
                       ),

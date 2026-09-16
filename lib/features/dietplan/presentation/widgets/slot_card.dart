@@ -6,6 +6,7 @@ import '../../../../core/widgets/app_text_field.dart';
 import '../../../../l10n/l10n_context.dart';
 import '../../data/slot_type.dart';
 import '../editable_slot.dart';
+import 'slot_items_editor.dart';
 import '../slot_type_presentation.dart';
 
 /// Card espandibile di uno slot (7.3 interfaccia.md). Chiusa: icona,
@@ -54,16 +55,10 @@ class _SlotCardState extends State<SlotCard> {
 
   List<TextEditingController> get _controllers => [
         widget.slot.labelController,
-        widget.slot.contentController,
         widget.slot.noteController,
-        widget.slot.recipeNameController,
-        widget.slot.recipeTextController,
       ];
 
   void _onFieldChanged() {
-    if (widget.slot.recipeNameController.text.trim().isNotEmpty) {
-      widget.slot.recipeNameError = null;
-    }
     setState(() {});
     widget.onChanged();
   }
@@ -108,10 +103,12 @@ class _SlotCardState extends State<SlotCard> {
                           style: typography.bodyLarge.copyWith(color: colors.textPrimary),
                         ),
                         if (!slot.expanded)
+                          // 7.3: da chiusa la card dice che cosa contiene, non
+                          // in quale quantità — le denominazioni, su una riga.
                           Text(
-                            slot.contentController.text.trim().isEmpty
+                            slot.items.isEmpty
                                 ? context.l10n.slotNotSpecified
-                                : slot.contentController.text.trim(),
+                                : slot.items.map((item) => item.nameController.text.trim()).join(' · '),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: typography.caption.copyWith(color: colors.textSecondary),
@@ -141,25 +138,7 @@ class _SlotCardState extends State<SlotCard> {
                     AppTextField(label: context.l10n.slotDescriptiveLabel, controller: slot.labelController),
                     const SizedBox(height: AppSpacing.sm),
                   ],
-                  AppTextField(
-                    label: context.l10n.slotContent,
-                    controller: slot.contentController,
-                    minLines: 2,
-                    maxLines: 5,
-                  ),
-                  const SizedBox(height: AppSpacing.sm),
-                  AppTextField(label: context.l10n.slotRecipeName, controller: slot.recipeNameController),
-                  if (slot.recipeNameError != null) ...[
-                    const SizedBox(height: AppSpacing.xxs),
-                    Text(slot.recipeNameError!, style: typography.caption.copyWith(color: colors.error)),
-                  ],
-                  const SizedBox(height: AppSpacing.sm),
-                  AppTextField(
-                    label: context.l10n.slotRecipeText,
-                    controller: slot.recipeTextController,
-                    minLines: 2,
-                    maxLines: 6,
-                  ),
+                  SlotItemsEditor(items: slot.items, onChanged: _onFieldChanged),
                   const SizedBox(height: AppSpacing.sm),
                   AppTextField(label: context.l10n.slotAccessoryNote, controller: slot.noteController, minLines: 2, maxLines: 3),
                   if (widget.showAdherenceWeight) ...[

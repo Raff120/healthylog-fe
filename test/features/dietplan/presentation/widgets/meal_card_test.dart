@@ -11,6 +11,7 @@ import 'package:healthylog/core/api/api_error_interceptor.dart';
 import 'package:healthylog/core/api/connectivity_status.dart';
 import 'package:healthylog/features/dietplan/data/plan_day.dart';
 import 'package:healthylog/features/dietplan/data/plan_day_api.dart';
+import 'package:healthylog/features/dietplan/data/slot_item.dart';
 import 'package:healthylog/features/dietplan/data/slot_status.dart';
 import 'package:healthylog/features/dietplan/data/slot_type.dart';
 import 'package:healthylog/features/dietplan/domain/plan_day_date.dart';
@@ -56,10 +57,8 @@ PlanDaySlot _slot(SlotStatus status, {String? replacementNote}) => PlanDaySlot(
       type: SlotType.lunch,
       label: null,
       order: 0,
-      content: 'Pasta al pomodoro',
+      items: const [SlotItem(itemId: 'i1', kindCode: 'FOOD', name: 'Pasta al pomodoro')],
       note: null,
-      recipeName: null,
-      recipeText: null,
       status: status,
       replacementNote: replacementNote,
     );

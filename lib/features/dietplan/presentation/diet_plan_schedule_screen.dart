@@ -10,6 +10,7 @@ import '../../../core/api/api_exception.dart';
 import '../../../core/widgets/app_primary_button.dart';
 import '../../../l10n/l10n_context.dart';
 import '../data/diet_plan.dart';
+import '../domain/slot_item_errors.dart';
 import '../data/diet_plan_requests.dart';
 import '../data/plan_status.dart';
 import '../data/slot_type.dart';
@@ -26,7 +27,6 @@ import 'widgets/name_description_dialog.dart';
 import 'widgets/plan_period_dialog.dart';
 import 'widgets/slot_card.dart';
 
-final RegExp _recipeNameFieldPattern = RegExp(r'^days\[(\d+)\]\.slots\[(\d+)\]\.recipeName$');
 
 /// Redazione dello schema settimanale (7.3 interfaccia.md, CD-5, CD-7,
 /// CD-8, CD-10, CD-11, MP-6): un giorno per volta con selettore in cima
@@ -193,24 +193,20 @@ class _DietPlanScheduleScreenState extends ConsumerState<DietPlanScheduleScreen>
     final exception = error.asApiException;
     if (exception?.code == 'VALIDATION_FAILED') {
       final fields = (exception?.body as Map?)?['fields'] as List?;
-      var matchedRecipeField = false;
-      for (final item in fields ?? const []) {
-        final field = (item as Map)['field'] as String?;
-        final match = field == null ? null : _recipeNameFieldPattern.firstMatch(field);
-        if (match == null) continue;
-        matchedRecipeField = true;
-        final dayIndex = int.parse(match.group(1)!);
-        final slotIndex = int.parse(match.group(2)!);
+      // ER-14, 7.3: l'errore va sul campo esatto, e la schermata si porta sul
+      // giorno che lo contiene.
+      final outcome = applySlotItemErrors(context, fields, (dayIndex, slotIndex) {
+        if (dayIndex == null || dayIndex >= _days!.length) return null;
         final day = _days![dayIndex];
-        final slot = day.slots[slotIndex];
-        slot.recipeNameError = context.l10n.editRecipeNameRequired;
-        slot.expanded = true;
-        setState(() => _selectedDay = day.dayOfWeek);
-      }
+        return slotIndex >= day.slots.length ? null : day.slots[slotIndex];
+      });
+      setState(() {
+        if (outcome.dayIndex != null) _selectedDay = _days![outcome.dayIndex!].dayOfWeek;
+      });
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            matchedRecipeField ? context.l10n.editRecipeFieldsInvalid : describeApiError(context, 'VALIDATION_FAILED'),
+            outcome.matched ? context.l10n.editItemsInvalid : describeApiError(context, 'VALIDATION_FAILED'),
           ),
         ),
       );

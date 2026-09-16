@@ -3,12 +3,15 @@ import 'package:healthylog/features/care/data/care_models.dart';
 import 'package:healthylog/features/dietplan/data/diet_plan.dart';
 import 'package:healthylog/features/dietplan/data/meal_swap_log.dart';
 import 'package:healthylog/features/dietplan/data/plan_day.dart';
+import 'package:healthylog/features/dietplan/data/slot_item.dart';
 import 'package:healthylog/features/dietplan/data/slot_type.dart';
 import 'package:healthylog/features/dietplan/data/weekday.dart' as plan;
 import 'package:healthylog/features/notification/data/app_notification.dart';
 import 'package:healthylog/features/notification/data/notification_type.dart';
 import 'package:healthylog/features/statistics/data/statistics_models.dart';
 import 'package:healthylog/features/workout/data/workout_models.dart' as workout;
+
+import '../../support/slot_items_json.dart';
 
 /// CC-41, VR-10: un valore di enumerativo che questa versione del client non
 /// conosce — introdotto da un server più recente — non solleva errore.
@@ -20,10 +23,8 @@ void main() {
         'type': type,
         'label': null,
         'order': 0,
-        'content': 'Contenuto',
+        'items': itemsJson('Contenuto'),
         'note': null,
-        'recipeName': null,
-        'recipeText': null,
         'status': status,
         'replacementNote': null,
       };
@@ -33,10 +34,8 @@ void main() {
         'type': type,
         'label': null,
         'order': 0,
-        'content': 'Contenuto',
+        'items': itemsJson('Contenuto'),
         'note': null,
-        'recipeName': null,
-        'recipeText': null,
         'adherenceWeight': 1.0,
       };
 
@@ -203,5 +202,49 @@ void main() {
     });
 
     expect(notification.type, NotificationType.unknown);
+  });
+
+  /// CC-50, CO-7quater: l'unità fa eccezione alla regola di VR-10. Omettere
+  /// l'elemento lo esporrebbe alla cancellazione al primo PUT dello schema,
+  /// che rimanda l'elenco intero: si conserva e si riscrive invariato.
+  group('unità di quantità sconosciuta (CO-7quater)', () {
+    Map<String, dynamic> itemJson(String unit) => {
+          'itemId': 'i1',
+          'kind': 'FOOD',
+          'name': 'Passata di pomodoro',
+          'quantity': 2,
+          'unit': unit,
+          'recipeText': null,
+          'alternatives': [
+            {'kind': 'FOOD', 'name': 'Pelati', 'quantity': 1, 'unit': unit, 'recipeText': null},
+          ],
+        };
+
+    test("l'elemento non è omesso e conserva il codice ricevuto", () {
+      final item = SlotItem.fromJson(itemJson('BARATTOLO'));
+
+      expect(item.name, 'Passata di pomodoro');
+      expect(item.quantity, 2);
+      // Sconosciuta a questa versione: nessuna unità riconosciuta...
+      expect(item.unit, isNull);
+      // ...ma il codice resta, e con esso la possibilità di riscriverlo.
+      expect(item.unitCode, 'BARATTOLO');
+      expect(item.alternatives.single.unitCode, 'BARATTOLO');
+    });
+
+    test('è riscritta invariata', () {
+      final riscritto = SlotItem.fromJson(itemJson('BARATTOLO')).toJson();
+
+      expect(riscritto['unit'], 'BARATTOLO');
+      expect((riscritto['alternatives'] as List).single, containsPair('unit', 'BARATTOLO'));
+    });
+
+    test("un genere sconosciuto segue la medesima sorte dell'unità", () {
+      final item = SlotItem.fromJson({...itemJson('GRAM'), 'kind': 'SUPPLEMENT'});
+
+      expect(item.kind, isNull);
+      expect(item.name, 'Passata di pomodoro');
+      expect(item.toJson()['kind'], 'SUPPLEMENT');
+    });
   });
 }
