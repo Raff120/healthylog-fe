@@ -212,6 +212,10 @@
   "maintenanceAction": "Retry",
   "maintenanceBody": "We are updating the service and will be back shortly. Your account and your data stay where they are.",
   "maintenanceTitle": "HealthyLog is under maintenance",
+  "mealItemAlternativePrefix": "or",
+  "mealItemAlternativesCount": "{count, plural, =1{+1 alternative} other{+{count} alternatives}}",
+  "mealItemsMore": "{count, plural, =1{and one more} other{and {count} more}}",
+  "mealItemsNone": "To be defined",
   "mealChange": "Change",
   "mealChangeStatusTitle": "Change the status?",
   "mealFutureDayBody": "This day has not arrived yet.",
@@ -559,6 +563,96 @@
   "unitInches": "in",
   "unitKilocalories": "kcal",
   "unitKilograms": "kg",
+  "unitQuantityGram": "g",
+  "unitQuantityMilliliter": "ml",
+  "unitQuantityPiece": "{count, plural, =1{piece} other{pieces}}",
+  "@unitQuantityPiece": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "unitQuantitySlice": "{count, plural, =1{slice} other{slices}}",
+  "@unitQuantitySlice": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "unitQuantityTablespoon": "{count, plural, =1{tablespoon} other{tablespoons}}",
+  "@unitQuantityTablespoon": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "unitQuantityTeaspoon": "{count, plural, =1{teaspoon} other{teaspoons}}",
+  "@unitQuantityTeaspoon": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "unitQuantityPortion": "{count, plural, =1{portion} other{portions}}",
+  "@unitQuantityPortion": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "unitQuantityCup": "{count, plural, =1{cup} other{cups}}",
+  "@unitQuantityCup": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "unitQuantityGlass": "{count, plural, =1{glass} other{glasses}}",
+  "@unitQuantityGlass": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "unitQuantityJar": "{count, plural, =1{jar} other{jars}}",
+  "@unitQuantityJar": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "unitQuantityCan": "{count, plural, =1{can} other{cans}}",
+  "@unitQuantityCan": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "unitQuantitySmallCup": "{count, plural, =1{small cup} other{small cups}}",
+  "@unitQuantitySmallCup": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "unitQuantityHandful": "{count, plural, =1{handful} other{handfuls}}",
+  "@unitQuantityHandful": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
   "unitPounds": "lb",
   "updateRequiredAction": "Update",
   "updateRequiredBody": "This version is no longer supported. Update the app to continue: your account and your data stay where they are.",

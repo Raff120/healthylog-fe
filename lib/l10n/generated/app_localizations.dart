@@ -1369,6 +1369,30 @@ abstract class L10n {
   /// **'HealthyLog è in manutenzione'**
   String get maintenanceTitle;
 
+  /// No description provided for @mealItemAlternativePrefix.
+  ///
+  /// In it, this message translates to:
+  /// **'oppure'**
+  String get mealItemAlternativePrefix;
+
+  /// 4.1 interfaccia, GG-25: indicatore in coda alla riga dell'elemento che ha alternative.
+  ///
+  /// In it, this message translates to:
+  /// **'{count, plural, =1{+1 alternativa} other{+{count} alternative}}'**
+  String mealItemAlternativesCount(int count);
+
+  /// 4.1 interfaccia: eccedenza oltre il quarto elemento nella card del pasto.
+  ///
+  /// In it, this message translates to:
+  /// **'{count, plural, =1{e un altro} other{e altri {count}}}'**
+  String mealItemsMore(int count);
+
+  /// No description provided for @mealItemsNone.
+  ///
+  /// In it, this message translates to:
+  /// **'Da definire'**
+  String get mealItemsNone;
+
   /// No description provided for @mealChange.
   ///
   /// In it, this message translates to:
@@ -3450,6 +3474,84 @@ abstract class L10n {
   /// In it, this message translates to:
   /// **'kg'**
   String get unitKilograms;
+
+  /// No description provided for @unitQuantityGram.
+  ///
+  /// In it, this message translates to:
+  /// **'g'**
+  String get unitQuantityGram;
+
+  /// No description provided for @unitQuantityMilliliter.
+  ///
+  /// In it, this message translates to:
+  /// **'ml'**
+  String get unitQuantityMilliliter;
+
+  /// CO-7ter: unità della quantità di un alimento, al singolare o al plurale secondo il numero (4.1 interfaccia).
+  ///
+  /// In it, this message translates to:
+  /// **'{count, plural, =1{pezzo} other{pezzi}}'**
+  String unitQuantityPiece(num count);
+
+  /// CO-7ter: unità della quantità di un alimento, al singolare o al plurale secondo il numero (4.1 interfaccia).
+  ///
+  /// In it, this message translates to:
+  /// **'{count, plural, =1{fetta} other{fette}}'**
+  String unitQuantitySlice(num count);
+
+  /// CO-7ter: unità della quantità di un alimento, al singolare o al plurale secondo il numero (4.1 interfaccia).
+  ///
+  /// In it, this message translates to:
+  /// **'{count, plural, =1{cucchiaio} other{cucchiai}}'**
+  String unitQuantityTablespoon(num count);
+
+  /// CO-7ter: unità della quantità di un alimento, al singolare o al plurale secondo il numero (4.1 interfaccia).
+  ///
+  /// In it, this message translates to:
+  /// **'{count, plural, =1{cucchiaino} other{cucchiaini}}'**
+  String unitQuantityTeaspoon(num count);
+
+  /// CO-7ter: unità della quantità di un alimento, al singolare o al plurale secondo il numero (4.1 interfaccia).
+  ///
+  /// In it, this message translates to:
+  /// **'{count, plural, =1{porzione} other{porzioni}}'**
+  String unitQuantityPortion(num count);
+
+  /// CO-7ter: unità della quantità di un alimento, al singolare o al plurale secondo il numero (4.1 interfaccia).
+  ///
+  /// In it, this message translates to:
+  /// **'{count, plural, =1{tazza} other{tazze}}'**
+  String unitQuantityCup(num count);
+
+  /// CO-7ter: unità della quantità di un alimento, al singolare o al plurale secondo il numero (4.1 interfaccia).
+  ///
+  /// In it, this message translates to:
+  /// **'{count, plural, =1{bicchiere} other{bicchieri}}'**
+  String unitQuantityGlass(num count);
+
+  /// CO-7ter: unità della quantità di un alimento, al singolare o al plurale secondo il numero (4.1 interfaccia).
+  ///
+  /// In it, this message translates to:
+  /// **'{count, plural, =1{vasetto} other{vasetti}}'**
+  String unitQuantityJar(num count);
+
+  /// CO-7ter: unità della quantità di un alimento, al singolare o al plurale secondo il numero (4.1 interfaccia).
+  ///
+  /// In it, this message translates to:
+  /// **'{count, plural, =1{scatoletta} other{scatolette}}'**
+  String unitQuantityCan(num count);
+
+  /// CO-7ter: unità della quantità di un alimento, al singolare o al plurale secondo il numero (4.1 interfaccia).
+  ///
+  /// In it, this message translates to:
+  /// **'{count, plural, =1{tazzina} other{tazzine}}'**
+  String unitQuantitySmallCup(num count);
+
+  /// CO-7ter: unità della quantità di un alimento, al singolare o al plurale secondo il numero (4.1 interfaccia).
+  ///
+  /// In it, this message translates to:
+  /// **'{count, plural, =1{manciata} other{manciate}}'**
+  String unitQuantityHandful(num count);
 
   /// LO-4: peso nel sistema imperiale.
   ///

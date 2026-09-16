@@ -347,6 +347,26 @@
     "description": "5.6 interfaccia.md, MN-3: messaggio fisso, che non promette orari; rassicura sul solo punto che conta (MN-4)."
   },
   "maintenanceTitle": "HealthyLog è in manutenzione",
+  "mealItemAlternativePrefix": "oppure",
+  "mealItemAlternativesCount": "{count, plural, =1{+1 alternativa} other{+{count} alternative}}",
+  "@mealItemAlternativesCount": {
+    "description": "4.1 interfaccia, GG-25: indicatore in coda alla riga dell'elemento che ha alternative.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "mealItemsMore": "{count, plural, =1{e un altro} other{e altri {count}}}",
+  "@mealItemsMore": {
+    "description": "4.1 interfaccia: eccedenza oltre il quarto elemento nella card del pasto.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "mealItemsNone": "Da definire",
   "mealChange": "Cambia",
   "mealChangeStatusTitle": "Cambiare stato?",
   "mealFutureDayBody": "Questo giorno non è ancora arrivato.",
@@ -1185,6 +1205,107 @@
   "unitKilograms": "kg",
   "@unitKilograms": {
     "description": "LO-4: peso nel sistema metrico."
+  },
+  "unitQuantityGram": "g",
+  "unitQuantityMilliliter": "ml",
+  "unitQuantityPiece": "{count, plural, =1{pezzo} other{pezzi}}",
+  "@unitQuantityPiece": {
+    "description": "CO-7ter: unità della quantità di un alimento, al singolare o al plurale secondo il numero (4.1 interfaccia).",
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "unitQuantitySlice": "{count, plural, =1{fetta} other{fette}}",
+  "@unitQuantitySlice": {
+    "description": "CO-7ter: unità della quantità di un alimento, al singolare o al plurale secondo il numero (4.1 interfaccia).",
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "unitQuantityTablespoon": "{count, plural, =1{cucchiaio} other{cucchiai}}",
+  "@unitQuantityTablespoon": {
+    "description": "CO-7ter: unità della quantità di un alimento, al singolare o al plurale secondo il numero (4.1 interfaccia).",
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "unitQuantityTeaspoon": "{count, plural, =1{cucchiaino} other{cucchiaini}}",
+  "@unitQuantityTeaspoon": {
+    "description": "CO-7ter: unità della quantità di un alimento, al singolare o al plurale secondo il numero (4.1 interfaccia).",
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "unitQuantityPortion": "{count, plural, =1{porzione} other{porzioni}}",
+  "@unitQuantityPortion": {
+    "description": "CO-7ter: unità della quantità di un alimento, al singolare o al plurale secondo il numero (4.1 interfaccia).",
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "unitQuantityCup": "{count, plural, =1{tazza} other{tazze}}",
+  "@unitQuantityCup": {
+    "description": "CO-7ter: unità della quantità di un alimento, al singolare o al plurale secondo il numero (4.1 interfaccia).",
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "unitQuantityGlass": "{count, plural, =1{bicchiere} other{bicchieri}}",
+  "@unitQuantityGlass": {
+    "description": "CO-7ter: unità della quantità di un alimento, al singolare o al plurale secondo il numero (4.1 interfaccia).",
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "unitQuantityJar": "{count, plural, =1{vasetto} other{vasetti}}",
+  "@unitQuantityJar": {
+    "description": "CO-7ter: unità della quantità di un alimento, al singolare o al plurale secondo il numero (4.1 interfaccia).",
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "unitQuantityCan": "{count, plural, =1{scatoletta} other{scatolette}}",
+  "@unitQuantityCan": {
+    "description": "CO-7ter: unità della quantità di un alimento, al singolare o al plurale secondo il numero (4.1 interfaccia).",
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "unitQuantitySmallCup": "{count, plural, =1{tazzina} other{tazzine}}",
+  "@unitQuantitySmallCup": {
+    "description": "CO-7ter: unità della quantità di un alimento, al singolare o al plurale secondo il numero (4.1 interfaccia).",
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "unitQuantityHandful": "{count, plural, =1{manciata} other{manciate}}",
+  "@unitQuantityHandful": {
+    "description": "CO-7ter: unità della quantità di un alimento, al singolare o al plurale secondo il numero (4.1 interfaccia).",
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
   },
   "unitPounds": "lb",
   "@unitPounds": {

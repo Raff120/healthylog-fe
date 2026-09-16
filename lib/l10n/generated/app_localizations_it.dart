@@ -747,6 +747,34 @@ class L10nIt extends L10n {
   String get maintenanceTitle => 'HealthyLog è in manutenzione';
 
   @override
+  String get mealItemAlternativePrefix => 'oppure';
+
+  @override
+  String mealItemAlternativesCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '+$count alternative',
+      one: '+1 alternativa',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String mealItemsMore(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'e altri $count',
+      one: 'e un altro',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get mealItemsNone => 'Da definire';
+
+  @override
   String get mealChange => 'Cambia';
 
   @override
@@ -1962,6 +1990,133 @@ class L10nIt extends L10n {
 
   @override
   String get unitKilograms => 'kg';
+
+  @override
+  String get unitQuantityGram => 'g';
+
+  @override
+  String get unitQuantityMilliliter => 'ml';
+
+  @override
+  String unitQuantityPiece(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'pezzi',
+      one: 'pezzo',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String unitQuantitySlice(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'fette',
+      one: 'fetta',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String unitQuantityTablespoon(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'cucchiai',
+      one: 'cucchiaio',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String unitQuantityTeaspoon(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'cucchiaini',
+      one: 'cucchiaino',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String unitQuantityPortion(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'porzioni',
+      one: 'porzione',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String unitQuantityCup(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'tazze',
+      one: 'tazza',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String unitQuantityGlass(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'bicchieri',
+      one: 'bicchiere',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String unitQuantityJar(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'vasetti',
+      one: 'vasetto',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String unitQuantityCan(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'scatolette',
+      one: 'scatoletta',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String unitQuantitySmallCup(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'tazzine',
+      one: 'tazzina',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String unitQuantityHandful(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'manciate',
+      one: 'manciata',
+    );
+    return '$_temp0';
+  }
 
   @override
   String get unitPounds => 'lb';
