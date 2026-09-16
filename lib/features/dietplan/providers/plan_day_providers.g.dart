@@ -95,7 +95,7 @@ final class PlanDayLocalCacheProvider
   }
 }
 
-String _$planDayLocalCacheHash() => r'9f40431f7944289fa9ea3ef16bec4d7971c5567b';
+String _$planDayLocalCacheHash() => r'c1a5049a801d2ddf47a1c61d9ff9f63f5ccfd4f7';
 
 /// Giornata selezionata nella vista giornaliera (VG-2: quella corrente
 /// all'apertura). La sola navigazione libera (VG-16, VG-17) e il ritorno

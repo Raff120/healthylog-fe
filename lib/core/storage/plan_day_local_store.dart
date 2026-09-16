@@ -43,6 +43,12 @@ class PlanDayLocalStore {
     return query.watch().map((rows) => rows.map(_toRecord).toList());
   }
 
+  /// Rimuove ogni occorrenza conservata (PL-11bis): il formato in cui sono
+  /// scritte è mutato, e reinterpretarle presenterebbe slot vuoti.
+  Future<void> deleteAll() {
+    return _db.delete(_db.localPlanDays).go();
+  }
+
   /// Rimuove le occorrenze con data esterna a [from]..[to] (PL-10):
   /// quanto esce dall'orizzonte conservato (PL-6, PL-7).
   Future<void> deleteOutsideRange(DateTime from, DateTime to) {

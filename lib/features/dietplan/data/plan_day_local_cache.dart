@@ -1,10 +1,14 @@
 import 'dart:convert';
 
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+
 import '../../../core/storage/plan_day_local_store.dart';
 import '../../../core/storage/records/local_plan_day_record.dart';
 import '../domain/plan_day_date.dart';
 import 'plan_day.dart';
+import 'plan_day_cache_format.dart';
 import 'plan_day_coverage.dart';
+import 'slot_item.dart';
 import 'slot_status.dart';
 import 'slot_type.dart';
 
@@ -13,8 +17,9 @@ import 'slot_type.dart';
 /// feature. Unico punto in cui la vista giornaliera (F12/F13) legge e
 /// scrive la cache di sola lettura della consultazione offline (OF-19).
 class PlanDayLocalCache {
-  const PlanDayLocalCache(this._store);
+  const PlanDayLocalCache(this._ref, this._store);
 
+  final Ref _ref;
   final PlanDayLocalStore _store;
 
   /// Salva la giornata e rimuove nella stessa occasione ciò che è uscito
@@ -22,6 +27,7 @@ class PlanDayLocalCache {
   /// salvataggio, non quella di [day] — che può essere una data
   /// qualunque, consultata navigando (VG-16, VG-17).
   Future<void> save(PlanDay day) async {
+    await _ref.read(planDayCacheFormatCheckProvider.future);
     await _store.upsert(
       LocalPlanDayRecord(
         date: dateOnly(day.date),
@@ -38,6 +44,7 @@ class PlanDayLocalCache {
   }
 
   Future<PlanDay?> read(DateTime date) async {
+    await _ref.read(planDayCacheFormatCheckProvider.future);
     final rows = await _store.readRange(dateOnly(date), dateOnly(date));
     if (rows.isEmpty) return null;
     return _fromRecord(rows.single);
@@ -60,10 +67,8 @@ class PlanDayLocalCache {
     type: SlotType.fromJson(json['type'] as String),
     label: json['label'] as String?,
     order: json['order'] as int,
-    content: json['content'] as String?,
+    items: slotItemsFromJson(json['items']),
     note: json['note'] as String?,
-    recipeName: json['recipeName'] as String?,
-    recipeText: json['recipeText'] as String?,
     status: SlotStatus.fromJson(json['status'] as String),
     replacementNote: json['replacementNote'] as String?,
   );
