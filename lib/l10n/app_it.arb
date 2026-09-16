@@ -341,6 +341,12 @@
   "loginForgotPassword": "Password dimenticata?",
   "loginSubmit": "Accedi",
   "loginToRegister": "Non hai un account? Registrati",
+  "maintenanceAction": "Riprova",
+  "maintenanceBody": "Stiamo aggiornando il servizio e torneremo a breve. Il tuo account e i tuoi dati restano dove sono.",
+  "@maintenanceBody": {
+    "description": "5.6 interfaccia.md, MN-3: messaggio fisso, che non promette orari; rassicura sul solo punto che conta (MN-4)."
+  },
+  "maintenanceTitle": "HealthyLog è in manutenzione",
   "mealChange": "Cambia",
   "mealChangeStatusTitle": "Cambiare stato?",
   "mealFutureDayBody": "Questo giorno non è ancora arrivato.",

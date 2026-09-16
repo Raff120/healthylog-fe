@@ -102,6 +102,11 @@ class SessionController extends _$SessionController {
       // base dati locale restano, e tornano disponibili con la versione
       // aggiornata; lo sbarramento lo presenta il router.
       if (code == 'CLIENT_UPDATE_REQUIRED') rethrow;
+      // MM-8, MN-4: nemmeno la manutenzione è una revoca, e il rinnovo è il
+      // punto in cui più facilmente la si incontra — è la prima chiamata
+      // dell'avvio. Cancellare qui i token costringerebbe a un nuovo accesso
+      // al termine della manutenzione, che MN-4 esclude.
+      if (code == 'MAINTENANCE') rethrow;
       if (code == 'NETWORK_ERROR') {
         // F14: un'assenza di rete non è una revoca. Rilanciato senza
         // toccare token o base dati locale, altrimenti la consultazione

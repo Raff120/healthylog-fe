@@ -45,6 +45,9 @@ RUN flutter build web --release \
 FROM nginx:1.27-alpine AS runtime
 
 COPY nginx/default.conf /etc/nginx/conf.d/default.conf
+COPY nginx/snippets/ /etc/nginx/snippets/
 COPY --from=build /build/build/web /usr/share/nginx/html
 
-EXPOSE 80
+# 8081 e' l'accesso di verifica, escluso dalla manutenzione (MM-5): la
+# composizione lo pubblica sul solo loopback del NAS.
+EXPOSE 80 8081
