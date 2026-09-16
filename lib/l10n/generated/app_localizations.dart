@@ -1351,6 +1351,24 @@ abstract class L10n {
   /// **'Non hai un account? Registrati'**
   String get loginToRegister;
 
+  /// No description provided for @maintenanceAction.
+  ///
+  /// In it, this message translates to:
+  /// **'Riprova'**
+  String get maintenanceAction;
+
+  /// 5.6 interfaccia.md, MN-3: messaggio fisso, che non promette orari; rassicura sul solo punto che conta (MN-4).
+  ///
+  /// In it, this message translates to:
+  /// **'Stiamo aggiornando il servizio e torneremo a breve. Il tuo account e i tuoi dati restano dove sono.'**
+  String get maintenanceBody;
+
+  /// No description provided for @maintenanceTitle.
+  ///
+  /// In it, this message translates to:
+  /// **'HealthyLog è in manutenzione'**
+  String get maintenanceTitle;
+
   /// No description provided for @mealChange.
   ///
   /// In it, this message translates to:

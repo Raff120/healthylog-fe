@@ -5,6 +5,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../core/auth/session.dart';
 import '../core/auth/session_controller.dart';
+import '../core/maintenance/maintenance_controller.dart';
 import '../core/update/client_update_controller.dart';
 import '../features/care/presentation/nutritionist_screen.dart';
 import '../features/care/presentation/patient_detail_screen.dart';
@@ -38,6 +39,7 @@ import '../features/group/presentation/group_screen.dart';
 import '../features/notification/presentation/notification_screen.dart';
 import '../features/statistics/presentation/statistics_screen.dart';
 import '../features/workout/presentation/activity_screen.dart';
+import 'maintenance_screen.dart';
 import 'navigation/main_shell.dart';
 import 'navigation/role_home_screen.dart';
 import 'splash_screen.dart';
@@ -77,8 +79,28 @@ const _deletionPendingPath = '/account-deletion';
 /// autenticata o no — riporta qui.
 const _updateRequiredPath = '/update-required';
 
+/// MN-2, MM-7: finché il servizio dichiara la manutenzione, ogni rotta
+/// riporta qui. La rotta reca la provenienza, cosicché al termine si torni
+/// alla schermata da cui si era stati portati via (5.6 interfaccia.md): non è
+/// memoria del dispositivo — che MM-7 esclude — ma dell'indirizzo corrente,
+/// e sopravvive perciò anche al ricaricamento della PWA.
+const _maintenancePath = '/maintenance';
+const _maintenanceOriginParameter = 'from';
+
 bool _startsWithAny(String path, List<String> prefixes) =>
     prefixes.any((prefix) => path == prefix || path.startsWith('$prefix/'));
+
+/// 5.6 interfaccia.md: terminata la manutenzione si torna alla schermata da
+/// cui l'Utente proveniva, ovvero alla destinazione principale se la
+/// manutenzione era comparsa all'avvio. La provenienza giunge dalla rotta
+/// stessa, e vale solo se è un percorso dell'applicazione: un valore scritto
+/// a mano nell'indirizzo non deve condurre altrove.
+String _maintenanceOrigin(GoRouterState state) {
+  final origin = state.uri.queryParameters[_maintenanceOriginParameter];
+  if (origin == null || !origin.startsWith('/') || origin.startsWith('//')) return '/splash';
+  if (origin == _maintenancePath || origin.startsWith('$_maintenancePath?')) return '/splash';
+  return origin;
+}
 
 /// Bridge minimo fra lo stato Riverpod della sessione e il
 /// `Listenable` richiesto da `refreshListenable` di go_router, così
@@ -96,18 +118,23 @@ class _SessionRouterRefresh extends ChangeNotifier {
     // VR-17: lo sbarramento dell'aggiornamento può scattare in qualsiasi
     // momento, alla risposta di una chiamata qualunque.
     _updateSubscription = _ref.listen(clientUpdateControllerProvider, (_, _) => notifyListeners());
+    // MM-7, MM-9: e così la manutenzione, che per di più cessa da sé — la
+    // schermata deve cadere senza che l'Utente tocchi nulla (MN-5).
+    _maintenanceSubscription = _ref.listen(maintenanceControllerProvider, (_, _) => notifyListeners());
   }
 
   final Ref _ref;
   late final ProviderSubscription<AsyncValue<AuthSession?>> _subscription;
   late final ProviderSubscription<Profile?> _profileSubscription;
   late final ProviderSubscription<AsyncValue<bool>> _updateSubscription;
+  late final ProviderSubscription<bool> _maintenanceSubscription;
 
   @override
   void dispose() {
     _subscription.close();
     _profileSubscription.close();
     _updateSubscription.close();
+    _maintenanceSubscription.close();
     super.dispose();
   }
 }
@@ -138,6 +165,18 @@ GoRouter goRouter(Ref ref) {
         return path == _updateRequiredPath ? null : _updateRequiredPath;
       }
       if (path == _updateRequiredPath) return '/splash';
+
+      // MN-2, MM-7: la manutenzione sbarra ogni rotta, e come l'aggiornamento
+      // precede l'attesa del ripristino della sessione, che durante la
+      // manutenzione non si concluderebbe. Viene dopo l'aggiornamento perché
+      // a quello cede: una versione superata resta sulla propria schermata
+      // (MM-10).
+      if (ref.read(maintenanceControllerProvider)) {
+        if (path == _maintenancePath) return null;
+        final origin = Uri.encodeComponent(state.uri.toString());
+        return '$_maintenancePath?$_maintenanceOriginParameter=$origin';
+      }
+      if (path == _maintenancePath) return _maintenanceOrigin(state);
 
       // Ripristino ancora in corso (TK-8): resta sulla sola schermata
       // pensata per attenderlo (5.2 interfaccia.md), che infatti non
@@ -176,6 +215,7 @@ GoRouter goRouter(Ref ref) {
     routes: [
       GoRoute(path: '/splash', builder: (context, state) => const SplashScreen()),
       GoRoute(path: _updateRequiredPath, builder: (context, state) => const UpdateRequiredScreen()),
+      GoRoute(path: _maintenancePath, builder: (context, state) => const MaintenanceScreen()),
       GoRoute(path: '/login', builder: (context, state) => const LoginScreen()),
       GoRoute(
         path: '/register',

@@ -60,7 +60,7 @@ final class SessionControllerProvider
   SessionController create() => SessionController();
 }
 
-String _$sessionControllerHash() => r'fcb8f6e2afe19691e6674f7481e38054ef3cfa65';
+String _$sessionControllerHash() => r'7ff3b63480d60a3db5946d9a84c317794c286fb2';
 
 /// Stato della sessione (5.2 interfaccia.md: l'accesso è richiesto una
 /// sola volta per dispositivo, AC-11, TK-15). All'avvio tenta il

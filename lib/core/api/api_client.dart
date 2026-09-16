@@ -7,6 +7,7 @@ import 'api_error_interceptor.dart';
 import 'client_headers_interceptor.dart';
 import 'client_update_interceptor.dart';
 import 'connectivity_interceptor.dart';
+import 'maintenance_interceptor.dart';
 import 'token_refresh_interceptor.dart';
 
 part 'api_client.g.dart';
@@ -48,6 +49,7 @@ Dio publicApiClient(Ref ref) {
   dio.interceptors.addAll([
     ClientHeadersInterceptor(ref),
     ClientUpdateInterceptor(ref),
+    MaintenanceInterceptor(ref),
     ConnectivityInterceptor(ref),
     ApiErrorInterceptor(),
   ]);
@@ -85,6 +87,7 @@ Dio apiClient(Ref ref) {
       },
     ),
     ClientUpdateInterceptor(ref),
+    MaintenanceInterceptor(ref),
     ConnectivityInterceptor(ref),
     TokenRefreshInterceptor(ref, dio),
     ApiErrorInterceptor(),

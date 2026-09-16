@@ -727,6 +727,16 @@ class L10nEn extends L10n {
   String get loginToRegister => 'No account yet? Sign up';
 
   @override
+  String get maintenanceAction => 'Retry';
+
+  @override
+  String get maintenanceBody =>
+      'We are updating the service and will be back shortly. Your account and your data stay where they are.';
+
+  @override
+  String get maintenanceTitle => 'HealthyLog is under maintenance';
+
+  @override
   String get mealChange => 'Change';
 
   @override
