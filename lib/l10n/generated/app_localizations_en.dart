@@ -374,11 +374,43 @@ class L10nEn extends L10n {
   String get editDiscardTitle => 'Unsaved changes';
 
   @override
-  String get editRecipeFieldsInvalid => 'Check the highlighted recipe fields.';
+  String get editItemAdd => 'Add item';
 
   @override
-  String get editRecipeNameRequired =>
-      'A name is required when the recipe text is present';
+  String get editItemAlternativeAdd => 'Add alternative';
+
+  @override
+  String get editItemKindFood => 'Food';
+
+  @override
+  String get editItemKindRecipe => 'Recipe';
+
+  @override
+  String get editItemName => 'Name';
+
+  @override
+  String get editItemNameRequired => 'The name is required';
+
+  @override
+  String get editItemQuantity => 'Quantity';
+
+  @override
+  String get editItemQuantityInvalid => 'Invalid quantity';
+
+  @override
+  String get editItemQuantityRequired => 'Enter the quantity as well';
+
+  @override
+  String get editItemUnit => 'Unit';
+
+  @override
+  String get editItemUnitRequired => 'Enter the unit as well';
+
+  @override
+  String get editItemsInvalid => 'Check the items marked below';
+
+  @override
+  String get editItemsTitle => 'Items';
 
   @override
   String get editRemoveSlotBody => 'The content you entered will be lost.';
@@ -737,6 +769,34 @@ class L10nEn extends L10n {
   String get maintenanceTitle => 'HealthyLog is under maintenance';
 
   @override
+  String get mealItemAlternativePrefix => 'or';
+
+  @override
+  String mealItemAlternativesCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '+$count alternatives',
+      one: '+1 alternative',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String mealItemsMore(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'and $count more',
+      one: 'and one more',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get mealItemsNone => 'To be defined';
+
+  @override
   String get mealChange => 'Change';
 
   @override
@@ -760,9 +820,6 @@ class L10nEn extends L10n {
   @override
   String get mealReplacementNoteLost =>
       'The replacement note will be permanently lost.';
-
-  @override
-  String get mealSeeRecipe => 'View recipe';
 
   @override
   String mealStatusByCook(String verb, String name) {
@@ -1688,16 +1745,10 @@ class L10nEn extends L10n {
       'How much this meal counts towards adherence. At zero it is not counted.';
 
   @override
-  String get slotContent => 'Content';
-
-  @override
   String get slotDescriptiveLabel => 'Descriptive label';
 
   @override
   String get slotNotSpecified => 'Not specified';
-
-  @override
-  String get slotRecipeName => 'Recipe name';
 
   @override
   String get slotRecipeText => 'Recipe text';
@@ -1945,6 +1996,133 @@ class L10nEn extends L10n {
 
   @override
   String get unitKilograms => 'kg';
+
+  @override
+  String get unitQuantityGram => 'g';
+
+  @override
+  String get unitQuantityMilliliter => 'ml';
+
+  @override
+  String unitQuantityPiece(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'pieces',
+      one: 'piece',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String unitQuantitySlice(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'slices',
+      one: 'slice',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String unitQuantityTablespoon(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'tablespoons',
+      one: 'tablespoon',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String unitQuantityTeaspoon(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'teaspoons',
+      one: 'teaspoon',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String unitQuantityPortion(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'portions',
+      one: 'portion',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String unitQuantityCup(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'cups',
+      one: 'cup',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String unitQuantityGlass(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'glasses',
+      one: 'glass',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String unitQuantityJar(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'jars',
+      one: 'jar',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String unitQuantityCan(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'cans',
+      one: 'can',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String unitQuantitySmallCup(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'small cups',
+      one: 'small cup',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String unitQuantityHandful(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'handfuls',
+      one: 'handful',
+    );
+    return '$_temp0';
+  }
 
   @override
   String get unitPounds => 'lb';

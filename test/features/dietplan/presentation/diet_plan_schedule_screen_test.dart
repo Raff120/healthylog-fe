@@ -13,6 +13,7 @@ import 'package:healthylog/features/dietplan/data/diet_plan_api.dart';
 import 'package:healthylog/features/dietplan/data/slot_type.dart';
 import 'package:healthylog/features/dietplan/presentation/diet_plan_schedule_screen.dart';
 import 'package:healthylog/features/dietplan/providers/diet_plan_providers.dart';
+import '../../../support/slot_items_json.dart';
 
 /// CD-5, CD-7, CD-8, CD-10: redazione dello schema settimanale. Verifica
 /// per intero, con un client dio fittizio (non solo la logica isolata),
@@ -58,10 +59,8 @@ Map<String, dynamic> _slotJson(String type, int order, {String? content, String?
       'type': type,
       'label': type == 'SNACK' ? 'Spuntino' : null,
       'order': order,
-      'content': content,
+      'items': itemsJson(content, recipeName: recipeName, recipeText: recipeText),
       'note': null,
-      'recipeName': recipeName,
-      'recipeText': recipeText,
       'adherenceWeight': type == 'SNACK' ? 0.5 : 1.0,
     };
 
@@ -168,7 +167,9 @@ void main() {
 
     await tester.tap(find.text('Colazione'));
     await tester.pumpAndSettle();
-    await tester.enterText(find.widgetWithText(TextField, 'Contenuto'), 'Yogurt e cereali');
+    await tester.tap(find.text('Aggiungi elemento'));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.widgetWithText(TextField, 'Denominazione').first, 'Yogurt e cereali');
     await tester.pumpAndSettle();
 
     expect(find.text('Modifiche non salvate'), findsOneWidget);
@@ -180,14 +181,14 @@ void main() {
     expect(find.text('Piano salvato.'), findsOneWidget);
   });
 
-  testWidgets('un testo di ricetta senza denominazione è segnalato sul campo (GG-15)', (tester) async {
+  testWidgets('un errore di campo del server è riportato sull\'elemento esatto (ER-14, CC-50)', (tester) async {
     final dio = Dio(BaseOptions(baseUrl: 'http://example.test'));
     dio.httpClientAdapter = _JsonAdapter((options) {
       if (options.method == 'PUT') {
         return const _ErrorResponse(400, {
           'code': 'VALIDATION_FAILED',
           'fields': [
-            {'field': 'days[0].slots[0].recipeName', 'code': 'REQUIRED'},
+            {'field': 'days[0].slots[0].items[0].name', 'code': 'REQUIRED'},
           ],
         });
       }
@@ -199,12 +200,13 @@ void main() {
 
     await tester.tap(find.text('Colazione'));
     await tester.pumpAndSettle();
-    await tester.enterText(find.widgetWithText(TextField, 'Testo della ricetta'), 'Con miele');
+    await tester.tap(find.text('Aggiungi elemento'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Salva'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Serve una denominazione se è presente il testo della ricetta'), findsOneWidget);
+    expect(find.text('La denominazione è obbligatoria'), findsOneWidget);
+    expect(find.text('Controlla gli elementi segnalati'), findsOneWidget);
   });
 
   testWidgets('la conferma di uno schema incompleto elenca i giorni mancanti (CD-15)', (tester) async {
@@ -341,7 +343,9 @@ void main() {
 
     await tester.tap(find.text('Colazione'));
     await tester.pumpAndSettle();
-    await tester.enterText(find.widgetWithText(TextField, 'Contenuto'), 'Yogurt e cereali');
+    await tester.tap(find.text('Aggiungi elemento'));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.widgetWithText(TextField, 'Denominazione').first, 'Yogurt e cereali');
     await tester.pumpAndSettle();
 
     await tester.tap(find.text('Salva modifiche'));

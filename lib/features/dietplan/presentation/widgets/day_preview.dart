@@ -46,9 +46,12 @@ class DayPreview extends StatelessWidget {
                             slot.label?.isNotEmpty == true ? slot.label! : slotTypeLabel(context, slot.type),
                             style: typography.bodyMedium.copyWith(color: colors.textPrimary),
                           ),
-                          if (slot.content != null && slot.content!.isNotEmpty)
+                          // CT-4, 7.4: l'anteprima dice che cosa il template
+                          // prevede, non in quale quantità — le denominazioni
+                          // bastano, e la riga resta breve.
+                          if (slot.items.isNotEmpty)
                             Text(
-                              slot.content!,
+                              slot.items.map((item) => item.name).join(' · '),
                               style: typography.caption.copyWith(color: colors.textSecondary),
                               maxLines: 2,
                               overflow: TextOverflow.ellipsis,

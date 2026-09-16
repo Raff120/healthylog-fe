@@ -3,6 +3,7 @@ import 'package:flutter/widgets.dart';
 import '../data/diet_plan.dart';
 import '../data/diet_plan_requests.dart';
 import '../data/plan_day.dart';
+import '../data/slot_item.dart';
 import '../data/slot_type.dart';
 import '../data/weekday.dart';
 
@@ -16,26 +17,20 @@ class EditableSlot {
     this.slotId,
     required this.type,
     String label = '',
-    String content = '',
     String note = '',
-    String recipeName = '',
-    String recipeText = '',
+    List<EditableItem>? items,
     required this.adherenceWeight,
     this.expanded = false,
   })  : labelController = TextEditingController(text: label),
-        contentController = TextEditingController(text: content),
         noteController = TextEditingController(text: note),
-        recipeNameController = TextEditingController(text: recipeName),
-        recipeTextController = TextEditingController(text: recipeText);
+        items = items ?? [];
 
   factory EditableSlot.fromSlot(DietPlanSlot slot) => EditableSlot(
         slotId: slot.slotId,
         type: slot.type,
         label: slot.label ?? '',
-        content: slot.content ?? '',
         note: slot.note ?? '',
-        recipeName: slot.recipeName ?? '',
-        recipeText: slot.recipeText ?? '',
+        items: slot.items.map(EditableItem.fromModel).toList(),
         adherenceWeight: slot.adherenceWeight,
       );
 
@@ -46,10 +41,8 @@ class EditableSlot {
         slotId: slot.slotId,
         type: slot.type,
         label: slot.label ?? '',
-        content: slot.content ?? '',
         note: slot.note ?? '',
-        recipeName: slot.recipeName ?? '',
-        recipeText: slot.recipeText ?? '',
+        items: slot.items.map(EditableItem.fromModel).toList(),
         // AD-5: il peso dell'occorrenza non transita nella risposta della
         // giornata e la modifica della sola giornata non lo tocca: il
         // backend conserva quello dello slot esistente e applica il
@@ -73,27 +66,23 @@ class EditableSlot {
   final String? slotId;
   final SlotType type;
   final TextEditingController labelController;
-  final TextEditingController contentController;
   final TextEditingController noteController;
-  final TextEditingController recipeNameController;
-  final TextEditingController recipeTextController;
+
+  /// GG-11, GG-21: gli elementi nell'ordine in cui vanno presentati.
+  final List<EditableItem> items;
   double adherenceWeight;
   bool expanded;
 
-  /// Errore di campo riportato dall'ultimo salvataggio (GG-15), se
-  /// presente: un testo di ricetta senza denominazione.
-  String? recipeNameError;
-
-  /// CD-14: uno slot privo di contenuto è previsto ma non specificato —
-  /// concorre alla segnalazione di incompletezza del giorno (CD-15).
-  bool get isEmpty => contentController.text.trim().isEmpty;
+  /// CD-14: uno slot privo di elementi è previsto ma non specificato —
+  /// concorre alla segnalazione di incompletezza del giorno (CD-15, GG-13).
+  bool get isEmpty => items.isEmpty;
 
   void dispose() {
     labelController.dispose();
-    contentController.dispose();
     noteController.dispose();
-    recipeNameController.dispose();
-    recipeTextController.dispose();
+    for (final item in items) {
+      item.dispose();
+    }
   }
 
   UpdateDietPlanSlotRequest toRequest() => UpdateDietPlanSlotRequest(
@@ -102,12 +91,131 @@ class EditableSlot {
         label: type == SlotType.snack && labelController.text.trim().isNotEmpty
             ? labelController.text.trim()
             : null,
-        content: contentController.text.trim().isEmpty ? null : contentController.text.trim(),
+        items: items.map((item) => item.toModel()).toList(),
         note: noteController.text.trim().isEmpty ? null : noteController.text.trim(),
-        recipeName: recipeNameController.text.trim().isEmpty ? null : recipeNameController.text.trim(),
-        recipeText: recipeTextController.text.trim().isEmpty ? null : recipeTextController.text.trim(),
         adherenceWeight: adherenceWeight,
       );
+}
+
+/// Redazione di un elemento e delle sue alternative (7.3 interfaccia.md,
+/// GG-12, GG-22, GG-25). Come [EditableSlot] sono oggetti mutabili che
+/// possiedono i controller dei propri campi di testo.
+///
+/// La quantità non è un controller ma un dato: il campo che la raccoglie la
+/// presenta col separatore della lingua (LO-10) e la riscrive qui appena
+/// cambia, cosicché il modello resti indipendente dalla lingua in cui è
+/// scritta.
+class EditableAlternative {
+  EditableAlternative({
+    this.kindCode = 'FOOD',
+    String name = '',
+    this.quantity,
+    this.unitCode,
+    String recipeText = '',
+  })  : nameController = TextEditingController(text: name),
+        recipeTextController = TextEditingController(text: recipeText);
+
+  factory EditableAlternative.fromModel(SlotItemAlternative alternative) => EditableAlternative(
+        kindCode: alternative.kindCode,
+        name: alternative.name,
+        quantity: alternative.quantity,
+        unitCode: alternative.unitCode,
+        recipeText: alternative.recipeText ?? '',
+      );
+
+  String kindCode;
+  final TextEditingController nameController;
+  num? quantity;
+  String? unitCode;
+  final TextEditingController recipeTextController;
+
+  /// Errori riportati dall'ultimo salvataggio, per campo (ER-14).
+  final Map<String, String> errors = {};
+
+  bool get isRecipe => kindCode == SlotItemKind.recipe.toJson();
+
+  SlotItemAlternative toModel() => SlotItemAlternative(
+        kindCode: kindCode,
+        name: nameController.text.trim(),
+        quantity: isRecipe ? null : quantity,
+        unitCode: isRecipe ? null : unitCode,
+        recipeText: isRecipe && recipeTextController.text.trim().isNotEmpty
+            ? recipeTextController.text.trim()
+            : null,
+      );
+
+  void dispose() {
+    nameController.dispose();
+    recipeTextController.dispose();
+  }
+}
+
+class EditableItem {
+  EditableItem({
+    this.itemId,
+    this.kindCode = 'FOOD',
+    String name = '',
+    this.quantity,
+    this.unitCode,
+    String recipeText = '',
+    List<EditableAlternative>? alternatives,
+    this.expanded = false,
+  })  : nameController = TextEditingController(text: name),
+        recipeTextController = TextEditingController(text: recipeText),
+        alternatives = alternatives ?? [];
+
+  factory EditableItem.fromModel(SlotItem item) => EditableItem(
+        itemId: item.itemId,
+        kindCode: item.kindCode,
+        name: item.name,
+        quantity: item.quantity,
+        unitCode: item.unitCode,
+        recipeText: item.recipeText ?? '',
+        alternatives: item.alternatives.map(EditableAlternative.fromModel).toList(),
+      );
+
+  /// CO-7bis: `null` per un elemento appena aggiunto, cui l'identificativo lo
+  /// assegna il sistema al salvataggio.
+  final String? itemId;
+  String kindCode;
+  final TextEditingController nameController;
+  num? quantity;
+  String? unitCode;
+  final TextEditingController recipeTextController;
+  final List<EditableAlternative> alternatives;
+  bool expanded;
+
+  final Map<String, String> errors = {};
+
+  bool get isRecipe => kindCode == SlotItemKind.recipe.toJson();
+
+  /// Un elemento appena aggiunto e non ancora compilato: si rimuove senza
+  /// chiedere conferma (7.3).
+  bool get isBlank =>
+      nameController.text.trim().isEmpty &&
+      quantity == null &&
+      recipeTextController.text.trim().isEmpty &&
+      alternatives.isEmpty;
+
+  SlotItem toModel() => SlotItem(
+        itemId: itemId,
+        kindCode: kindCode,
+        name: nameController.text.trim(),
+        quantity: isRecipe ? null : quantity,
+        unitCode: isRecipe ? null : unitCode,
+        recipeText: isRecipe && recipeTextController.text.trim().isNotEmpty
+            ? recipeTextController.text.trim()
+            : null,
+        alternatives: alternatives.map((alternative) => alternative.toModel()).toList(),
+      );
+
+  void dispose() {
+    nameController.dispose();
+    recipeTextController.dispose();
+    for (final alternative in alternatives) {
+      alternative.dispose();
+    }
+  }
 }
 
 /// Giorno-modello in redazione (OG-1): il proprio giorno della settimana e

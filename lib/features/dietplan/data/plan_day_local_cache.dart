@@ -5,6 +5,7 @@ import '../../../core/storage/records/local_plan_day_record.dart';
 import '../domain/plan_day_date.dart';
 import 'plan_day.dart';
 import 'plan_day_coverage.dart';
+import 'slot_item.dart';
 import 'slot_status.dart';
 import 'slot_type.dart';
 
@@ -60,10 +61,8 @@ class PlanDayLocalCache {
     type: SlotType.fromJson(json['type'] as String),
     label: json['label'] as String?,
     order: json['order'] as int,
-    content: json['content'] as String?,
+    items: slotItemsFromJson(json['items']),
     note: json['note'] as String?,
-    recipeName: json['recipeName'] as String?,
-    recipeText: json['recipeText'] as String?,
     status: SlotStatus.fromJson(json['status'] as String),
     replacementNote: json['replacementNote'] as String?,
   );

@@ -1,5 +1,6 @@
 import '../../identity/data/account_role.dart';
 import 'plan_status.dart';
+import 'slot_item.dart';
 import 'slot_type.dart';
 import 'weekday.dart';
 
@@ -10,10 +11,8 @@ class DietPlanSlot {
     required this.type,
     required this.label,
     required this.order,
-    required this.content,
+    required this.items,
     required this.note,
-    required this.recipeName,
-    required this.recipeText,
     required this.adherenceWeight,
   });
 
@@ -22,10 +21,8 @@ class DietPlanSlot {
         type: SlotType.fromJson(json['type'] as String),
         label: json['label'] as String?,
         order: json['order'] as int,
-        content: json['content'] as String?,
+        items: slotItemsFromJson(json['items']),
         note: json['note'] as String?,
-        recipeName: json['recipeName'] as String?,
-        recipeText: json['recipeText'] as String?,
         adherenceWeight: (json['adherenceWeight'] as num).toDouble(),
       );
 
@@ -37,10 +34,10 @@ class DietPlanSlot {
   final SlotType type;
   final String? label;
   final int order;
-  final String? content;
+  /// Elenco ordinato degli elementi (GG-11, GG-21). Vuoto per uno slot
+  /// previsto ma non ancora specificato (GG-13).
+  final List<SlotItem> items;
   final String? note;
-  final String? recipeName;
-  final String? recipeText;
   final double adherenceWeight;
 }
 
