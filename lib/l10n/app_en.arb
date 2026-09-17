@@ -397,7 +397,6 @@
   "planPeriodStartLocked": "The plan is already under way: its start date cannot be changed.",
   "planPeriodStartNotFuture": "The plan is scheduled: the start falls after today. To start it today, use “Activate now”.",
   "planRecipient": "Recipient",
-  "planRecordWorkout": "Log workout",
   "planStartDate": "Start date",
   "planStartsOn": "The plan starts on {date}",
   "planStatusActive": "Active",

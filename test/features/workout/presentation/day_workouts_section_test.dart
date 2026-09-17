@@ -28,7 +28,8 @@ import '../../../support/slot_items_json.dart';
 /// Sezione degli allenamenti nella vista giornaliera (AL-12, VG-6, 6.2
 /// interfaccia.md): sopra i pasti, distinta da essi, con la sola spunta;
 /// assente quando nulla è previsto né registrato; presente anche dove il
-/// piano non copre la giornata (AL-8, RA-8, SA-14).
+/// piano non copre la giornata (AL-8, RA-8, SA-14). *Piano* non presenta
+/// più alcun pulsante mobile (vedi decisioni.md).
 
 class _JsonAdapter implements HttpClientAdapter {
   _JsonAdapter(this._body, {this.status = 200});
@@ -182,10 +183,13 @@ void main() {
     expect(find.text('Corsa'), findsOneWidget);
   });
 
-  testWidgets('offre il pulsante mobile di registrazione sul proprio piano (RA-1, 10.2)',
+  testWidgets('non presenta alcun pulsante mobile in *Piano* (10.2, vedi decisioni.md)',
       (tester) async {
     await _pump(tester);
 
-    expect(find.byType(FloatingActionButton), findsOneWidget);
+    // La registrazione libera di un allenamento si compie dalla
+    // destinazione *Attività*: in *Piano* il pulsante mobile veniva
+    // letto come "aggiungi un piano alimentare".
+    expect(find.byType(FloatingActionButton), findsNothing);
   });
 }

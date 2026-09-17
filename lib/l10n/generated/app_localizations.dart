@@ -2479,12 +2479,6 @@ abstract class L10n {
   /// **'Destinatario'**
   String get planRecipient;
 
-  /// No description provided for @planRecordWorkout.
-  ///
-  /// In it, this message translates to:
-  /// **'Registra allenamento'**
-  String get planRecordWorkout;
-
   /// No description provided for @planStartDate.
   ///
   /// In it, this message translates to:

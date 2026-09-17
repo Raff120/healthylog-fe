@@ -1412,9 +1412,6 @@ class L10nIt extends L10n {
   String get planRecipient => 'Destinatario';
 
   @override
-  String get planRecordWorkout => 'Registra allenamento';
-
-  @override
   String get planStartDate => 'Data di inizio';
 
   @override

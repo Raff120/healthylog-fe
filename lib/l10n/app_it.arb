@@ -856,7 +856,6 @@
   "planPeriodStartLocked": "Il piano è già in corso: la data di inizio non si modifica.",
   "planPeriodStartNotFuture": "Il piano è programmato: l'inizio cade dopo oggi. Per avviarlo oggi usa «Attiva ora».",
   "planRecipient": "Destinatario",
-  "planRecordWorkout": "Registra allenamento",
   "planStartDate": "Data di inizio",
   "planStartsOn": "Il piano inizia il {date}",
   "@planStartsOn": {
