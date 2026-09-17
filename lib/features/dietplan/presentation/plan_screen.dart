@@ -14,7 +14,6 @@ import '../../care/domain/plan_competence.dart';
 import '../../group/providers/cooking_group_providers.dart';
 import '../../notification/presentation/widgets/notification_bell.dart';
 import '../../workout/presentation/widgets/day_workouts_section.dart';
-import '../../workout/presentation/widgets/workout_sheet.dart';
 import '../../care/providers/care_providers.dart';
 import '../../identity/providers/profile_providers.dart';
 import '../data/plan_day.dart';
@@ -108,22 +107,6 @@ class PlanScreen extends ConsumerWidget {
                 ),
               ],
       ),
-      // 10.2 interfaccia.md: pulsante mobile in *Piano* per la
-      // registrazione di un allenamento, con il foglio completo. 6.2: è
-      // assente sulla giornata di un altro membro e in modalità
-      // affiancata (CU-10, VG-10), e mentre si sceglie dove spostare un
-      // pasto — l'intestazione stessa è allora dedicata all'inversione.
-      floatingActionButton: swapSelection == null &&
-              ref.watch(selectedGroupMemberProvider) == null &&
-              !ref.watch(sideBySideModeProvider)
-          ? FloatingActionButton(
-              onPressed: () => showWorkoutSheet(context, date: selectedDate),
-              backgroundColor: colors.accent,
-              foregroundColor: colors.surface,
-              tooltip: context.l10n.planRecordWorkout,
-              child: const Icon(Icons.add),
-            )
-          : null,
       body: SafeArea(
         child: AnimatedSwitcher(
           duration: AppSpacing.motionScreenTransition,

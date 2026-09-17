@@ -910,9 +910,6 @@ class L10nEn extends L10n {
   }
 
   @override
-  String get navActivity => 'Activity';
-
-  @override
   String navNotAvailableYet(String destination) {
     return '$destination: not available yet.';
   }
@@ -931,6 +928,9 @@ class L10nEn extends L10n {
 
   @override
   String get navTemplates => 'Templates';
+
+  @override
+  String get navWorkouts => 'Workouts';
 
   @override
   String get notificationCareLinkRevoked =>
@@ -1399,9 +1399,6 @@ class L10nEn extends L10n {
 
   @override
   String get planRecipient => 'Recipient';
-
-  @override
-  String get planRecordWorkout => 'Log workout';
 
   @override
   String get planStartDate => 'Start date';

@@ -6,8 +6,9 @@ import 'package:healthylog/core/api/api_error_interceptor.dart';
 import 'package:healthylog/features/measurement/data/measurement_api.dart';
 
 /// Stub di [MeasurementApi] per i banchi che attraversano schermate che
-/// le osservano senza esserne l'oggetto — *Attività* le ospita nel
-/// secondo segmento (10.1), il dettaglio del Paziente le elenca (9.2).
+/// le osservano senza esserne l'oggetto — il segmento *Corpo* di
+/// *Statistiche* le ospita (11.3), il dettaglio del Paziente le elenca
+/// (9.2).
 MeasurementApi stubMeasurementApi({List<Map<String, dynamic>> measurements = const []}) {
   final dio = Dio(BaseOptions(baseUrl: 'http://example.test'))
     ..httpClientAdapter = _MeasurementStubAdapter(measurements)

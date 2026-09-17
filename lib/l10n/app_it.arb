@@ -469,7 +469,6 @@
       }
     }
   },
-  "navActivity": "Attività",
   "navNotAvailableYet": "{destination}: non ancora disponibile.",
   "@navNotAvailableYet": {
     "placeholders": {
@@ -483,6 +482,7 @@
   "navProfile": "Profilo",
   "navStatistics": "Statistiche",
   "navTemplates": "Template",
+  "navWorkouts": "Allenamenti",
   "notificationCareLinkRevoked": "Il collegamento professionale è stato revocato.",
   "notificationCareRequestAccepted": "La tua richiesta di collegamento è stata accettata.",
   "notificationCareRequestReceived": "Hai ricevuto una richiesta di collegamento professionale.",
@@ -856,7 +856,6 @@
   "planPeriodStartLocked": "Il piano è già in corso: la data di inizio non si modifica.",
   "planPeriodStartNotFuture": "Il piano è programmato: l'inizio cade dopo oggi. Per avviarlo oggi usa «Attiva ora».",
   "planRecipient": "Destinatario",
-  "planRecordWorkout": "Registra allenamento",
   "planStartDate": "Data di inizio",
   "planStartsOn": "Il piano inizia il {date}",
   "@planStartsOn": {
