@@ -469,7 +469,6 @@
       }
     }
   },
-  "navActivity": "Attività",
   "navNotAvailableYet": "{destination}: non ancora disponibile.",
   "@navNotAvailableYet": {
     "placeholders": {
@@ -483,6 +482,7 @@
   "navProfile": "Profilo",
   "navStatistics": "Statistiche",
   "navTemplates": "Template",
+  "navWorkouts": "Allenamenti",
   "notificationCareLinkRevoked": "Il collegamento professionale è stato revocato.",
   "notificationCareRequestAccepted": "La tua richiesta di collegamento è stata accettata.",
   "notificationCareRequestReceived": "Hai ricevuto una richiesta di collegamento professionale.",

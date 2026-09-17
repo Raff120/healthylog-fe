@@ -1657,12 +1657,6 @@ abstract class L10n {
   /// **'Stai vedendo il piano di {name}'**
   String memberViewingPlanOf(String name);
 
-  /// No description provided for @navActivity.
-  ///
-  /// In it, this message translates to:
-  /// **'Attività'**
-  String get navActivity;
-
   /// No description provided for @navNotAvailableYet.
   ///
   /// In it, this message translates to:
@@ -1698,6 +1692,12 @@ abstract class L10n {
   /// In it, this message translates to:
   /// **'Template'**
   String get navTemplates;
+
+  /// No description provided for @navWorkouts.
+  ///
+  /// In it, this message translates to:
+  /// **'Allenamenti'**
+  String get navWorkouts;
 
   /// No description provided for @notificationCareLinkRevoked.
   ///

@@ -15,7 +15,7 @@ import 'package:healthylog/features/workout/providers/workout_providers.dart';
 
 import '../../../support/measurement_api_stub.dart';
 
-/// *Attività* (10.1 interfaccia.md): pianificazione, obiettivo, elenco e
+/// *Allenamenti* (10.1 interfaccia.md): pianificazione, obiettivo, elenco e
 /// filtri. RA-11, RA-13, CB-8, CB-9, OS-10, RA-18.
 ///
 /// La destinazione è dedicata ai soli allenamenti: le misure sono

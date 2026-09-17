@@ -38,7 +38,7 @@ import '../support/workout_api_stub.dart';
 /// Barra di navigazione principale (3.1, 3.2 interfaccia.md), aggiunta
 /// retroattivamente a F06 (vedi decisioni.md): quattro voci per l'Utente,
 /// tre per il Nutrizionista. Dalla Fase 7 nessuna voce dell'Utente è più
-/// disabilitata — *Attività* (F23) e *Statistiche* (F25) hanno entrambe
+/// disabilitata — *Allenamenti* (F23) e *Statistiche* (F25) hanno entrambe
 /// una schermata propria. Verificato tramite l'app reale, sul modello di
 /// `router_test.dart`.
 class _InMemorySecureKeyValueStore extends SecureKeyValueStore {
@@ -240,11 +240,11 @@ void main() {
         await _pumpAuthenticatedApp(tester,
             role: 'USER', size: const Size(400, 800), platform: platform);
         final found = [
-          for (final label in ['Piano', 'Attività', 'Statistiche', 'Profilo'])
+          for (final label in ['Piano', 'Allenamenti', 'Statistiche', 'Profilo'])
             if (find.text(label).evaluate().isNotEmpty) label,
         ];
         debugDefaultTargetPlatformOverride = null;
-        expect(found, ['Piano', 'Attività', 'Statistiche', 'Profilo']);
+        expect(found, ['Piano', 'Allenamenti', 'Statistiche', 'Profilo']);
       });
     }
   });
@@ -286,7 +286,7 @@ void main() {
       expect(find.text('Piano'), findsOneWidget);
       expect(find.text('Giorno'), findsOneWidget);
       expect(find.text('Settimana'), findsOneWidget);
-      expect(find.text('Attività'), findsOneWidget);
+      expect(find.text('Allenamenti'), findsOneWidget);
       expect(find.text('Statistiche'), findsOneWidget);
       expect(find.text('Profilo'), findsOneWidget);
     },
@@ -434,7 +434,7 @@ void main() {
     expect(find.text('Nessun paziente collegato'), findsOneWidget);
     expect(find.text('Template'), findsOneWidget);
     expect(find.text('Profilo'), findsOneWidget);
-    expect(find.text('Attività'), findsNothing);
+    expect(find.text('Allenamenti'), findsNothing);
   });
 
   /// 3.1, 3.2 interfaccia.md (F22): *Template* è una destinazione della

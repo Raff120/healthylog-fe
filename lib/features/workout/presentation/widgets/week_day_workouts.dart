@@ -8,7 +8,8 @@ import '../../providers/workout_providers.dart';
 /// Allenamenti in coda al pannello del giorno nella vista settimanale
 /// (AL-12, VS-6, 6.4 interfaccia.md): il solo tipo di attività e lo stato
 /// di svolgimento, **senza possibilità di registrazione** — quella
-/// avviene dalla vista giornaliera o dalla sezione *Attività*.
+/// avviene dalla destinazione *Allenamenti* (RA-4), o dalla vista
+/// giornaliera con la spunta di un allenamento previsto (RA-3).
 ///
 /// CU-10, VG-10: assente sulla settimana di un altro membro del Gruppo,
 /// cui gli allenamenti sono riservati.

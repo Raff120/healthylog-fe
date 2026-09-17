@@ -188,7 +188,7 @@ void main() {
     await _pump(tester);
 
     // La registrazione libera di un allenamento si compie dalla
-    // destinazione *Attività*: in *Piano* il pulsante mobile veniva
+    // destinazione *Allenamenti*: in *Piano* il pulsante mobile veniva
     // letto come "aggiungi un piano alimentare".
     expect(find.byType(FloatingActionButton), findsNothing);
   });

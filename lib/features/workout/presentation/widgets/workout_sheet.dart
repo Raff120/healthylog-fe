@@ -16,7 +16,7 @@ import 'workout_confirmations.dart';
 /// Registrazione e modifica di un allenamento (10.2 interfaccia.md).
 ///
 /// Un solo foglio per i tre punti di accesso: quello **completo** —
-/// pulsante mobile di *Attività* (RA-4) — quello **ridotto** della
+/// pulsante mobile di *Allenamenti* (RA-4) — quello **ridotto** della
 /// spunta di un allenamento previsto, che eredita il tipo dalla
 /// pianificazione e presenta i soli campi facoltativi (AL-13, RA-3), e la
 /// modifica dall'elenco (RA-15).
