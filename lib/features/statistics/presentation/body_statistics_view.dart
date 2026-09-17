@@ -19,7 +19,7 @@ import 'widgets/statistics_headline.dart';
 /// misurazioni — dal quale si registrano, si modificano e si consultano,
 /// essendo questa la loro unica collocazione (vedi decisioni.md). Il
 /// pulsante di registrazione appartiene alla schermata che ospita il
-/// segmento, come in *Attività* apparteneva a quella.
+/// segmento, come apparteneva alla schermata che le ospitava prima.
 ///
 /// AN-11: la variazione è presentata in forma neutra, col segno che le
 /// compete e in colore primario — nessun colore di merito, nessuna
@@ -157,8 +157,8 @@ class BodyStatisticsView extends ConsumerWidget {
 
 /// AN-4: l'elenco delle misurazioni del periodo, in ordine cronologico
 /// decrescente. Dalla presente feature le misure non hanno altra
-/// collocazione: *Attività* è dedicata ai soli allenamenti (vedi
-/// decisioni.md).
+/// collocazione: la destinazione *Allenamenti* è dedicata ai soli
+/// allenamenti (vedi decisioni.md).
 class _PeriodMeasurements extends ConsumerWidget {
   const _PeriodMeasurements({required this.from, required this.to});
 

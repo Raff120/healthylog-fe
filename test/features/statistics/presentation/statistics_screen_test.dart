@@ -356,7 +356,7 @@ void main() {
   });
 
   /// PR-11: la registrazione di una misurazione appartiene ora al solo
-  /// segmento *Corpo* — *Attività* non ospita più le misure (vedi
+  /// segmento *Corpo* — *Allenamenti* non ospita più le misure (vedi
   /// decisioni.md). Il pulsante non deve comparire sugli altri due
   /// segmenti, che non hanno nulla da registrare.
   testWidgets('offre la registrazione di una misurazione dal solo segmento Corpo (PR-11)',

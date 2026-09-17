@@ -6,7 +6,7 @@ import '../../providers/plan_day_providers.dart';
 
 /// Segmented control *Giorno* · *Settimana* (6.1 interfaccia.md): unico
 /// comando delle due granularità di *Piano*. La forma è quella comune di
-/// [AppSegmentedControl], condivisa con *Attività* (10.1).
+/// [AppSegmentedControl], condivisa con *Statistiche* (11.1).
 class SegmentedViewControl extends StatelessWidget {
   const SegmentedViewControl({super.key, required this.value, required this.onChanged});
 

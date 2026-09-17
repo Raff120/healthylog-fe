@@ -15,7 +15,7 @@ import 'widgets/workout_filter_sheet.dart';
 import 'widgets/workout_list_tile.dart';
 import 'widgets/workout_sheet.dart';
 
-/// *Attività* (10.1 interfaccia.md): seconda destinazione della
+/// *Allenamenti* (10.1 interfaccia.md): seconda destinazione della
 /// navigazione, dedicata ai soli allenamenti (AL-17).
 ///
 /// Ospitava anche le misurazioni, dietro un segmented control. Non più:

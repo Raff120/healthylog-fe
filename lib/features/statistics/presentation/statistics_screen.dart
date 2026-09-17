@@ -29,7 +29,7 @@ import 'workout_statistics_view.dart';
 ///
 /// Il segmento **Corpo** reca il pulsante mobile per la registrazione di
 /// una misurazione (PR-11): dalla presente feature le misure non hanno
-/// altra collocazione, *Attività* essendo dedicata ai soli allenamenti.
+/// altra collocazione, *Allenamenti* essendo dedicata ai soli allenamenti.
 ///
 /// **Tono della sezione** (11.1): l'intera schermata presenta i dati in
 /// forma neutra — nessuna soglia di merito, nessun colore di giudizio,
@@ -79,7 +79,7 @@ class StatisticsScreen extends ConsumerWidget {
       ),
       // PR-11, 11.3: la registrazione di una misurazione appartiene al
       // solo segmento *Corpo*. Il pulsante compare lì e in nessun altro
-      // punto dell'applicazione: *Attività* non ospita più le misure
+      // punto dell'applicazione: *Allenamenti* non ospita più le misure
       // (vedi decisioni.md). Resta disponibile anche quando il periodo
       // non ne contiene alcuna — è anzi allora che serve.
       floatingActionButton: mode == StatisticsViewMode.body

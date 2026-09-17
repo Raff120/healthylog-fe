@@ -5,13 +5,12 @@ import 'package:flutter/material.dart';
 import '../../app/theme/app_spacing.dart';
 import '../../app/theme/theme_context.dart';
 
-/// Segmented control dell'intestazione (6.1, 10.1 e 11.1
-/// interfaccia.md): unico comando delle due granularità di *Piano* —
-/// *Giorno* · *Settimana* —, dei due contenuti di *Attività* —
-/// *Allenamenti* · *Misure* — e dei tre segmenti di *Statistiche* —
-/// *Aderenza* · *Allenamenti* · *Corpo*. Il medesimo meccanismo per la
-/// medesima ragione: contenuti affini che non meritano voci di
-/// navigazione distinte.
+/// Segmented control dell'intestazione (6.1 e 11.1 interfaccia.md):
+/// unico comando delle due granularità di *Piano* — *Giorno* ·
+/// *Settimana* — e dei tre segmenti di *Statistiche* — *Aderenza* ·
+/// *Allenamenti* · *Corpo*. Il medesimo meccanismo per la medesima
+/// ragione: contenuti affini che non meritano voci di navigazione
+/// distinte.
 ///
 /// Curvatura piena, fondo in superficie alternativa; il segmento attivo
 /// scorre in 280 ms (`AppSpacing.motionScreenTransition`). La larghezza
