@@ -1463,6 +1463,7 @@
   },
   "workoutCaloriesBurned": "Calorie bruciate",
   "workoutCaloriesOptional": "Se lo sai. Non è obbligatorio.",
+  "workoutCaloriesUnit": "kcal",
   "workoutCaloriesWithUnit": "{value} kcal",
   "@workoutCaloriesWithUnit": {
     "placeholders": {

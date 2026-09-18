@@ -13,7 +13,7 @@ import '../providers/workout_providers.dart';
 import 'workout_activity_presentation.dart';
 import 'widgets/planning_card.dart';
 import 'widgets/workout_filter_sheet.dart';
-import 'widgets/workout_list_tile.dart';
+import 'widgets/workout_card.dart';
 import 'widgets/workout_sheet.dart';
 
 /// *Allenamenti* (10.1 interfaccia.md): seconda destinazione della
@@ -106,15 +106,21 @@ class _WorkoutsView extends ConsumerWidget {
                         ? context.l10n.workoutNoneRecorded
                         : context.l10n.workoutNoneWithFilters,
                   )
-                : ListView.separated(
-                    padding: const EdgeInsets.only(top: AppSpacing.xs, bottom: AppSpacing.xxl),
+                : ListView.builder(
+                    padding: const EdgeInsets.fromLTRB(
+                      AppSpacing.md,
+                      AppSpacing.sm,
+                      AppSpacing.md,
+                      AppSpacing.xxl,
+                    ),
                     itemCount: items.length,
-                    separatorBuilder: (context, index) =>
-                        Divider(height: 1, color: colors.dividerLight),
-                    itemBuilder: (context, index) => WorkoutListTile(
-                      workout: items[index],
-                      // RA-14, RA-15: il tocco conduce alla modifica.
-                      onTap: () => showWorkoutSheet(context, existing: items[index]),
+                    itemBuilder: (context, index) => Padding(
+                      padding: const EdgeInsets.only(bottom: AppSpacing.xs),
+                      child: WorkoutCard(
+                        workout: items[index],
+                        // RA-14, RA-15: il tocco conduce alla modifica.
+                        onTap: () => showWorkoutSheet(context, existing: items[index]),
+                      ),
                     ),
                   ),
           ),

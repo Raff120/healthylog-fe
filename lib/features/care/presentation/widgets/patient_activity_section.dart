@@ -3,12 +3,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../app/theme/app_spacing.dart';
 import '../../../../app/theme/theme_context.dart';
-import '../../../../l10n/formats.dart';
 import '../../../../l10n/l10n_context.dart';
 import '../../../measurement/presentation/widgets/measurement_list_tile.dart';
 import '../../../measurement/presentation/widgets/measurement_sheet.dart';
 import '../../../measurement/providers/measurement_providers.dart';
-import '../../../workout/data/workout_models.dart';
+import '../../../workout/presentation/widgets/workout_card.dart';
 import '../../../workout/providers/workout_providers.dart';
 
 /// Misurazioni e allenamenti del Paziente nel dettaglio (9.2
@@ -75,43 +74,16 @@ class PatientActivitySection extends ConsumerWidget {
             style: typography.bodyMedium.copyWith(color: colors.textSecondary),
           )
         else
-          for (final workout in workouts.take(5)) _WorkoutRow(workout: workout),
+          // AL-18, AL-17: sola lettura — la card è quella dell'elenco,
+          // senza il tocco che condurrebbe alla modifica.
+          for (final workout in workouts.take(5))
+            Padding(
+              padding: const EdgeInsets.only(bottom: AppSpacing.xs),
+              child: WorkoutCard(workout: workout),
+            ),
       ],
     );
   }
 }
 
-/// AL-18, CB-11: sola lettura — data, tipo e calorie se indicate; nessuna
-/// azione, il Nutrizionista non crea né modifica allenamenti (AL-17).
-class _WorkoutRow extends StatelessWidget {
-  const _WorkoutRow({required this.workout});
-
-  final Workout workout;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    final typography = context.typography;
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: AppSpacing.xxs),
-      child: Row(
-        children: [
-          Expanded(
-            child: Text(
-              '${formatDate(context, workout.date)} · ${workout.activityType}',
-              style: typography.bodyMedium.copyWith(color: colors.textPrimary),
-              overflow: TextOverflow.ellipsis,
-            ),
-          ),
-          if (workout.caloriesBurned != null)
-            Text(
-              context.l10n.workoutCaloriesWithUnit(workout.caloriesBurned!),
-              style: typography.caption.copyWith(color: colors.textSecondary),
-            ),
-        ],
-      ),
-    );
-  }
-}
 

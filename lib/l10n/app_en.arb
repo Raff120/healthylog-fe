@@ -744,6 +744,7 @@
   "workoutBulletTypeWithCalories": "• {type} — {calories} kcal",
   "workoutCaloriesBurned": "Calories burned",
   "workoutCaloriesOptional": "If you know it. Not required.",
+  "workoutCaloriesUnit": "kcal",
   "workoutCaloriesWithUnit": "{value} kcal",
   "workoutCease": "Stop",
   "workoutClearFilters": "Clear filters",

@@ -4099,6 +4099,12 @@ abstract class L10n {
   /// **'Se lo sai. Non è obbligatorio.'**
   String get workoutCaloriesOptional;
 
+  /// No description provided for @workoutCaloriesUnit.
+  ///
+  /// In it, this message translates to:
+  /// **'kcal'**
+  String get workoutCaloriesUnit;
+
   /// No description provided for @workoutCaloriesWithUnit.
   ///
   /// In it, this message translates to:

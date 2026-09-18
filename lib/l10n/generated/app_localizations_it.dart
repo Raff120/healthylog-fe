@@ -2406,6 +2406,9 @@ class L10nIt extends L10n {
   String get workoutCaloriesOptional => 'Se lo sai. Non è obbligatorio.';
 
   @override
+  String get workoutCaloriesUnit => 'kcal';
+
+  @override
   String workoutCaloriesWithUnit(int value) {
     return '$value kcal';
   }

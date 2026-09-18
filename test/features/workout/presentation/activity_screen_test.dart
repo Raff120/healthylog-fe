@@ -142,7 +142,10 @@ void main() {
 
     expect(find.text('Corsa'), findsOneWidget);
     expect(find.text('Palestra'), findsOneWidget);
-    expect(find.text('320 kcal'), findsOneWidget);
+    // 10.1: le calorie sono il valore principale della card — numero e
+    // unità sono distinti.
+    expect(find.text('320'), findsOneWidget);
+    expect(find.text('kcal'), findsOneWidget);
     // RA-13: l'icona distingue l'allenamento svolto a fronte di una pianificazione.
     expect(find.byIcon(Icons.event_available), findsOneWidget);
   });
