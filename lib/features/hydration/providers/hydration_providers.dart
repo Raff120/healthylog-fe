@@ -65,13 +65,16 @@ class WaterIntakeController extends _$WaterIntakeController {
   @override
   AsyncValue<void>? build() => null;
 
-  Future<void> add(DateTime date, int amountMl) =>
+  /// Restituisce l'esito: l'aggiunta non lascia traccia sulla schermata
+  /// (AQ-16), e senza saperla riuscita la barra di conferma di 4.5
+  /// constaterebbe un fatto non avvenuto.
+  Future<bool> add(DateTime date, int amountMl) =>
       _run(() => ref.read(hydrationApiProvider).add(date, amountMl));
 
-  Future<void> removeEntry(DateTime date, String entryId) =>
+  Future<bool> removeEntry(DateTime date, String entryId) =>
       _run(() => ref.read(hydrationApiProvider).removeEntry(date, entryId));
 
-  Future<void> _run(Future<void> Function() operation) async {
+  Future<bool> _run(Future<void> Function() operation) async {
     // I comandi rapidi registrano senza attendere (AQ-5): nessun widget
     // osserva l'esito, e il controller sarebbe smaltito a richiesta
     // ancora in corso — con essa la lettura della giornata, che resterebbe
@@ -81,10 +84,11 @@ class WaterIntakeController extends _$WaterIntakeController {
     try {
       state = const AsyncValue.loading();
       state = await AsyncValue.guard(operation);
-      if (state?.hasError ?? true) return;
+      if (state?.hasError ?? true) return false;
       ref.invalidate(waterIntakeDayProvider);
       ref.invalidate(waterIntakeDaysProvider);
       ref.invalidate(waterStatisticsProvider);
+      return true;
     } finally {
       link.close();
     }

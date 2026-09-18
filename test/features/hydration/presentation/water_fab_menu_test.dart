@@ -183,6 +183,24 @@ void main() {
     expect(find.byIcon(Icons.water_drop_outlined), findsOneWidget);
   });
 
+  /// 4.5: l'aggiunta riuscita non lascia traccia sulla schermata — il
+  /// pulsante non porta il totale (AQ-16) — ed è il caso in cui la barra
+  /// temporanea è dovuta: senza, il tocco non si distingue da un tocco a
+  /// vuoto (segnalato dall'utente).
+  testWidgets('l\'aggiunta riuscita è constatata da una barra (4.5)', (tester) async {
+    await _pump(tester);
+
+    await tester.tap(find.byKey(const Key('waterFab')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Bottiglietta'));
+    await tester.pumpAndSettle();
+
+    expect(find.widgetWithText(SnackBar, 'Aggiunti 500 ml'), findsOneWidget);
+    // Constata e basta: non si congratula (AQ-23).
+    expect(find.textContaining('Complimenti'), findsNothing);
+    expect(find.textContaining('Ottimo'), findsNothing);
+  });
+
   testWidgets('il tocco sul velo richiude senza registrare nulla (6.2)', (tester) async {
     final adapter = await _pump(tester);
 

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../app/theme/app_spacing.dart';
 import '../../../../app/theme/theme_context.dart';
+import '../../../../core/api/api_error_messages.dart';
 import '../../../../core/widgets/app_primary_button.dart';
 import '../../../../core/widgets/app_text_field.dart';
 import '../../../../l10n/l10n_context.dart';
@@ -10,6 +11,7 @@ import '../../../../l10n/unit_system.dart';
 import '../../../identity/providers/profile_providers.dart';
 import '../../domain/water_amounts.dart';
 import '../../providers/hydration_providers.dart';
+import '../hydration_formatting.dart';
 
 /// AQ-7: la quantità diversa da quelle previste dai tre comandi rapidi.
 /// Un campo solo, nell'unità del sistema scelto (LO-4).
@@ -54,9 +56,20 @@ class _WaterAmountSheetState extends ConsumerState<_WaterAmountSheet> {
   Future<void> _save() async {
     final amount = _millilitres;
     if (amount == null) return;
-    await ref.read(waterIntakeControllerProvider.notifier).add(widget.date, amount);
+    final messenger = ScaffoldMessenger.of(context);
+    final notice = context.l10n.waterAddedNotice(formatVolume(context, amount, _units));
+    final failure = describeApiError(context, '');
+    final added = await ref.read(waterIntakeControllerProvider.notifier).add(widget.date, amount);
     if (!mounted) return;
+    // Fallita, il foglio resta dov'è: la quantità scritta non va riscritta
+    // per riprovare (4.5).
+    if (!added) {
+      messenger.showSnackBar(SnackBar(content: Text(failure)));
+      return;
+    }
     Navigator.of(context).pop();
+    // 4.5: la constatazione dell'aggiunta, che altrove non si vedrebbe.
+    messenger.showSnackBar(SnackBar(content: Text(notice)));
   }
 
   @override
