@@ -12,7 +12,7 @@ import '../theme/theme_context.dart';
 import 'app_destination.dart';
 
 /// Involucro delle destinazioni principali (3.2 interfaccia.md): barra
-/// inferiore su `compact`, barra laterale compatta su `medium`, barra
+/// inferiore fluttuante su `compact`, barra laterale compatta su `medium`, barra
 /// laterale estesa da `expanded` in su — le stesse soglie condivise
 /// dell'intera applicazione (`app_breakpoints.dart`), non una soglia
 /// propria.
@@ -116,33 +116,51 @@ class _BottomBarScaffold extends StatelessWidget {
       body: Column(
         children: [const OfflineBar(), Expanded(child: child)],
       ),
-      bottomNavigationBar: DecoratedBox(
-        key: const ValueKey('bottomNavBar'),
-        decoration: BoxDecoration(
-          color: colors.surface,
-          border: Border(top: BorderSide(color: colors.dividerStrong)),
-        ),
-        // La rientranza sta dentro la superficie della barra, non fuori:
-        // sotto la barra non deve restare fascia di colore diverso, che sul
-        // web mostrerebbe lo sfondo della pagina (vedi decisioni.md).
-        child: SafeArea(
-          top: false,
-          child: SizedBox(
-            height: AppSpacing.heightBottomNav,
-            child: Row(
-              children: [
-                for (var i = 0; i < destinations.length; i++)
-                  Expanded(
-                    child: _NavItem(
-                      key: ValueKey('navItem-${destinations[i].label}'),
-                      destination: destinations[i],
-                      selected: i == selectedIndex,
-                      axis: Axis.vertical,
-                      showLabel: true,
-                      onTap: () => onSelect(i),
+      // La pillola non occupa la zona riservata al bordo inferiore dello
+      // schermo ma le sta sopra: la rientranza è fuori dalla sua
+      // superficie, e lo spazio che le resta intorno lo dipinge lo
+      // sfondo della schermata. Sul web ciò è vero quanto sulle
+      // piattaforme native — l'elemento ospite arriva al bordo dello
+      // schermo e la zona riservata è riferita come `MediaQuery.padding`
+      // (vedi decisioni.md): la fascia in fondo non mostra la pagina.
+      bottomNavigationBar: SafeArea(
+        top: false,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(
+            AppSpacing.md,
+            AppSpacing.xs,
+            AppSpacing.md,
+            AppSpacing.xs,
+          ),
+          child: Material(
+            key: const ValueKey('bottomNavBar'),
+            color: colors.surface,
+            // 2.4: nessuna ombra. La forma e lo spazio che le resta
+            // intorno dicono già che la barra sta sopra; la separazione si
+            // affida al colore di superficie e al bordo, come ovunque
+            // nell'applicazione — e nel tema scuro l'ombra non funziona
+            // comunque.
+            elevation: 0,
+            surfaceTintColor: colors.surface,
+            shape: StadiumBorder(side: BorderSide(color: colors.dividerStrong)),
+            clipBehavior: Clip.antiAlias,
+            child: SizedBox(
+              height: AppSpacing.heightBottomNav,
+              child: Row(
+                children: [
+                  for (var i = 0; i < destinations.length; i++)
+                    Expanded(
+                      child: _NavItem(
+                        key: ValueKey('navItem-${destinations[i].label}'),
+                        destination: destinations[i],
+                        selected: i == selectedIndex,
+                        axis: Axis.vertical,
+                        showLabel: true,
+                        onTap: () => onSelect(i),
+                      ),
                     ),
-                  ),
-              ],
+                ],
+              ),
             ),
           ),
         ),

@@ -249,12 +249,17 @@ void main() {
     }
   });
 
-  // MP-9: la barra copre con la propria superficie la zona riservata al
-  // bordo inferiore dello schermo — l'indicatore di Home sull'iPhone.
-  // Segnalato dall'utente sulla PWA installata: sotto la barra restava una
-  // fascia di colore diverso, e lo stacco si vedeva. La rientranza sta
-  // dentro la superficie della barra, non fuori.
-  testWidgets('la barra inferiore copre la zona riservata del dispositivo', (
+  // MP-9: la barra è una pillola discostata dai bordi (3.2 interfaccia.md)
+  // e la zona riservata al bordo inferiore dello schermo — l'indicatore di
+  // Home sull'iPhone — le sta sotto, non dentro.
+  //
+  // Segnalato dall'utente sulla PWA installata, quando la barra era
+  // ancorata al fondo: sotto di essa restava una fascia di colore diverso,
+  // perché era la pagina a dipingerla. Il punto che quella correzione ha
+  // fissato vale ancora e va verificato qui: è l'applicazione ad arrivare
+  // al bordo dello schermo, sicché la fascia attorno alla pillola porta il
+  // fondo della schermata e non quello della pagina.
+  testWidgets('la barra inferiore fluttua sopra la zona riservata del dispositivo', (
     tester,
   ) async {
     const safeAreaBottom = 34.0;
@@ -264,10 +269,16 @@ void main() {
     await _pumpAuthenticatedApp(tester, role: 'USER', size: const Size(400, 800));
 
     final barra = tester.getRect(find.byKey(const ValueKey('bottomNavBar')));
-    // Nessuna fascia fra la barra e il bordo dello schermo.
-    expect(barra.bottom, 800);
-    // La barra è più alta della zona riservata che si è presa.
-    expect(barra.height, AppSpacing.heightBottomNav + safeAreaBottom);
+    // L'applicazione dipinge fino al bordo dello schermo: sotto la pillola
+    // non si apre alcuna fascia estranea.
+    expect(tester.getRect(find.byType(Scaffold).first).bottom, 800);
+    // La pillola sta sopra la zona riservata, discostata dal fondo.
+    expect(barra.bottom, lessThanOrEqualTo(800 - safeAreaBottom));
+    // È alta quanto la barra, non di più: la rientranza non vi entra.
+    expect(barra.height, AppSpacing.heightBottomNav);
+    // Ed è discostata dai lati dello schermo.
+    expect(barra.left, greaterThan(0));
+    expect(barra.right, lessThan(400));
     // Le voci restano sopra la zona riservata, non sotto l'indicatore.
     expect(
       tester.getRect(find.text('Piano')).bottom,
