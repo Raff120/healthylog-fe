@@ -118,12 +118,16 @@ class BodyStatisticsView extends ConsumerWidget {
                     ? null
                     : _formatChange(context, bodyMeasureToDisplay(series.measure, series.change!, units)),
                 unit: series.change == null ? null : bodyMeasureUnit(context, series.measure, units),
-                caption: describePeriod(context, 
-                  statistics.period,
-                  statistics.from,
-                  statistics.to,
-                  statistics.planName,
-                ),
+                // AD-8bis: vedi `WorkoutStatisticsView`.
+                caption: statistics.period == StatisticsPeriod.plan
+                    ? describePeriod(
+                        context,
+                        statistics.period,
+                        statistics.from,
+                        statistics.to,
+                        statistics.planName,
+                      )
+                    : null,
                 emptyText: context.l10n.bodyStatsSingleValue,
               ),
               // AN-5: la legenda della fonte compare solo se le due fonti

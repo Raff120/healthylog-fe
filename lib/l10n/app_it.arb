@@ -1131,6 +1131,9 @@
       }
     }
   },
+  "statisticsCurrentPlan": "In corso",
+  "statisticsNextPeriod": "Periodo successivo",
+  "statisticsPreviousPeriod": "Periodo precedente",
   "statisticsUnavailable": "Statistiche non disponibili",
   "statisticsWeekRange": "Settimana dal {start} al {end}",
   "@statisticsWeekRange": {

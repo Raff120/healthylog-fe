@@ -180,6 +180,89 @@ abstract class _$SelectedStatisticsPeriod
   }
 }
 
+/// AD-8bis: la data cui l'orizzonte si riferisce — la settimana o il mese
+/// che la comprende. Predefinita a oggi, e non conservata tra le sessioni:
+/// alla riapertura le statistiche mostrano sempre il periodo corrente,
+/// come *Piano* mostra sempre la giornata corrente (3.2).
+///
+/// L'orizzonte *Piano* non se ne serve: là il periodo è il piano, e lo
+/// indica [SelectedStatisticsPlan].
+
+@ProviderFor(SelectedStatisticsDate)
+final selectedStatisticsDateProvider = SelectedStatisticsDateProvider._();
+
+/// AD-8bis: la data cui l'orizzonte si riferisce — la settimana o il mese
+/// che la comprende. Predefinita a oggi, e non conservata tra le sessioni:
+/// alla riapertura le statistiche mostrano sempre il periodo corrente,
+/// come *Piano* mostra sempre la giornata corrente (3.2).
+///
+/// L'orizzonte *Piano* non se ne serve: là il periodo è il piano, e lo
+/// indica [SelectedStatisticsPlan].
+final class SelectedStatisticsDateProvider
+    extends $NotifierProvider<SelectedStatisticsDate, DateTime> {
+  /// AD-8bis: la data cui l'orizzonte si riferisce — la settimana o il mese
+  /// che la comprende. Predefinita a oggi, e non conservata tra le sessioni:
+  /// alla riapertura le statistiche mostrano sempre il periodo corrente,
+  /// come *Piano* mostra sempre la giornata corrente (3.2).
+  ///
+  /// L'orizzonte *Piano* non se ne serve: là il periodo è il piano, e lo
+  /// indica [SelectedStatisticsPlan].
+  SelectedStatisticsDateProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'selectedStatisticsDateProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$selectedStatisticsDateHash();
+
+  @$internal
+  @override
+  SelectedStatisticsDate create() => SelectedStatisticsDate();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(DateTime value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<DateTime>(value),
+    );
+  }
+}
+
+String _$selectedStatisticsDateHash() =>
+    r'5a021186691f7a1e2133b6463dee4e842a9e5af6';
+
+/// AD-8bis: la data cui l'orizzonte si riferisce — la settimana o il mese
+/// che la comprende. Predefinita a oggi, e non conservata tra le sessioni:
+/// alla riapertura le statistiche mostrano sempre il periodo corrente,
+/// come *Piano* mostra sempre la giornata corrente (3.2).
+///
+/// L'orizzonte *Piano* non se ne serve: là il periodo è il piano, e lo
+/// indica [SelectedStatisticsPlan].
+
+abstract class _$SelectedStatisticsDate extends $Notifier<DateTime> {
+  DateTime build();
+  @$mustCallSuper
+  @override
+  WhenComplete runBuild() {
+    final ref = this.ref as $Ref<DateTime, DateTime>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<DateTime, DateTime>,
+              DateTime,
+              Object?,
+              Object?
+            >;
+    return element.handleCreate(ref, build);
+  }
+}
+
 /// Il piano su cui riferire l'orizzonte *Piano*: quello indicato dal
 /// dettaglio di un piano concluso (7.5), altrimenti assente — e il
 /// backend intende allora quello in corso (PA-8).
@@ -310,7 +393,7 @@ final class AdherenceStatisticsProvider
 }
 
 String _$adherenceStatisticsHash() =>
-    r'73d253f26799187d622bca7fd6cc843436284c75';
+    r'f247ac00e54e7a42dcac4843c14d1722d2ee9ade';
 
 /// 8.2: l'aderenza dell'orizzonte richiesto.
 
@@ -400,7 +483,7 @@ final class WorkoutStatisticsProvider
   }
 }
 
-String _$workoutStatisticsHash() => r'77130193301f2184a4fe1c8ac4ac3a80b48f4362';
+String _$workoutStatisticsHash() => r'0f682665d1dc66fa5b95c20758fb21af50c7c570';
 
 /// 8.3: frequenza degli allenamenti e confronti.
 
@@ -491,7 +574,7 @@ final class MeasurementStatisticsProvider
 }
 
 String _$measurementStatisticsHash() =>
-    r'bb56666450722cd5efff0a1c3efe5dd158e6b37b';
+    r'a7150b5a375daf42aca7b441b9f3f4cba42c2aed';
 
 /// 8.4: andamento di peso e misure.
 
