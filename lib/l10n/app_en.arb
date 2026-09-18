@@ -675,6 +675,8 @@
   "validationRequired": "Required field",
   "validationTooLong": "Too long",
   "validationUsernameAlreadyTaken": "This username is already taken",
+  "verifyEmailConfirmed": "Address confirmed.",
+  "verifyEmailConfirmedSignIn": "Address confirmed: you can sign in now.",
   "verifyEmailCode": "Confirmation code",
   "verifyEmailCodeIncomplete": "The code has six digits",
   "verifyEmailConfirm": "Confirm",

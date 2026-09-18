@@ -3685,6 +3685,18 @@ abstract class L10n {
   /// **'Questo nome utente è già in uso'**
   String get validationUsernameAlreadyTaken;
 
+  /// No description provided for @verifyEmailConfirmed.
+  ///
+  /// In it, this message translates to:
+  /// **'Indirizzo confermato.'**
+  String get verifyEmailConfirmed;
+
+  /// No description provided for @verifyEmailConfirmedSignIn.
+  ///
+  /// In it, this message translates to:
+  /// **'Indirizzo confermato: ora puoi accedere.'**
+  String get verifyEmailConfirmedSignIn;
+
   /// No description provided for @verifyEmailCode.
   ///
   /// In it, this message translates to:

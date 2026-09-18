@@ -2169,6 +2169,13 @@ class L10nEn extends L10n {
   String get validationUsernameAlreadyTaken => 'This username is already taken';
 
   @override
+  String get verifyEmailConfirmed => 'Address confirmed.';
+
+  @override
+  String get verifyEmailConfirmedSignIn =>
+      'Address confirmed: you can sign in now.';
+
+  @override
   String get verifyEmailCode => 'Confirmation code';
 
   @override

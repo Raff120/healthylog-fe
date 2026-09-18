@@ -1335,6 +1335,8 @@
   "validationRequired": "Campo obbligatorio",
   "validationTooLong": "Troppo lungo",
   "validationUsernameAlreadyTaken": "Questo nome utente è già in uso",
+  "verifyEmailConfirmed": "Indirizzo confermato.",
+  "verifyEmailConfirmedSignIn": "Indirizzo confermato: ora puoi accedere.",
   "verifyEmailCode": "Codice di conferma",
   "verifyEmailCodeIncomplete": "Il codice è di sei cifre",
   "verifyEmailConfirm": "Conferma",
