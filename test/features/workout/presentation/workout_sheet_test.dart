@@ -137,7 +137,7 @@ PlannedWorkout _planned() => PlannedWorkout(
 /// AL-2, 10.2 interfaccia.md: lo sport si sceglie nel selettore, cercandolo
 /// per nome — trenta voci non si scorrono.
 Future<void> _chooseActivity(WidgetTester tester, String name) async {
-  await tester.tap(find.text('Tipo di attività'));
+  await tester.tap(find.text('Sport'));
   await tester.pumpAndSettle();
   await tester.enterText(find.widgetWithText(TextField, 'Cerca'), name);
   await tester.pumpAndSettle();
@@ -221,7 +221,7 @@ void main() {
     final adapter = await _pumpSheet(tester, planned: _planned());
 
     // 10.2: i soli campi facoltativi, e si può chiudere senza compilarli.
-    expect(find.widgetWithText(TextField, 'Tipo di attività'), findsNothing);
+    expect(find.widgetWithText(TextField, 'Sport'), findsNothing);
     // AL-2: il titolo denomina lo sport ereditato nella lingua corrente,
     // non con l'etichetta con cui fu registrato.
     expect(find.text('Sala pesi'), findsOneWidget);

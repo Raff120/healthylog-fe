@@ -4054,13 +4054,13 @@ abstract class L10n {
   /// No description provided for @workoutActivityType.
   ///
   /// In it, this message translates to:
-  /// **'Tipo di attività'**
+  /// **'Sport'**
   String get workoutActivityType;
 
   /// No description provided for @workoutActivityTypeRequired.
   ///
   /// In it, this message translates to:
-  /// **'Indica il tipo di attività'**
+  /// **'Indica lo sport'**
   String get workoutActivityTypeRequired;
 
   /// No description provided for @workoutAddOneOff.
@@ -4168,7 +4168,7 @@ abstract class L10n {
   /// No description provided for @workoutNoTypesYet.
   ///
   /// In it, this message translates to:
-  /// **'Nessun tipo ancora registrato.'**
+  /// **'Nessuno sport ancora registrato.'**
   String get workoutNoTypesYet;
 
   /// No description provided for @workoutNoWeeklyGoal.
@@ -4294,7 +4294,7 @@ abstract class L10n {
   /// No description provided for @workoutStatsDistribution.
   ///
   /// In it, this message translates to:
-  /// **'Distribuzione per tipo'**
+  /// **'Distribuzione per sport'**
   String get workoutStatsDistribution;
 
   /// No description provided for @workoutStatsGoalComparison.

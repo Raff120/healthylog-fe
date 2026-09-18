@@ -2378,10 +2378,10 @@ class L10nIt extends L10n {
   String get workoutActivityYoga => 'Yoga';
 
   @override
-  String get workoutActivityType => 'Tipo di attività';
+  String get workoutActivityType => 'Sport';
 
   @override
-  String get workoutActivityTypeRequired => 'Indica il tipo di attività';
+  String get workoutActivityTypeRequired => 'Indica lo sport';
 
   @override
   String get workoutAddOneOff => 'Aggiungi allenamento occasionale';
@@ -2445,7 +2445,7 @@ class L10nIt extends L10n {
   String get workoutMarkAsDone => 'Segna come svolto';
 
   @override
-  String get workoutNoTypesYet => 'Nessun tipo ancora registrato.';
+  String get workoutNoTypesYet => 'Nessuno sport ancora registrato.';
 
   @override
   String get workoutNoWeeklyGoal => 'Nessun obiettivo settimanale';
@@ -2518,7 +2518,7 @@ class L10nIt extends L10n {
       'Se vuoi, aggiungi calorie e nota. Puoi anche chiudere: l\'allenamento è registrato lo stesso.';
 
   @override
-  String get workoutStatsDistribution => 'Distribuzione per tipo';
+  String get workoutStatsDistribution => 'Distribuzione per sport';
 
   @override
   String get workoutStatsGoalComparison => 'Confronto con l’obiettivo';
