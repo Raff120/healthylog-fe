@@ -38,7 +38,7 @@ class WaterFabMenu extends ConsumerStatefulWidget {
   /// Lato del pulsante (6.2) e raggio dell'arco su cui si dispone il
   /// ventaglio.
   static const double diameter = 56;
-  static const double radius = 132;
+  static const double radius = 152;
 
   @override
   ConsumerState<WaterFabMenu> createState() => _WaterFabMenuState();
@@ -103,8 +103,10 @@ class _WaterFan extends ConsumerWidget {
   final double fabInset;
   final Animation<double> animation;
 
-  /// Angoli dell'arco, dal quasi orizzontale al quasi verticale (6.2).
-  static const List<double> _degrees = [8, 34, 60, 86];
+  /// Angoli dell'arco, dall'orizzontale al verticale (6.2). Distribuiti
+  /// sull'intero quadrante: su un arco più stretto le voci, che sono alte
+  /// quanto il bersaglio minimo, si accavallerebbero.
+  static const List<double> _degrees = [4, 32, 61, 90];
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -150,17 +152,29 @@ class _WaterFan extends ConsumerWidget {
             bottom: centreFromBottom +
                 WaterFabMenu.radius * math.sin(_degrees[index] * math.pi / 180) -
                 AppSpacing.minInteractiveTarget / 2,
-            child: _FanEntry(
+            child: ConstrainedBox(
+              // La pastiglia si distende verso sinistra a partire dal
+              // proprio punto d'ancoraggio: oltre quel che resta di
+              // schermo non può andare, e il nome cede prima del margine.
+              constraints: BoxConstraints(
+                maxWidth: MediaQuery.sizeOf(context).width -
+                    AppSpacing.md -
+                    (centreFromRight +
+                        WaterFabMenu.radius * math.cos(_degrees[index] * math.pi / 180) -
+                        AppSpacing.minInteractiveTarget / 2),
+                ),
+              child: _FanEntry(
               // Le voci emergono in sequenza, non tutte insieme: l'arco
               // si legge come un dispiegarsi (6.2).
-              animation: CurvedAnimation(
-                parent: animation,
-                curve: Interval(index * 0.12, 1, curve: Curves.easeOutBack),
+                animation: CurvedAnimation(
+                  parent: animation,
+                  curve: Interval(index * 0.12, 1, curve: Curves.easeOutBack),
               ),
-              label: entries[index].label,
-              value: entries[index].value,
-              icon: entries[index].icon,
-              onTap: entries[index].onTap,
+                label: entries[index].label,
+                value: entries[index].value,
+                icon: entries[index].icon,
+                onTap: entries[index].onTap,
+              ),
             ),
           ),
       ],
@@ -223,9 +237,13 @@ class _FanEntry extends StatelessWidget {
                       if (icon != null)
                         Icon(icon, size: 20, color: colors.accent)
                       else ...[
-                        Text(
-                          label,
-                          style: typography.bodyMedium.copyWith(color: colors.textPrimary),
+                        Flexible(
+                          child: Text(
+                            label,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: typography.bodyMedium.copyWith(color: colors.textPrimary),
+                          ),
                         ),
                         const SizedBox(width: AppSpacing.xxs),
                         Text(
