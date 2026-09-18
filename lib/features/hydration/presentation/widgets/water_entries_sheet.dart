@@ -8,6 +8,7 @@ import '../../../../l10n/l10n_context.dart';
 import '../../../identity/providers/profile_providers.dart';
 import '../../providers/hydration_providers.dart';
 import '../hydration_formatting.dart';
+import 'water_confirmations.dart';
 
 /// Elenco delle aggiunte dell'orizzonte, raccolte per giornata, ciascuna
 /// col proprio comando di rimozione (AQ-8, AQ-28; 11.1 interfaccia.md).
@@ -113,9 +114,18 @@ class _WaterEntriesSheet extends ConsumerWidget {
                             _EntryRow(
                               key: ValueKey('waterEntry-${entry.entryId}'),
                               label: formatVolume(context, entry.amountMl, units),
-                              onRemove: () => ref
-                                  .read(waterIntakeControllerProvider.notifier)
-                                  .removeEntry(day.date, entry.entryId),
+                              // 4.5: conferma semplice. La rimozione è
+                              // rifacibile — si riaggiunge la quantità —
+                              // ma non si torna indietro dal tocco, ed è
+                              // il livello dell'eliminazione di un
+                              // allenamento o di una misurazione.
+                              onRemove: () async {
+                                final amount = formatVolume(context, entry.amountMl, units);
+                                if (!await confirmRemoveWaterEntry(context, amount)) return;
+                                await ref
+                                    .read(waterIntakeControllerProvider.notifier)
+                                    .removeEntry(day.date, entry.entryId);
+                              },
                             ),
                         ],
                       ],
