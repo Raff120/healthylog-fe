@@ -21,9 +21,11 @@ import 'package:healthylog/features/group/providers/cooking_group_providers.dart
 import 'package:healthylog/features/identity/data/profile_api.dart';
 import 'package:healthylog/features/identity/providers/profile_providers.dart';
 import 'package:healthylog/features/notification/providers/notification_providers.dart';
+import 'package:healthylog/features/hydration/providers/hydration_providers.dart';
 import 'package:healthylog/features/workout/providers/workout_providers.dart';
 
 import '../../../support/care_api_stub.dart';
+import '../../../support/hydration_api_stub.dart';
 import '../../../support/workout_api_stub.dart';
 
 /// Intestazione di *Piano* (6.1 interfaccia.md) su schermo stretto: il
@@ -107,6 +109,7 @@ Future<void> _pumpPlan(WidgetTester tester, {required bool withGroup}) async {
       // di ogni destinazione principale (3.1).
       notificationApiProvider.overrideWithValue(stubNotificationApi()),
       workoutApiProvider.overrideWithValue(stubWorkoutApi()),
+      hydrationApiProvider.overrideWithValue(stubHydrationApi()),
       planDayApiProvider.overrideWithValue(PlanDayApi(planDayDio)),
       profileApiProvider.overrideWithValue(ProfileApi(profileDio)),
       cookingGroupApiProvider.overrideWithValue(CookingGroupApi(groupDio)),

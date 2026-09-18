@@ -18,10 +18,12 @@ import 'package:healthylog/features/identity/data/profile_api.dart';
 import 'package:healthylog/features/identity/providers/identity_providers.dart';
 import 'package:healthylog/features/identity/providers/profile_providers.dart';
 import 'package:healthylog/features/notification/providers/notification_providers.dart';
+import 'package:healthylog/features/hydration/providers/hydration_providers.dart';
 import 'package:healthylog/features/workout/providers/workout_providers.dart';
 import 'package:healthylog/main.dart';
 
 import '../support/care_api_stub.dart';
+import '../support/hydration_api_stub.dart';
 import '../support/workout_api_stub.dart';
 
 /// Protezione delle rotte (5.2 interfaccia.md: "Chi ha una sessione
@@ -184,6 +186,7 @@ void main() {
           // di ogni destinazione principale (3.1).
           notificationApiProvider.overrideWithValue(stubNotificationApi()),
         workoutApiProvider.overrideWithValue(stubWorkoutApi()),
+        hydrationApiProvider.overrideWithValue(stubHydrationApi()),
           // F14: la base dati reale userebbe path_provider/flutter_secure_storage,
           // assenti nella VM di test (sospensione indefinita, non un errore).
           appDatabaseProvider.overrideWithValue(

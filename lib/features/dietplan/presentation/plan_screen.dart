@@ -13,6 +13,7 @@ import '../../../l10n/l10n_context.dart';
 import '../../care/domain/plan_competence.dart';
 import '../../group/providers/cooking_group_providers.dart';
 import '../../notification/presentation/widgets/notification_bell.dart';
+import '../../hydration/presentation/widgets/day_water_section.dart';
 import '../../workout/presentation/widgets/day_workouts_section.dart';
 import '../../care/providers/care_providers.dart';
 import '../../identity/providers/profile_providers.dart';
@@ -290,11 +291,18 @@ class _DayContent extends ConsumerWidget {
     // indipendente dal piano alimentare e non è preclusa quando questo è
     // interrotto (AL-8, RA-8, SA-14) — 6.2 lo dice per la giornata senza
     // pasti, e la ragione vale identica per le altre (vedi decisioni.md).
+    // Altrettanto vale per l'acqua (AQ-4, AQ-20).
     if (member == null) {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           DayWorkoutsSection(date: day.date),
+          // AQ-16, AQ-19: l'acqua sta fra gli allenamenti e i pasti, ed è
+          // sempre presente sulla propria giornata — anche a totale nullo,
+          // che è la condizione in cui i comandi servono di più. AQ-4: come
+          // gli allenamenti, non dipende dal piano e resta anche dove i
+          // pasti cedono il posto a uno stato vuoto.
+          DayWaterSection(date: day.date),
           Expanded(child: _MealsContent(day: day)),
         ],
       );

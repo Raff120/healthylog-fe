@@ -2284,6 +2284,72 @@ class L10nIt extends L10n {
   String get weekdayWednesday => 'Mercoledì';
 
   @override
+  String get unitFluidOunces => 'fl oz';
+
+  @override
+  String get unitLitres => 'L';
+
+  @override
+  String get waterAddCustom => 'Altra quantità';
+
+  @override
+  String get waterAmountBottle => 'Bottiglia';
+
+  @override
+  String get waterAmountGlass => 'Bicchiere';
+
+  @override
+  String get waterAmountSmallBottle => 'Bottiglietta';
+
+  @override
+  String waterAverageFrom(String date) {
+    return 'La media considera i giorni dal $date, prima registrazione.';
+  }
+
+  @override
+  String waterAveragePerDay(String value) {
+    return '$value al giorno';
+  }
+
+  @override
+  String get waterCustomAmount => 'Quantità';
+
+  @override
+  String get waterCustomTitle => 'Aggiungi acqua';
+
+  @override
+  String get waterDayEntries => 'Aggiunte della giornata';
+
+  @override
+  String get waterGoalHelp =>
+      'Comparirà nella vista giornaliera accanto al bevuto.';
+
+  @override
+  String get waterGoalLabel => 'Obiettivo d’acqua';
+
+  @override
+  String waterGoalReference(String value) {
+    return 'Obiettivo $value';
+  }
+
+  @override
+  String get waterNoEntries => 'Nessuna aggiunta registrata';
+
+  @override
+  String waterOfGoal(String value) {
+    return 'di $value';
+  }
+
+  @override
+  String get waterRemoveEntry => 'Rimuovi questa aggiunta';
+
+  @override
+  String get waterSectionTitle => 'ACQUA';
+
+  @override
+  String get waterTitle => 'Acqua';
+
+  @override
   String get workoutActivityBasketball => 'Basket';
 
   @override

@@ -27,12 +27,14 @@ import 'package:healthylog/features/identity/providers/profile_providers.dart';
 import 'package:healthylog/core/storage/preferences_store.dart';
 import 'package:healthylog/features/notification/providers/notification_providers.dart';
 import 'package:healthylog/features/statistics/providers/statistics_providers.dart';
+import 'package:healthylog/features/hydration/providers/hydration_providers.dart';
 import 'package:healthylog/features/workout/providers/workout_providers.dart';
 import 'package:healthylog/main.dart';
 
 import '../support/care_api_stub.dart';
 import '../support/preferences_store_stub.dart';
 import '../support/statistics_api_stub.dart';
+import '../support/hydration_api_stub.dart';
 import '../support/workout_api_stub.dart';
 
 /// Barra di navigazione principale (3.1, 3.2 interfaccia.md), aggiunta
@@ -174,6 +176,7 @@ Future<ProviderContainer> _pumpAuthenticatedApp(
       // di ogni destinazione principale (3.1).
       notificationApiProvider.overrideWithValue(stubNotificationApi()),
         workoutApiProvider.overrideWithValue(stubWorkoutApi()),
+        hydrationApiProvider.overrideWithValue(stubHydrationApi()),
       statisticsApiProvider.overrideWithValue(stubStatisticsApi()),
       // 11.1: il periodo selezionato è conservato tra le sessioni; nella
       // VM di test l'archivio locale è in memoria.
@@ -399,6 +402,7 @@ void main() {
           // di ogni destinazione principale (3.1).
           notificationApiProvider.overrideWithValue(stubNotificationApi()),
         workoutApiProvider.overrideWithValue(stubWorkoutApi()),
+        hydrationApiProvider.overrideWithValue(stubHydrationApi()),
       statisticsApiProvider.overrideWithValue(stubStatisticsApi()),
       // 11.1: il periodo selezionato è conservato tra le sessioni; nella
       // VM di test l'archivio locale è in memoria.

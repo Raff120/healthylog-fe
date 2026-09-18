@@ -19,9 +19,11 @@ import 'package:healthylog/features/dietplan/providers/plan_day_providers.dart';
 import 'package:healthylog/features/group/data/cooking_group_api.dart';
 import 'package:healthylog/features/group/providers/cooking_group_providers.dart';
 import 'package:healthylog/features/notification/providers/notification_providers.dart';
+import 'package:healthylog/features/hydration/providers/hydration_providers.dart';
 import 'package:healthylog/features/workout/providers/workout_providers.dart';
 
 import '../../../support/care_api_stub.dart';
+import '../../../support/hydration_api_stub.dart';
 import '../../../support/workout_api_stub.dart';
 import '../../../support/slot_items_json.dart';
 
@@ -122,6 +124,7 @@ Future<void> _pump(
         notificationApiProvider.overrideWithValue(stubNotificationApi()),
         workoutApiProvider
             .overrideWithValue(stubWorkoutApi(planned: planned, workouts: workouts)),
+        hydrationApiProvider.overrideWithValue(stubHydrationApi()),
         planDayApiProvider.overrideWithValue(PlanDayApi(planDayDio)),
         cookingGroupApiProvider.overrideWithValue(CookingGroupApi(groupDio)),
         appDatabaseProvider.overrideWithValue(AppDatabase(NativeDatabase.memory())),
