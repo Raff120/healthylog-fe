@@ -3847,6 +3847,192 @@ abstract class L10n {
   /// **'Mercoledì'**
   String get weekdayWednesday;
 
+  /// No description provided for @workoutActivityBasketball.
+  ///
+  /// In it, this message translates to:
+  /// **'Basket'**
+  String get workoutActivityBasketball;
+
+  /// No description provided for @workoutActivityBoxing.
+  ///
+  /// In it, this message translates to:
+  /// **'Boxe'**
+  String get workoutActivityBoxing;
+
+  /// No description provided for @workoutActivityCalisthenics.
+  ///
+  /// In it, this message translates to:
+  /// **'Calisthenics'**
+  String get workoutActivityCalisthenics;
+
+  /// No description provided for @workoutActivityClimbing.
+  ///
+  /// In it, this message translates to:
+  /// **'Arrampicata'**
+  String get workoutActivityClimbing;
+
+  /// No description provided for @workoutActivityCrossfit.
+  ///
+  /// In it, this message translates to:
+  /// **'Crossfit'**
+  String get workoutActivityCrossfit;
+
+  /// No description provided for @workoutActivityCycling.
+  ///
+  /// In it, this message translates to:
+  /// **'Bicicletta'**
+  String get workoutActivityCycling;
+
+  /// No description provided for @workoutActivityDance.
+  ///
+  /// In it, this message translates to:
+  /// **'Danza'**
+  String get workoutActivityDance;
+
+  /// No description provided for @workoutActivityGolf.
+  ///
+  /// In it, this message translates to:
+  /// **'Golf'**
+  String get workoutActivityGolf;
+
+  /// No description provided for @workoutActivityGym.
+  ///
+  /// In it, this message translates to:
+  /// **'Sala pesi'**
+  String get workoutActivityGym;
+
+  /// No description provided for @workoutActivityHockey.
+  ///
+  /// In it, this message translates to:
+  /// **'Hockey'**
+  String get workoutActivityHockey;
+
+  /// No description provided for @workoutActivityHorseRiding.
+  ///
+  /// In it, this message translates to:
+  /// **'Equitazione'**
+  String get workoutActivityHorseRiding;
+
+  /// No description provided for @workoutActivityMartialArts.
+  ///
+  /// In it, this message translates to:
+  /// **'Arti marziali'**
+  String get workoutActivityMartialArts;
+
+  /// No description provided for @workoutActivityOther.
+  ///
+  /// In it, this message translates to:
+  /// **'Altro'**
+  String get workoutActivityOther;
+
+  /// No description provided for @workoutActivityPadel.
+  ///
+  /// In it, this message translates to:
+  /// **'Padel'**
+  String get workoutActivityPadel;
+
+  /// No description provided for @workoutActivityPilates.
+  ///
+  /// In it, this message translates to:
+  /// **'Pilates'**
+  String get workoutActivityPilates;
+
+  /// No description provided for @workoutActivityRowing.
+  ///
+  /// In it, this message translates to:
+  /// **'Canottaggio'**
+  String get workoutActivityRowing;
+
+  /// No description provided for @workoutActivityRugby.
+  ///
+  /// In it, this message translates to:
+  /// **'Rugby'**
+  String get workoutActivityRugby;
+
+  /// No description provided for @workoutActivityRunning.
+  ///
+  /// In it, this message translates to:
+  /// **'Corsa'**
+  String get workoutActivityRunning;
+
+  /// No description provided for @workoutActivitySkating.
+  ///
+  /// In it, this message translates to:
+  /// **'Pattinaggio'**
+  String get workoutActivitySkating;
+
+  /// No description provided for @workoutActivitySkiing.
+  ///
+  /// In it, this message translates to:
+  /// **'Sci'**
+  String get workoutActivitySkiing;
+
+  /// No description provided for @workoutActivitySnowboard.
+  ///
+  /// In it, this message translates to:
+  /// **'Snowboard'**
+  String get workoutActivitySnowboard;
+
+  /// No description provided for @workoutActivitySoccer.
+  ///
+  /// In it, this message translates to:
+  /// **'Calcio'**
+  String get workoutActivitySoccer;
+
+  /// No description provided for @workoutActivitySpinning.
+  ///
+  /// In it, this message translates to:
+  /// **'Spinning'**
+  String get workoutActivitySpinning;
+
+  /// No description provided for @workoutActivitySurfing.
+  ///
+  /// In it, this message translates to:
+  /// **'Surf'**
+  String get workoutActivitySurfing;
+
+  /// No description provided for @workoutActivitySwimming.
+  ///
+  /// In it, this message translates to:
+  /// **'Nuoto'**
+  String get workoutActivitySwimming;
+
+  /// No description provided for @workoutActivityTennis.
+  ///
+  /// In it, this message translates to:
+  /// **'Tennis'**
+  String get workoutActivityTennis;
+
+  /// No description provided for @workoutActivityTreadmill.
+  ///
+  /// In it, this message translates to:
+  /// **'Tapis roulant'**
+  String get workoutActivityTreadmill;
+
+  /// No description provided for @workoutActivityTrekking.
+  ///
+  /// In it, this message translates to:
+  /// **'Trekking'**
+  String get workoutActivityTrekking;
+
+  /// No description provided for @workoutActivityVolleyball.
+  ///
+  /// In it, this message translates to:
+  /// **'Pallavolo'**
+  String get workoutActivityVolleyball;
+
+  /// No description provided for @workoutActivityWalking.
+  ///
+  /// In it, this message translates to:
+  /// **'Camminata'**
+  String get workoutActivityWalking;
+
+  /// No description provided for @workoutActivityYoga.
+  ///
+  /// In it, this message translates to:
+  /// **'Yoga'**
+  String get workoutActivityYoga;
+
   /// No description provided for @workoutActivityType.
   ///
   /// In it, this message translates to:

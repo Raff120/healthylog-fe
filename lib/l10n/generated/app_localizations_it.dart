@@ -2275,6 +2275,99 @@ class L10nIt extends L10n {
   String get weekdayWednesday => 'Mercoledì';
 
   @override
+  String get workoutActivityBasketball => 'Basket';
+
+  @override
+  String get workoutActivityBoxing => 'Boxe';
+
+  @override
+  String get workoutActivityCalisthenics => 'Calisthenics';
+
+  @override
+  String get workoutActivityClimbing => 'Arrampicata';
+
+  @override
+  String get workoutActivityCrossfit => 'Crossfit';
+
+  @override
+  String get workoutActivityCycling => 'Bicicletta';
+
+  @override
+  String get workoutActivityDance => 'Danza';
+
+  @override
+  String get workoutActivityGolf => 'Golf';
+
+  @override
+  String get workoutActivityGym => 'Sala pesi';
+
+  @override
+  String get workoutActivityHockey => 'Hockey';
+
+  @override
+  String get workoutActivityHorseRiding => 'Equitazione';
+
+  @override
+  String get workoutActivityMartialArts => 'Arti marziali';
+
+  @override
+  String get workoutActivityOther => 'Altro';
+
+  @override
+  String get workoutActivityPadel => 'Padel';
+
+  @override
+  String get workoutActivityPilates => 'Pilates';
+
+  @override
+  String get workoutActivityRowing => 'Canottaggio';
+
+  @override
+  String get workoutActivityRugby => 'Rugby';
+
+  @override
+  String get workoutActivityRunning => 'Corsa';
+
+  @override
+  String get workoutActivitySkating => 'Pattinaggio';
+
+  @override
+  String get workoutActivitySkiing => 'Sci';
+
+  @override
+  String get workoutActivitySnowboard => 'Snowboard';
+
+  @override
+  String get workoutActivitySoccer => 'Calcio';
+
+  @override
+  String get workoutActivitySpinning => 'Spinning';
+
+  @override
+  String get workoutActivitySurfing => 'Surf';
+
+  @override
+  String get workoutActivitySwimming => 'Nuoto';
+
+  @override
+  String get workoutActivityTennis => 'Tennis';
+
+  @override
+  String get workoutActivityTreadmill => 'Tapis roulant';
+
+  @override
+  String get workoutActivityTrekking => 'Trekking';
+
+  @override
+  String get workoutActivityVolleyball => 'Pallavolo';
+
+  @override
+  String get workoutActivityWalking => 'Camminata';
+
+  @override
+  String get workoutActivityYoga => 'Yoga';
+
+  @override
   String get workoutActivityType => 'Tipo di attività';
 
   @override
