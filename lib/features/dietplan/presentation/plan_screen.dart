@@ -31,6 +31,7 @@ import 'widgets/plan_status_banner.dart';
 import 'widgets/segmented_view_control.dart';
 import 'widgets/week_selector.dart';
 import 'widgets/weekly_view.dart';
+import '../../../app/navigation/bottom_bar_insets.dart';
 
 /// *Piano* (6.1 interfaccia.md; VG-1..VG-4, VS-1): schermata principale
 /// dell'applicazione, destinazione di *Piano* nella barra di
@@ -107,7 +108,9 @@ class PlanScreen extends ConsumerWidget {
                 ),
               ],
       ),
+      // 3.2: il contenuto scorre sotto la barra fluttuante.
       body: SafeArea(
+        bottom: false,
         child: AnimatedSwitcher(
           duration: AppSpacing.motionScreenTransition,
           transitionBuilder: (child, animation) => SlideTransition(
@@ -435,11 +438,11 @@ class _SlotsOrEmpty extends StatelessWidget {
     // VG-3: nell'ordinamento definito dal piano — già garantito dal
     // backend (GG-8), nessun riordino qui.
     return ListView.separated(
-      padding: const EdgeInsets.fromLTRB(
+      padding: EdgeInsets.fromLTRB(
         AppSpacing.md,
         AppSpacing.sm,
         AppSpacing.md,
-        AppSpacing.xxl,
+        AppSpacing.xxl + bottomBarInset(context),
       ),
       itemCount: slots.length,
       separatorBuilder: (context, index) =>

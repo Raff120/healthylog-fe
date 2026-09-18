@@ -14,6 +14,30 @@ class AppPalette {
   static const Color accentPressedDark = Color(0xFF93B8D8);
   static const Color accentSubtleDark = Color(0xFF243440);
 
+  // Superficie della barra di navigazione fluttuante (3.2 interfaccia.md),
+  // distinta da quella delle card che le scorrono sotto — nessun neutro
+  // chiaro bastava a separarla dal bianco senza farne una fascia grigia
+  // (vedi decisioni.md).
+  //
+  // Nel tema chiaro è l'accento: la barra è l'unico elemento persistente
+  // dell'applicazione, e portarne il colore la distingue da tutto ciò che
+  // le passa sotto senza aggiungere un neutro alla tavolozza. Nel tema
+  // scuro resta un neutro più chiaro del fondo, che è come 2.4 prescrive
+  // di separare là dove l'ombra non funziona.
+  static const Color surfaceFloatingLight = accentLight;
+  static const Color surfaceFloatingDark = Color(0xFF32302C);
+  static const Color shadowFloatingLight = Color(0x38000000);
+  static const Color shadowFloatingDark = Color(0x00000000);
+
+  // Voci della barra sulla propria superficie: attiva e inattiva. Sul
+  // colore d'accento la distinzione è fra il bianco pieno e il bianco
+  // attenuato; sul neutro scuro resta quella di 3.2, accento e colore
+  // secondario del testo.
+  static const Color onSurfaceFloatingLight = Color(0xFFFFFFFF);
+  static const Color onSurfaceFloatingMutedLight = Color(0xBCFFFFFF);
+  static const Color onSurfaceFloatingDark = accentDark;
+  static const Color onSurfaceFloatingMutedDark = textSecondaryDark;
+
   // Neutri — tema chiaro.
   static const Color backgroundLight = Color(0xFFFAF9F7);
   static const Color surfaceLight = Color(0xFFFFFFFF);

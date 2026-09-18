@@ -10,6 +10,7 @@ import 'statistics_formatting.dart';
 import 'widgets/breakdown_row.dart';
 import 'widgets/statistics_headline.dart';
 import 'widgets/weekly_bar_chart.dart';
+import '../../../app/navigation/bottom_bar_insets.dart';
 
 /// Segmento **Allenamenti** di *Statistiche* (11.2 interfaccia.md):
 /// numero di sessioni, confronto con l'obiettivo, confronto con la
@@ -36,7 +37,12 @@ class WorkoutStatisticsView extends ConsumerWidget {
     final maxByType = statistics.byActivityType.isEmpty ? 1 : statistics.byActivityType.first.count;
 
     return ListView(
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.xs),
+      padding: EdgeInsets.fromLTRB(
+        AppSpacing.md,
+        AppSpacing.xs,
+        AppSpacing.md,
+        AppSpacing.xs + bottomBarInset(context),
+      ),
       children: [
         StatisticsHeadline(
           value: '${statistics.total}',

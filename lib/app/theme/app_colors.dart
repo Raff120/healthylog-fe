@@ -9,6 +9,10 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.background,
     required this.surface,
     required this.surfaceAlt,
+    required this.surfaceFloating,
+    required this.onSurfaceFloating,
+    required this.onSurfaceFloatingMuted,
+    required this.shadowFloating,
     required this.dividerLight,
     required this.dividerStrong,
     required this.textPrimary,
@@ -27,6 +31,21 @@ class AppColors extends ThemeExtension<AppColors> {
   final Color background;
   final Color surface;
   final Color surfaceAlt;
+
+  /// 3.2 interfaccia.md: la superficie della barra di navigazione
+  /// fluttuante, distinta da quella delle card che le scorrono sotto.
+  final Color surfaceFloating;
+
+  /// 3.2: la voce attiva della barra fluttuante, sulla sua superficie.
+  final Color onSurfaceFloating;
+
+  /// 3.2: la voce inattiva — e quella non ancora abilitata (2.6), che sulla
+  /// superficie della barra non avrebbe contrasto nel colore terziario.
+  final Color onSurfaceFloatingMuted;
+
+  /// 2.4: l'ombra di ciò che fluttua, ampia e tenue. Nel tema scuro è
+  /// trasparente — là la separazione si affida al colore di superficie.
+  final Color shadowFloating;
   final Color dividerLight;
   final Color dividerStrong;
   final Color textPrimary;
@@ -45,6 +64,10 @@ class AppColors extends ThemeExtension<AppColors> {
     background: AppPalette.backgroundLight,
     surface: AppPalette.surfaceLight,
     surfaceAlt: AppPalette.surfaceAltLight,
+    surfaceFloating: AppPalette.surfaceFloatingLight,
+    onSurfaceFloating: AppPalette.onSurfaceFloatingLight,
+    onSurfaceFloatingMuted: AppPalette.onSurfaceFloatingMutedLight,
+    shadowFloating: AppPalette.shadowFloatingLight,
     dividerLight: AppPalette.dividerLightOnLight,
     dividerStrong: AppPalette.dividerStrongOnLight,
     textPrimary: AppPalette.textPrimaryLight,
@@ -64,6 +87,10 @@ class AppColors extends ThemeExtension<AppColors> {
     background: AppPalette.backgroundDark,
     surface: AppPalette.surfaceDark,
     surfaceAlt: AppPalette.surfaceAltDark,
+    surfaceFloating: AppPalette.surfaceFloatingDark,
+    onSurfaceFloating: AppPalette.onSurfaceFloatingDark,
+    onSurfaceFloatingMuted: AppPalette.onSurfaceFloatingMutedDark,
+    shadowFloating: AppPalette.shadowFloatingDark,
     dividerLight: AppPalette.dividerLightOnDark,
     dividerStrong: AppPalette.dividerStrongOnDark,
     textPrimary: AppPalette.textPrimaryDark,
@@ -84,6 +111,10 @@ class AppColors extends ThemeExtension<AppColors> {
     Color? background,
     Color? surface,
     Color? surfaceAlt,
+    Color? surfaceFloating,
+    Color? onSurfaceFloating,
+    Color? onSurfaceFloatingMuted,
+    Color? shadowFloating,
     Color? dividerLight,
     Color? dividerStrong,
     Color? textPrimary,
@@ -102,6 +133,10 @@ class AppColors extends ThemeExtension<AppColors> {
       background: background ?? this.background,
       surface: surface ?? this.surface,
       surfaceAlt: surfaceAlt ?? this.surfaceAlt,
+      surfaceFloating: surfaceFloating ?? this.surfaceFloating,
+      onSurfaceFloating: onSurfaceFloating ?? this.onSurfaceFloating,
+      onSurfaceFloatingMuted: onSurfaceFloatingMuted ?? this.onSurfaceFloatingMuted,
+      shadowFloating: shadowFloating ?? this.shadowFloating,
       dividerLight: dividerLight ?? this.dividerLight,
       dividerStrong: dividerStrong ?? this.dividerStrong,
       textPrimary: textPrimary ?? this.textPrimary,
@@ -125,6 +160,11 @@ class AppColors extends ThemeExtension<AppColors> {
       background: Color.lerp(background, other.background, t)!,
       surface: Color.lerp(surface, other.surface, t)!,
       surfaceAlt: Color.lerp(surfaceAlt, other.surfaceAlt, t)!,
+      surfaceFloating: Color.lerp(surfaceFloating, other.surfaceFloating, t)!,
+      onSurfaceFloating: Color.lerp(onSurfaceFloating, other.onSurfaceFloating, t)!,
+      onSurfaceFloatingMuted:
+          Color.lerp(onSurfaceFloatingMuted, other.onSurfaceFloatingMuted, t)!,
+      shadowFloating: Color.lerp(shadowFloating, other.shadowFloating, t)!,
       dividerLight: Color.lerp(dividerLight, other.dividerLight, t)!,
       dividerStrong: Color.lerp(dividerStrong, other.dividerStrong, t)!,
       textPrimary: Color.lerp(textPrimary, other.textPrimary, t)!,

@@ -14,6 +14,7 @@ import 'statistics_formatting.dart';
 import 'widgets/breakdown_row.dart';
 import 'widgets/statistics_headline.dart';
 import 'widgets/weekly_bar_chart.dart';
+import '../../../app/navigation/bottom_bar_insets.dart';
 
 /// Segmento **Aderenza** di *Statistiche* (11.1 interfaccia.md): valore
 /// complessivo, andamento settimanale, disaggregazione per tipo di pasto e
@@ -41,7 +42,12 @@ class AdherenceView extends ConsumerWidget {
     final excluded = describeExcludedDays(context, statistics.suspendedDays, statistics.uncoveredDays);
 
     return ListView(
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.xs),
+      padding: EdgeInsets.fromLTRB(
+        AppSpacing.md,
+        AppSpacing.xs,
+        AppSpacing.md,
+        AppSpacing.xs + bottomBarInset(context),
+      ),
       children: [
         // ST-10: sul piano con più periodi, l'alternanza fra il calcolo
         // complessivo e quello per singolo periodo — i due dati non sono
