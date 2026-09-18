@@ -5,6 +5,8 @@ import '../../../../app/theme/app_spacing.dart';
 import '../../../../app/theme/theme_context.dart';
 import '../../../../l10n/l10n_context.dart';
 import '../../../dietplan/presentation/slot_type_presentation.dart';
+import '../../../hydration/presentation/hydration_formatting.dart';
+import '../../../hydration/providers/hydration_providers.dart';
 import '../../../statistics/data/statistics_models.dart';
 import '../../../statistics/presentation/statistics_formatting.dart';
 import '../../../identity/providers/profile_providers.dart';
@@ -51,6 +53,7 @@ class PatientStatisticsSection extends ConsumerWidget {
         const SizedBox(height: AppSpacing.xs),
         _Adherence(query: query),
         _Workouts(query: query),
+        _Water(query: query),
         _Body(query: query),
       ],
     );
@@ -130,6 +133,58 @@ class _Workouts extends ConsumerWidget {
           if (data.planned > 0)
             Text(
               context.l10n.workoutStatsPlanProgress(data.planned, data.plannedDone),
+              style: typography.bodyMedium.copyWith(color: colors.textSecondary),
+            ),
+          const SizedBox(height: AppSpacing.md),
+          Divider(height: 1, color: colors.dividerLight),
+        ],
+      ),
+    );
+  }
+}
+
+/// AQ-14, AQ-31: il consumo d'acqua del Paziente e l'obiettivo che si è
+/// dato, in sola lettura e nei limiti della circoscrizione — le giornate
+/// fuori dai periodi di titolarità non sono restituite e non si
+/// distinguono da quelle in cui nulla è stato bevuto (CS-13).
+///
+/// AQ-13: nulla qui consente di impostare o proporre un obiettivo. È
+/// elemento di contesto nella valutazione dell'andamento (NU-4), come
+/// l'obiettivo settimanale di allenamento.
+class _Water extends ConsumerWidget {
+  const _Water({required this.query});
+
+  final StatisticsQuery query;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final colors = context.colors;
+    final typography = context.typography;
+    final units = ref.watch(unitSystemProvider);
+    final statistics = ref.watch(waterStatisticsProvider(query));
+
+    return statistics.maybeWhen(
+      orElse: () => const SizedBox.shrink(),
+      data: (data) => Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const SizedBox(height: AppSpacing.md),
+          Text(
+            data.isEmpty
+                // 9.2: l'interruzione non è spiegata oltre — la ragione
+                // attiene a piani che il Nutrizionista non deve conoscere.
+                ? context.l10n.statisticsNoDataForPeriod
+                : context.l10n.waterAveragePerDay(formatVolume(context, data.averageMl!, units)),
+            style: typography.bodyLarge.copyWith(
+              color: data.isEmpty ? colors.textSecondary : colors.textPrimary,
+            ),
+          ),
+          // AQ-11, AQ-26: l'obiettivo compare se in quelle giornate ve
+          // n'era uno e se ricadono nei periodi di titolarità; altrimenti
+          // nulla, senza segnalarne la mancanza.
+          if (data.referenceGoalMl case final goal?)
+            Text(
+              context.l10n.waterGoalReference(formatVolume(context, goal, units)),
               style: typography.bodyMedium.copyWith(color: colors.textSecondary),
             ),
           const SizedBox(height: AppSpacing.md),
