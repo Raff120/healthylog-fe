@@ -14,6 +14,15 @@ class AppPalette {
   static const Color accentPressedDark = Color(0xFF93B8D8);
   static const Color accentSubtleDark = Color(0xFF243440);
 
+  // Superficie della barra di navigazione fluttuante (3.2 interfaccia.md).
+  // Distinta da quella delle card, che le scorrono sotto: nel tema chiaro
+  // coincide con la superficie e se ne stacca con l'ombra, che là funziona;
+  // nel tema scuro è più chiara, perché l'ombra no (2.4).
+  static const Color surfaceFloatingLight = Color(0xFFFFFFFF);
+  static const Color surfaceFloatingDark = Color(0xFF32302C);
+  static const Color shadowFloatingLight = Color(0x38000000);
+  static const Color shadowFloatingDark = Color(0x00000000);
+
   // Neutri — tema chiaro.
   static const Color backgroundLight = Color(0xFFFAF9F7);
   static const Color surfaceLight = Color(0xFFFFFFFF);

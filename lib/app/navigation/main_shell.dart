@@ -142,14 +142,17 @@ class _BottomBarScaffold extends StatelessWidget {
           ),
           child: Material(
             key: const ValueKey('bottomNavBar'),
-            color: colors.surface,
-            // 2.4: nessuna ombra. La forma e lo spazio che le resta
-            // intorno dicono già che la barra sta sopra; la separazione si
-            // affida al colore di superficie e al bordo, come ovunque
-            // nell'applicazione — e nel tema scuro l'ombra non funziona
-            // comunque.
-            elevation: 0,
-            surfaceTintColor: colors.surface,
+            // 2.4, 3.2: la barra ha una superficie propria, distinta da
+            // quella delle card che le scorrono sotto — altrimenti, dove
+            // una card le passa dietro, i due piani si confondono
+            // (segnalato dall'utente, vedi decisioni.md). Nel tema chiaro
+            // se ne stacca con l'ombra, ampia e tenue; nel tema scuro con
+            // il colore, più chiaro del fondo, che è il modo in cui 2.4
+            // prescrive di separare là dove l'ombra non funziona.
+            color: colors.surfaceFloating,
+            elevation: AppSpacing.elevationFloating,
+            shadowColor: colors.shadowFloating,
+            surfaceTintColor: colors.surfaceFloating,
             shape: StadiumBorder(side: BorderSide(color: colors.dividerStrong)),
             clipBehavior: Clip.antiAlias,
             child: SizedBox(

@@ -40,6 +40,10 @@ class AppSpacing {
   static const double heightScreenHeader = 56;
   static const double heightOfflineBar = 32;
 
+  // Elevazione di ciò che fluttua (2.4 interfaccia.md): ombra ampia e
+  // tenue, non stretta e netta. Il colore che la rende tale è del tema.
+  static const double elevationFloating = 8;
+
   // Larghezza massima del contenuto.
   static const double maxWidthSingleColumn = 720;
   static const double maxWidthWide = 1280;
