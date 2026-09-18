@@ -16,11 +16,12 @@ class AppPalette {
 
   // Superficie della barra di navigazione fluttuante (3.2 interfaccia.md).
   // Distinta da quella delle card, che le scorrono sotto, in entrambi i
-  // temi: nel tema chiaro più scura — sopra il bianco delle card non c'è
-  // nulla di più chiaro, e la sola ombra non basta a separarle —, nel tema
-  // scuro più chiara, che è come 2.4 prescrive di separare là dove l'ombra
-  // non funziona.
-  static const Color surfaceFloatingLight = Color(0xFFEFEDE7);
+  // temi: nel tema chiaro di poco più scura — sopra il bianco delle card
+  // non c'è nulla di più chiaro, e la sola ombra non basta a separarle —,
+  // nel tema scuro più chiara, che è come 2.4 prescrive di separare là dove
+  // l'ombra non funziona. Nel tema chiaro lo scarto è il minimo che basti a
+  // distinguerla: la barra resta chiara, non diventa una fascia grigia.
+  static const Color surfaceFloatingLight = Color(0xFFF7F5F0);
   static const Color surfaceFloatingDark = Color(0xFF32302C);
   static const Color shadowFloatingLight = Color(0x38000000);
   static const Color shadowFloatingDark = Color(0x00000000);
