@@ -241,4 +241,40 @@ void main() {
     expect(find.text('Registra un allenamento'), findsOneWidget);
     expect(find.text('Registra una misurazione'), findsNothing);
   });
+  /// AL-2, VR-10: gli allenamenti registrati prima dell'elenco degli sport
+  /// sono privi del codice. Continuano a presentarsi con la denominazione
+  /// allora registrata, sotto l'icona di *Altro*: nessun dato è perduto e
+  /// nessuno è reinventato.
+  testWidgets('conserva la denominazione degli allenamenti privi di codice (VR-10)',
+      (tester) async {
+    await _pumpActivity(tester, workouts: [
+      _workout(id: 'w-1', date: DateTime.now(), activityType: 'Palestra in centro'),
+    ]);
+
+    expect(find.text('Palestra in centro'), findsOneWidget);
+    expect(find.byIcon(Icons.more_horiz_outlined), findsOneWidget);
+  });
+
+  /// RA-12: l'attività denominata dall'Utente non ha un codice proprio —
+  /// si circoscrive con Altro e il suo nome insieme, altrimenti il filtro
+  /// raccoglierebbe ogni attività fuori elenco.
+  testWidgets('il filtro su un\'attività denominata invia codice e nome (RA-12, AL-2)',
+      (tester) async {
+    final today = DateTime.now();
+    final adapter = await _pumpActivity(tester, workouts: [
+      _workout(id: 'w-1', date: today, activityType: 'Bocce', activityCode: 'OTHER'),
+      _workout(id: 'w-2', date: today, activityType: 'Tennis', activityCode: 'TENNIS'),
+    ]);
+
+    await tester.tap(find.byIcon(Icons.filter_list));
+    await tester.pumpAndSettle();
+    await tester.tap(find.widgetWithText(FilterChip, 'Bocce'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.widgetWithText(ElevatedButton, 'Applica'));
+    await tester.pumpAndSettle();
+
+    expect(adapter.listQueries.last['activityCode'], 'OTHER');
+    expect(adapter.listQueries.last['activityType'], 'Bocce');
+  });
+
 }
