@@ -23,9 +23,11 @@ import 'package:healthylog/features/group/providers/cooking_group_providers.dart
 import 'package:healthylog/features/identity/data/profile_api.dart';
 import 'package:healthylog/features/identity/providers/profile_providers.dart';
 import 'package:healthylog/features/notification/providers/notification_providers.dart';
+import 'package:healthylog/features/hydration/providers/hydration_providers.dart';
 import 'package:healthylog/features/workout/providers/workout_providers.dart';
 
 import '../../../support/care_api_stub.dart';
+import '../../../support/hydration_api_stub.dart';
 import '../../../support/workout_api_stub.dart';
 import '../../../support/slot_items_json.dart';
 
@@ -397,6 +399,7 @@ Future<void> _pumpDailyView(
         // di ogni destinazione principale (3.1).
         notificationApiProvider.overrideWithValue(stubNotificationApi()),
         workoutApiProvider.overrideWithValue(stubWorkoutApi()),
+        hydrationApiProvider.overrideWithValue(stubHydrationApi()),
         planDayApiProvider.overrideWithValue(PlanDayApi(dio)),
         cookingGroupApiProvider.overrideWithValue(_noGroupCookingGroupApi()),
         appDatabaseProvider.overrideWithValue(
@@ -433,6 +436,7 @@ Future<void> _pumpDailyViewWithOwnedPlans(
         // di ogni destinazione principale (3.1).
         notificationApiProvider.overrideWithValue(stubNotificationApi()),
         workoutApiProvider.overrideWithValue(stubWorkoutApi()),
+        hydrationApiProvider.overrideWithValue(stubHydrationApi()),
         planDayApiProvider.overrideWithValue(PlanDayApi(dio)),
         cookingGroupApiProvider.overrideWithValue(_noGroupCookingGroupApi()),
         dietPlanApiProvider.overrideWithValue(ownedPlansApi),
@@ -551,6 +555,7 @@ Future<_MemberAwareAdapter> _pumpWithGroup(
         // di ogni destinazione principale (3.1).
         notificationApiProvider.overrideWithValue(stubNotificationApi()),
         workoutApiProvider.overrideWithValue(stubWorkoutApi()),
+        hydrationApiProvider.overrideWithValue(stubHydrationApi()),
         planDayApiProvider.overrideWithValue(PlanDayApi(planDayDio)),
         profileApiProvider.overrideWithValue(ProfileApi(profileDio)),
         cookingGroupApiProvider.overrideWithValue(CookingGroupApi(groupDio)),
@@ -637,6 +642,7 @@ void main() {
         // di ogni destinazione principale (3.1).
         notificationApiProvider.overrideWithValue(stubNotificationApi()),
         workoutApiProvider.overrideWithValue(stubWorkoutApi()),
+        hydrationApiProvider.overrideWithValue(stubHydrationApi()),
             planDayApiProvider.overrideWithValue(PlanDayApi(dio)),
             cookingGroupApiProvider.overrideWithValue(_noGroupCookingGroupApi()),
             appDatabaseProvider.overrideWithValue(
@@ -698,6 +704,7 @@ void main() {
         // di ogni destinazione principale (3.1).
         notificationApiProvider.overrideWithValue(stubNotificationApi()),
         workoutApiProvider.overrideWithValue(stubWorkoutApi()),
+        hydrationApiProvider.overrideWithValue(stubHydrationApi()),
             planDayApiProvider.overrideWithValue(PlanDayApi(dio)),
             cookingGroupApiProvider.overrideWithValue(_noGroupCookingGroupApi()),
             appDatabaseProvider.overrideWithValue(
@@ -766,6 +773,7 @@ void main() {
             careApiProvider.overrideWithValue(stubCareApi()),
             notificationApiProvider.overrideWithValue(stubNotificationApi()),
             workoutApiProvider.overrideWithValue(stubWorkoutApi()),
+            hydrationApiProvider.overrideWithValue(stubHydrationApi()),
             planDayApiProvider.overrideWithValue(PlanDayApi(dio)),
             cookingGroupApiProvider.overrideWithValue(_noGroupCookingGroupApi()),
             appDatabaseProvider.overrideWithValue(
@@ -838,6 +846,7 @@ void main() {
         // di ogni destinazione principale (3.1).
         notificationApiProvider.overrideWithValue(stubNotificationApi()),
         workoutApiProvider.overrideWithValue(stubWorkoutApi()),
+        hydrationApiProvider.overrideWithValue(stubHydrationApi()),
             planDayApiProvider.overrideWithValue(PlanDayApi(dio)),
             cookingGroupApiProvider.overrideWithValue(_noGroupCookingGroupApi()),
             appDatabaseProvider.overrideWithValue(
@@ -894,6 +903,7 @@ void main() {
         // di ogni destinazione principale (3.1).
         notificationApiProvider.overrideWithValue(stubNotificationApi()),
         workoutApiProvider.overrideWithValue(stubWorkoutApi()),
+        hydrationApiProvider.overrideWithValue(stubHydrationApi()),
             planDayApiProvider.overrideWithValue(PlanDayApi(dio)),
             cookingGroupApiProvider.overrideWithValue(_noGroupCookingGroupApi()),
             appDatabaseProvider.overrideWithValue(
@@ -1029,6 +1039,7 @@ void main() {
         // di ogni destinazione principale (3.1).
         notificationApiProvider.overrideWithValue(stubNotificationApi()),
         workoutApiProvider.overrideWithValue(stubWorkoutApi()),
+        hydrationApiProvider.overrideWithValue(stubHydrationApi()),
             planDayApiProvider.overrideWithValue(PlanDayApi(planDayDio)),
             cookingGroupApiProvider.overrideWithValue(_noGroupCookingGroupApi()),
             dietPlanApiProvider.overrideWithValue(DietPlanApi(dietPlanDio)),
@@ -1146,6 +1157,7 @@ void main() {
         // di ogni destinazione principale (3.1).
         notificationApiProvider.overrideWithValue(stubNotificationApi()),
         workoutApiProvider.overrideWithValue(stubWorkoutApi()),
+        hydrationApiProvider.overrideWithValue(stubHydrationApi()),
             planDayApiProvider.overrideWithValue(PlanDayApi(dio)),
             cookingGroupApiProvider.overrideWithValue(_noGroupCookingGroupApi()),
             appDatabaseProvider.overrideWithValue(AppDatabase(NativeDatabase.memory())),

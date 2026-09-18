@@ -32,41 +32,47 @@ class EmptyStateView extends StatelessWidget {
     final colors = context.colors;
     final typography = context.typography;
 
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.xxl),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(icon, size: 48, color: colors.textTertiary),
-            const SizedBox(height: AppSpacing.md),
-            Text(
-              title,
-              style: typography.titleMedium.copyWith(color: colors.textPrimary),
-              textAlign: TextAlign.center,
-            ),
-            if (text != null) ...[
-              const SizedBox(height: AppSpacing.xs),
+    // Lo stato vuoto divide l'altezza della giornata con le sezioni che lo
+    // sovrastano — allenamenti e acqua (AL-12, AQ-16): su schermo basso, o
+    // in orizzontale, il blocco centrato non vi entrerebbe. Scorre allora
+    // anziché traboccare, e resta centrato dove lo spazio basta.
+    return SingleChildScrollView(
+      child: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(AppSpacing.xxl),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon, size: 48, color: colors.textTertiary),
+              const SizedBox(height: AppSpacing.md),
               Text(
-                text!,
-                style: typography.bodyMedium.copyWith(
-                  color: colors.textSecondary,
-                ),
+                title,
+                style: typography.titleMedium.copyWith(color: colors.textPrimary),
                 textAlign: TextAlign.center,
               ),
-            ],
-            if (actionLabel != null && onAction != null) ...[
-              const SizedBox(height: AppSpacing.lg),
-              SizedBox(
-                width: 200,
-                child: AppPrimaryButton(
-                  label: actionLabel!,
-                  onPressed: onAction,
-                  loading: actionLoading,
+              if (text != null) ...[
+                const SizedBox(height: AppSpacing.xs),
+                Text(
+                  text!,
+                  style: typography.bodyMedium.copyWith(
+                    color: colors.textSecondary,
+                  ),
+                  textAlign: TextAlign.center,
                 ),
-              ),
+              ],
+              if (actionLabel != null && onAction != null) ...[
+                const SizedBox(height: AppSpacing.lg),
+                SizedBox(
+                  width: 200,
+                  child: AppPrimaryButton(
+                    label: actionLabel!,
+                    onPressed: onAction,
+                    loading: actionLoading,
+                  ),
+                ),
+              ],
             ],
-          ],
+          ),
         ),
       ),
     );

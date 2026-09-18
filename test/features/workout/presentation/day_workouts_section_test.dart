@@ -19,9 +19,11 @@ import 'package:healthylog/features/dietplan/providers/plan_day_providers.dart';
 import 'package:healthylog/features/group/data/cooking_group_api.dart';
 import 'package:healthylog/features/group/providers/cooking_group_providers.dart';
 import 'package:healthylog/features/notification/providers/notification_providers.dart';
+import 'package:healthylog/features/hydration/providers/hydration_providers.dart';
 import 'package:healthylog/features/workout/providers/workout_providers.dart';
 
 import '../../../support/care_api_stub.dart';
+import '../../../support/hydration_api_stub.dart';
 import '../../../support/workout_api_stub.dart';
 import '../../../support/slot_items_json.dart';
 
@@ -122,6 +124,7 @@ Future<void> _pump(
         notificationApiProvider.overrideWithValue(stubNotificationApi()),
         workoutApiProvider
             .overrideWithValue(stubWorkoutApi(planned: planned, workouts: workouts)),
+        hydrationApiProvider.overrideWithValue(stubHydrationApi()),
         planDayApiProvider.overrideWithValue(PlanDayApi(planDayDio)),
         cookingGroupApiProvider.overrideWithValue(CookingGroupApi(groupDio)),
         appDatabaseProvider.overrideWithValue(AppDatabase(NativeDatabase.memory())),
@@ -183,13 +186,17 @@ void main() {
     expect(find.text('Corsa'), findsOneWidget);
   });
 
-  testWidgets('non presenta alcun pulsante mobile in *Piano* (10.2, vedi decisioni.md)',
+  testWidgets('non presenta alcun pulsante mobile dell\'allenamento in *Piano* (10.2, vedi decisioni.md)',
       (tester) async {
     await _pump(tester);
 
     // La registrazione libera di un allenamento si compie dalla
     // destinazione *Allenamenti*: in *Piano* il pulsante mobile veniva
-    // letto come "aggiungi un piano alimentare".
-    expect(find.byType(FloatingActionButton), findsNothing);
+    // letto come "aggiungi un piano alimentare". Il solo pulsante mobile
+    // ammesso è quello dell'acqua (AQ-17bis), che reca la goccia e non
+    // un «+», e non incorre in quella ambiguità.
+    expect(find.byType(FloatingActionButton), findsOneWidget);
+    expect(find.byIcon(Icons.water_drop_outlined), findsOneWidget);
+    expect(find.byIcon(Icons.add), findsNothing);
   });
 }

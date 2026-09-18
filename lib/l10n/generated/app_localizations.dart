@@ -3865,6 +3865,114 @@ abstract class L10n {
   /// **'Mercoledì'**
   String get weekdayWednesday;
 
+  /// No description provided for @unitFluidOunces.
+  ///
+  /// In it, this message translates to:
+  /// **'fl oz'**
+  String get unitFluidOunces;
+
+  /// No description provided for @unitLitres.
+  ///
+  /// In it, this message translates to:
+  /// **'L'**
+  String get unitLitres;
+
+  /// No description provided for @waterAddCustom.
+  ///
+  /// In it, this message translates to:
+  /// **'Altra quantità'**
+  String get waterAddCustom;
+
+  /// No description provided for @waterAddTooltip.
+  ///
+  /// In it, this message translates to:
+  /// **'Segna l’acqua bevuta'**
+  String get waterAddTooltip;
+
+  /// No description provided for @waterAmountBottle.
+  ///
+  /// In it, this message translates to:
+  /// **'Bottiglia'**
+  String get waterAmountBottle;
+
+  /// No description provided for @waterAmountGlass.
+  ///
+  /// In it, this message translates to:
+  /// **'Bicchiere'**
+  String get waterAmountGlass;
+
+  /// No description provided for @waterAmountSmallBottle.
+  ///
+  /// In it, this message translates to:
+  /// **'Bottiglietta'**
+  String get waterAmountSmallBottle;
+
+  /// No description provided for @waterSectionTitle.
+  ///
+  /// In it, this message translates to:
+  /// **'ACQUA'**
+  String get waterSectionTitle;
+
+  /// No description provided for @waterCustomAmount.
+  ///
+  /// In it, this message translates to:
+  /// **'Quantità'**
+  String get waterCustomAmount;
+
+  /// No description provided for @waterCustomTitle.
+  ///
+  /// In it, this message translates to:
+  /// **'Aggiungi acqua'**
+  String get waterCustomTitle;
+
+  /// No description provided for @waterEntriesOpen.
+  ///
+  /// In it, this message translates to:
+  /// **'Aggiunte'**
+  String get waterEntriesOpen;
+
+  /// No description provided for @waterEntriesTitle.
+  ///
+  /// In it, this message translates to:
+  /// **'Aggiunte del periodo'**
+  String get waterEntriesTitle;
+
+  /// No description provided for @waterGoalHelp.
+  ///
+  /// In it, this message translates to:
+  /// **'Comparirà nelle statistiche come riferimento dell’acqua bevuta.'**
+  String get waterGoalHelp;
+
+  /// No description provided for @waterGoalLabel.
+  ///
+  /// In it, this message translates to:
+  /// **'Obiettivo d’acqua'**
+  String get waterGoalLabel;
+
+  /// No description provided for @waterGoalReference.
+  ///
+  /// In it, this message translates to:
+  /// **'Obiettivo {value}'**
+  String waterGoalReference(String value);
+
+  /// No description provided for @waterNoEntries.
+  ///
+  /// In it, this message translates to:
+  /// **'Nessuna aggiunta registrata'**
+  String get waterNoEntries;
+
+  /// No description provided for @waterRemoveEntry.
+  ///
+  /// In it, this message translates to:
+  /// **'Rimuovi questa aggiunta'**
+  String get waterRemoveEntry;
+
+  /// No description provided for @waterTitle.
+  ///
+  /// In it, this message translates to:
+  /// **'Acqua'**
+  String get waterTitle;
+
   /// No description provided for @workoutActivityBasketball.
   ///
   /// In it, this message translates to:

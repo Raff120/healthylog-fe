@@ -27,12 +27,14 @@ import 'package:healthylog/features/identity/providers/profile_providers.dart';
 import 'package:healthylog/core/storage/preferences_store.dart';
 import 'package:healthylog/features/notification/providers/notification_providers.dart';
 import 'package:healthylog/features/statistics/providers/statistics_providers.dart';
+import 'package:healthylog/features/hydration/providers/hydration_providers.dart';
 import 'package:healthylog/features/workout/providers/workout_providers.dart';
 import 'package:healthylog/main.dart';
 
 import '../support/care_api_stub.dart';
 import '../support/preferences_store_stub.dart';
 import '../support/statistics_api_stub.dart';
+import '../support/hydration_api_stub.dart';
 import '../support/workout_api_stub.dart';
 
 /// Barra di navigazione principale (3.1, 3.2 interfaccia.md), aggiunta
@@ -174,6 +176,7 @@ Future<ProviderContainer> _pumpAuthenticatedApp(
       // di ogni destinazione principale (3.1).
       notificationApiProvider.overrideWithValue(stubNotificationApi()),
         workoutApiProvider.overrideWithValue(stubWorkoutApi()),
+        hydrationApiProvider.overrideWithValue(stubHydrationApi()),
       statisticsApiProvider.overrideWithValue(stubStatisticsApi()),
       // 11.1: il periodo selezionato è conservato tra le sessioni; nella
       // VM di test l'archivio locale è in memoria.
@@ -318,10 +321,44 @@ void main() {
     // 11.1: i tre segmenti dell'intestazione.
     expect(find.text('Aderenza'), findsOneWidget);
     expect(find.text('Corpo'), findsOneWidget);
-    // AD-4: senza slot valutabili la constatazione, non uno zero.
-    expect(find.text('Non ci sono ancora dati'), findsOneWidget);
+    // AD-4: senza slot valutabili la constatazione, non uno zero. Due
+    // volte: una per l'aderenza e una per l'idratazione in coda alla
+    // sezione (AQ-27), che è priva di registrazioni quanto quella.
+    expect(find.text('Non ci sono ancora dati'), findsNWidgets(2));
     // La barra resta: la voce di partenza è ancora raggiungibile.
     expect(find.text('Profilo'), findsOneWidget);
+  });
+
+  /// AQ-16, 3.2: il pulsante dell'acqua sta **sopra** la barra
+  /// fluttuante, non sotto. La barra non appartiene alla schermata ma
+  /// alla navicella che la contiene, e il pulsante che l'ignorasse le
+  /// finirebbe dietro (segnalato dall'utente).
+  testWidgets('il pulsante dell\'acqua sta sopra la barra fluttuante (3.2)', (tester) async {
+    await _pumpAuthenticatedApp(tester, role: 'USER');
+
+    final fab = tester.getRect(find.byType(FloatingActionButton));
+    final bar = tester.getRect(find.byKey(const ValueKey('bottomNavBar')));
+
+    expect(fab.bottom, lessThanOrEqualTo(bar.top),
+        reason: 'il pulsante finisce sotto la barra: fab=$fab barra=$bar');
+  });
+
+  /// La stessa verifica sul pulsante delle misurazioni (11.3), che
+  /// condivide il meccanismo: se lo scostamento fosse letto nel punto
+  /// sbagliato finirebbe dietro la barra allo stesso modo.
+  testWidgets('anche il pulsante delle misurazioni sta sopra la barra (3.2)', (tester) async {
+    await _pumpAuthenticatedApp(tester, role: 'USER');
+
+    await tester.tap(find.text('Statistiche'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Corpo'));
+    await tester.pumpAndSettle();
+
+    final fab = tester.getRect(find.byType(FloatingActionButton));
+    final bar = tester.getRect(find.byKey(const ValueKey('bottomNavBar')));
+
+    expect(fab.bottom, lessThanOrEqualTo(bar.top),
+        reason: 'il pulsante finisce sotto la barra: fab=$fab barra=$bar');
   });
 
   testWidgets('il tocco su Profilo naviga e conserva la barra', (tester) async {
@@ -399,6 +436,7 @@ void main() {
           // di ogni destinazione principale (3.1).
           notificationApiProvider.overrideWithValue(stubNotificationApi()),
         workoutApiProvider.overrideWithValue(stubWorkoutApi()),
+        hydrationApiProvider.overrideWithValue(stubHydrationApi()),
       statisticsApiProvider.overrideWithValue(stubStatisticsApi()),
       // 11.1: il periodo selezionato è conservato tra le sessioni; nella
       // VM di test l'archivio locale è in memoria.

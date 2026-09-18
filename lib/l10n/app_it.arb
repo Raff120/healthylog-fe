@@ -1407,6 +1407,38 @@
   "weekdayThursday": "Giovedì",
   "weekdayTuesday": "Martedì",
   "weekdayWednesday": "Mercoledì",
+  "unitFluidOunces": "fl oz",
+  "unitLitres": "L",
+  "waterAddCustom": "Altra quantità",
+  "waterAddTooltip": "Segna l’acqua bevuta",
+  "waterAmountBottle": "Bottiglia",
+  "waterAmountGlass": "Bicchiere",
+  "waterAmountSmallBottle": "Bottiglietta",
+  "waterSectionTitle": "ACQUA",
+  "waterCustomAmount": "Quantità",
+  "waterCustomTitle": "Aggiungi acqua",
+  "waterEntriesOpen": "Aggiunte",
+  "waterEntriesTitle": "Aggiunte del periodo",
+  "waterGoalHelp": "Comparirà nelle statistiche come riferimento dell’acqua bevuta.",
+  "waterGoalLabel": "Obiettivo d’acqua",
+  "waterGoalReference": "Obiettivo {value}",
+  "@waterGoalReference": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "waterNoEntries": "Nessuna aggiunta registrata",
+  "@waterOfGoal": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "waterRemoveEntry": "Rimuovi questa aggiunta",
+  "waterTitle": "Acqua",
   "workoutActivityBasketball": "Basket",
   "workoutActivityBoxing": "Boxe",
   "workoutActivityCalisthenics": "Calisthenics",

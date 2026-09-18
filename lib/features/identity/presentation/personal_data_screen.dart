@@ -9,7 +9,10 @@ import '../../../core/api/api_exception.dart';
 import '../../../core/widgets/app_primary_button.dart';
 import '../../../core/widgets/app_text_field.dart';
 import '../../../l10n/l10n_context.dart';
+import '../../../l10n/unit_system.dart';
 import '../../../l10n/units.dart';
+import '../../hydration/domain/water_amounts.dart';
+import '../../hydration/providers/hydration_providers.dart';
 import '../data/account_role.dart';
 import '../data/profile_models.dart';
 import '../domain/registration_field_validators.dart';
@@ -37,11 +40,22 @@ class _PersonalDataScreenState extends ConsumerState<PersonalDataScreen> {
   // misurazioni (11.3 interfaccia.md): non è un dato rilevato ma un
   // riferimento che l'Utente si dà.
   final _targetWeight = TextEditingController();
+  // AQ-11: obiettivo giornaliero d'acqua, facoltativo. Sta qui accanto al
+  // peso obiettivo — è un traguardo che ci si dà una volta, non
+  // un'operazione quotidiana — e non nella vista giornaliera, dove la sua
+  // presenza inviterebbe a rincorrerlo (AQ-17, 12.1 interfaccia.md).
+  final _waterGoal = TextEditingController();
 
   DateTime? _birthDate;
   BiologicalSex? _sex;
   bool _submitted = false;
   bool _initialized = false;
+  bool _waterGoalInitialized = false;
+
+  /// AQ-12, DS-21: l'obiettivo viaggia per conto proprio (EP-9) e si
+  /// scrive solo se mutato — una scrittura a vuoto aggiungerebbe alla
+  /// serie datata un elemento che non registra alcun cambiamento.
+  int? _originalWaterGoalMl;
   String _originalUsername = '';
   String _originalEmail = '';
 
@@ -56,6 +70,7 @@ class _PersonalDataScreenState extends ConsumerState<PersonalDataScreen> {
     _birthPlace.dispose();
     _height.dispose();
     _targetWeight.dispose();
+    _waterGoal.dispose();
     super.dispose();
   }
 
@@ -83,6 +98,22 @@ class _PersonalDataScreenState extends ConsumerState<PersonalDataScreen> {
     _sex = profile.sex;
     _originalUsername = profile.username;
     _originalEmail = profile.email;
+  }
+
+  /// L'obiettivo non appartiene al profilo (EP-9) e arriva da una
+  /// lettura propria: si valorizza quando questa si risolve, non con gli
+  /// altri campi.
+  void _initializeWaterGoal(int? goalMl, UnitSystem units) {
+    if (_waterGoalInitialized) return;
+    _waterGoalInitialized = true;
+    _originalWaterGoalMl = goalMl;
+    _waterGoal.text = goalMl == null ? '' : _formatDecimal(volumeToDisplay(goalMl, units));
+  }
+
+  /// LO-7: l'obiettivo torna in millilitri, unità di conservazione.
+  int? _waterGoalValue() {
+    final shown = _shownValue(_waterGoal);
+    return shown == null ? null : volumeToStorage(shown, ref.read(unitSystemProvider));
   }
 
   void _onUsernameChanged(String value) {
@@ -119,6 +150,11 @@ class _PersonalDataScreenState extends ConsumerState<PersonalDataScreen> {
       // PR-9: nessun giudizio sulla congruità del valore, solo la sua
       // leggibilità come numero.
       'targetWeightKg': _targetWeightValue() == null && _targetWeight.text.trim().isNotEmpty
+          ? 'INVALID_FORMAT'
+          : null,
+      // AQ-24: nessun giudizio sulla congruità dell'obiettivo, solo la
+      // sua leggibilità come numero.
+      'waterGoalMl': _waterGoalValue() == null && _waterGoal.text.trim().isNotEmpty
           ? 'INVALID_FORMAT'
           : null,
     };
@@ -195,6 +231,16 @@ class _PersonalDataScreenState extends ConsumerState<PersonalDataScreen> {
       return;
     }
 
+    // AQ-12, EP-9: l'obiettivo ha un endpoint proprio, perché la scrittura
+    // non sostituisce un valore ma aggiunge un elemento alla serie datata
+    // (DS-19). Segue il salvataggio del profilo e non lo precede: se
+    // quello fallisce, questo non è avvenuto.
+    final waterGoal = _waterGoalValue();
+    if (waterGoal != _originalWaterGoalMl) {
+      await ref.read(dailyWaterGoalProvider.notifier).save(waterGoal);
+      _originalWaterGoalMl = waterGoal;
+    }
+
     if (!mounted) return;
     if (emailChanged) {
       // AC-5, AC-7, PR-4: la modifica dell'indirizzo riporta l'account
@@ -229,6 +275,11 @@ class _PersonalDataScreenState extends ConsumerState<PersonalDataScreen> {
     final profileState = ref.watch(profileControllerProvider);
     // LO-4: le etichette recano l'unità del sistema scelto.
     final units = ref.watch(unitSystemProvider);
+    // AQ-11, EP-9: l'obiettivo d'acqua non appartiene al profilo e si
+    // legge per conto proprio; il campo si valorizza quando la lettura
+    // si risolve.
+    final waterGoal = ref.watch(dailyWaterGoalProvider);
+    if (waterGoal.hasValue) _initializeWaterGoal(waterGoal.value, units);
 
     return Scaffold(
       backgroundColor: colors.background,
@@ -342,6 +393,26 @@ class _PersonalDataScreenState extends ConsumerState<PersonalDataScreen> {
                         controller: _targetWeight,
                         keyboardType: const TextInputType.numberWithOptions(decimal: true),
                         errorText: _errorFor('targetWeightKg'),
+                      ),
+                      const SizedBox(height: AppSpacing.sm),
+                      AppTextField(
+                        key: const Key('waterGoalField'),
+                        label: context.l10n.measureWithUnit(
+                          context.l10n.waterGoalLabel,
+                          units == UnitSystem.imperial
+                              ? context.l10n.unitFluidOunces
+                              : context.l10n.unitQuantityMilliliter,
+                        ),
+                        controller: _waterGoal,
+                        keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                        errorText: _errorFor('waterGoalMl'),
+                      ),
+                      const SizedBox(height: AppSpacing.xxs),
+                      // 12.1: la didascalia ne dichiara l'unico impiego —
+                      // e che non è un contatore da rincorrere (AQ-17).
+                      Text(
+                        context.l10n.waterGoalHelp,
+                        style: context.typography.caption.copyWith(color: context.colors.textTertiary),
                       ),
                       const SizedBox(height: AppSpacing.sm),
                       AppTextField(
