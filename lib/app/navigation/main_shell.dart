@@ -153,7 +153,10 @@ class _BottomBarScaffold extends StatelessWidget {
             elevation: AppSpacing.elevationFloating,
             shadowColor: colors.shadowFloating,
             surfaceTintColor: colors.surfaceFloating,
-            shape: StadiumBorder(side: BorderSide(color: colors.dividerStrong)),
+            // Nessun bordo: la superficie propria basta a separare i due
+            // piani in entrambi i temi, e sull'accento un contorno neutro
+            // non avrebbe significato (2.4).
+            shape: const StadiumBorder(),
             clipBehavior: Clip.antiAlias,
             child: SizedBox(
               height: AppSpacing.heightBottomNav,
@@ -167,6 +170,13 @@ class _BottomBarScaffold extends StatelessWidget {
                         selected: i == selectedIndex,
                         axis: Axis.vertical,
                         showLabel: true,
+                        // 3.2: sulla superficie della barra la selezione si
+                        // legge fra pieno e attenuato, non fra accento e
+                        // secondario: quei due, là sopra, non avrebbero
+                        // contrasto.
+                        selectedColor: colors.onSurfaceFloating,
+                        unselectedColor: colors.onSurfaceFloatingMuted,
+                        disabledColor: colors.onSurfaceFloatingMuted,
                         onTap: () => onSelect(i),
                       ),
                     ),
@@ -226,6 +236,9 @@ class _RailScaffold extends StatelessWidget {
                           selected: i == selectedIndex,
                           axis: Axis.horizontal,
                           showLabel: extended,
+                          selectedColor: colors.accent,
+                          unselectedColor: colors.textSecondary,
+                          disabledColor: colors.textTertiary,
                           onTap: () => onSelect(i),
                         ),
                     ],
@@ -257,6 +270,9 @@ class _NavItem extends StatelessWidget {
     required this.selected,
     required this.axis,
     required this.showLabel,
+    required this.selectedColor,
+    required this.unselectedColor,
+    required this.disabledColor,
     required this.onTap,
   });
 
@@ -264,20 +280,27 @@ class _NavItem extends StatelessWidget {
   final bool selected;
   final Axis axis;
   final bool showLabel;
+
+  /// 3.2, 2.6: i colori della voce dipendono dalla superficie che la
+  /// ospita — quella della barra fluttuante o il fondo della barra
+  /// laterale — e li sceglie chi la dispone.
+  final Color selectedColor;
+  final Color unselectedColor;
+  final Color disabledColor;
+
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.colors;
     final typography = context.typography;
 
     final Color color;
     if (!destination.enabled) {
-      color = colors.textTertiary;
+      color = disabledColor;
     } else if (selected) {
-      color = colors.accent;
+      color = selectedColor;
     } else {
-      color = colors.textSecondary;
+      color = unselectedColor;
     }
 
     final icon = Icon(destination.icon, size: 24, color: color);
