@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../app/theme/app_spacing.dart';
 import '../../../app/theme/theme_context.dart';
 import '../../../l10n/l10n_context.dart';
+import '../../workout/presentation/workout_activity_presentation.dart';
 import '../data/statistics_models.dart';
 import 'statistics_formatting.dart';
 import 'widgets/breakdown_row.dart';
@@ -125,7 +126,8 @@ class WorkoutStatisticsView extends ConsumerWidget {
                   children: [
                     for (final entry in statistics.byActivityType)
                       BreakdownRow(
-                        label: entry.activityType,
+                        icon: workoutActivityIcon(entry.activityCode),
+                        label: workoutActivityName(context, entry.activityCode, entry.activityType),
                         value: '${entry.count}',
                         fraction: entry.count / maxByType,
                       ),

@@ -4,7 +4,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../app/theme/app_spacing.dart';
 import '../../../../app/theme/theme_context.dart';
 import '../../../../l10n/l10n_context.dart';
+import '../../data/workout_activity.dart';
 import '../../providers/workout_providers.dart';
+import '../workout_activity_presentation.dart';
 import 'workout_sheet.dart';
 
 /// Sezione degli allenamenti nella vista giornaliera (AL-12, VG-6, 6.2
@@ -43,7 +45,8 @@ class DayWorkoutsSection extends ConsumerWidget {
           for (final planned in day.pendingPlanned)
             _WorkoutRow(
               key: ValueKey('planned-${planned.id}'),
-              label: planned.activityType,
+              activity: planned.activityCode,
+              label: workoutActivityName(context, planned.activityCode, planned.activityType),
               done: false,
               // AL-13, RA-3: la marcatura come svolto genera la
               // registrazione ereditando il tipo, e apre il foglio ridotto
@@ -53,7 +56,8 @@ class DayWorkoutsSection extends ConsumerWidget {
           for (final workout in day.recorded)
             _WorkoutRow(
               key: ValueKey('recorded-${workout.id}'),
-              label: workout.activityType,
+              activity: workout.activityCode,
+              label: workoutActivityName(context, workout.activityCode, workout.activityType),
               done: true,
               calories: workout.caloriesBurned,
               onCheck: () => showWorkoutSheet(context, existing: workout),
@@ -64,18 +68,21 @@ class DayWorkoutsSection extends ConsumerWidget {
   }
 }
 
-/// Card alta 56 con icona, tipo di attività e un solo pulsante di spunta:
+/// Card alta 56 con l'icona dello sport (AL-2), la denominazione e un
+/// solo pulsante di spunta:
 /// l'allenamento è svolto o non lo è, non esiste lo stato *saltato*
 /// (AL-13, 6.2 interfaccia.md).
 class _WorkoutRow extends StatelessWidget {
   const _WorkoutRow({
     super.key,
+    required this.activity,
     required this.label,
     required this.done,
     required this.onCheck,
     this.calories,
   });
 
+  final WorkoutActivity activity;
   final String label;
   final bool done;
   final int? calories;
@@ -97,7 +104,7 @@ class _WorkoutRow extends StatelessWidget {
         ),
         child: Row(
           children: [
-            Icon(Icons.directions_run, size: 20, color: colors.textSecondary),
+            Icon(workoutActivityIcon(activity), size: 20, color: colors.textSecondary),
             const SizedBox(width: AppSpacing.xs),
             Expanded(
               child: Text(

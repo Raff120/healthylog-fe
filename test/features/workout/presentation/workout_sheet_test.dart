@@ -9,6 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:healthylog/app/theme/app_theme.dart';
 import 'package:healthylog/core/api/api_error_interceptor.dart';
 import 'package:healthylog/features/workout/data/workout_api.dart';
+import 'package:healthylog/features/workout/data/workout_activity.dart';
 import 'package:healthylog/features/workout/data/workout_models.dart';
 import 'package:healthylog/features/workout/presentation/widgets/workout_sheet.dart';
 import 'package:healthylog/features/workout/providers/workout_providers.dart';
@@ -58,8 +59,8 @@ class _WorkoutAdapter implements HttpClientAdapter {
     if (options.path == '/workouts' && options.queryParameters.containsKey('date')) {
       return _json(200, existingToday);
     }
-    if (options.path == '/workouts/activity-types') {
-      return _json(200, const ['Corsa', 'Nuoto']);
+    if (options.path == '/workouts/activities') {
+      return _json(200, const <Object>[]);
     }
     return _json(200, const <Object>[]);
   }
@@ -115,6 +116,7 @@ Workout _recorded({String? plannedWorkoutId}) => Workout(
       id: 'w-1',
       userId: 'user-1',
       date: DateTime.now(),
+      activityCode: WorkoutActivity.running,
       activityType: 'Corsa',
       caloriesBurned: 300,
       note: null,
@@ -126,10 +128,22 @@ PlannedWorkout _planned() => PlannedWorkout(
       recurrence: WorkoutRecurrence.weekly,
       daysOfWeek: const [Weekday.monday],
       date: null,
+      activityCode: WorkoutActivity.gym,
       activityType: 'Palestra',
       activeFrom: DateTime.now(),
       activeTo: null,
     );
+
+/// AL-2, 10.2 interfaccia.md: lo sport si sceglie nel selettore, cercandolo
+/// per nome — trenta voci non si scorrono.
+Future<void> _chooseActivity(WidgetTester tester, String name) async {
+  await tester.tap(find.text('Sport'));
+  await tester.pumpAndSettle();
+  await tester.enterText(find.widgetWithText(TextField, 'Cerca'), name);
+  await tester.pumpAndSettle();
+  await tester.tap(find.text(name).last);
+  await tester.pumpAndSettle();
+}
 
 void main() {
   testWidgets('presenta le calorie sempre vuote e senza valori suggeriti (CB-1, CB-2)',
@@ -163,7 +177,7 @@ void main() {
       },
     ]);
 
-    await tester.enterText(find.widgetWithText(TextField, 'Tipo di attività'), 'Nuoto');
+    await _chooseActivity(tester, 'Nuoto');
     await tester.tap(find.widgetWithText(ElevatedButton, 'Registra'));
     await tester.pumpAndSettle();
 
@@ -193,7 +207,7 @@ void main() {
       },
     ]);
 
-    await tester.enterText(find.widgetWithText(TextField, 'Tipo di attività'), 'Nuoto');
+    await _chooseActivity(tester, 'Nuoto');
     await tester.tap(find.widgetWithText(ElevatedButton, 'Registra'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Annulla'));
@@ -207,8 +221,10 @@ void main() {
     final adapter = await _pumpSheet(tester, planned: _planned());
 
     // 10.2: i soli campi facoltativi, e si può chiudere senza compilarli.
-    expect(find.widgetWithText(TextField, 'Tipo di attività'), findsNothing);
-    expect(find.text('Palestra'), findsOneWidget);
+    expect(find.widgetWithText(TextField, 'Sport'), findsNothing);
+    // AL-2: il titolo denomina lo sport ereditato nella lingua corrente,
+    // non con l'etichetta con cui fu registrato.
+    expect(find.text('Sala pesi'), findsOneWidget);
 
     await tester.tap(find.widgetWithText(ElevatedButton, 'Registra'));
     await tester.pumpAndSettle();

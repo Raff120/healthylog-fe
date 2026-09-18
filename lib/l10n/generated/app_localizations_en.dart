@@ -2258,10 +2258,112 @@ class L10nEn extends L10n {
   String get weekdayWednesday => 'Wednesday';
 
   @override
-  String get workoutActivityType => 'Activity type';
+  String get workoutActivityBasketball => 'Basketball';
 
   @override
-  String get workoutActivityTypeRequired => 'Enter the activity type';
+  String get workoutActivityBoxing => 'Boxing';
+
+  @override
+  String get workoutActivityCalisthenics => 'Calisthenics';
+
+  @override
+  String get workoutActivityClimbing => 'Climbing';
+
+  @override
+  String get workoutActivityCrossfit => 'CrossFit';
+
+  @override
+  String get workoutActivityCycling => 'Cycling';
+
+  @override
+  String get workoutActivityDance => 'Dance';
+
+  @override
+  String get workoutActivityGolf => 'Golf';
+
+  @override
+  String get workoutActivityGym => 'Weight room';
+
+  @override
+  String get workoutActivityHockey => 'Hockey';
+
+  @override
+  String get workoutActivityHorseRiding => 'Horse riding';
+
+  @override
+  String get workoutActivityMartialArts => 'Martial arts';
+
+  @override
+  String get workoutActivityName => 'Activity name';
+
+  @override
+  String get workoutActivityNameHint => 'What the activity you did is called.';
+
+  @override
+  String get workoutActivityNameRequired => 'Enter the activity name';
+
+  @override
+  String get workoutActivityOther => 'Other';
+
+  @override
+  String get workoutActivityPadel => 'Padel';
+
+  @override
+  String get workoutActivityPilates => 'Pilates';
+
+  @override
+  String get workoutActivityRowing => 'Rowing';
+
+  @override
+  String get workoutActivityRugby => 'Rugby';
+
+  @override
+  String get workoutActivityRunning => 'Running';
+
+  @override
+  String get workoutActivitySkating => 'Skating';
+
+  @override
+  String get workoutActivitySkiing => 'Skiing';
+
+  @override
+  String get workoutActivitySnowboard => 'Snowboarding';
+
+  @override
+  String get workoutActivitySoccer => 'Football';
+
+  @override
+  String get workoutActivitySpinning => 'Spinning';
+
+  @override
+  String get workoutActivitySurfing => 'Surfing';
+
+  @override
+  String get workoutActivitySwimming => 'Swimming';
+
+  @override
+  String get workoutActivityTennis => 'Tennis';
+
+  @override
+  String get workoutActivityTreadmill => 'Treadmill';
+
+  @override
+  String get workoutActivityTrekking => 'Hiking';
+
+  @override
+  String get workoutActivityVolleyball => 'Volleyball';
+
+  @override
+  String get workoutActivityWalking => 'Walking';
+
+  @override
+  String get workoutActivityYoga => 'Yoga';
+
+  @override
+  String get workoutActivityType => 'Sport';
+
+  @override
+  String get workoutActivityTypeRequired => 'Choose the sport';
 
   @override
   String get workoutAddOneOff => 'Add one-off workout';
@@ -2284,6 +2386,9 @@ class L10nEn extends L10n {
 
   @override
   String get workoutCaloriesOptional => 'If you know it. Not required.';
+
+  @override
+  String get workoutCaloriesUnit => 'kcal';
 
   @override
   String workoutCaloriesWithUnit(int value) {
@@ -2322,7 +2427,7 @@ class L10nEn extends L10n {
   String get workoutMarkAsDone => 'Mark as done';
 
   @override
-  String get workoutNoTypesYet => 'No activity types logged yet.';
+  String get workoutNoTypesYet => 'No sports logged yet.';
 
   @override
   String get workoutNoWeeklyGoal => 'No weekly goal';
@@ -2395,7 +2500,7 @@ class L10nEn extends L10n {
       'Add calories and a note if you like. You can also close: the workout is logged either way.';
 
   @override
-  String get workoutStatsDistribution => 'Distribution by type';
+  String get workoutStatsDistribution => 'Distribution by sport';
 
   @override
   String get workoutStatsGoalComparison => 'Compared with the goal';

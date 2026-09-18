@@ -51,6 +51,18 @@ class _WorkoutStubAdapter implements HttpClientAdapter {
     Future<void>? cancelFuture,
   ) async {
     if (options.path == '/workouts') return _json(200, workouts);
+    if (options.path == '/workouts/activities') {
+      // AL-2: uno sport per codice, e per OTHER uno per denominazione.
+      final seen = <String>{};
+      final usages = <Map<String, dynamic>>[];
+      for (final workout in workouts) {
+        final code = (workout['activityCode'] as String?) ?? 'OTHER';
+        final key = '$code:${code == 'OTHER' ? workout['activityType'] : ''}';
+        if (!seen.add(key)) continue;
+        usages.add({'activityCode': code, 'activityType': workout['activityType'], 'count': 1});
+      }
+      return _json(200, usages);
+    }
     if (options.path == '/workouts/activity-types') {
       return _json(200, workouts.map((workout) => workout['activityType']).toSet().toList());
     }

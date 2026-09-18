@@ -8,6 +8,7 @@ import '../../../../l10n/l10n_context.dart';
 import '../../data/workout_models.dart';
 import '../../providers/workout_providers.dart';
 import '../weekday_presentation.dart';
+import '../workout_activity_presentation.dart';
 import 'planning_sheet.dart';
 import 'weekly_goal_sheet.dart';
 
@@ -66,9 +67,19 @@ class PlanningCard extends ConsumerWidget {
             if (oneOff.isNotEmpty) ...[
               const SizedBox(height: AppSpacing.sm),
               for (final plan in oneOff)
-                Text(
-                  '${plan.activityType} — ${formatDate(context, plan.date!)}',
-                  style: typography.caption.copyWith(color: colors.textSecondary),
+                Row(
+                  children: [
+                    Icon(workoutActivityIcon(plan.activityCode), size: 16, color: colors.textSecondary),
+                    const SizedBox(width: AppSpacing.xxs),
+                    Flexible(
+                      child: Text(
+                        '${workoutActivityName(context, plan.activityCode, plan.activityType)}'
+                        ' — ${formatDate(context, plan.date!)}',
+                        style: typography.caption.copyWith(color: colors.textSecondary),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
                 ),
             ],
           ],
@@ -100,8 +111,9 @@ class PlanningCard extends ConsumerWidget {
   }
 }
 
-/// 10.1 interfaccia.md: sette iniziali, quelli previsti in accento, con il
-/// tipo di attività in `caption` sotto ciascun giorno previsto.
+/// 10.1 interfaccia.md: sette iniziali, quelli previsti in accento, con
+/// l'icona dello sport e la sua denominazione sotto ciascun giorno
+/// previsto (AL-2).
 class _WeekStrip extends StatelessWidget {
   const _WeekStrip({required this.weekly});
 
@@ -113,6 +125,7 @@ class _WeekStrip extends StatelessWidget {
     final typography = context.typography;
 
     return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         for (final day in Weekday.values)
           Expanded(
@@ -121,18 +134,21 @@ class _WeekStrip extends StatelessWidget {
                 Text(
                   workoutWeekdayInitial(context, day),
                   style: typography.label.copyWith(
-                    color: _typesOn(day).isEmpty ? colors.textTertiary : colors.accent,
-                    fontWeight: _typesOn(day).isEmpty ? FontWeight.w400 : FontWeight.w500,
+                    color: _plansOn(day).isEmpty ? colors.textTertiary : colors.accent,
+                    fontWeight: _plansOn(day).isEmpty ? FontWeight.w400 : FontWeight.w500,
                   ),
                 ),
                 const SizedBox(height: AppSpacing.xxs),
-                Text(
-                  _typesOn(day).join(', '),
-                  style: typography.caption.copyWith(color: colors.textSecondary),
-                  textAlign: TextAlign.center,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
+                for (final plan in _plansOn(day)) ...[
+                  Icon(workoutActivityIcon(plan.activityCode), size: 16, color: colors.accent),
+                  Text(
+                    workoutActivityName(context, plan.activityCode, plan.activityType),
+                    style: typography.caption.copyWith(color: colors.textSecondary),
+                    textAlign: TextAlign.center,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
               ],
             ),
           ),
@@ -140,9 +156,7 @@ class _WeekStrip extends StatelessWidget {
     );
   }
 
-  List<String> _typesOn(Weekday day) => weekly
-      .where((plan) => plan.daysOfWeek.contains(day))
-      .map((plan) => plan.activityType)
-      .toList();
+  List<PlannedWorkout> _plansOn(Weekday day) =>
+      weekly.where((plan) => plan.daysOfWeek.contains(day)).toList();
 }
 

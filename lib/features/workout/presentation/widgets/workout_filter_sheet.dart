@@ -6,10 +6,12 @@ import '../../../../app/theme/theme_context.dart';
 import '../../../../core/widgets/app_primary_button.dart';
 import '../../../../l10n/formats.dart';
 import '../../../../l10n/l10n_context.dart';
+import '../../data/workout_activity.dart';
 import '../../providers/workout_providers.dart';
+import '../workout_activity_presentation.dart';
 
-/// Filtri dell'elenco (RA-12, 10.1 interfaccia.md): tipo di attività —
-/// tra quelli già impiegati — e periodo. I filtri attivi sono presentati
+/// Filtri dell'elenco (RA-12, 10.1 interfaccia.md): sport — tra quelli
+/// già impiegati — e periodo. I filtri attivi sono presentati
 /// come chip sotto l'intestazione, rimovibili singolarmente (vedi
 /// `ActivityScreen`).
 Future<void> showWorkoutFilterSheet(BuildContext context) {
@@ -35,7 +37,7 @@ class _WorkoutFilterSheetState extends ConsumerState<_WorkoutFilterSheet> {
   Widget build(BuildContext context) {
     final colors = context.colors;
     final typography = context.typography;
-    final types = ref.watch(workoutActivityTypesProvider).value ?? const <String>[];
+    final used = ref.watch(workoutActivitiesProvider).value ?? const <WorkoutActivityUsage>[];
 
     return DecoratedBox(
       decoration: BoxDecoration(
@@ -54,7 +56,7 @@ class _WorkoutFilterSheetState extends ConsumerState<_WorkoutFilterSheet> {
               const SizedBox(height: AppSpacing.md),
               Text(context.l10n.workoutActivityType, style: typography.overline.copyWith(color: colors.textSecondary)),
               const SizedBox(height: AppSpacing.xs),
-              if (types.isEmpty)
+              if (used.isEmpty)
                 Text(
                   context.l10n.workoutNoTypesYet,
                   style: typography.bodyMedium.copyWith(color: colors.textSecondary),
@@ -64,13 +66,18 @@ class _WorkoutFilterSheetState extends ConsumerState<_WorkoutFilterSheet> {
                   spacing: AppSpacing.xs,
                   runSpacing: AppSpacing.xxs,
                   children: [
-                    for (final type in types)
+                    // AL-2: le voci sono gli sport praticati; l'attività
+                    // denominata dall'Utente vi figura col proprio nome.
+                    for (final usage in used)
                       FilterChip(
-                        label: Text(type),
-                        selected: _filters.activityType == type,
+                        avatar: Icon(workoutActivityIcon(usage.activity), size: 16),
+                        label: Text(workoutActivityName(context, usage.activity, usage.customName)),
+                        selected: _filters.activity == usage.activity &&
+                            _filters.customName == usage.customName,
                         onSelected: (selected) => setState(() {
                           _filters = WorkoutFilters(
-                            activityType: selected ? type : null,
+                            activity: selected ? usage.activity : null,
+                            customName: selected ? usage.customName : null,
                             from: _filters.from,
                             to: _filters.to,
                           );
@@ -94,7 +101,8 @@ class _WorkoutFilterSheetState extends ConsumerState<_WorkoutFilterSheet> {
                   if (range == null) return;
                   setState(() {
                     _filters = WorkoutFilters(
-                      activityType: _filters.activityType,
+                      activity: _filters.activity,
+                      customName: _filters.customName,
                       from: range.start,
                       to: range.end,
                     );

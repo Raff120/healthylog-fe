@@ -134,7 +134,7 @@ final class WorkoutsProvider
   Workouts create() => Workouts();
 }
 
-String _$workoutsHash() => r'1a3c788b38240c3b989af554aecc65307d0069f8';
+String _$workoutsHash() => r'6e82f3ddf0d8d57a8d71331509d222981c597fa1';
 
 /// RA-11: l'elenco degli allenamenti registrati, nell'ordine e con i
 /// filtri correnti.
@@ -157,53 +157,54 @@ abstract class _$Workouts extends $AsyncNotifier<List<Workout>> {
   }
 }
 
-/// AL-2: i tipi già impiegati, per i suggerimenti del campo (10.2
-/// interfaccia.md) e per le voci del filtro (RA-12).
+/// AL-2: gli sport già impiegati, che il selettore porta in cima (10.2
+/// interfaccia.md) e da cui il filtro ricava le voci (RA-12).
 
-@ProviderFor(workoutActivityTypes)
-final workoutActivityTypesProvider = WorkoutActivityTypesProvider._();
+@ProviderFor(workoutActivities)
+final workoutActivitiesProvider = WorkoutActivitiesProvider._();
 
-/// AL-2: i tipi già impiegati, per i suggerimenti del campo (10.2
-/// interfaccia.md) e per le voci del filtro (RA-12).
+/// AL-2: gli sport già impiegati, che il selettore porta in cima (10.2
+/// interfaccia.md) e da cui il filtro ricava le voci (RA-12).
 
-final class WorkoutActivityTypesProvider
+final class WorkoutActivitiesProvider
     extends
         $FunctionalProvider<
-          AsyncValue<List<String>>,
-          List<String>,
-          FutureOr<List<String>>
+          AsyncValue<List<WorkoutActivityUsage>>,
+          List<WorkoutActivityUsage>,
+          FutureOr<List<WorkoutActivityUsage>>
         >
-    with $FutureModifier<List<String>>, $FutureProvider<List<String>> {
-  /// AL-2: i tipi già impiegati, per i suggerimenti del campo (10.2
-  /// interfaccia.md) e per le voci del filtro (RA-12).
-  WorkoutActivityTypesProvider._()
+    with
+        $FutureModifier<List<WorkoutActivityUsage>>,
+        $FutureProvider<List<WorkoutActivityUsage>> {
+  /// AL-2: gli sport già impiegati, che il selettore porta in cima (10.2
+  /// interfaccia.md) e da cui il filtro ricava le voci (RA-12).
+  WorkoutActivitiesProvider._()
     : super(
         from: null,
         argument: null,
         retry: null,
-        name: r'workoutActivityTypesProvider',
+        name: r'workoutActivitiesProvider',
         isAutoDispose: true,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
 
   @override
-  String debugGetCreateSourceHash() => _$workoutActivityTypesHash();
+  String debugGetCreateSourceHash() => _$workoutActivitiesHash();
 
   @$internal
   @override
-  $FutureProviderElement<List<String>> $createElement(
+  $FutureProviderElement<List<WorkoutActivityUsage>> $createElement(
     $ProviderPointer pointer,
   ) => $FutureProviderElement(pointer);
 
   @override
-  FutureOr<List<String>> create(Ref ref) {
-    return workoutActivityTypes(ref);
+  FutureOr<List<WorkoutActivityUsage>> create(Ref ref) {
+    return workoutActivities(ref);
   }
 }
 
-String _$workoutActivityTypesHash() =>
-    r'ff08e3056c41199fe0fa1bb91a1435e27ade019b';
+String _$workoutActivitiesHash() => r'47e297291959dd62ab303a7e675482ac155a9b65';
 
 /// AL-9: la pianificazione vigente, che la card di 10.1 presenta.
 
@@ -621,7 +622,7 @@ final class WorkoutControllerProvider
   }
 }
 
-String _$workoutControllerHash() => r'1142d48ebe716cb3068a7defbb84f48018a606f5';
+String _$workoutControllerHash() => r'b8164457cb5a43d5ef8bb58b1ea0e1955c5d46dc';
 
 /// RA-4, RA-15: registrazione, modifica ed eliminazione. Ogni esito
 /// rinnova elenco, giornate e tipi impiegati per invalidazione, come già

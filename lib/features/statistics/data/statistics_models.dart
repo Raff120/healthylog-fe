@@ -1,5 +1,6 @@
 import '../../dietplan/data/slot_type.dart';
 import '../../identity/data/account_role.dart';
+import '../../workout/data/workout_activity.dart';
 import '../../workout/data/workout_models.dart' show Weekday;
 
 /// Orizzonte di calcolo delle statistiche (AD-8, SA-10, AN-13): settimana,
@@ -179,15 +180,24 @@ class AdherenceStatistics {
   bool get hasMultiplePeriods => periods.length > 1;
 }
 
-/// Un tipo di attività con il numero di sessioni svolte (SA-2).
+/// Uno sport con il numero di sessioni svolte (SA-2).
 class ActivityTypeCount {
-  const ActivityTypeCount({required this.activityType, required this.count});
+  const ActivityTypeCount({
+    required this.activityCode,
+    required this.activityType,
+    required this.count,
+  });
 
   factory ActivityTypeCount.fromJson(Map<String, dynamic> json) => ActivityTypeCount(
+        // VR-10: assente sulle statistiche di un periodo anteriore
+        // all'elenco degli sport, che ricadono su `other` e conservano la
+        // denominazione allora registrata.
+        activityCode: WorkoutActivity.fromJson(json['activityCode']),
         activityType: json['activityType'] as String,
         count: (json['count'] as num).toInt(),
       );
 
+  final WorkoutActivity activityCode;
   final String activityType;
   final int count;
 }

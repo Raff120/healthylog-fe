@@ -4,13 +4,16 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../app/theme/app_spacing.dart';
 import '../../../../app/theme/theme_context.dart';
 import '../../../../core/widgets/app_primary_button.dart';
-import '../../../../core/widgets/app_text_field.dart';
 import '../../../../l10n/formats.dart';
 import '../../../../l10n/l10n_context.dart';
+import '../../data/workout_activity.dart';
 import '../../data/workout_models.dart';
 import '../../data/workout_requests.dart';
 import '../../providers/workout_providers.dart';
 import '../weekday_presentation.dart';
+import '../workout_activity_presentation.dart';
+import 'workout_activity_field.dart';
+import 'workout_activity_picker.dart';
 
 /// Modifica della pianificazione (10.1 interfaccia.md): selezione dei
 /// giorni della settimana (AL-10), tipo di attività, e l'azione per
@@ -106,13 +109,16 @@ class _PlannedRow extends ConsumerWidget {
       padding: const EdgeInsets.only(bottom: AppSpacing.xs),
       child: Row(
         children: [
-          Icon(plan.isWeekly ? Icons.repeat : Icons.event_outlined, size: 18, color: colors.textSecondary),
+          Icon(workoutActivityIcon(plan.activityCode), size: 18, color: colors.textSecondary),
           const SizedBox(width: AppSpacing.xs),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(plan.activityType, style: typography.bodyMedium.copyWith(color: colors.textPrimary)),
+                Text(
+                  workoutActivityName(context, plan.activityCode, plan.activityType),
+                  style: typography.bodyMedium.copyWith(color: colors.textPrimary),
+                ),
                 Text(
                   plan.isWeekly
                       ? plan.daysOfWeek.map((day) => workoutWeekdayLabel(context, day)).join(', ')
@@ -163,26 +169,37 @@ class _PlannedWorkoutEditor extends ConsumerStatefulWidget {
 }
 
 class _PlannedWorkoutEditorState extends ConsumerState<_PlannedWorkoutEditor> {
-  late final _activityTypeController =
-      TextEditingController(text: widget.existing?.activityType ?? '');
+  /// AL-2: lo sport previsto, che la spunta erediterà (AL-13).
+  late WorkoutActivity? _activity = widget.existing?.activityCode;
+  late String? _customName =
+      (widget.existing?.activityCode.isOther ?? false) ? widget.existing?.activityType : null;
   late final Set<Weekday> _days = {...?widget.existing?.daysOfWeek};
   late DateTime _date = widget.existing?.date ?? _dateOnly(DateTime.now());
   String? _error;
 
   bool get _isWeekly => widget.recurrence == WorkoutRecurrence.weekly;
 
-  @override
-  void dispose() {
-    _activityTypeController.dispose();
-    super.dispose();
+  Future<void> _pickActivity() async {
+    final choice = await showWorkoutActivityPicker(
+      context,
+      selected: _activity,
+      customName: _customName,
+    );
+    if (choice == null || !mounted) return;
+    setState(() {
+      _activity = choice.activity;
+      _customName = choice.customName;
+      _error = null;
+    });
   }
 
   Future<void> _submit() async {
-    final activityType = _activityTypeController.text.trim();
-    if (activityType.isEmpty) {
+    final activity = _activity;
+    if (activity == null) {
       setState(() => _error = context.l10n.workoutActivityTypeRequired);
       return;
     }
+    final activityType = workoutActivityName(context, activity, _customName);
     if (_isWeekly && _days.isEmpty) {
       setState(() => _error = context.l10n.workoutPickAtLeastOneDay);
       return;
@@ -193,6 +210,7 @@ class _PlannedWorkoutEditorState extends ConsumerState<_PlannedWorkoutEditor> {
       await controller.update(
         widget.existing!.id,
         UpdatePlannedWorkoutRequest(
+          activityCode: activity,
           activityType: activityType,
           daysOfWeek: _isWeekly ? days : const [],
           date: _isWeekly ? null : _date,
@@ -201,8 +219,16 @@ class _PlannedWorkoutEditorState extends ConsumerState<_PlannedWorkoutEditor> {
     } else {
       await controller.create(
         _isWeekly
-            ? CreatePlannedWorkoutRequest.weekly(daysOfWeek: days, activityType: activityType)
-            : CreatePlannedWorkoutRequest.oneOff(date: _date, activityType: activityType),
+            ? CreatePlannedWorkoutRequest.weekly(
+                daysOfWeek: days,
+                activityCode: activity,
+                activityType: activityType,
+              )
+            : CreatePlannedWorkoutRequest.oneOff(
+                date: _date,
+                activityCode: activity,
+                activityType: activityType,
+              ),
       );
     }
     if (!mounted) return;
@@ -236,13 +262,11 @@ class _PlannedWorkoutEditorState extends ConsumerState<_PlannedWorkoutEditor> {
                   style: typography.titleMedium.copyWith(color: colors.textPrimary),
                 ),
                 const SizedBox(height: AppSpacing.md),
-                AppTextField(
-                  label: context.l10n.workoutActivityType,
-                  controller: _activityTypeController,
-                  textCapitalization: TextCapitalization.sentences,
-                  onChanged: (_) {
-                    if (_error != null) setState(() => _error = null);
-                  },
+                WorkoutActivityField(
+                  activity: _activity,
+                  customName: _customName,
+                  errorText: null,
+                  onTap: _pickActivity,
                 ),
                 const SizedBox(height: AppSpacing.sm),
                 if (_isWeekly)
