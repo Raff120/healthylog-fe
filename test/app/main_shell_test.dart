@@ -321,8 +321,10 @@ void main() {
     // 11.1: i tre segmenti dell'intestazione.
     expect(find.text('Aderenza'), findsOneWidget);
     expect(find.text('Corpo'), findsOneWidget);
-    // AD-4: senza slot valutabili la constatazione, non uno zero.
-    expect(find.text('Non ci sono ancora dati'), findsOneWidget);
+    // AD-4: senza slot valutabili la constatazione, non uno zero. Due
+    // volte: una per l'aderenza e una per l'idratazione in coda alla
+    // sezione (AQ-27), che è priva di registrazioni quanto quella.
+    expect(find.text('Non ci sono ancora dati'), findsNWidgets(2));
     // La barra resta: la voce di partenza è ancora raggiungibile.
     expect(find.text('Profilo'), findsOneWidget);
   });

@@ -7,6 +7,7 @@ import '../../../core/widgets/app_segmented_control.dart';
 import '../../../l10n/formats.dart';
 import '../../../l10n/l10n_context.dart';
 import '../../dietplan/presentation/slot_type_presentation.dart';
+import '../../hydration/presentation/widgets/water_statistics_section.dart';
 import '../../workout/presentation/weekday_presentation.dart';
 import '../data/statistics_models.dart';
 import '../providers/statistics_providers.dart';
@@ -29,9 +30,14 @@ import '../../../app/navigation/bottom_bar_insets.dart';
 /// AD-17, AD-18: nessun confronto con altri Utenti, nessuna classifica,
 /// nessun obiettivo di aderenza suggerito.
 class AdherenceView extends ConsumerWidget {
-  const AdherenceView({super.key, required this.statistics});
+  const AdherenceView({super.key, required this.statistics, required this.query});
 
   final AdherenceStatistics statistics;
+
+  /// Il criterio dell'orizzonte, che l'idratazione in coda alla sezione
+  /// interroga per conto proprio (AQ-30: la contiguità è di
+  /// presentazione, non di calcolo).
+  final StatisticsQuery query;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -115,6 +121,10 @@ class AdherenceView extends ConsumerWidget {
             ],
           ),
         ),
+        const SizedBox(height: AppSpacing.lg),
+        // 8.6, 11.1: l'idratazione chiude la sezione. Non concorre
+        // all'aderenza (AQ-30) e non ne condivide che la collocazione.
+        WaterStatisticsSection(query: query),
         const SizedBox(height: AppSpacing.xxl),
       ],
     );

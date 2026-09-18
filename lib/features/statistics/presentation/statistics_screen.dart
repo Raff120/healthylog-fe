@@ -161,7 +161,7 @@ class _Content extends ConsumerWidget {
     return switch (mode) {
       StatisticsViewMode.adherence => _Async(
           value: ref.watch(adherenceStatisticsProvider(query)),
-          builder: (statistics) => AdherenceView(statistics: statistics),
+          builder: (statistics) => AdherenceView(statistics: statistics, query: query),
         ),
       StatisticsViewMode.workouts => _Async(
           value: ref.watch(workoutStatisticsProvider(query)),
