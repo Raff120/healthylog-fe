@@ -49,6 +49,18 @@ class _RecordingAdapter implements HttpClientAdapter {
       listQueries.add(Map<String, dynamic>.from(options.queryParameters));
       return _json(200, workouts);
     }
+    if (options.path == '/workouts/activities') {
+      // AL-2: uno sport per codice, e per OTHER uno per denominazione.
+      final seen = <String>{};
+      final usages = <Map<String, dynamic>>[];
+      for (final workout in workouts) {
+        final code = (workout['activityCode'] as String?) ?? 'OTHER';
+        final key = '$code:${code == 'OTHER' ? workout['activityType'] : ''}';
+        if (!seen.add(key)) continue;
+        usages.add({'activityCode': code, 'activityType': workout['activityType'], 'count': 1});
+      }
+      return _json(200, usages);
+    }
     if (options.path == '/workouts/activity-types') {
       return _json(200, workouts.map((workout) => workout['activityType']).toSet().toList());
     }
@@ -70,6 +82,7 @@ Map<String, dynamic> _workout({
   required String id,
   required DateTime date,
   required String activityType,
+  String? activityCode,
   int? calories,
   String? note,
   String? plannedWorkoutId,
@@ -78,6 +91,7 @@ Map<String, dynamic> _workout({
       'id': id,
       'userId': 'user-1',
       'date': _isoDate(date),
+      'activityCode': activityCode,
       'activityType': activityType,
       'caloriesBurned': calories,
       'note': note,
@@ -186,14 +200,14 @@ void main() {
     expect(find.textContaining('Ricorda'), findsNothing);
   });
 
-  testWidgets('il filtro per tipo raggiunge il server e compare come chip rimovibile (RA-12)',
+  testWidgets('il filtro per sport raggiunge il server e compare come chip rimovibile (RA-12)',
       (tester) async {
     final today = DateTime.now();
     final adapter = await _pumpActivity(tester, workouts: [
-      _workout(id: 'w-1', date: today, activityType: 'Corsa'),
-      _workout(id: 'w-2', date: today, activityType: 'Nuoto'),
+      _workout(id: 'w-1', date: today, activityType: 'Corsa', activityCode: 'RUNNING'),
+      _workout(id: 'w-2', date: today, activityType: 'Nuoto', activityCode: 'SWIMMING'),
     ]);
-    expect(adapter.listQueries.last.containsKey('activityType'), isFalse);
+    expect(adapter.listQueries.last.containsKey('activityCode'), isFalse);
 
     await tester.tap(find.byIcon(Icons.filter_list));
     await tester.pumpAndSettle();
@@ -204,7 +218,7 @@ void main() {
 
     // CS-11 vale per la circoscrizione, ma il criterio è lo stesso: il
     // filtro è un parametro dell'interrogazione, non una cernita a valle.
-    expect(adapter.listQueries.last['activityType'], 'Corsa');
+    expect(adapter.listQueries.last['activityCode'], 'RUNNING');
     expect(find.widgetWithText(InputChip, 'Corsa'), findsOneWidget);
   });
 

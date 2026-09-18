@@ -10,6 +10,7 @@ import '../../../l10n/formats.dart';
 import '../../../l10n/l10n_context.dart';
 import '../../notification/presentation/widgets/notification_bell.dart';
 import '../providers/workout_providers.dart';
+import 'workout_activity_presentation.dart';
 import 'widgets/planning_card.dart';
 import 'widgets/workout_filter_sheet.dart';
 import 'widgets/workout_list_tile.dart';
@@ -138,10 +139,11 @@ class _FilterChips extends ConsumerWidget {
       child: Wrap(
         spacing: AppSpacing.xs,
         children: [
-          if (filters.activityType != null)
+          if (filters.activity != null)
             InputChip(
-              label: Text(filters.activityType!),
-              onDeleted: () => controller.apply(filters.withoutActivityType()),
+              avatar: Icon(workoutActivityIcon(filters.activity!), size: 16),
+              label: Text(workoutActivityName(context, filters.activity!, filters.customName)),
+              onDeleted: () => controller.apply(filters.withoutActivity()),
             ),
           if (filters.from != null && filters.to != null)
             InputChip(

@@ -8,9 +8,13 @@ import '../../../../core/widgets/app_primary_button.dart';
 import '../../../../core/widgets/app_text_field.dart';
 import '../../../../l10n/formats.dart';
 import '../../../../l10n/l10n_context.dart';
+import '../../data/workout_activity.dart';
 import '../../data/workout_models.dart';
 import '../../data/workout_requests.dart';
 import '../../providers/workout_providers.dart';
+import '../workout_activity_presentation.dart';
+import 'workout_activity_field.dart';
+import 'workout_activity_picker.dart';
 import 'workout_confirmations.dart';
 
 /// Registrazione e modifica di un allenamento (10.2 interfaccia.md).
@@ -53,22 +57,26 @@ class _WorkoutSheet extends ConsumerStatefulWidget {
 }
 
 class _WorkoutSheetState extends ConsumerState<_WorkoutSheet> {
-  late final _activityTypeController =
-      TextEditingController(text: widget.existing?.activityType ?? '');
+  /// AL-2: lo sport, scelto nel selettore. Nullo finché non è indicato —
+  /// in registrazione è il campo che il modulo esige.
+  late WorkoutActivity? _activity = widget.existing?.activityCode;
+
+  /// AL-2: il nome dato all'attività, per il solo `other`.
+  late String? _customName =
+      (widget.existing?.activityCode.isOther ?? false) ? widget.existing?.activityType : null;
   // CB-2: il campo delle calorie è presentato sempre vuoto in
   // registrazione; in modifica riporta il valore già registrato (CB-4).
   late final _caloriesController =
       TextEditingController(text: widget.existing?.caloriesBurned?.toString() ?? '');
   late final _noteController = TextEditingController(text: widget.existing?.note ?? '');
   late DateTime _date = _dateOnly(widget.date);
-  String? _activityTypeError;
+  String? _activityError;
 
   bool get _isReduced => widget.planned != null;
   bool get _isEdit => widget.existing != null;
 
   @override
   void dispose() {
-    _activityTypeController.dispose();
     _caloriesController.dispose();
     _noteController.dispose();
     super.dispose();
@@ -89,12 +97,30 @@ class _WorkoutSheetState extends ConsumerState<_WorkoutSheet> {
     if (picked != null) setState(() => _date = _dateOnly(picked));
   }
 
+  Future<void> _pickActivity() async {
+    final choice = await showWorkoutActivityPicker(
+      context,
+      selected: _activity,
+      customName: _customName,
+    );
+    if (choice == null || !mounted) return;
+    setState(() {
+      _activity = choice.activity;
+      _customName = choice.customName;
+      _activityError = null;
+    });
+  }
+
   Future<void> _submit() async {
-    final activityType = _activityTypeController.text.trim();
-    if (!_isReduced && activityType.isEmpty) {
-      setState(() => _activityTypeError = context.l10n.workoutActivityTypeRequired);
+    final activity = _activity;
+    if (!_isReduced && activity == null) {
+      setState(() => _activityError = context.l10n.workoutActivityTypeRequired);
       return;
     }
+    // AL-2: la denominazione accompagna il codice — è il nome dato
+    // dall'Utente per `other`, l'etichetta dello sport altrimenti. I client
+    // che non conoscono l'elenco presentano quella (VR-2).
+    final activityType = activity == null ? '' : workoutActivityName(context, activity, _customName);
     // CB-1: l'omissione delle calorie non è segnalata né impedisce il
     // salvataggio; un testo non numerico equivale all'assenza del valore.
     final calories = int.tryParse(_caloriesController.text.trim());
@@ -106,6 +132,7 @@ class _WorkoutSheetState extends ConsumerState<_WorkoutSheet> {
         widget.existing!.id,
         UpdateWorkoutRequest(
           date: _date,
+          activityCode: activity!,
           activityType: activityType,
           caloriesBurned: calories,
           note: note.isEmpty ? null : note,
@@ -120,6 +147,7 @@ class _WorkoutSheetState extends ConsumerState<_WorkoutSheet> {
       await controller.create(
         CreateWorkoutRequest(
           date: _date,
+          activityCode: _isReduced ? null : activity,
           activityType: _isReduced ? null : activityType,
           caloriesBurned: calories,
           note: note.isEmpty ? null : note,
@@ -176,7 +204,11 @@ class _WorkoutSheetState extends ConsumerState<_WorkoutSheet> {
                   _isEdit
                       ? context.l10n.workoutEditTitle
                       : _isReduced
-                          ? widget.planned!.activityType
+                          ? workoutActivityName(
+                              context,
+                              widget.planned!.activityCode,
+                              widget.planned!.activityType,
+                            )
                           : context.l10n.workoutRecordTitle,
                   style: typography.titleMedium.copyWith(color: colors.textPrimary),
                 ),
@@ -192,12 +224,11 @@ class _WorkoutSheetState extends ConsumerState<_WorkoutSheet> {
                 if (!_isReduced) ...[
                   _DateField(date: _date, onTap: _pickDate),
                   const SizedBox(height: AppSpacing.sm),
-                  _ActivityTypeField(
-                    controller: _activityTypeController,
-                    errorText: _activityTypeError,
-                    onChanged: (_) {
-                      if (_activityTypeError != null) setState(() => _activityTypeError = null);
-                    },
+                  WorkoutActivityField(
+                    activity: _activity,
+                    customName: _customName,
+                    errorText: _activityError,
+                    onTap: _pickActivity,
                   ),
                   const SizedBox(height: AppSpacing.sm),
                 ],
@@ -280,54 +311,6 @@ class _DateField extends StatelessWidget {
           ],
         ),
       ),
-    );
-  }
-}
-
-/// AL-2: campo di testo con i suggerimenti dai tipi già impiegati — la
-/// coerenza dei dati è favorita, non imposta: il testo resta libero.
-class _ActivityTypeField extends ConsumerWidget {
-  const _ActivityTypeField({
-    required this.controller,
-    required this.errorText,
-    required this.onChanged,
-  });
-
-  final TextEditingController controller;
-  final String? errorText;
-  final ValueChanged<String> onChanged;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final suggestions = ref.watch(workoutActivityTypesProvider).value ?? const <String>[];
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        AppTextField(
-          label: context.l10n.workoutActivityType,
-          controller: controller,
-          errorText: errorText,
-          textCapitalization: TextCapitalization.sentences,
-          onChanged: onChanged,
-        ),
-        if (suggestions.isNotEmpty) ...[
-          const SizedBox(height: AppSpacing.xs),
-          Wrap(
-            spacing: AppSpacing.xs,
-            runSpacing: AppSpacing.xxs,
-            children: [
-              for (final suggestion in suggestions.take(6))
-                ActionChip(
-                  label: Text(suggestion),
-                  onPressed: () {
-                    controller.text = suggestion;
-                    onChanged(suggestion);
-                  },
-                ),
-            ],
-          ),
-        ],
-      ],
     );
   }
 }

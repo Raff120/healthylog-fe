@@ -61,3 +61,28 @@ enum WorkoutActivity {
 
   bool get isOther => this == WorkoutActivity.other;
 }
+
+/// Sport già impiegato dall'Utente, con quante volte lo è stato (AL-2,
+/// RA-12), come lo restituisce `GET /workouts/activities`.
+///
+/// Il selettore vi porta in cima gli sport che l'Utente pratica davvero e
+/// il filtro ne ricava le voci (10.2 interfaccia.md). [customName] è
+/// valorizzato per [WorkoutActivity.other], dove la denominazione è tutto
+/// ciò che distingue un'attività dall'altra.
+class WorkoutActivityUsage {
+  const WorkoutActivityUsage({required this.activity, required this.customName, required this.count});
+
+  factory WorkoutActivityUsage.fromJson(Map<String, dynamic> json) {
+    final activity = WorkoutActivity.fromJson(json['activityCode']);
+    final label = json['activityType'] as String?;
+    return WorkoutActivityUsage(
+      activity: activity,
+      customName: activity.isOther ? label : null,
+      count: json['count'] as int? ?? 0,
+    );
+  }
+
+  final WorkoutActivity activity;
+  final String? customName;
+  final int count;
+}

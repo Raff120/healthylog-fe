@@ -3919,6 +3919,24 @@ abstract class L10n {
   /// **'Arti marziali'**
   String get workoutActivityMartialArts;
 
+  /// No description provided for @workoutActivityName.
+  ///
+  /// In it, this message translates to:
+  /// **'Nome dell\'attività'**
+  String get workoutActivityName;
+
+  /// No description provided for @workoutActivityNameHint.
+  ///
+  /// In it, this message translates to:
+  /// **'Come si chiama l\'attività che hai svolto.'**
+  String get workoutActivityNameHint;
+
+  /// No description provided for @workoutActivityNameRequired.
+  ///
+  /// In it, this message translates to:
+  /// **'Indica il nome dell\'attività'**
+  String get workoutActivityNameRequired;
+
   /// No description provided for @workoutActivityOther.
   ///
   /// In it, this message translates to:

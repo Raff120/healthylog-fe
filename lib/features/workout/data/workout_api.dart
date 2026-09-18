@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 
+import 'workout_activity.dart';
 import 'workout_models.dart';
 import 'workout_requests.dart';
 
@@ -18,11 +19,20 @@ class WorkoutApi {
   final Dio _dio;
 
   /// RA-11, RA-12: l'elenco in ordine cronologico decrescente, con i
-  /// filtri per tipo e per periodo.
-  Future<List<Workout>> list({DateTime? from, DateTime? to, String? activityType, String? userId}) async {
+  /// filtri per sport, per denominazione e per periodo. I due filtri
+  /// sull'attività si cumulano: l'attività denominata dall'Utente si
+  /// circoscrive con `other` e il suo nome insieme (AL-2).
+  Future<List<Workout>> list({
+    DateTime? from,
+    DateTime? to,
+    WorkoutActivity? activityCode,
+    String? activityType,
+    String? userId,
+  }) async {
     final response = await _dio.get('/workouts', queryParameters: {
       if (from != null) 'from': _isoDate(from),
       if (to != null) 'to': _isoDate(to),
+      if (activityCode != null) 'activityCode': activityCode.param,
       if (activityType != null) 'activityType': activityType,
       if (userId != null) 'userId': userId,
     });
@@ -46,10 +56,14 @@ class WorkoutApi {
     return (response.data as List).map((e) => DayWorkouts.fromJson(e as Map<String, dynamic>)).toList();
   }
 
-  /// AL-2: i tipi già impiegati, per i suggerimenti e per il filtro.
-  Future<List<String>> activityTypes() async {
-    final response = await _dio.get('/workouts/activity-types');
-    return (response.data as List).cast<String>();
+  /// AL-2, RA-12: gli sport già impiegati, per il selettore e per il
+  /// filtro — in ordine di frequenza decrescente, come li restituisce il
+  /// backend.
+  Future<List<WorkoutActivityUsage>> activities() async {
+    final response = await _dio.get('/workouts/activities');
+    return (response.data as List)
+        .map((e) => WorkoutActivityUsage.fromJson(e as Map<String, dynamic>))
+        .toList();
   }
 
   Future<Workout> create(CreateWorkoutRequest request) async {

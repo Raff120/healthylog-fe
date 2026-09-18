@@ -1,3 +1,5 @@
+import 'workout_activity.dart';
+
 /// Natura della pianificazione (rispecchia
 /// `it.healthylog.model.WorkoutRecurrence`).
 enum WorkoutRecurrence {
@@ -51,6 +53,7 @@ class Workout {
     required this.id,
     required this.userId,
     required this.date,
+    required this.activityCode,
     required this.activityType,
     required this.caloriesBurned,
     required this.note,
@@ -61,6 +64,9 @@ class Workout {
         id: json['id'] as String,
         userId: json['userId'] as String,
         date: DateTime.parse(json['date'] as String),
+        // VR-10: assente sugli allenamenti anteriori all'elenco degli
+        // sport, che ricadono su `other` conservando la denominazione.
+        activityCode: WorkoutActivity.fromJson(json['activityCode']),
         activityType: json['activityType'] as String,
         caloriesBurned: json['caloriesBurned'] as int?,
         note: json['note'] as String?,
@@ -70,6 +76,12 @@ class Workout {
   final String id;
   final String userId;
   final DateTime date;
+
+  /// AL-2: lo sport, da cui discendono denominazione e icona.
+  final WorkoutActivity activityCode;
+
+  /// AL-2: la denominazione registrata, che è il nome dato dall'Utente
+  /// quando lo sport è `other`.
   final String activityType;
 
   /// AL-3, CB-1: facoltativo, in chilocalorie (CB-3).
@@ -90,6 +102,7 @@ class PlannedWorkout {
     required this.recurrence,
     required this.daysOfWeek,
     required this.date,
+    required this.activityCode,
     required this.activityType,
     required this.activeFrom,
     required this.activeTo,
@@ -104,6 +117,7 @@ class PlannedWorkout {
             .nonNulls
             .toList(),
         date: json['date'] == null ? null : DateTime.parse(json['date'] as String),
+        activityCode: WorkoutActivity.fromJson(json['activityCode']),
         activityType: json['activityType'] as String,
         activeFrom: DateTime.parse(json['activeFrom'] as String),
         activeTo: json['activeTo'] == null ? null : DateTime.parse(json['activeTo'] as String),
@@ -117,6 +131,10 @@ class PlannedWorkout {
 
   /// AL-11: la data della previsione occasionale; assente se ricorrente.
   final DateTime? date;
+
+  /// AL-2: lo sport previsto, che la spunta eredita insieme alla
+  /// denominazione (AL-13).
+  final WorkoutActivity activityCode;
 
   final String activityType;
   final DateTime activeFrom;

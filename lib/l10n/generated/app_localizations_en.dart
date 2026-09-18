@@ -2294,6 +2294,15 @@ class L10nEn extends L10n {
   String get workoutActivityMartialArts => 'Martial arts';
 
   @override
+  String get workoutActivityName => 'Activity name';
+
+  @override
+  String get workoutActivityNameHint => 'What the activity you did is called.';
+
+  @override
+  String get workoutActivityNameRequired => 'Enter the activity name';
+
+  @override
   String get workoutActivityOther => 'Other';
 
   @override

@@ -2311,6 +2311,16 @@ class L10nIt extends L10n {
   String get workoutActivityMartialArts => 'Arti marziali';
 
   @override
+  String get workoutActivityName => 'Nome dell\'attività';
+
+  @override
+  String get workoutActivityNameHint =>
+      'Come si chiama l\'attività che hai svolto.';
+
+  @override
+  String get workoutActivityNameRequired => 'Indica il nome dell\'attività';
+
+  @override
   String get workoutActivityOther => 'Altro';
 
   @override
