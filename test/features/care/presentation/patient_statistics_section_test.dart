@@ -3,9 +3,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:healthylog/app/theme/app_theme.dart';
 import 'package:healthylog/features/care/presentation/widgets/patient_statistics_section.dart';
+import 'package:healthylog/features/hydration/providers/hydration_providers.dart';
 import 'package:healthylog/features/statistics/providers/statistics_providers.dart';
 
 import '../../../support/l10n_test_support.dart';
+import '../../../support/hydration_api_stub.dart';
 import '../../../support/statistics_api_stub.dart';
 
 /// 9.2 interfaccia.md, VA-7: le statistiche del Paziente nel dettaglio del
@@ -17,6 +19,9 @@ Future<void> _pumpSection(
   Map<String, dynamic>? adherence,
   Map<String, dynamic>? workouts,
   Map<String, dynamic>? measurements,
+  List<Map<String, dynamic>> waterDays = const [],
+  int? waterGoalMl,
+  int? waterAverageMl,
 }) async {
   tester.view.physicalSize = const Size(500, 1200);
   tester.view.devicePixelRatio = 1.0;
@@ -29,6 +34,12 @@ Future<void> _pumpSection(
           adherence: adherence,
           workouts: workouts,
           measurements: measurements,
+        )),
+        // AQ-14, AQ-31: il consumo d'acqua del Paziente, circoscritto.
+        hydrationApiProvider.overrideWithValue(stubHydrationApi(
+          days: waterDays,
+          goalMl: waterGoalMl,
+          averageMl: waterAverageMl,
         )),
       ],
       child: MaterialApp(
@@ -104,5 +115,25 @@ void main() {
     // AN-10, AN-11: variazione col proprio segno, senza qualificazioni.
     expect(find.text('Peso: −2.0 kg'), findsOneWidget);
     expect(find.textContaining('migliorament'), findsNothing);
+  });
+
+  /// AQ-14, AQ-31: il consumo d'acqua e l'obiettivo che il Paziente si è
+  /// dato, in sola consultazione.
+  testWidgets('presenta il consumo d\'acqua e l\'obiettivo del Paziente (AQ-14)', (tester) async {
+    await _pumpSection(
+      tester,
+      waterDays: [
+        {'date': '2026-03-02', 'totalMl': 1800},
+        {'date': '2026-03-03', 'totalMl': 2200},
+      ],
+      waterGoalMl: 2000,
+      waterAverageMl: 2000,
+    );
+
+    expect(find.text('2 L al giorno'), findsOneWidget);
+    expect(find.text('Obiettivo 2 L'), findsOneWidget);
+    // AQ-13: nulla consente al Nutrizionista di impostarlo o proporlo.
+    expect(find.byType(TextField), findsNothing);
+    expect(find.byType(Slider), findsNothing);
   });
 }

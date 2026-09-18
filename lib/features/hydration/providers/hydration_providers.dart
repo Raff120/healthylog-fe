@@ -62,10 +62,20 @@ class WaterIntakeController extends _$WaterIntakeController {
       _run(() => ref.read(hydrationApiProvider).removeEntry(date, entryId));
 
   Future<void> _run(Future<void> Function() operation) async {
-    state = const AsyncValue.loading();
-    state = await AsyncValue.guard(operation);
-    if (state?.hasError ?? true) return;
-    ref.invalidate(waterIntakeDayProvider);
-    ref.invalidate(waterStatisticsProvider);
+    // I comandi rapidi registrano senza attendere (AQ-5): nessun widget
+    // osserva l'esito, e il controller sarebbe smaltito a richiesta
+    // ancora in corso — con essa la lettura della giornata, che resterebbe
+    // al totale precedente. Il collegamento lo tiene in vita fino alla
+    // fine dell'operazione, non oltre.
+    final link = ref.keepAlive();
+    try {
+      state = const AsyncValue.loading();
+      state = await AsyncValue.guard(operation);
+      if (state?.hasError ?? true) return;
+      ref.invalidate(waterIntakeDayProvider);
+      ref.invalidate(waterStatisticsProvider);
+    } finally {
+      link.close();
+    }
   }
 }
