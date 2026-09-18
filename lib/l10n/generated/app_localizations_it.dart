@@ -2284,6 +2284,63 @@ class L10nIt extends L10n {
   String get weekdayWednesday => 'Mercoledì';
 
   @override
+  String get unitFluidOunces => 'fl oz';
+
+  @override
+  String get unitLitres => 'L';
+
+  @override
+  String get waterAddCustom => 'Altra quantità';
+
+  @override
+  String get waterAddTooltip => 'Segna l’acqua bevuta';
+
+  @override
+  String get waterAmountBottle => 'Bottiglia';
+
+  @override
+  String get waterAmountGlass => 'Bicchiere';
+
+  @override
+  String get waterAmountSmallBottle => 'Bottiglietta';
+
+  @override
+  String get waterSectionTitle => 'ACQUA';
+
+  @override
+  String get waterCustomAmount => 'Quantità';
+
+  @override
+  String get waterCustomTitle => 'Aggiungi acqua';
+
+  @override
+  String get waterEntriesOpen => 'Aggiunte';
+
+  @override
+  String get waterEntriesTitle => 'Aggiunte del periodo';
+
+  @override
+  String get waterGoalHelp =>
+      'Comparirà nelle statistiche come riferimento dell’acqua bevuta.';
+
+  @override
+  String get waterGoalLabel => 'Obiettivo d’acqua';
+
+  @override
+  String waterGoalReference(String value) {
+    return 'Obiettivo $value';
+  }
+
+  @override
+  String get waterNoEntries => 'Nessuna aggiunta registrata';
+
+  @override
+  String get waterRemoveEntry => 'Rimuovi questa aggiunta';
+
+  @override
+  String get waterTitle => 'Acqua';
+
+  @override
   String get workoutActivityBasketball => 'Basket';
 
   @override

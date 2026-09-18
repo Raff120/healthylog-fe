@@ -13,6 +13,7 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.onSurfaceFloating,
     required this.onSurfaceFloatingMuted,
     required this.shadowFloating,
+    required this.scrim,
     required this.dividerLight,
     required this.dividerStrong,
     required this.textPrimary,
@@ -21,6 +22,7 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.accent,
     required this.accentPressed,
     required this.accentSubtle,
+    required this.accentMuted,
     required this.error,
     required this.errorBackground,
     required this.warning,
@@ -46,6 +48,12 @@ class AppColors extends ThemeExtension<AppColors> {
   /// 2.4: l'ombra di ciò che fluttua, ampia e tenue. Nel tema scuro è
   /// trasparente — là la separazione si affida al colore di superficie.
   final Color shadowFloating;
+
+  /// 2.6, 6.2: il velo che separa dal contenuto ciò che vi si apre sopra —
+  /// il ventaglio dell'acqua e ogni altra apertura modale. Il tocco sul
+  /// velo richiude senza compiere alcunché.
+  final Color scrim;
+
   final Color dividerLight;
   final Color dividerStrong;
   final Color textPrimary;
@@ -54,6 +62,12 @@ class AppColors extends ThemeExtension<AppColors> {
   final Color accent;
   final Color accentPressed;
   final Color accentSubtle;
+
+  /// 2.2, 11.1: accento attenuato, per la distinzione di sola evidenza fra
+  /// barre — la giornata che raggiunge l'obiettivo d'acqua e quella che
+  /// non lo raggiunge (AQ-23). Non è un colore di merito: è la medesima
+  /// tinta, meno presente.
+  final Color accentMuted;
   final Color error;
   final Color errorBackground;
   final Color warning;
@@ -68,6 +82,7 @@ class AppColors extends ThemeExtension<AppColors> {
     onSurfaceFloating: AppPalette.onSurfaceFloatingLight,
     onSurfaceFloatingMuted: AppPalette.onSurfaceFloatingMutedLight,
     shadowFloating: AppPalette.shadowFloatingLight,
+    scrim: AppPalette.scrimLight,
     dividerLight: AppPalette.dividerLightOnLight,
     dividerStrong: AppPalette.dividerStrongOnLight,
     textPrimary: AppPalette.textPrimaryLight,
@@ -76,6 +91,7 @@ class AppColors extends ThemeExtension<AppColors> {
     accent: AppPalette.accentLight,
     accentPressed: AppPalette.accentPressedLight,
     accentSubtle: AppPalette.accentSubtleLight,
+    accentMuted: AppPalette.accentMutedLight,
     error: AppPalette.errorLight,
     errorBackground: AppPalette.errorBackgroundLight,
     warning: AppPalette.warningLight,
@@ -91,6 +107,7 @@ class AppColors extends ThemeExtension<AppColors> {
     onSurfaceFloating: AppPalette.onSurfaceFloatingDark,
     onSurfaceFloatingMuted: AppPalette.onSurfaceFloatingMutedDark,
     shadowFloating: AppPalette.shadowFloatingDark,
+    scrim: AppPalette.scrimDark,
     dividerLight: AppPalette.dividerLightOnDark,
     dividerStrong: AppPalette.dividerStrongOnDark,
     textPrimary: AppPalette.textPrimaryDark,
@@ -99,6 +116,7 @@ class AppColors extends ThemeExtension<AppColors> {
     accent: AppPalette.accentDark,
     accentPressed: AppPalette.accentPressedDark,
     accentSubtle: AppPalette.accentSubtleDark,
+    accentMuted: AppPalette.accentMutedDark,
     error: AppPalette.errorDark,
     errorBackground: AppPalette.errorBackgroundDark,
     warning: AppPalette.warningDark,
@@ -115,6 +133,7 @@ class AppColors extends ThemeExtension<AppColors> {
     Color? onSurfaceFloating,
     Color? onSurfaceFloatingMuted,
     Color? shadowFloating,
+    Color? scrim,
     Color? dividerLight,
     Color? dividerStrong,
     Color? textPrimary,
@@ -123,6 +142,7 @@ class AppColors extends ThemeExtension<AppColors> {
     Color? accent,
     Color? accentPressed,
     Color? accentSubtle,
+    Color? accentMuted,
     Color? error,
     Color? errorBackground,
     Color? warning,
@@ -137,6 +157,7 @@ class AppColors extends ThemeExtension<AppColors> {
       onSurfaceFloating: onSurfaceFloating ?? this.onSurfaceFloating,
       onSurfaceFloatingMuted: onSurfaceFloatingMuted ?? this.onSurfaceFloatingMuted,
       shadowFloating: shadowFloating ?? this.shadowFloating,
+      scrim: scrim ?? this.scrim,
       dividerLight: dividerLight ?? this.dividerLight,
       dividerStrong: dividerStrong ?? this.dividerStrong,
       textPrimary: textPrimary ?? this.textPrimary,
@@ -145,6 +166,7 @@ class AppColors extends ThemeExtension<AppColors> {
       accent: accent ?? this.accent,
       accentPressed: accentPressed ?? this.accentPressed,
       accentSubtle: accentSubtle ?? this.accentSubtle,
+      accentMuted: accentMuted ?? this.accentMuted,
       error: error ?? this.error,
       errorBackground: errorBackground ?? this.errorBackground,
       warning: warning ?? this.warning,
@@ -165,6 +187,7 @@ class AppColors extends ThemeExtension<AppColors> {
       onSurfaceFloatingMuted:
           Color.lerp(onSurfaceFloatingMuted, other.onSurfaceFloatingMuted, t)!,
       shadowFloating: Color.lerp(shadowFloating, other.shadowFloating, t)!,
+      scrim: Color.lerp(scrim, other.scrim, t)!,
       dividerLight: Color.lerp(dividerLight, other.dividerLight, t)!,
       dividerStrong: Color.lerp(dividerStrong, other.dividerStrong, t)!,
       textPrimary: Color.lerp(textPrimary, other.textPrimary, t)!,
@@ -173,6 +196,7 @@ class AppColors extends ThemeExtension<AppColors> {
       accent: Color.lerp(accent, other.accent, t)!,
       accentPressed: Color.lerp(accentPressed, other.accentPressed, t)!,
       accentSubtle: Color.lerp(accentSubtle, other.accentSubtle, t)!,
+      accentMuted: Color.lerp(accentMuted, other.accentMuted, t)!,
       error: Color.lerp(error, other.error, t)!,
       errorBackground: Color.lerp(errorBackground, other.errorBackground, t)!,
       warning: Color.lerp(warning, other.warning, t)!,
