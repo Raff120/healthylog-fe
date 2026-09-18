@@ -17,14 +17,12 @@ HydrationApi stubHydrationApi({
   List<Map<String, dynamic>> days = const [],
   int? goalMl,
   List<Map<String, dynamic>>? statisticsDaily,
-  int? averageMl,
 }) {
   final dio = Dio(BaseOptions(baseUrl: 'http://example.test'))
     ..httpClientAdapter = _HydrationStubAdapter(
       days: days,
       goalMl: goalMl,
       statisticsDaily: statisticsDaily,
-      averageMl: averageMl,
     )
     ..interceptors.add(ApiErrorInterceptor());
   return HydrationApi(dio);
@@ -35,13 +33,11 @@ class _HydrationStubAdapter implements HttpClientAdapter {
     required this.days,
     required this.goalMl,
     required this.statisticsDaily,
-    required this.averageMl,
   });
 
   final List<Map<String, dynamic>> days;
   final int? goalMl;
   final List<Map<String, dynamic>>? statisticsDaily;
-  final int? averageMl;
 
   @override
   void close({bool force = false}) {}
@@ -73,8 +69,6 @@ class _HydrationStubAdapter implements HttpClientAdapter {
         'to': daily.isEmpty ? '2026-01-01' : daily.last['date'],
         'planId': null,
         'planName': null,
-        'averageMl': averageMl,
-        'averageFrom': daily.isEmpty ? null : daily.first['date'],
         'suspendedDays': 0,
         'uncoveredDays': 0,
         'daily': daily,

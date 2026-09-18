@@ -7,11 +7,25 @@ import '../../../../app/theme/theme_context.dart';
 /// testo con cui il valore si presenta al tocco. [value] assente è
 /// assenza di dati (AD-4): la barra non è disegnata, l'etichetta resta.
 class BarDatum {
-  const BarDatum({required this.label, required this.value, required this.valueLabel});
+  const BarDatum({
+    required this.label,
+    required this.value,
+    required this.valueLabel,
+    this.emphasised = true,
+  });
 
   final String label;
   final double? value;
   final String valueLabel;
+
+  /// AQ-23, 11.1: distingue la barra in accento **pieno** da quella in
+  /// accento **tenue**. L'idratazione se ne vale per le giornate in cui
+  /// l'obiettivo è stato raggiunto; l'aderenza e gli allenamenti, che non
+  /// distinguono alcunché, lasciano il valore predefinito.
+  ///
+  /// La distinzione è di sola evidenza, nella medesima tinta: mai un
+  /// colore di merito, mai un verde e mai un rosso.
+  final bool emphasised;
 }
 
 /// Grafico a barre dell'andamento settimanale (AD-14, SA-11; 11.1, 11.2
@@ -176,7 +190,7 @@ class _Bar extends StatelessWidget {
                 heightFactor: fraction,
                 child: DecoratedBox(
                   decoration: BoxDecoration(
-                    color: colors.accent,
+                    color: datum.emphasised ? colors.accent : colors.accentMuted,
                     borderRadius: const BorderRadius.vertical(
                       top: Radius.circular(AppSpacing.radiusSm),
                     ),

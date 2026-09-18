@@ -22,6 +22,16 @@ Future<WaterIntakeDay> waterIntakeDay(Ref ref, DateTime date) async {
   return days.isEmpty ? WaterIntakeDay.empty(date) : days.first;
 }
 
+/// AQ-28: le giornate dell'orizzonte con le rispettive aggiunte, per
+/// l'elenco da cui si rettifica (11.1 interfaccia.md). Distinto da
+/// [waterStatistics], che porta i totali e non le aggiunte.
+@riverpod
+Future<List<WaterIntakeDay>> waterIntakeDays(
+  Ref ref,
+  ({DateTime from, DateTime to}) range,
+) =>
+    ref.watch(hydrationApiProvider).list(range.from, range.to);
+
 /// AQ-11: l'obiettivo giornaliero vigente, `null` se non impostato.
 @riverpod
 class DailyWaterGoal extends _$DailyWaterGoal {
@@ -73,6 +83,7 @@ class WaterIntakeController extends _$WaterIntakeController {
       state = await AsyncValue.guard(operation);
       if (state?.hasError ?? true) return;
       ref.invalidate(waterIntakeDayProvider);
+      ref.invalidate(waterIntakeDaysProvider);
       ref.invalidate(waterStatisticsProvider);
     } finally {
       link.close();

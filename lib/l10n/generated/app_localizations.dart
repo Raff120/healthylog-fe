@@ -3907,17 +3907,11 @@ abstract class L10n {
   /// **'Bottiglietta'**
   String get waterAmountSmallBottle;
 
-  /// No description provided for @waterAverageFrom.
+  /// No description provided for @waterSectionTitle.
   ///
   /// In it, this message translates to:
-  /// **'La media considera i giorni dal {date}, prima registrazione.'**
-  String waterAverageFrom(String date);
-
-  /// No description provided for @waterAveragePerDay.
-  ///
-  /// In it, this message translates to:
-  /// **'{value} al giorno'**
-  String waterAveragePerDay(String value);
+  /// **'ACQUA'**
+  String get waterSectionTitle;
 
   /// No description provided for @waterCustomAmount.
   ///
@@ -3931,16 +3925,22 @@ abstract class L10n {
   /// **'Aggiungi acqua'**
   String get waterCustomTitle;
 
-  /// No description provided for @waterDayEntries.
+  /// No description provided for @waterEntriesOpen.
   ///
   /// In it, this message translates to:
-  /// **'Aggiunte della giornata'**
-  String get waterDayEntries;
+  /// **'Aggiunte'**
+  String get waterEntriesOpen;
+
+  /// No description provided for @waterEntriesTitle.
+  ///
+  /// In it, this message translates to:
+  /// **'Aggiunte del periodo'**
+  String get waterEntriesTitle;
 
   /// No description provided for @waterGoalHelp.
   ///
   /// In it, this message translates to:
-  /// **'Comparirà nella vista giornaliera accanto al bevuto.'**
+  /// **'Comparirà nelle statistiche come riferimento dell’acqua bevuta.'**
   String get waterGoalHelp;
 
   /// No description provided for @waterGoalLabel.
@@ -3961,23 +3961,11 @@ abstract class L10n {
   /// **'Nessuna aggiunta registrata'**
   String get waterNoEntries;
 
-  /// No description provided for @waterOfGoal.
-  ///
-  /// In it, this message translates to:
-  /// **'di {value}'**
-  String waterOfGoal(String value);
-
   /// No description provided for @waterRemoveEntry.
   ///
   /// In it, this message translates to:
   /// **'Rimuovi questa aggiunta'**
   String get waterRemoveEntry;
-
-  /// No description provided for @waterSectionTitle.
-  ///
-  /// In it, this message translates to:
-  /// **'ACQUA'**
-  String get waterSectionTitle;
 
   /// No description provided for @waterTitle.
   ///

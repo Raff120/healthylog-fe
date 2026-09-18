@@ -22,6 +22,7 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.accent,
     required this.accentPressed,
     required this.accentSubtle,
+    required this.accentMuted,
     required this.error,
     required this.errorBackground,
     required this.warning,
@@ -61,6 +62,12 @@ class AppColors extends ThemeExtension<AppColors> {
   final Color accent;
   final Color accentPressed;
   final Color accentSubtle;
+
+  /// 2.2, 11.1: accento attenuato, per la distinzione di sola evidenza fra
+  /// barre — la giornata che raggiunge l'obiettivo d'acqua e quella che
+  /// non lo raggiunge (AQ-23). Non è un colore di merito: è la medesima
+  /// tinta, meno presente.
+  final Color accentMuted;
   final Color error;
   final Color errorBackground;
   final Color warning;
@@ -84,6 +91,7 @@ class AppColors extends ThemeExtension<AppColors> {
     accent: AppPalette.accentLight,
     accentPressed: AppPalette.accentPressedLight,
     accentSubtle: AppPalette.accentSubtleLight,
+    accentMuted: AppPalette.accentMutedLight,
     error: AppPalette.errorLight,
     errorBackground: AppPalette.errorBackgroundLight,
     warning: AppPalette.warningLight,
@@ -108,6 +116,7 @@ class AppColors extends ThemeExtension<AppColors> {
     accent: AppPalette.accentDark,
     accentPressed: AppPalette.accentPressedDark,
     accentSubtle: AppPalette.accentSubtleDark,
+    accentMuted: AppPalette.accentMutedDark,
     error: AppPalette.errorDark,
     errorBackground: AppPalette.errorBackgroundDark,
     warning: AppPalette.warningDark,
@@ -133,6 +142,7 @@ class AppColors extends ThemeExtension<AppColors> {
     Color? accent,
     Color? accentPressed,
     Color? accentSubtle,
+    Color? accentMuted,
     Color? error,
     Color? errorBackground,
     Color? warning,
@@ -156,6 +166,7 @@ class AppColors extends ThemeExtension<AppColors> {
       accent: accent ?? this.accent,
       accentPressed: accentPressed ?? this.accentPressed,
       accentSubtle: accentSubtle ?? this.accentSubtle,
+      accentMuted: accentMuted ?? this.accentMuted,
       error: error ?? this.error,
       errorBackground: errorBackground ?? this.errorBackground,
       warning: warning ?? this.warning,
@@ -185,6 +196,7 @@ class AppColors extends ThemeExtension<AppColors> {
       accent: Color.lerp(accent, other.accent, t)!,
       accentPressed: Color.lerp(accentPressed, other.accentPressed, t)!,
       accentSubtle: Color.lerp(accentSubtle, other.accentSubtle, t)!,
+      accentMuted: Color.lerp(accentMuted, other.accentMuted, t)!,
       error: Color.lerp(error, other.error, t)!,
       errorBackground: Color.lerp(errorBackground, other.errorBackground, t)!,
       warning: Color.lerp(warning, other.warning, t)!,

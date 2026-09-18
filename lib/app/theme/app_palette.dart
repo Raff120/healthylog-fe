@@ -10,9 +10,16 @@ class AppPalette {
   static const Color accentPressedLight = Color(0xFF4A7BA5);
   static const Color accentSubtleLight = Color(0xFFE9F0F6);
 
+  /// 2.2, 11.1: accento attenuato — la barra di una giornata in cui
+  /// l'obiettivo d'acqua non è stato raggiunto (AQ-23). Sta fra l'accento
+  /// e l'accento tenue: quest'ultimo è un fondo, e una barra di quel
+  /// valore non si vedrebbe.
+  static const Color accentMutedLight = Color(0xFFA9C4DA);
+
   static const Color accentDark = Color(0xFF7FA8CC);
   static const Color accentPressedDark = Color(0xFF93B8D8);
   static const Color accentSubtleDark = Color(0xFF243440);
+  static const Color accentMutedDark = Color(0xFF4A6B85);
 
   // Superficie della barra di navigazione fluttuante (3.2 interfaccia.md),
   // distinta da quella delle card che le scorrono sotto — nessun neutro

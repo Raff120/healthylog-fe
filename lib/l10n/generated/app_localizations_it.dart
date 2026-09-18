@@ -2305,14 +2305,7 @@ class L10nIt extends L10n {
   String get waterAmountSmallBottle => 'Bottiglietta';
 
   @override
-  String waterAverageFrom(String date) {
-    return 'La media considera i giorni dal $date, prima registrazione.';
-  }
-
-  @override
-  String waterAveragePerDay(String value) {
-    return '$value al giorno';
-  }
+  String get waterSectionTitle => 'ACQUA';
 
   @override
   String get waterCustomAmount => 'Quantità';
@@ -2321,11 +2314,14 @@ class L10nIt extends L10n {
   String get waterCustomTitle => 'Aggiungi acqua';
 
   @override
-  String get waterDayEntries => 'Aggiunte della giornata';
+  String get waterEntriesOpen => 'Aggiunte';
+
+  @override
+  String get waterEntriesTitle => 'Aggiunte del periodo';
 
   @override
   String get waterGoalHelp =>
-      'Comparirà nella vista giornaliera accanto al bevuto.';
+      'Comparirà nelle statistiche come riferimento dell’acqua bevuta.';
 
   @override
   String get waterGoalLabel => 'Obiettivo d’acqua';
@@ -2339,15 +2335,7 @@ class L10nIt extends L10n {
   String get waterNoEntries => 'Nessuna aggiunta registrata';
 
   @override
-  String waterOfGoal(String value) {
-    return 'di $value';
-  }
-
-  @override
   String get waterRemoveEntry => 'Rimuovi questa aggiunta';
-
-  @override
-  String get waterSectionTitle => 'ACQUA';
 
   @override
   String get waterTitle => 'Acqua';

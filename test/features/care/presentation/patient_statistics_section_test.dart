@@ -21,7 +21,6 @@ Future<void> _pumpSection(
   Map<String, dynamic>? measurements,
   List<Map<String, dynamic>> waterDays = const [],
   int? waterGoalMl,
-  int? waterAverageMl,
 }) async {
   tester.view.physicalSize = const Size(500, 1200);
   tester.view.devicePixelRatio = 1.0;
@@ -39,7 +38,6 @@ Future<void> _pumpSection(
         hydrationApiProvider.overrideWithValue(stubHydrationApi(
           days: waterDays,
           goalMl: waterGoalMl,
-          averageMl: waterAverageMl,
         )),
       ],
       child: MaterialApp(
@@ -119,7 +117,8 @@ void main() {
 
   /// AQ-14, AQ-31: il consumo d'acqua e l'obiettivo che il Paziente si è
   /// dato, in sola consultazione.
-  testWidgets('presenta il consumo d\'acqua e l\'obiettivo del Paziente (AQ-14)', (tester) async {
+  testWidgets('presenta il consumo d\'acqua per giornata e l\'obiettivo del Paziente (AQ-14)',
+      (tester) async {
     await _pumpSection(
       tester,
       waterDays: [
@@ -127,13 +126,15 @@ void main() {
         {'date': '2026-03-03', 'totalMl': 2200},
       ],
       waterGoalMl: 2000,
-      waterAverageMl: 2000,
     );
 
-    expect(find.text('2 L al giorno'), findsOneWidget);
+    // Una barra per giornata, con la linea dell'obiettivo (AQ-25, AQ-26).
     expect(find.text('Obiettivo 2 L'), findsOneWidget);
-    // AQ-13: nulla consente al Nutrizionista di impostarlo o proporlo.
+    expect(find.text('2 L'), findsWidgets);
+    // AQ-13, AQ-28bis: il Nutrizionista consulta e non rettifica — nessun
+    // comando di impostazione, nessun elenco delle aggiunte.
     expect(find.byType(TextField), findsNothing);
-    expect(find.byType(Slider), findsNothing);
+    expect(find.byKey(const Key('waterEntriesButton')), findsNothing);
+    expect(find.text('Aggiunte'), findsNothing);
   });
 }

@@ -1414,26 +1414,12 @@
   "waterAmountBottle": "Bottiglia",
   "waterAmountGlass": "Bicchiere",
   "waterAmountSmallBottle": "Bottiglietta",
-  "waterAverageFrom": "La media considera i giorni dal {date}, prima registrazione.",
-  "@waterAverageFrom": {
-    "placeholders": {
-      "date": {
-        "type": "String"
-      }
-    }
-  },
-  "waterAveragePerDay": "{value} al giorno",
-  "@waterAveragePerDay": {
-    "placeholders": {
-      "value": {
-        "type": "String"
-      }
-    }
-  },
+  "waterSectionTitle": "ACQUA",
   "waterCustomAmount": "Quantità",
   "waterCustomTitle": "Aggiungi acqua",
-  "waterDayEntries": "Aggiunte della giornata",
-  "waterGoalHelp": "Comparirà nella vista giornaliera accanto al bevuto.",
+  "waterEntriesOpen": "Aggiunte",
+  "waterEntriesTitle": "Aggiunte del periodo",
+  "waterGoalHelp": "Comparirà nelle statistiche come riferimento dell’acqua bevuta.",
   "waterGoalLabel": "Obiettivo d’acqua",
   "waterGoalReference": "Obiettivo {value}",
   "@waterGoalReference": {
@@ -1444,7 +1430,6 @@
     }
   },
   "waterNoEntries": "Nessuna aggiunta registrata",
-  "waterOfGoal": "di {value}",
   "@waterOfGoal": {
     "placeholders": {
       "value": {
@@ -1453,7 +1438,6 @@
     }
   },
   "waterRemoveEntry": "Rimuovi questa aggiunta",
-  "waterSectionTitle": "ACQUA",
   "waterTitle": "Acqua",
   "workoutActivityBasketball": "Basket",
   "workoutActivityBoxing": "Boxe",

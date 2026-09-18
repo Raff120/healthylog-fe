@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../app/theme/app_spacing.dart';
 import '../../../../app/theme/theme_context.dart';
+import '../../../../l10n/formats.dart';
 import '../../../../l10n/l10n_context.dart';
 import '../../../dietplan/presentation/slot_type_presentation.dart';
 import '../../../hydration/presentation/hydration_formatting.dart';
@@ -13,6 +14,7 @@ import '../../../identity/providers/profile_providers.dart';
 import '../../../statistics/presentation/statistics_presentation.dart';
 import '../../../statistics/presentation/widgets/breakdown_row.dart';
 import '../../../statistics/presentation/widgets/statistics_headline.dart';
+import '../../../statistics/presentation/widgets/weekly_bar_chart.dart';
 import '../../../statistics/providers/statistics_providers.dart';
 
 /// Statistiche del Paziente nel dettaglio del Nutrizionista (9.2
@@ -143,13 +145,14 @@ class _Workouts extends ConsumerWidget {
   }
 }
 
-/// AQ-14, AQ-31: il consumo d'acqua del Paziente e l'obiettivo che si è
-/// dato, in sola lettura e nei limiti della circoscrizione — le giornate
-/// fuori dai periodi di titolarità non sono restituite e non si
-/// distinguono da quelle in cui nulla è stato bevuto (CS-13).
+/// AQ-14, AQ-31: il consumo d'acqua del Paziente, giornata per giornata,
+/// in sola lettura e nei limiti della circoscrizione — le giornate fuori
+/// dai periodi di titolarità non sono restituite e non si distinguono da
+/// quelle in cui nulla è stato bevuto (CS-13).
 ///
-/// AQ-13: nulla qui consente di impostare o proporre un obiettivo. È
-/// elemento di contesto nella valutazione dell'andamento (NU-4), come
+/// AQ-13, AQ-28bis: nulla qui consente di impostare o proporre un
+/// obiettivo, né di annullare alcuna aggiunta: il Nutrizionista consulta.
+/// È elemento di contesto nella valutazione dell'andamento (NU-4), come
 /// l'obiettivo settimanale di allenamento.
 class _Water extends ConsumerWidget {
   const _Water({required this.query});
@@ -165,32 +168,54 @@ class _Water extends ConsumerWidget {
 
     return statistics.maybeWhen(
       orElse: () => const SizedBox.shrink(),
-      data: (data) => Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          const SizedBox(height: AppSpacing.md),
-          Text(
-            data.isEmpty
-                // 9.2: l'interruzione non è spiegata oltre — la ragione
-                // attiene a piani che il Nutrizionista non deve conoscere.
-                ? context.l10n.statisticsNoDataForPeriod
-                : context.l10n.waterAveragePerDay(formatVolume(context, data.averageMl!, units)),
-            style: typography.bodyLarge.copyWith(
-              color: data.isEmpty ? colors.textSecondary : colors.textPrimary,
-            ),
-          ),
-          // AQ-11, AQ-26: l'obiettivo compare se in quelle giornate ve
-          // n'era uno e se ricadono nei periodi di titolarità; altrimenti
-          // nulla, senza segnalarne la mancanza.
-          if (data.referenceGoalMl case final goal?)
+      data: (data) {
+        final goal = data.referenceGoalMl;
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            const SizedBox(height: AppSpacing.md),
             Text(
-              context.l10n.waterGoalReference(formatVolume(context, goal, units)),
-              style: typography.bodyMedium.copyWith(color: colors.textSecondary),
+              context.l10n.waterSectionTitle,
+              style: typography.overline.copyWith(color: colors.textTertiary),
             ),
-          const SizedBox(height: AppSpacing.md),
-          Divider(height: 1, color: colors.dividerLight),
-        ],
-      ),
+            const SizedBox(height: AppSpacing.xs),
+            if (data.isEmpty)
+              // 9.2: l'interruzione non è spiegata oltre — la ragione
+              // attiene a piani che il Nutrizionista non deve conoscere.
+              Text(
+                context.l10n.statisticsNoDataForPeriod,
+                style: typography.bodyMedium.copyWith(color: colors.textSecondary),
+              )
+            else ...[
+              WeeklyBarChart(
+                bars: [
+                  for (final day in data.daily)
+                    BarDatum(
+                      label: formatDayOfMonth(context, day.date),
+                      value: day.totalMl.toDouble(),
+                      valueLabel: formatVolume(context, day.totalMl, units),
+                      emphasised: day.goalReached,
+                    ),
+                ],
+                referenceValue: goal?.toDouble(),
+                referenceLabel: goal == null ? null : formatVolume(context, goal, units),
+              ),
+              // AQ-14: l'obiettivo che il Paziente si è dato, quale
+              // elemento di contesto. Compare se in quelle giornate ve
+              // n'era uno e se ricadono nei periodi di titolarità.
+              if (goal != null) ...[
+                const SizedBox(height: AppSpacing.xxs),
+                Text(
+                  context.l10n.waterGoalReference(formatVolume(context, goal, units)),
+                  style: typography.caption.copyWith(color: colors.textSecondary),
+                ),
+              ],
+            ],
+            const SizedBox(height: AppSpacing.md),
+            Divider(height: 1, color: colors.dividerLight),
+          ],
+        );
+      },
     );
   }
 }

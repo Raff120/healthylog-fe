@@ -2288,14 +2288,7 @@ class L10nEn extends L10n {
   String get waterAmountSmallBottle => 'Small bottle';
 
   @override
-  String waterAverageFrom(String date) {
-    return 'The average counts the days from $date, the first entry.';
-  }
-
-  @override
-  String waterAveragePerDay(String value) {
-    return '$value per day';
-  }
+  String get waterSectionTitle => 'WATER';
 
   @override
   String get waterCustomAmount => 'Amount';
@@ -2304,11 +2297,14 @@ class L10nEn extends L10n {
   String get waterCustomTitle => 'Add water';
 
   @override
-  String get waterDayEntries => 'Additions for the day';
+  String get waterEntriesOpen => 'Additions';
+
+  @override
+  String get waterEntriesTitle => 'Additions in the period';
 
   @override
   String get waterGoalHelp =>
-      'It will appear in the daily view next to what you drank.';
+      'It will appear in the statistics as a reference for the water you drank.';
 
   @override
   String get waterGoalLabel => 'Daily water goal';
@@ -2322,15 +2318,7 @@ class L10nEn extends L10n {
   String get waterNoEntries => 'No additions recorded';
 
   @override
-  String waterOfGoal(String value) {
-    return 'of $value';
-  }
-
-  @override
   String get waterRemoveEntry => 'Remove this addition';
-
-  @override
-  String get waterSectionTitle => 'WATER';
 
   @override
   String get waterTitle => 'Water';

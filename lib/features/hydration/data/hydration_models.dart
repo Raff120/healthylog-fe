@@ -62,6 +62,11 @@ class WaterDay {
   final int totalMl;
   final int? goalMl;
 
+  /// AQ-23, EP-11: il raggiungimento non è un campo della risposta ma il
+  /// confronto fra i due valori, che si compie qui — nel dominio non
+  /// esiste, perché il dominio non giudica.
+  bool get goalReached => goalMl != null && totalMl >= goalMl!;
+
   static WaterDay fromJson(Map<String, dynamic> json) => WaterDay(
         date: DateTime.parse(json['date'] as String),
         totalMl: json['totalMl'] as int,
@@ -72,24 +77,14 @@ class WaterDay {
 /// Statistiche dell'idratazione (8.6 funzionale). Rispecchia
 /// `WaterStatisticsResponse`.
 ///
-/// [averageMl] nullo significa che nell'orizzonte non vi è alcuna
-/// registrazione: il segmento presenta allora la constatazione neutra di
-/// AD-4, non uno zero. [averageFrom] è la giornata da cui la media muove
-/// (AQ-28), che la presentazione dichiara quando non coincide con
-/// l'inizio dell'orizzonte.
+/// **Nessun valore aggregato** (EP-10): quanta acqua in ciascuna giornata
+/// e quale obiettivo vi fosse in vigore, e nient'altro. La media
+/// giornaliera della prima stesura è soppressa.
 class WaterStatistics {
-  const WaterStatistics({
-    required this.from,
-    required this.to,
-    required this.averageMl,
-    required this.averageFrom,
-    required this.daily,
-  });
+  const WaterStatistics({required this.from, required this.to, required this.daily});
 
   final DateTime from;
   final DateTime to;
-  final int? averageMl;
-  final DateTime? averageFrom;
   final List<WaterDay> daily;
 
   /// AQ-26: l'obiettivo da rappresentare come linea di riferimento è
@@ -102,14 +97,14 @@ class WaterStatistics {
     return null;
   }
 
-  bool get isEmpty => averageMl == null;
+  /// AQ-27, AD-4: nessuna registrazione nell'orizzonte. Le giornate
+  /// figurano comunque, a zero: è la presentazione a sostituirvi la
+  /// constatazione neutra, non uno zero.
+  bool get isEmpty => daily.every((day) => day.totalMl == 0);
 
   static WaterStatistics fromJson(Map<String, dynamic> json) => WaterStatistics(
         from: DateTime.parse(json['from'] as String),
         to: DateTime.parse(json['to'] as String),
-        averageMl: json['averageMl'] as int?,
-        averageFrom:
-            json['averageFrom'] == null ? null : DateTime.parse(json['averageFrom'] as String),
         daily: (json['daily'] as List)
             .map((e) => WaterDay.fromJson(e as Map<String, dynamic>))
             .toList(),

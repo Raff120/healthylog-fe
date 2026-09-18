@@ -159,6 +159,106 @@ final class WaterIntakeDayFamily extends $Family
   String toString() => r'waterIntakeDayProvider';
 }
 
+/// AQ-28: le giornate dell'orizzonte con le rispettive aggiunte, per
+/// l'elenco da cui si rettifica (11.1 interfaccia.md). Distinto da
+/// [waterStatistics], che porta i totali e non le aggiunte.
+
+@ProviderFor(waterIntakeDays)
+final waterIntakeDaysProvider = WaterIntakeDaysFamily._();
+
+/// AQ-28: le giornate dell'orizzonte con le rispettive aggiunte, per
+/// l'elenco da cui si rettifica (11.1 interfaccia.md). Distinto da
+/// [waterStatistics], che porta i totali e non le aggiunte.
+
+final class WaterIntakeDaysProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<List<WaterIntakeDay>>,
+          List<WaterIntakeDay>,
+          FutureOr<List<WaterIntakeDay>>
+        >
+    with
+        $FutureModifier<List<WaterIntakeDay>>,
+        $FutureProvider<List<WaterIntakeDay>> {
+  /// AQ-28: le giornate dell'orizzonte con le rispettive aggiunte, per
+  /// l'elenco da cui si rettifica (11.1 interfaccia.md). Distinto da
+  /// [waterStatistics], che porta i totali e non le aggiunte.
+  WaterIntakeDaysProvider._({
+    required WaterIntakeDaysFamily super.from,
+    required ({DateTime from, DateTime to}) super.argument,
+  }) : super(
+         retry: null,
+         name: r'waterIntakeDaysProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$waterIntakeDaysHash();
+
+  @override
+  String toString() {
+    return r'waterIntakeDaysProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  $FutureProviderElement<List<WaterIntakeDay>> $createElement(
+    $ProviderPointer pointer,
+  ) => $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<List<WaterIntakeDay>> create(Ref ref) {
+    final argument = this.argument as ({DateTime from, DateTime to});
+    return waterIntakeDays(ref, argument);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is WaterIntakeDaysProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$waterIntakeDaysHash() => r'3041a776422b408859acbd76b4c14fa72c2514bd';
+
+/// AQ-28: le giornate dell'orizzonte con le rispettive aggiunte, per
+/// l'elenco da cui si rettifica (11.1 interfaccia.md). Distinto da
+/// [waterStatistics], che porta i totali e non le aggiunte.
+
+final class WaterIntakeDaysFamily extends $Family
+    with
+        $FunctionalFamilyOverride<
+          FutureOr<List<WaterIntakeDay>>,
+          ({DateTime from, DateTime to})
+        > {
+  WaterIntakeDaysFamily._()
+    : super(
+        retry: null,
+        name: r'waterIntakeDaysProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  /// AQ-28: le giornate dell'orizzonte con le rispettive aggiunte, per
+  /// l'elenco da cui si rettifica (11.1 interfaccia.md). Distinto da
+  /// [waterStatistics], che porta i totali e non le aggiunte.
+
+  WaterIntakeDaysProvider call(({DateTime from, DateTime to}) range) =>
+      WaterIntakeDaysProvider._(argument: range, from: this);
+
+  @override
+  String toString() => r'waterIntakeDaysProvider';
+}
+
 /// AQ-11: l'obiettivo giornaliero vigente, `null` se non impostato.
 
 @ProviderFor(DailyWaterGoal)
@@ -346,7 +446,7 @@ final class WaterIntakeControllerProvider
 }
 
 String _$waterIntakeControllerHash() =>
-    r'78469f57e8f865a597669d2290f69e7575922264';
+    r'6e826d892a06be9050f2d9db59ad13af80c1f4ac';
 
 /// AQ-5, AQ-7, AQ-8: aggiunta e annullamento. Ogni esito rinnova la
 /// giornata e le statistiche per invalidazione, come i controller degli
