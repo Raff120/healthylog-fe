@@ -12,9 +12,11 @@ import '../../notification/presentation/widgets/notification_bell.dart';
 import '../data/statistics_models.dart';
 import '../providers/statistics_providers.dart';
 import 'adherence_view.dart';
+import 'widgets/statistics_period_navigator.dart';
 import 'widgets/statistics_period_selector.dart';
 import 'body_statistics_view.dart';
 import 'workout_statistics_view.dart';
+import '../../../app/navigation/bottom_bar_insets.dart';
 
 /// *Statistiche* (11 interfaccia.md): terza destinazione dell'Utente.
 ///
@@ -83,30 +85,55 @@ class StatisticsScreen extends ConsumerWidget {
       // (vedi decisioni.md). Resta disponibile anche quando il periodo
       // non ne contiene alcuna — è anzi allora che serve.
       floatingActionButton: mode == StatisticsViewMode.body
-          ? FloatingActionButton(
-              onPressed: () => showMeasurementSheet(context),
-              backgroundColor: colors.accent,
-              foregroundColor: colors.surface,
-              tooltip: context.l10n.measurementRecord,
-              child: const Icon(Icons.add),
+          ? Padding(
+              // 3.2: il pulsante mobile scavalca la barra fluttuante.
+              padding: EdgeInsets.only(bottom: bottomBarFabInset(context)),
+              child: FloatingActionButton(
+                onPressed: () => showMeasurementSheet(context),
+                backgroundColor: colors.accent,
+                foregroundColor: colors.surface,
+                tooltip: context.l10n.measurementRecord,
+                child: const Icon(Icons.add),
+              ),
             )
           : null,
+      // 3.2: il contenuto scorre sotto la barra fluttuante.
       body: SafeArea(
-        child: period.when(
-          loading: () => const Center(child: CircularProgressIndicator()),
-          error: (_, _) => const _PeriodSelectorFallback(),
-          data: (selectedPeriod) => _Content(
-            mode: mode,
-            query: StatisticsQuery(
-              period: selectedPeriod,
-              // 7.5: fuori dal dettaglio di un piano concluso non si
-              // indica alcun piano, e il backend intende quello in corso
-              // (PA-8).
-              planId: selectedPeriod == StatisticsPeriod.plan
-                  ? (planId ?? ref.watch(selectedStatisticsPlanProvider))
-                  : null,
+        bottom: false,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // AD-8bis: la navigazione fra i periodi sta accanto al
+            // selettore dell'orizzonte, fuori dal contenuto — che nel
+            // segmento *Corpo* privo di misurazioni è una constatazione
+            // di assenza, e porterebbe via con sé il comando proprio dove
+            // serve.
+            const StatisticsPeriodNavigator(),
+            Expanded(
+              child: period.when(
+                loading: () => const Center(child: CircularProgressIndicator()),
+                error: (_, _) => const _PeriodSelectorFallback(),
+                data: (selectedPeriod) => _Content(
+                  mode: mode,
+                  query: StatisticsQuery(
+                    period: selectedPeriod,
+                    // AD-8bis: la data cui l'orizzonte si riferisce.
+                    // L'orizzonte *Piano* non se ne serve: là il periodo è
+                    // il piano.
+                    date: selectedPeriod == StatisticsPeriod.plan
+                        ? null
+                        : ref.watch(selectedStatisticsDateProvider),
+                    // 7.5: fuori dal dettaglio di un piano concluso non si
+                    // indica alcun piano, e il backend intende quello in
+                    // corso (PA-8).
+                    planId: selectedPeriod == StatisticsPeriod.plan
+                        ? (planId ?? ref.watch(selectedStatisticsPlanProvider))
+                        : null,
+                  ),
+                ),
+              ),
             ),
-          ),
+          ],
         ),
       ),
     );

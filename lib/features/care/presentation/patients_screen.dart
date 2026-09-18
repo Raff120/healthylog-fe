@@ -17,6 +17,7 @@ import 'patient_detail_screen.dart';
 import 'patient_sort_presentation.dart';
 import 'widgets/invite_patient_sheet.dart';
 import 'widgets/patient_tile.dart';
+import '../../../app/navigation/bottom_bar_insets.dart';
 
 /// *Pazienti* (9.1 interfaccia.md; NU-1, VA-1..VA-9): destinazione
 /// iniziale del Nutrizionista. Richieste pendenti in cima (VA-9), elenco
@@ -93,7 +94,12 @@ class _PatientsScreenState extends ConsumerState<PatientsScreen> {
           );
         }
         return ListView(
-          padding: const EdgeInsets.fromLTRB(AppSpacing.md, AppSpacing.md, AppSpacing.md, AppSpacing.xxl * 2),
+          padding: EdgeInsets.fromLTRB(
+            AppSpacing.md,
+            AppSpacing.md,
+            AppSpacing.md,
+            AppSpacing.xxl * 2 + bottomBarInset(context),
+          ),
           children: [
             if (requests.isNotEmpty) ...[
               Text(context.l10n.patientsPendingRequests, style: typography.overline.copyWith(color: colors.textTertiary)),
@@ -183,12 +189,17 @@ class _PatientsScreenState extends ConsumerState<PatientsScreen> {
         actions: const [NotificationBell()],
       ),
       // 9.1 interfaccia.md: "Pulsante mobile, icona user-plus. Conduce a 9.3".
-      floatingActionButton: FloatingActionButton(
-        onPressed: _invite,
-        tooltip: context.l10n.patientsInvite,
-        child: const Icon(Icons.person_add_alt_1_outlined),
+      floatingActionButton: Padding(
+        // 3.2: il pulsante mobile scavalca la barra fluttuante.
+        padding: EdgeInsets.only(bottom: bottomBarFabInset(context)),
+        child: FloatingActionButton(
+          onPressed: _invite,
+          tooltip: context.l10n.patientsInvite,
+          child: const Icon(Icons.person_add_alt_1_outlined),
+        ),
       ),
-      body: SafeArea(child: body),
+      // 3.2: il contenuto scorre sotto la barra fluttuante.
+      body: SafeArea(bottom: false, child: body),
     );
   }
 }

@@ -4,9 +4,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../app/theme/app_spacing.dart';
 import '../../../../app/theme/theme_context.dart';
 import '../../providers/workout_providers.dart';
+import '../workout_activity_presentation.dart';
 
 /// Allenamenti in coda al pannello del giorno nella vista settimanale
-/// (AL-12, VS-6, 6.4 interfaccia.md): il solo tipo di attività e lo stato
+/// (AL-12, VS-6, 6.4 interfaccia.md): la sola denominazione dello sport e lo stato
 /// di svolgimento, **senza possibilità di registrazione** — quella
 /// avviene dalla destinazione *Allenamenti* (RA-4), o dalla vista
 /// giornaliera con la spunta di un allenamento previsto (RA-3).
@@ -34,9 +35,19 @@ class WeekDayWorkouts extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Divider(height: AppSpacing.sm, color: colors.dividerLight),
-          for (final workout in day.recorded) _Row(label: workout.activityType, done: true),
+          // AL-2: la denominazione discende dal codice, nella lingua
+          // corrente. La cella settimanale è troppo stretta perché
+          // all'icona di stato se ne affianchi una seconda (VS-6).
+          for (final workout in day.recorded)
+            _Row(
+              label: workoutActivityName(context, workout.activityCode, workout.activityType),
+              done: true,
+            ),
           for (final planned in day.pendingPlanned)
-            _Row(label: planned.activityType, done: false),
+            _Row(
+              label: workoutActivityName(context, planned.activityCode, planned.activityType),
+              done: false,
+            ),
         ],
       ),
     );

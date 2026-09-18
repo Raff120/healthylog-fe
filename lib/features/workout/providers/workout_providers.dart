@@ -1,6 +1,7 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../core/api/api_client.dart';
+import '../data/workout_activity.dart';
 import '../data/workout_api.dart';
 import '../data/workout_models.dart';
 import '../data/workout_requests.dart';
@@ -10,30 +11,36 @@ part 'workout_providers.g.dart';
 @riverpod
 WorkoutApi workoutApi(Ref ref) => WorkoutApi(ref.watch(apiClientProvider));
 
-/// RA-12: i filtri dell'elenco — tipo di attività e periodo — presentati
-/// come chip rimovibili singolarmente sotto l'intestazione.
+/// RA-12: i filtri dell'elenco — sport e periodo — presentati come chip
+/// rimovibili singolarmente sotto l'intestazione.
+///
+/// AL-2: [customName] accompagna [WorkoutActivity.other], dove la
+/// denominazione è tutto ciò che distingue un'attività dall'altra; per
+/// ogni altro sport è nullo e il filtro si fonda sul solo codice.
 class WorkoutFilters {
-  const WorkoutFilters({this.activityType, this.from, this.to});
+  const WorkoutFilters({this.activity, this.customName, this.from, this.to});
 
-  final String? activityType;
+  final WorkoutActivity? activity;
+  final String? customName;
   final DateTime? from;
   final DateTime? to;
 
-  bool get isEmpty => activityType == null && from == null && to == null;
+  bool get isEmpty => activity == null && from == null && to == null;
 
-  WorkoutFilters withoutActivityType() => WorkoutFilters(from: from, to: to);
+  WorkoutFilters withoutActivity() => WorkoutFilters(from: from, to: to);
 
-  WorkoutFilters withoutPeriod() => WorkoutFilters(activityType: activityType);
+  WorkoutFilters withoutPeriod() => WorkoutFilters(activity: activity, customName: customName);
 
   @override
   bool operator ==(Object other) =>
       other is WorkoutFilters &&
-      other.activityType == activityType &&
+      other.activity == activity &&
+      other.customName == customName &&
       other.from == from &&
       other.to == to;
 
   @override
-  int get hashCode => Object.hash(activityType, from, to);
+  int get hashCode => Object.hash(activity, customName, from, to);
 }
 
 @riverpod
@@ -56,15 +63,16 @@ class Workouts extends _$Workouts {
     return ref.read(workoutApiProvider).list(
           from: filters.from,
           to: filters.to,
-          activityType: filters.activityType,
+          activityCode: filters.activity,
+          activityType: filters.customName,
         );
   }
 }
 
-/// AL-2: i tipi già impiegati, per i suggerimenti del campo (10.2
-/// interfaccia.md) e per le voci del filtro (RA-12).
+/// AL-2: gli sport già impiegati, che il selettore porta in cima (10.2
+/// interfaccia.md) e da cui il filtro ricava le voci (RA-12).
 @riverpod
-Future<List<String>> workoutActivityTypes(Ref ref) => ref.watch(workoutApiProvider).activityTypes();
+Future<List<WorkoutActivityUsage>> workoutActivities(Ref ref) => ref.watch(workoutApiProvider).activities();
 
 /// AL-9: la pianificazione vigente, che la card di 10.1 presenta.
 @riverpod
@@ -134,7 +142,7 @@ class WorkoutController extends _$WorkoutController {
 
   void _invalidateReads() {
     ref.invalidate(workoutsProvider);
-    ref.invalidate(workoutActivityTypesProvider);
+    ref.invalidate(workoutActivitiesProvider);
     ref.invalidate(dayWorkoutsProvider);
     ref.invalidate(weekWorkoutsProvider);
   }

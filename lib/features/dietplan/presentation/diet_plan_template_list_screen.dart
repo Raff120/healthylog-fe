@@ -13,6 +13,7 @@ import '../data/diet_plan_template.dart';
 import '../data/diet_plan_template_requests.dart';
 import '../providers/diet_plan_template_providers.dart';
 import 'widgets/name_description_dialog.dart';
+import '../../../app/navigation/bottom_bar_insets.dart';
 
 /// Elenco dei template (7.4 interfaccia.md, CT-2, CT-3): raggiunto per ora
 /// da un punto d'accesso provvisorio (nessuna schermata "Piani" esiste
@@ -63,13 +64,19 @@ class DietPlanTemplateListScreen extends ConsumerWidget {
         // dell'intestazione.
         actions: const [NotificationBell()],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: creating ? null : () => _create(context, ref),
-        child: creating
-            ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
-            : const Icon(Icons.add),
+      floatingActionButton: Padding(
+        // 3.2: il pulsante mobile scavalca la barra fluttuante.
+        padding: EdgeInsets.only(bottom: bottomBarFabInset(context)),
+        child: FloatingActionButton(
+          onPressed: creating ? null : () => _create(context, ref),
+          child: creating
+              ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
+              : const Icon(Icons.add),
+        ),
       ),
+      // 3.2: il contenuto scorre sotto la barra fluttuante.
       body: SafeArea(
+        bottom: false,
         child: listState.when(
           loading: () => const Center(child: CircularProgressIndicator()),
           error: (error, _) => Center(
@@ -92,7 +99,12 @@ class DietPlanTemplateListScreen extends ConsumerWidget {
               );
             }
             return ListView.separated(
-              padding: const EdgeInsets.fromLTRB(AppSpacing.md, AppSpacing.md, AppSpacing.md, AppSpacing.xxl),
+              padding: EdgeInsets.fromLTRB(
+                AppSpacing.md,
+                AppSpacing.md,
+                AppSpacing.md,
+                AppSpacing.xxl + bottomBarInset(context),
+              ),
               itemCount: templates.length,
               separatorBuilder: (context, index) => const SizedBox(height: AppSpacing.sm),
               itemBuilder: (context, index) {

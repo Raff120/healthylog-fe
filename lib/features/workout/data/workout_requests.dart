@@ -1,3 +1,4 @@
+import 'workout_activity.dart';
 import 'workout_models.dart';
 
 String _isoDate(DateTime date) {
@@ -7,12 +8,14 @@ String _isoDate(DateTime date) {
       '${local.day.toString().padLeft(2, '0')}';
 }
 
-/// Corpo di `POST /workouts` (RA-4). [activityType] è assente quando la
-/// registrazione nasce dalla spunta di un allenamento previsto: il tipo è
-/// ereditato dalla pianificazione (AL-13, RA-3).
+/// Corpo di `POST /workouts` (RA-4). [activityCode] e [activityType] sono
+/// assenti quando la registrazione nasce dalla spunta di un allenamento
+/// previsto: sport e denominazione sono ereditati dalla pianificazione
+/// (AL-13, RA-3).
 class CreateWorkoutRequest {
   const CreateWorkoutRequest({
     required this.date,
+    this.activityCode,
     this.activityType,
     this.caloriesBurned,
     this.note,
@@ -20,6 +23,7 @@ class CreateWorkoutRequest {
   });
 
   final DateTime date;
+  final WorkoutActivity? activityCode;
   final String? activityType;
   final int? caloriesBurned;
   final String? note;
@@ -27,6 +31,7 @@ class CreateWorkoutRequest {
 
   Map<String, dynamic> toJson() => {
         'date': _isoDate(date),
+        'activityCode': activityCode?.param,
         'activityType': activityType,
         'caloriesBurned': caloriesBurned,
         'note': note,
@@ -39,18 +44,21 @@ class CreateWorkoutRequest {
 class UpdateWorkoutRequest {
   const UpdateWorkoutRequest({
     required this.date,
+    required this.activityCode,
     required this.activityType,
     this.caloriesBurned,
     this.note,
   });
 
   final DateTime date;
+  final WorkoutActivity activityCode;
   final String activityType;
   final int? caloriesBurned;
   final String? note;
 
   Map<String, dynamic> toJson() => {
         'date': _isoDate(date),
+        'activityCode': activityCode.param,
         'activityType': activityType,
         'caloriesBurned': caloriesBurned,
         'note': note,
@@ -61,23 +69,29 @@ class UpdateWorkoutRequest {
 class CreatePlannedWorkoutRequest {
   const CreatePlannedWorkoutRequest.weekly({
     required this.daysOfWeek,
+    required this.activityCode,
     required this.activityType,
   })  : recurrence = WorkoutRecurrence.weekly,
         date = null;
 
-  const CreatePlannedWorkoutRequest.oneOff({required this.date, required this.activityType})
-      : recurrence = WorkoutRecurrence.oneOff,
+  const CreatePlannedWorkoutRequest.oneOff({
+    required this.date,
+    required this.activityCode,
+    required this.activityType,
+  })  : recurrence = WorkoutRecurrence.oneOff,
         daysOfWeek = const [];
 
   final WorkoutRecurrence recurrence;
   final List<Weekday> daysOfWeek;
   final DateTime? date;
+  final WorkoutActivity activityCode;
   final String activityType;
 
   Map<String, dynamic> toJson() => {
         'recurrence': recurrence.param,
         'daysOfWeek': daysOfWeek.map((day) => day.param).toList(),
         'date': date == null ? null : _isoDate(date!),
+        'activityCode': activityCode.param,
         'activityType': activityType,
       };
 }
@@ -85,16 +99,19 @@ class CreatePlannedWorkoutRequest {
 /// Corpo di `PATCH /planned-workouts/{id}` (AL-16, DS-14).
 class UpdatePlannedWorkoutRequest {
   const UpdatePlannedWorkoutRequest({
+    required this.activityCode,
     required this.activityType,
     this.daysOfWeek = const [],
     this.date,
   });
 
+  final WorkoutActivity activityCode;
   final String activityType;
   final List<Weekday> daysOfWeek;
   final DateTime? date;
 
   Map<String, dynamic> toJson() => {
+        'activityCode': activityCode.param,
         'activityType': activityType,
         'daysOfWeek': daysOfWeek.map((day) => day.param).toList(),
         'date': date == null ? null : _isoDate(date!),

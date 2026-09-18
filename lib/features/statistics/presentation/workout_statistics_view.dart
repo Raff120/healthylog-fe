@@ -4,11 +4,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../app/theme/app_spacing.dart';
 import '../../../app/theme/theme_context.dart';
 import '../../../l10n/l10n_context.dart';
+import '../../workout/presentation/workout_activity_presentation.dart';
 import '../data/statistics_models.dart';
 import 'statistics_formatting.dart';
 import 'widgets/breakdown_row.dart';
 import 'widgets/statistics_headline.dart';
 import 'widgets/weekly_bar_chart.dart';
+import '../../../app/navigation/bottom_bar_insets.dart';
 
 /// Segmento **Allenamenti** di *Statistiche* (11.2 interfaccia.md):
 /// numero di sessioni, confronto con l'obiettivo, confronto con la
@@ -35,17 +37,28 @@ class WorkoutStatisticsView extends ConsumerWidget {
     final maxByType = statistics.byActivityType.isEmpty ? 1 : statistics.byActivityType.first.count;
 
     return ListView(
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.xs),
+      padding: EdgeInsets.fromLTRB(
+        AppSpacing.md,
+        AppSpacing.xs,
+        AppSpacing.md,
+        AppSpacing.xs + bottomBarInset(context),
+      ),
       children: [
         StatisticsHeadline(
           value: '${statistics.total}',
           unit: statistics.total == 1 ? 'allenamento' : 'allenamenti',
-          caption: describePeriod(context, 
-            statistics.period,
-            statistics.from,
-            statistics.to,
-            statistics.planName,
-          ),
+          // AD-8bis: su settimana e mese il periodo è già nel navigatore,
+          // per esteso. Sul piano no — là il navigatore porta il solo nome —
+          // e la didascalia ne dichiara l'intervallo.
+          caption: statistics.period == StatisticsPeriod.plan
+              ? describePeriod(
+                  context,
+                  statistics.period,
+                  statistics.from,
+                  statistics.to,
+                  statistics.planName,
+                )
+              : null,
         ),
         // SA-15: sull'orizzonte del piano i giorni di sospensione, esclusi
         // dall'aderenza, concorrono invece qui per intero (SA-14).
@@ -125,7 +138,8 @@ class WorkoutStatisticsView extends ConsumerWidget {
                   children: [
                     for (final entry in statistics.byActivityType)
                       BreakdownRow(
-                        label: entry.activityType,
+                        icon: workoutActivityIcon(entry.activityCode),
+                        label: workoutActivityName(context, entry.activityCode, entry.activityType),
                         value: '${entry.count}',
                         fraction: entry.count / maxByType,
                       ),

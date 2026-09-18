@@ -13,6 +13,7 @@ import '../../identity/providers/profile_providers.dart';
 import 'statistics_presentation.dart';
 import 'widgets/measure_line_chart.dart';
 import 'widgets/statistics_headline.dart';
+import '../../../app/navigation/bottom_bar_insets.dart';
 
 /// Segmento **Corpo** di *Statistiche* (11.3 interfaccia.md): selettore
 /// della misura, grafico, variazione nel periodo ed elenco delle
@@ -65,7 +66,7 @@ class BodyStatisticsView extends ConsumerWidget {
     );
 
     return ListView(
-      padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
+      padding: EdgeInsets.fromLTRB(0, AppSpacing.xs, 0, AppSpacing.xs + bottomBarInset(context)),
       children: [
         // AN-1, AN-2: chip scorribili con le sole misure per le quali
         // esistano registrazioni nel periodo. Una misura per volta.
@@ -117,12 +118,16 @@ class BodyStatisticsView extends ConsumerWidget {
                     ? null
                     : _formatChange(context, bodyMeasureToDisplay(series.measure, series.change!, units)),
                 unit: series.change == null ? null : bodyMeasureUnit(context, series.measure, units),
-                caption: describePeriod(context, 
-                  statistics.period,
-                  statistics.from,
-                  statistics.to,
-                  statistics.planName,
-                ),
+                // AD-8bis: vedi `WorkoutStatisticsView`.
+                caption: statistics.period == StatisticsPeriod.plan
+                    ? describePeriod(
+                        context,
+                        statistics.period,
+                        statistics.from,
+                        statistics.to,
+                        statistics.planName,
+                      )
+                    : null,
                 emptyText: context.l10n.bodyStatsSingleValue,
               ),
               // AN-5: la legenda della fonte compare solo se le due fonti

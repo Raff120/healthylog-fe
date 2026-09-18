@@ -15,6 +15,7 @@ import '../../providers/meal_swap_providers.dart';
 import '../../providers/plan_day_providers.dart';
 import '../weekday_presentation.dart';
 import 'week_slot_row.dart';
+import '../../../../app/navigation/bottom_bar_insets.dart';
 
 /// Contenuto della vista settimanale (6.2 funzionale, VS-1; 6.4
 /// interfaccia.md): i sette giorni della settimana che inizia a
@@ -84,7 +85,12 @@ class _WeekPanelList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListView.separated(
-      padding: const EdgeInsets.fromLTRB(AppSpacing.md, AppSpacing.sm, AppSpacing.md, AppSpacing.xxl),
+      padding: EdgeInsets.fromLTRB(
+        AppSpacing.md,
+        AppSpacing.sm,
+        AppSpacing.md,
+        AppSpacing.xxl + bottomBarInset(context),
+      ),
       itemCount: days.length,
       separatorBuilder: (context, index) => const SizedBox(height: AppSpacing.xs),
       itemBuilder: (context, index) => _DayCard(
@@ -106,7 +112,12 @@ class _WeekGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(AppSpacing.md),
+      padding: EdgeInsets.fromLTRB(
+        AppSpacing.md,
+        AppSpacing.md,
+        AppSpacing.md,
+        AppSpacing.md + bottomBarInset(context),
+      ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
