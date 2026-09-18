@@ -12,6 +12,7 @@ import '../../../core/api/api_exception.dart';
 import '../../../core/widgets/app_primary_button.dart';
 import '../../../core/widgets/app_text_field.dart';
 import '../../../l10n/l10n_context.dart';
+import '../../../core/auth/session_controller.dart';
 import '../providers/email_verification_controller.dart';
 import '../providers/profile_providers.dart';
 
@@ -82,6 +83,21 @@ class _EmailVerificationWaitingScreenState extends ConsumerState<EmailVerificati
             // sessione già attiva — il profilo in memoria reca ancora
             // l'account non confermato.
             ref.invalidate(profileControllerProvider);
+            // 4.5, 5.3: l'esito è constatato **prima** di andarsene. La
+            // barra vive sopra le rotte e sopravvive al cambio di
+            // schermata: chi si è appena registrato si ritrovava altrimenti
+            // davanti all'accesso senza sapere se il codice fosse stato
+            // accolto (segnalato dall'utente).
+            //
+            // Il testo distingue i due casi: chi ha già una sessione
+            // prosegue, chi non ce l'ha deve ancora accedere — ed è quanto
+            // l'instradamento farà di lì a un istante.
+            final signedIn = ref.read(sessionControllerProvider).value != null;
+            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+              content: Text(signedIn
+                  ? context.l10n.verifyEmailConfirmed
+                  : context.l10n.verifyEmailConfirmedSignIn),
+            ));
             // Senza sessione l'instradamento rimanda da sé all'accesso:
             // la destinazione è la stessa nei due casi, e non occorre
             // distinguerli qui.

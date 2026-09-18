@@ -1,9 +1,11 @@
+import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../app/theme/app_spacing.dart';
+import '../../../../core/api/api_error_messages.dart';
 import '../../../../app/theme/theme_context.dart';
 import '../../../../l10n/l10n_context.dart';
 import '../../../identity/providers/profile_providers.dart';
@@ -125,9 +127,26 @@ class _WaterFan extends ConsumerWidget {
     final centreFromBottom =
         MediaQuery.viewPaddingOf(context).bottom + fabInset + AppSpacing.md + WaterFabMenu.diameter / 2;
 
+    // 4.5: l'aggiunta riuscita non lascia traccia sulla schermata — il
+    // pulsante offre l'azione e non la misura (AQ-16) — ed è perciò il
+    // caso in cui la barra temporanea è dovuta: senza, il tocco non si
+    // distingue da un tocco a vuoto (segnalato dall'utente).
+    //
+    // La barra constata la quantità aggiunta e non il totale della
+    // giornata, che AQ-16 tiene fuori da *Piano*. Constata e basta: non
+    // si congratula (AQ-23).
     void add(int millilitres) {
-      ref.read(waterIntakeControllerProvider.notifier).add(date, millilitres);
+      final messenger = ScaffoldMessenger.of(context);
+      final notice = context.l10n.waterAddedNotice(formatVolume(context, millilitres, units));
+      final failure = describeApiError(context, '');
+      // Il ventaglio si chiude subito: la registrazione prosegue per conto
+      // proprio, e l'esito arriva dalla barra.
       Navigator.of(context).pop();
+      unawaited(
+        ref.read(waterIntakeControllerProvider.notifier).add(date, millilitres).then(
+              (added) => messenger.showSnackBar(SnackBar(content: Text(added ? notice : failure))),
+            ),
+      );
     }
 
     final entries = <({String label, String? value, IconData? icon, VoidCallback onTap})>[

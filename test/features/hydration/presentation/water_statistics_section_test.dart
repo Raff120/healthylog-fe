@@ -118,6 +118,33 @@ void main() {
     expect(find.byTooltip('Rimuovi questa aggiunta'), findsNWidgets(2));
   });
 
+  /// AQ-8, 4.5: la rimozione di un'aggiunta chiede conferma semplice —
+  /// non si torna indietro dal tocco (segnalato dall'utente).
+  testWidgets('la rimozione di un\'aggiunta chiede conferma (4.5)', (tester) async {
+    await _pump(tester, days: [
+      {
+        'date': '2026-03-02',
+        'totalMl': 650,
+        'entries': [
+          {'entryId': 'e1', 'amountMl': 150},
+          {'entryId': 'e2', 'amountMl': 500},
+        ],
+      },
+    ], goalMl: 2000);
+
+    await tester.tap(find.byKey(const Key('waterEntriesButton')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byTooltip('Rimuovi questa aggiunta').first);
+    await tester.pumpAndSettle();
+
+    expect(find.text('Rimuovere 150 ml?'), findsOneWidget);
+
+    // Chi rinuncia non ha rimosso nulla: l'aggiunta è ancora in elenco.
+    await tester.tap(find.text('Annulla'));
+    await tester.pumpAndSettle();
+    expect(find.text('150 ml'), findsOneWidget);
+  });
+
   testWidgets('il Nutrizionista non dispone dell\'elenco (AQ-28bis)', (tester) async {
     await _pump(
       tester,

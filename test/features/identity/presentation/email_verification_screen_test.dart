@@ -46,7 +46,12 @@ class _RecordingAdapter implements HttpClientAdapter {
   }
 }
 
-Future<_RecordingAdapter> _pumpScreen(WidgetTester tester, int statusCode, String body) async {
+Future<_RecordingAdapter> _pumpScreen(
+  WidgetTester tester,
+  int statusCode,
+  String body, {
+  bool redirectToLogin = false,
+}) async {
   final adapter = _RecordingAdapter(statusCode, body);
   final dio = Dio(BaseOptions(baseUrl: 'http://example.test'));
   dio.httpClientAdapter = adapter;
@@ -60,7 +65,19 @@ Future<_RecordingAdapter> _pumpScreen(WidgetTester tester, int statusCode, Strin
         builder: (context, state) =>
             const EmailVerificationWaitingScreen(email: 'utente@example.it'),
       ),
-      GoRoute(path: '/home', builder: (context, state) => const Text('piano')),
+      // La destinazione reale è una schermata con la propria Scaffold —
+      // *Piano* o l'accesso: la barra di conferma vi si attacca, e senza
+      // di quella non avrebbe dove comparire (4.5).
+      //
+      // Chi si è appena registrato non ha sessione, e l'instradamento lo
+      // rimanda da sé all'accesso: la barra attraversa **due** cambi di
+      // schermata, che è il caso segnalato dall'utente.
+      GoRoute(
+        path: '/home',
+        redirect: (context, state) => redirectToLogin ? '/login' : null,
+        builder: (context, state) => const Scaffold(body: Text('piano')),
+      ),
+      GoRoute(path: '/login', builder: (context, state) => const Scaffold(body: Text('accesso'))),
     ],
   );
 
@@ -89,6 +106,24 @@ void main() {
 
     expect(adapter.sentBodies.single, {'email': 'utente@example.it', 'code': '123456'});
     expect(find.text('piano'), findsOneWidget);
+  });
+
+  /// 4.5, 5.3: chi si registra non ha sessione, e la conferma lo riporta
+  /// all'accesso. Senza constatazione si ritrovava davanti al modulo di
+  /// accesso senza sapere se il codice fosse stato accolto (segnalato
+  /// dall'utente).
+  testWidgets('la conferma riuscita è constatata e sopravvive al cambio di schermata (4.5)',
+      (tester) async {
+    await _pumpScreen(tester, 204, '', redirectToLogin: true);
+
+    await tester.enterText(find.byType(TextField), '123456');
+    await tester.pumpAndSettle();
+
+    expect(find.text('accesso'), findsOneWidget);
+    expect(
+      find.widgetWithText(SnackBar, 'Indirizzo confermato: ora puoi accedere.'),
+      findsOneWidget,
+    );
   });
 
   testWidgets('il codice rifiutato resta sulla schermata e lo dichiara', (tester) async {

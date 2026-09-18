@@ -32,6 +32,25 @@ class CurrentCookingGroup extends _$CurrentCookingGroup {
 
 Duration? _noRetry(int retryCount, Object error) => null;
 
+/// I comandi del Gruppo si invocano **senza che alcun widget ne osservi
+/// l'esito**: la schermata legge il notificatore e attende, ma non lo
+/// guarda (`ref.read`, non `ref.watch`). Il controller `autoDispose`
+/// sarebbe allora smaltito a richiesta ancora in corso, e con esso
+/// l'invalidazione che aggiorna la vista: la nomina a Cuoco e la
+/// rimozione avvenivano sul server e la schermata restava quella di
+/// prima (segnalato dall'utente).
+///
+/// Il collegamento tiene in vita il controller fino alla fine
+/// dell'operazione — invalidazione compresa — e non oltre.
+Future<void> _whileAlive(Ref ref, Future<void> Function() operation) async {
+  final link = ref.keepAlive();
+  try {
+    await operation();
+  } finally {
+    link.close();
+  }
+}
+
 /// GE-5: i codici di invito vigenti del Gruppo, consultabili dal solo
 /// Proprietario — la schermata non invoca questo provider per un
 /// richiedente diverso, coerente con la verifica lato server.
@@ -54,11 +73,11 @@ class CreateCookingGroupController extends _$CreateCookingGroupController {
   @override
   AsyncValue<CookingGroup>? build() => null;
 
-  Future<void> create(String name) async {
-    state = const AsyncValue.loading();
-    state = await AsyncValue.guard(() => ref.read(cookingGroupApiProvider).create(CookingGroupNameRequest(name)));
-    if (state?.hasError == false) ref.invalidate(currentCookingGroupProvider);
-  }
+  Future<void> create(String name) => _whileAlive(ref, () async {
+        state = const AsyncValue.loading();
+        state = await AsyncValue.guard(() => ref.read(cookingGroupApiProvider).create(CookingGroupNameRequest(name)));
+        if (state?.hasError == false) ref.invalidate(currentCookingGroupProvider);
+      });
 }
 
 /// GR-9, GR-10, GR-11: adesione tramite codice, dopo la conferma esplicita
@@ -68,11 +87,11 @@ class JoinCookingGroupController extends _$JoinCookingGroupController {
   @override
   AsyncValue<CookingGroup>? build() => null;
 
-  Future<void> join(String code) async {
-    state = const AsyncValue.loading();
-    state = await AsyncValue.guard(() => ref.read(cookingGroupApiProvider).join(InviteCodeRequest(code)));
-    if (state?.hasError == false) ref.invalidate(currentCookingGroupProvider);
-  }
+  Future<void> join(String code) => _whileAlive(ref, () async {
+        state = const AsyncValue.loading();
+        state = await AsyncValue.guard(() => ref.read(cookingGroupApiProvider).join(InviteCodeRequest(code)));
+        if (state?.hasError == false) ref.invalidate(currentCookingGroupProvider);
+      });
 }
 
 /// GE-12, GR-1: modifica della denominazione.
@@ -81,13 +100,13 @@ class RenameCookingGroupController extends _$RenameCookingGroupController {
   @override
   AsyncValue<CookingGroup>? build() => null;
 
-  Future<void> rename(String groupId, String name) async {
-    state = const AsyncValue.loading();
-    state = await AsyncValue.guard(
-      () => ref.read(cookingGroupApiProvider).rename(groupId, CookingGroupNameRequest(name)),
-    );
-    if (state?.hasError == false) ref.invalidate(currentCookingGroupProvider);
-  }
+  Future<void> rename(String groupId, String name) => _whileAlive(ref, () async {
+        state = const AsyncValue.loading();
+        state = await AsyncValue.guard(
+          () => ref.read(cookingGroupApiProvider).rename(groupId, CookingGroupNameRequest(name)),
+        );
+        if (state?.hasError == false) ref.invalidate(currentCookingGroupProvider);
+      });
 }
 
 /// GE-12, UT-14: uscita volontaria — a scioglimento avvenuto o meno, il
@@ -97,11 +116,11 @@ class LeaveCookingGroupController extends _$LeaveCookingGroupController {
   @override
   AsyncValue<void>? build() => null;
 
-  Future<void> leave(String groupId) async {
-    state = const AsyncValue.loading();
-    state = await AsyncValue.guard(() => ref.read(cookingGroupApiProvider).leave(groupId));
-    if (state?.hasError == false) ref.invalidate(currentCookingGroupProvider);
-  }
+  Future<void> leave(String groupId) => _whileAlive(ref, () async {
+        state = const AsyncValue.loading();
+        state = await AsyncValue.guard(() => ref.read(cookingGroupApiProvider).leave(groupId));
+        if (state?.hasError == false) ref.invalidate(currentCookingGroupProvider);
+      });
 }
 
 /// GE-12: scioglimento esplicito, riservato al Proprietario.
@@ -110,11 +129,11 @@ class DissolveCookingGroupController extends _$DissolveCookingGroupController {
   @override
   AsyncValue<void>? build() => null;
 
-  Future<void> dissolve(String groupId) async {
-    state = const AsyncValue.loading();
-    state = await AsyncValue.guard(() => ref.read(cookingGroupApiProvider).dissolve(groupId));
-    if (state?.hasError == false) ref.invalidate(currentCookingGroupProvider);
-  }
+  Future<void> dissolve(String groupId) => _whileAlive(ref, () async {
+        state = const AsyncValue.loading();
+        state = await AsyncValue.guard(() => ref.read(cookingGroupApiProvider).dissolve(groupId));
+        if (state?.hasError == false) ref.invalidate(currentCookingGroupProvider);
+      });
 }
 
 /// GE-6: rimozione di un membro, riservata al Proprietario.
@@ -123,11 +142,11 @@ class RemoveGroupMemberController extends _$RemoveGroupMemberController {
   @override
   AsyncValue<CookingGroup>? build() => null;
 
-  Future<void> remove(String groupId, String userId) async {
-    state = const AsyncValue.loading();
-    state = await AsyncValue.guard(() => ref.read(cookingGroupApiProvider).removeMember(groupId, userId));
-    if (state?.hasError == false) ref.invalidate(currentCookingGroupProvider);
-  }
+  Future<void> remove(String groupId, String userId) => _whileAlive(ref, () async {
+        state = const AsyncValue.loading();
+        state = await AsyncValue.guard(() => ref.read(cookingGroupApiProvider).removeMember(groupId, userId));
+        if (state?.hasError == false) ref.invalidate(currentCookingGroupProvider);
+      });
 }
 
 /// GE-7, GE-8: promozione a Cuoco o revoca del privilegio.
@@ -136,13 +155,13 @@ class UpdateGroupMemberController extends _$UpdateGroupMemberController {
   @override
   AsyncValue<CookingGroup>? build() => null;
 
-  Future<void> update(String groupId, String userId, bool cook) async {
-    state = const AsyncValue.loading();
-    state = await AsyncValue.guard(
-      () => ref.read(cookingGroupApiProvider).updateMember(groupId, userId, UpdateGroupMemberRequest(cook: cook)),
-    );
-    if (state?.hasError == false) ref.invalidate(currentCookingGroupProvider);
-  }
+  Future<void> update(String groupId, String userId, bool cook) => _whileAlive(ref, () async {
+        state = const AsyncValue.loading();
+        state = await AsyncValue.guard(
+          () => ref.read(cookingGroupApiProvider).updateMember(groupId, userId, UpdateGroupMemberRequest(cook: cook)),
+        );
+        if (state?.hasError == false) ref.invalidate(currentCookingGroupProvider);
+      });
 }
 
 /// GE-9, GR-15: trasferimento volontario della proprietà.
@@ -151,13 +170,13 @@ class TransferGroupOwnershipController extends _$TransferGroupOwnershipControlle
   @override
   AsyncValue<CookingGroup>? build() => null;
 
-  Future<void> transfer(String groupId, String newOwnerId) async {
-    state = const AsyncValue.loading();
-    state = await AsyncValue.guard(
-      () => ref.read(cookingGroupApiProvider).transferOwnership(groupId, TransferGroupOwnershipRequest(newOwnerId)),
-    );
-    if (state?.hasError == false) ref.invalidate(currentCookingGroupProvider);
-  }
+  Future<void> transfer(String groupId, String newOwnerId) => _whileAlive(ref, () async {
+        state = const AsyncValue.loading();
+        state = await AsyncValue.guard(
+          () => ref.read(cookingGroupApiProvider).transferOwnership(groupId, TransferGroupOwnershipRequest(newOwnerId)),
+        );
+        if (state?.hasError == false) ref.invalidate(currentCookingGroupProvider);
+      });
 }
 
 /// GR-7, GR-8: generazione di un nuovo codice — la stessa chiamata serve
@@ -168,11 +187,11 @@ class GenerateInviteCodeController extends _$GenerateInviteCodeController {
   @override
   AsyncValue<InviteCode>? build() => null;
 
-  Future<void> generate(String groupId, GenerateInviteCodeRequest request) async {
-    state = const AsyncValue.loading();
-    state = await AsyncValue.guard(() => ref.read(cookingGroupApiProvider).generateInviteCode(groupId, request));
-    if (state?.hasError == false) ref.invalidate(groupInviteCodesProvider(groupId));
-  }
+  Future<void> generate(String groupId, GenerateInviteCodeRequest request) => _whileAlive(ref, () async {
+        state = const AsyncValue.loading();
+        state = await AsyncValue.guard(() => ref.read(cookingGroupApiProvider).generateInviteCode(groupId, request));
+        if (state?.hasError == false) ref.invalidate(groupInviteCodesProvider(groupId));
+      });
 }
 
 /// GR-7: revoca esplicita, senza generarne uno nuovo.
@@ -181,9 +200,9 @@ class RevokeInviteCodeController extends _$RevokeInviteCodeController {
   @override
   AsyncValue<void>? build() => null;
 
-  Future<void> revoke(String groupId, String inviteCodeId) async {
-    state = const AsyncValue.loading();
-    state = await AsyncValue.guard(() => ref.read(cookingGroupApiProvider).revokeInviteCode(inviteCodeId));
-    if (state?.hasError == false) ref.invalidate(groupInviteCodesProvider(groupId));
-  }
+  Future<void> revoke(String groupId, String inviteCodeId) => _whileAlive(ref, () async {
+        state = const AsyncValue.loading();
+        state = await AsyncValue.guard(() => ref.read(cookingGroupApiProvider).revokeInviteCode(inviteCodeId));
+        if (state?.hasError == false) ref.invalidate(groupInviteCodesProvider(groupId));
+      });
 }

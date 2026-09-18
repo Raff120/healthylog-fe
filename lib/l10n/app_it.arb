@@ -1335,6 +1335,8 @@
   "validationRequired": "Campo obbligatorio",
   "validationTooLong": "Troppo lungo",
   "validationUsernameAlreadyTaken": "Questo nome utente è già in uso",
+  "verifyEmailConfirmed": "Indirizzo confermato.",
+  "verifyEmailConfirmedSignIn": "Indirizzo confermato: ora puoi accedere.",
   "verifyEmailCode": "Codice di conferma",
   "verifyEmailCodeIncomplete": "Il codice è di sei cifre",
   "verifyEmailConfirm": "Conferma",
@@ -1410,6 +1412,14 @@
   "unitFluidOunces": "fl oz",
   "unitLitres": "L",
   "waterAddCustom": "Altra quantità",
+  "waterAddedNotice": "Aggiunti {value}",
+  "@waterAddedNotice": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
   "waterAddTooltip": "Segna l’acqua bevuta",
   "waterAmountBottle": "Bottiglia",
   "waterAmountGlass": "Bicchiere",
@@ -1431,6 +1441,14 @@
   },
   "waterNoEntries": "Nessuna aggiunta registrata",
   "@waterOfGoal": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "waterRemoveConfirm": "Rimuovere {value}?",
+  "@waterRemoveConfirm": {
     "placeholders": {
       "value": {
         "type": "String"
