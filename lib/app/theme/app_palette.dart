@@ -20,8 +20,10 @@ class AppPalette {
   // non c'è nulla di più chiaro, e la sola ombra non basta a separarle —,
   // nel tema scuro più chiara, che è come 2.4 prescrive di separare là dove
   // l'ombra non funziona. Nel tema chiaro lo scarto è il minimo che basti a
-  // distinguerla: la barra resta chiara, non diventa una fascia grigia.
-  static const Color surfaceFloatingLight = Color(0xFFF7F5F0);
+  // distinguerla: la barra resta chiara, non diventa una fascia grigia. È
+  // l'unico neutro privo della componente calda degli altri (2.2): scelta
+  // dell'utente, che il tono caldo leggeva come sporco (vedi decisioni.md).
+  static const Color surfaceFloatingLight = Color(0xFFF5F5F5);
   static const Color surfaceFloatingDark = Color(0xFF32302C);
   static const Color shadowFloatingLight = Color(0x38000000);
   static const Color shadowFloatingDark = Color(0x00000000);
