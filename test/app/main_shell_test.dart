@@ -272,6 +272,10 @@ void main() {
     // L'applicazione dipinge fino al bordo dello schermo: sotto la pillola
     // non si apre alcuna fascia estranea.
     expect(tester.getRect(find.byType(Scaffold).first).bottom, 800);
+    // Il corpo della destinazione arriva sotto la pillola: il contenuto vi
+    // scorre sotto anziché interrompersi sopra con uno stacco netto
+    // (segnalato dall'utente, vedi decisioni.md).
+    expect(tester.getRect(find.byType(Scaffold).at(1)).bottom, 800);
     // La pillola sta sopra la zona riservata, discostata dal fondo.
     expect(barra.bottom, lessThanOrEqualTo(800 - safeAreaBottom));
     // È alta quanto la barra, non di più: la rientranza non vi entra.

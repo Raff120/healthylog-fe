@@ -113,6 +113,14 @@ class _BottomBarScaffold extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.colors;
     return Scaffold(
+      // Il corpo arriva sotto la pillola: una barra che fluttua sopra una
+      // schermata che finisce dove lei comincia non fluttua, si vede il
+      // taglio (segnalato dall'utente, vedi decisioni.md). Le destinazioni
+      // lasciano perciò scorrere il contenuto sotto la barra e prendono da
+      // `MediaQuery.padding` la spaziatura in coda che le compete
+      // (`bottom_bar_insets.dart`), che `Scaffold` valorizza qui con
+      // l'ingombro della barra.
+      extendBody: true,
       body: Column(
         children: [const OfflineBar(), Expanded(child: child)],
       ),

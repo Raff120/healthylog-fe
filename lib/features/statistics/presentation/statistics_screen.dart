@@ -15,6 +15,7 @@ import 'adherence_view.dart';
 import 'widgets/statistics_period_selector.dart';
 import 'body_statistics_view.dart';
 import 'workout_statistics_view.dart';
+import '../../../app/navigation/bottom_bar_insets.dart';
 
 /// *Statistiche* (11 interfaccia.md): terza destinazione dell'Utente.
 ///
@@ -83,15 +84,21 @@ class StatisticsScreen extends ConsumerWidget {
       // (vedi decisioni.md). Resta disponibile anche quando il periodo
       // non ne contiene alcuna — è anzi allora che serve.
       floatingActionButton: mode == StatisticsViewMode.body
-          ? FloatingActionButton(
-              onPressed: () => showMeasurementSheet(context),
-              backgroundColor: colors.accent,
-              foregroundColor: colors.surface,
-              tooltip: context.l10n.measurementRecord,
-              child: const Icon(Icons.add),
+          ? Padding(
+              // 3.2: il pulsante mobile scavalca la barra fluttuante.
+              padding: EdgeInsets.only(bottom: bottomBarFabInset(context)),
+              child: FloatingActionButton(
+                onPressed: () => showMeasurementSheet(context),
+                backgroundColor: colors.accent,
+                foregroundColor: colors.surface,
+                tooltip: context.l10n.measurementRecord,
+                child: const Icon(Icons.add),
+              ),
             )
           : null,
+      // 3.2: il contenuto scorre sotto la barra fluttuante.
       body: SafeArea(
+        bottom: false,
         child: period.when(
           loading: () => const Center(child: CircularProgressIndicator()),
           error: (_, _) => const _PeriodSelectorFallback(),

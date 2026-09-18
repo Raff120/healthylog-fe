@@ -19,6 +19,7 @@ import '../../domain/plan_day_date.dart';
 import '../../providers/meal_swap_providers.dart';
 import '../../providers/plan_day_providers.dart';
 import '../slot_type_presentation.dart';
+import '../../../../app/navigation/bottom_bar_insets.dart';
 
 const double _labelColumnWidth = 72;
 const double _memberColumnWidth = 140;
@@ -252,6 +253,8 @@ class _Grid extends StatelessWidget {
               _HeaderRow(members: members, currentUserId: currentUserId, columnWidth: columnWidth),
               Expanded(
                 child: SingleChildScrollView(
+                  // 3.2: la griglia scorre sotto la barra fluttuante.
+                  padding: EdgeInsets.only(bottom: bottomBarInset(context)),
                   child: Column(
                     children: [
                       for (final row in rows)

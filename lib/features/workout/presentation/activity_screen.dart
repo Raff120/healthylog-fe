@@ -15,6 +15,7 @@ import 'widgets/planning_card.dart';
 import 'widgets/workout_filter_sheet.dart';
 import 'widgets/workout_card.dart';
 import 'widgets/workout_sheet.dart';
+import '../../../app/navigation/bottom_bar_insets.dart';
 
 /// *Allenamenti* (10.1 interfaccia.md): seconda destinazione della
 /// navigazione, dedicata ai soli allenamenti (AL-17).
@@ -55,13 +56,18 @@ class ActivityScreen extends ConsumerWidget {
           const NotificationBell(),
         ],
       ),
-      body: const SafeArea(child: _WorkoutsView()),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => showWorkoutSheet(context),
-        backgroundColor: colors.accent,
-        foregroundColor: colors.surface,
-        tooltip: context.l10n.workoutRecord,
-        child: const Icon(Icons.add),
+      // 3.2: il contenuto scorre sotto la barra fluttuante.
+      body: const SafeArea(bottom: false, child: _WorkoutsView()),
+      floatingActionButton: Padding(
+        // 3.2: il pulsante mobile scavalca la barra fluttuante.
+        padding: EdgeInsets.only(bottom: bottomBarFabInset(context)),
+        child: FloatingActionButton(
+          onPressed: () => showWorkoutSheet(context),
+          backgroundColor: colors.accent,
+          foregroundColor: colors.surface,
+          tooltip: context.l10n.workoutRecord,
+          child: const Icon(Icons.add),
+        ),
       ),
     );
   }
@@ -107,11 +113,11 @@ class _WorkoutsView extends ConsumerWidget {
                         : context.l10n.workoutNoneWithFilters,
                   )
                 : ListView.builder(
-                    padding: const EdgeInsets.fromLTRB(
+                    padding: EdgeInsets.fromLTRB(
                       AppSpacing.md,
                       AppSpacing.sm,
                       AppSpacing.md,
-                      AppSpacing.xxl,
+                      AppSpacing.xxl + bottomBarInset(context),
                     ),
                     itemCount: items.length,
                     itemBuilder: (context, index) => Padding(
