@@ -3883,6 +3883,12 @@ abstract class L10n {
   /// **'Altra quantità'**
   String get waterAddCustom;
 
+  /// No description provided for @waterAddedNotice.
+  ///
+  /// In it, this message translates to:
+  /// **'Aggiunti {value}'**
+  String waterAddedNotice(String value);
+
   /// No description provided for @waterAddTooltip.
   ///
   /// In it, this message translates to:
@@ -3960,6 +3966,12 @@ abstract class L10n {
   /// In it, this message translates to:
   /// **'Nessuna aggiunta registrata'**
   String get waterNoEntries;
+
+  /// No description provided for @waterRemoveConfirm.
+  ///
+  /// In it, this message translates to:
+  /// **'Rimuovere {value}?'**
+  String waterRemoveConfirm(String value);
 
   /// No description provided for @waterRemoveEntry.
   ///

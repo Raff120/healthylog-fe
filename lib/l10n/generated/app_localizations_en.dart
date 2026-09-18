@@ -2276,6 +2276,11 @@ class L10nEn extends L10n {
   String get waterAddCustom => 'Other amount';
 
   @override
+  String waterAddedNotice(String value) {
+    return '$value added';
+  }
+
+  @override
   String get waterAddTooltip => 'Log water';
 
   @override
@@ -2316,6 +2321,11 @@ class L10nEn extends L10n {
 
   @override
   String get waterNoEntries => 'No additions recorded';
+
+  @override
+  String waterRemoveConfirm(String value) {
+    return 'Remove $value?';
+  }
 
   @override
   String get waterRemoveEntry => 'Remove this addition';

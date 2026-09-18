@@ -2293,6 +2293,11 @@ class L10nIt extends L10n {
   String get waterAddCustom => 'Altra quantità';
 
   @override
+  String waterAddedNotice(String value) {
+    return 'Aggiunti $value';
+  }
+
+  @override
   String get waterAddTooltip => 'Segna l’acqua bevuta';
 
   @override
@@ -2333,6 +2338,11 @@ class L10nIt extends L10n {
 
   @override
   String get waterNoEntries => 'Nessuna aggiunta registrata';
+
+  @override
+  String waterRemoveConfirm(String value) {
+    return 'Rimuovere $value?';
+  }
 
   @override
   String get waterRemoveEntry => 'Rimuovi questa aggiunta';
