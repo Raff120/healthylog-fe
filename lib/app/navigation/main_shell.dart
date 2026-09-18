@@ -143,12 +143,12 @@ class _BottomBarScaffold extends StatelessWidget {
           child: Material(
             key: const ValueKey('bottomNavBar'),
             // 2.4, 3.2: la barra ha una superficie propria, distinta da
-            // quella delle card che le scorrono sotto — altrimenti, dove
-            // una card le passa dietro, i due piani si confondono
-            // (segnalato dall'utente, vedi decisioni.md). Nel tema chiaro
-            // se ne stacca con l'ombra, ampia e tenue; nel tema scuro con
-            // il colore, più chiaro del fondo, che è il modo in cui 2.4
-            // prescrive di separare là dove l'ombra non funziona.
+            // quella delle card che le scorrono sotto in entrambi i temi —
+            // altrimenti, dove una card le passa dietro, i due piani si
+            // confondono (segnalato dall'utente, vedi decisioni.md).
+            // L'ombra accompagna la distinzione nel tema chiaro, dove
+            // funziona; nel tema scuro la distinzione è il colore, più
+            // chiaro del fondo (2.4).
             color: colors.surfaceFloating,
             elevation: AppSpacing.elevationFloating,
             shadowColor: colors.shadowFloating,
@@ -298,15 +298,26 @@ class _NavItem extends StatelessWidget {
     final content = axis == Axis.vertical
         ? FittedBox(
             fit: BoxFit.scaleDown,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                icon,
-                if (label != null) ...[
-                  const SizedBox(height: AppSpacing.xxs),
-                  label,
+            child: Padding(
+              // Il riquadro di riga dell'etichetta comprende, sotto la
+              // linea di base, uno spazio che nessun glifo riempie:
+              // centrare i riquadri porta perciò l'icona più vicina al
+              // bordo superiore di quanto l'etichetta non lo sia
+              // all'inferiore, e si vede (segnalato dall'utente). Lo
+              // scarto si ricava dalla scala tipografica — l'interlinea
+              // eccedente il corpo, di cui metà cade sotto la linea di
+              // base — e si restituisce sopra l'icona.
+              padding: EdgeInsets.only(top: _labelDescentSlack(typography.caption)),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  icon,
+                  if (label != null) ...[
+                    const SizedBox(height: AppSpacing.xxs),
+                    label,
+                  ],
                 ],
-              ],
+              ),
             ),
           )
         : Padding(
@@ -337,4 +348,13 @@ class _NavItem extends StatelessWidget {
     // (3.2 interfaccia.md) ha ragione d'essere.
     return showLabel ? item : Tooltip(message: destination.label, child: item);
   }
+}
+
+/// Metà dell'interlinea eccedente il corpo dell'etichetta: quanto il
+/// riquadro di riga lascia vuoto sotto la linea di base (2.3
+/// interfaccia.md).
+double _labelDescentSlack(TextStyle style) {
+  final fontSize = style.fontSize ?? 0;
+  final lineHeight = (style.height ?? 1) * fontSize;
+  return (lineHeight - fontSize) / 2;
 }
