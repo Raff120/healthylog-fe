@@ -1410,6 +1410,7 @@
   "unitFluidOunces": "fl oz",
   "unitLitres": "L",
   "waterAddCustom": "Altra quantità",
+  "waterAddTooltip": "Segna l’acqua bevuta",
   "waterAmountBottle": "Bottiglia",
   "waterAmountGlass": "Bicchiere",
   "waterAmountSmallBottle": "Bottiglietta",

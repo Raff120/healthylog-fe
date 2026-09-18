@@ -13,7 +13,7 @@ import '../../../l10n/l10n_context.dart';
 import '../../care/domain/plan_competence.dart';
 import '../../group/providers/cooking_group_providers.dart';
 import '../../notification/presentation/widgets/notification_bell.dart';
-import '../../hydration/presentation/widgets/day_water_section.dart';
+import '../../hydration/presentation/widgets/water_fab_menu.dart';
 import '../../workout/presentation/widgets/day_workouts_section.dart';
 import '../../care/providers/care_providers.dart';
 import '../../identity/providers/profile_providers.dart';
@@ -109,6 +109,24 @@ class PlanScreen extends ConsumerWidget {
                 ),
               ],
       ),
+      // AQ-16, AQ-17bis, 6.1: l'unico pulsante mobile ammesso in *Piano*,
+      // quello dell'acqua. Reca la goccia e non un «+», che in una
+      // schermata di piano alimentare si leggerebbe come «aggiungi un
+      // piano»; offre l'azione e non la misura, che sta in *Statistiche*.
+      //
+      // AQ-18: assente nella vista settimanale, che non presenta l'acqua.
+      // AQ-20: assente sulla giornata di un altro membro e in modalità
+      // affiancata, dove il consumo è riservato. AQ-9: assente sulla
+      // giornata futura — non si può aver bevuto domani. Assente infine
+      // mentre si sceglie dove spostare un pasto, dove l'intestazione e
+      // la schermata sono dedicate all'inversione (6.5).
+      floatingActionButton: viewMode == PlanViewMode.day &&
+              swapSelection == null &&
+              ref.watch(selectedGroupMemberProvider) == null &&
+              !ref.watch(sideBySideModeProvider) &&
+              !selectedDate.isAfter(dateOnly(DateTime.now()))
+          ? WaterFabMenu(date: selectedDate)
+          : null,
       // 3.2: il contenuto scorre sotto la barra fluttuante.
       body: SafeArea(
         bottom: false,
@@ -291,18 +309,13 @@ class _DayContent extends ConsumerWidget {
     // indipendente dal piano alimentare e non è preclusa quando questo è
     // interrotto (AL-8, RA-8, SA-14) — 6.2 lo dice per la giornata senza
     // pasti, e la ragione vale identica per le altre (vedi decisioni.md).
-    // Altrettanto vale per l'acqua (AQ-4, AQ-20).
+    // L'acqua non sta più qui: è il pulsante mobile della schermata
+    // (AQ-16, 6.2), che per la medesima ragione non dipende dal piano.
     if (member == null) {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           DayWorkoutsSection(date: day.date),
-          // AQ-16, AQ-19: l'acqua sta fra gli allenamenti e i pasti, ed è
-          // sempre presente sulla propria giornata — anche a totale nullo,
-          // che è la condizione in cui i comandi servono di più. AQ-4: come
-          // gli allenamenti, non dipende dal piano e resta anche dove i
-          // pasti cedono il posto a uno stato vuoto.
-          DayWaterSection(date: day.date),
           Expanded(child: _MealsContent(day: day)),
         ],
       );

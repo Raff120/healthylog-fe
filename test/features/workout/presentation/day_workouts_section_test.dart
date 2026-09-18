@@ -186,13 +186,17 @@ void main() {
     expect(find.text('Corsa'), findsOneWidget);
   });
 
-  testWidgets('non presenta alcun pulsante mobile in *Piano* (10.2, vedi decisioni.md)',
+  testWidgets('non presenta alcun pulsante mobile dell\'allenamento in *Piano* (10.2, vedi decisioni.md)',
       (tester) async {
     await _pump(tester);
 
     // La registrazione libera di un allenamento si compie dalla
     // destinazione *Allenamenti*: in *Piano* il pulsante mobile veniva
-    // letto come "aggiungi un piano alimentare".
-    expect(find.byType(FloatingActionButton), findsNothing);
+    // letto come "aggiungi un piano alimentare". Il solo pulsante mobile
+    // ammesso è quello dell'acqua (AQ-17bis), che reca la goccia e non
+    // un «+», e non incorre in quella ambiguità.
+    expect(find.byType(FloatingActionButton), findsOneWidget);
+    expect(find.byIcon(Icons.water_drop_outlined), findsOneWidget);
+    expect(find.byIcon(Icons.add), findsNothing);
   });
 }

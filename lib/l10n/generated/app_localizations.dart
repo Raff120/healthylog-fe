@@ -3883,6 +3883,12 @@ abstract class L10n {
   /// **'Altra quantità'**
   String get waterAddCustom;
 
+  /// No description provided for @waterAddTooltip.
+  ///
+  /// In it, this message translates to:
+  /// **'Segna l’acqua bevuta'**
+  String get waterAddTooltip;
+
   /// No description provided for @waterAmountBottle.
   ///
   /// In it, this message translates to:

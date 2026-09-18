@@ -2276,6 +2276,9 @@ class L10nEn extends L10n {
   String get waterAddCustom => 'Other amount';
 
   @override
+  String get waterAddTooltip => 'Log water';
+
+  @override
   String get waterAmountBottle => 'Bottle';
 
   @override

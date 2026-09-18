@@ -13,6 +13,7 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.onSurfaceFloating,
     required this.onSurfaceFloatingMuted,
     required this.shadowFloating,
+    required this.scrim,
     required this.dividerLight,
     required this.dividerStrong,
     required this.textPrimary,
@@ -46,6 +47,12 @@ class AppColors extends ThemeExtension<AppColors> {
   /// 2.4: l'ombra di ciò che fluttua, ampia e tenue. Nel tema scuro è
   /// trasparente — là la separazione si affida al colore di superficie.
   final Color shadowFloating;
+
+  /// 2.6, 6.2: il velo che separa dal contenuto ciò che vi si apre sopra —
+  /// il ventaglio dell'acqua e ogni altra apertura modale. Il tocco sul
+  /// velo richiude senza compiere alcunché.
+  final Color scrim;
+
   final Color dividerLight;
   final Color dividerStrong;
   final Color textPrimary;
@@ -68,6 +75,7 @@ class AppColors extends ThemeExtension<AppColors> {
     onSurfaceFloating: AppPalette.onSurfaceFloatingLight,
     onSurfaceFloatingMuted: AppPalette.onSurfaceFloatingMutedLight,
     shadowFloating: AppPalette.shadowFloatingLight,
+    scrim: AppPalette.scrimLight,
     dividerLight: AppPalette.dividerLightOnLight,
     dividerStrong: AppPalette.dividerStrongOnLight,
     textPrimary: AppPalette.textPrimaryLight,
@@ -91,6 +99,7 @@ class AppColors extends ThemeExtension<AppColors> {
     onSurfaceFloating: AppPalette.onSurfaceFloatingDark,
     onSurfaceFloatingMuted: AppPalette.onSurfaceFloatingMutedDark,
     shadowFloating: AppPalette.shadowFloatingDark,
+    scrim: AppPalette.scrimDark,
     dividerLight: AppPalette.dividerLightOnDark,
     dividerStrong: AppPalette.dividerStrongOnDark,
     textPrimary: AppPalette.textPrimaryDark,
@@ -115,6 +124,7 @@ class AppColors extends ThemeExtension<AppColors> {
     Color? onSurfaceFloating,
     Color? onSurfaceFloatingMuted,
     Color? shadowFloating,
+    Color? scrim,
     Color? dividerLight,
     Color? dividerStrong,
     Color? textPrimary,
@@ -137,6 +147,7 @@ class AppColors extends ThemeExtension<AppColors> {
       onSurfaceFloating: onSurfaceFloating ?? this.onSurfaceFloating,
       onSurfaceFloatingMuted: onSurfaceFloatingMuted ?? this.onSurfaceFloatingMuted,
       shadowFloating: shadowFloating ?? this.shadowFloating,
+      scrim: scrim ?? this.scrim,
       dividerLight: dividerLight ?? this.dividerLight,
       dividerStrong: dividerStrong ?? this.dividerStrong,
       textPrimary: textPrimary ?? this.textPrimary,
@@ -165,6 +176,7 @@ class AppColors extends ThemeExtension<AppColors> {
       onSurfaceFloatingMuted:
           Color.lerp(onSurfaceFloatingMuted, other.onSurfaceFloatingMuted, t)!,
       shadowFloating: Color.lerp(shadowFloating, other.shadowFloating, t)!,
+      scrim: Color.lerp(scrim, other.scrim, t)!,
       dividerLight: Color.lerp(dividerLight, other.dividerLight, t)!,
       dividerStrong: Color.lerp(dividerStrong, other.dividerStrong, t)!,
       textPrimary: Color.lerp(textPrimary, other.textPrimary, t)!,

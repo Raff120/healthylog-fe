@@ -2293,6 +2293,9 @@ class L10nIt extends L10n {
   String get waterAddCustom => 'Altra quantità';
 
   @override
+  String get waterAddTooltip => 'Segna l’acqua bevuta';
+
+  @override
   String get waterAmountBottle => 'Bottiglia';
 
   @override

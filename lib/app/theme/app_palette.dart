@@ -29,6 +29,12 @@ class AppPalette {
   static const Color shadowFloatingLight = Color(0x38000000);
   static const Color shadowFloatingDark = Color(0x00000000);
 
+  /// Velo che separa dal contenuto ciò che vi si apre sopra (2.6): il
+  /// ventaglio dell'acqua (6.2) e ogni altra apertura modale. Più denso
+  /// nel tema scuro, dove un nero tenue non si distinguerebbe dal fondo.
+  static const Color scrimLight = Color(0x66000000);
+  static const Color scrimDark = Color(0x99000000);
+
   // Voci della barra sulla propria superficie: attiva e inattiva. Sul
   // colore d'accento la distinzione è fra il bianco pieno e il bianco
   // attenuato; sul neutro scuro resta quella di 3.2, accento e colore

@@ -708,6 +708,7 @@
   "unitFluidOunces": "fl oz",
   "unitLitres": "L",
   "waterAddCustom": "Other amount",
+  "waterAddTooltip": "Log water",
   "waterAmountBottle": "Bottle",
   "waterAmountGlass": "Glass",
   "waterAmountSmallBottle": "Small bottle",
