@@ -1832,6 +1832,15 @@ class L10nEn extends L10n {
   }
 
   @override
+  String get statisticsCurrentPlan => 'Current';
+
+  @override
+  String get statisticsNextPeriod => 'Next period';
+
+  @override
+  String get statisticsPreviousPeriod => 'Previous period';
+
+  @override
   String get statisticsUnavailable => 'Statistics not available';
 
   @override

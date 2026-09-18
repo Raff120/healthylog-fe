@@ -6,12 +6,16 @@ import '../../../../l10n/l10n_context.dart';
 
 /// Valore complessivo di una sezione di *Statistiche* (11.1, 11.2
 /// interfaccia.md): numero in `displayLarge` con cifre a larghezza fissa
-/// (2.3), unità in `titleMedium`, periodo considerato in `caption` colore
-/// secondario.
+/// (2.3), unità in `titleMedium`, e una `caption` in colore secondario
+/// dove occorra dire del periodo più di quanto il navigatore già dica.
 ///
-/// La didascalia dichiara il periodo, non lo governa: il comando sta
-/// nell'intestazione (`StatisticsPeriodSelector`), dove resta
-/// raggiungibile anche là dove un valore complessivo non esista.
+/// La didascalia dichiara il periodo, non lo governa: i comandi stanno
+/// sopra il contenuto (`StatisticsPeriodSelector`,
+/// `StatisticsPeriodNavigator`), dove restano raggiungibili anche là dove
+/// un valore complessivo non esista. Da quando il periodo osservato è
+/// scritto nel navigatore (AD-8bis), la didascalia è **assente** su
+/// settimana e mese, che vi si leggono per esteso: ripeterla due righe
+/// sotto non direbbe nulla di nuovo.
 ///
 /// AD-15, SA-16: il valore è reso in colore **primario**, mai in colore di
 /// stato — non è un giudizio. Nessuna soglia, nessun livello, nessuna
@@ -24,7 +28,7 @@ class StatisticsHeadline extends StatelessWidget {
     super.key,
     required this.value,
     required this.unit,
-    required this.caption,
+    this.caption,
     this.emptyText,
   });
 
@@ -32,7 +36,9 @@ class StatisticsHeadline extends StatelessWidget {
   final String? value;
 
   final String? unit;
-  final String caption;
+
+  /// Assente quando il navigatore già dice il periodo per esteso.
+  final String? caption;
   /// AD-4: in assenza vale la constatazione predefinita, risolta alla
   /// costruzione perché richiede il contesto.
   final String? emptyText;
@@ -70,8 +76,10 @@ class StatisticsHeadline extends StatelessWidget {
                 ],
               ],
             ),
-          const SizedBox(height: AppSpacing.xxs),
-          Text(caption, style: typography.caption.copyWith(color: colors.textSecondary)),
+          if (caption != null) ...[
+            const SizedBox(height: AppSpacing.xxs),
+            Text(caption!, style: typography.caption.copyWith(color: colors.textSecondary)),
+          ],
         ],
       ),
     );

@@ -3205,6 +3205,24 @@ abstract class L10n {
   /// **'{plan} · {start} – {end}'**
   String statisticsPlanRange(String plan, String start, String end);
 
+  /// No description provided for @statisticsCurrentPlan.
+  ///
+  /// In it, this message translates to:
+  /// **'In corso'**
+  String get statisticsCurrentPlan;
+
+  /// No description provided for @statisticsNextPeriod.
+  ///
+  /// In it, this message translates to:
+  /// **'Periodo successivo'**
+  String get statisticsNextPeriod;
+
+  /// No description provided for @statisticsPreviousPeriod.
+  ///
+  /// In it, this message translates to:
+  /// **'Periodo precedente'**
+  String get statisticsPreviousPeriod;
+
   /// No description provided for @statisticsUnavailable.
   ///
   /// In it, this message translates to:

@@ -12,6 +12,7 @@ import '../../notification/presentation/widgets/notification_bell.dart';
 import '../data/statistics_models.dart';
 import '../providers/statistics_providers.dart';
 import 'adherence_view.dart';
+import 'widgets/statistics_period_navigator.dart';
 import 'widgets/statistics_period_selector.dart';
 import 'body_statistics_view.dart';
 import 'workout_statistics_view.dart';
@@ -99,21 +100,40 @@ class StatisticsScreen extends ConsumerWidget {
       // 3.2: il contenuto scorre sotto la barra fluttuante.
       body: SafeArea(
         bottom: false,
-        child: period.when(
-          loading: () => const Center(child: CircularProgressIndicator()),
-          error: (_, _) => const _PeriodSelectorFallback(),
-          data: (selectedPeriod) => _Content(
-            mode: mode,
-            query: StatisticsQuery(
-              period: selectedPeriod,
-              // 7.5: fuori dal dettaglio di un piano concluso non si
-              // indica alcun piano, e il backend intende quello in corso
-              // (PA-8).
-              planId: selectedPeriod == StatisticsPeriod.plan
-                  ? (planId ?? ref.watch(selectedStatisticsPlanProvider))
-                  : null,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // AD-8bis: la navigazione fra i periodi sta accanto al
+            // selettore dell'orizzonte, fuori dal contenuto — che nel
+            // segmento *Corpo* privo di misurazioni è una constatazione
+            // di assenza, e porterebbe via con sé il comando proprio dove
+            // serve.
+            const StatisticsPeriodNavigator(),
+            Expanded(
+              child: period.when(
+                loading: () => const Center(child: CircularProgressIndicator()),
+                error: (_, _) => const _PeriodSelectorFallback(),
+                data: (selectedPeriod) => _Content(
+                  mode: mode,
+                  query: StatisticsQuery(
+                    period: selectedPeriod,
+                    // AD-8bis: la data cui l'orizzonte si riferisce.
+                    // L'orizzonte *Piano* non se ne serve: là il periodo è
+                    // il piano.
+                    date: selectedPeriod == StatisticsPeriod.plan
+                        ? null
+                        : ref.watch(selectedStatisticsDateProvider),
+                    // 7.5: fuori dal dettaglio di un piano concluso non si
+                    // indica alcun piano, e il backend intende quello in
+                    // corso (PA-8).
+                    planId: selectedPeriod == StatisticsPeriod.plan
+                        ? (planId ?? ref.watch(selectedStatisticsPlanProvider))
+                        : null,
+                  ),
+                ),
+              ),
             ),
-          ),
+          ],
         ),
       ),
     );

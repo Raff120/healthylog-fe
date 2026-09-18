@@ -47,6 +47,28 @@ class SelectedStatisticsPeriod extends _$SelectedStatisticsPeriod {
   }
 }
 
+/// AD-8bis: la data cui l'orizzonte si riferisce — la settimana o il mese
+/// che la comprende. Predefinita a oggi, e non conservata tra le sessioni:
+/// alla riapertura le statistiche mostrano sempre il periodo corrente,
+/// come *Piano* mostra sempre la giornata corrente (3.2).
+///
+/// L'orizzonte *Piano* non se ne serve: là il periodo è il piano, e lo
+/// indica [SelectedStatisticsPlan].
+@riverpod
+class SelectedStatisticsDate extends _$SelectedStatisticsDate {
+  @override
+  DateTime build() => _today();
+
+  void select(DateTime date) => state = DateTime(date.year, date.month, date.day);
+
+  void toCurrent() => state = _today();
+
+  static DateTime _today() {
+    final now = DateTime.now();
+    return DateTime(now.year, now.month, now.day);
+  }
+}
+
 /// Il piano su cui riferire l'orizzonte *Piano*: quello indicato dal
 /// dettaglio di un piano concluso (7.5), altrimenti assente — e il
 /// backend intende allora quello in corso (PA-8).
@@ -62,9 +84,14 @@ class SelectedStatisticsPlan extends _$SelectedStatisticsPlan {
 /// [userId] è ammesso al solo Nutrizionista sul proprio Paziente (EP-4,
 /// ST-16bis).
 class StatisticsQuery {
-  const StatisticsQuery({required this.period, this.planId, this.userId});
+  const StatisticsQuery({required this.period, this.date, this.planId, this.userId});
 
   final StatisticsPeriod period;
+
+  /// AD-8bis: la data cui l'orizzonte si riferisce. Assente vale oggi, che
+  /// è quanto il backend intende in sua assenza.
+  final DateTime? date;
+
   final String? planId;
   final String? userId;
 
@@ -72,27 +99,31 @@ class StatisticsQuery {
   bool operator ==(Object other) =>
       other is StatisticsQuery &&
       other.period == period &&
+      other.date == date &&
       other.planId == planId &&
       other.userId == userId;
 
   @override
-  int get hashCode => Object.hash(period, planId, userId);
+  int get hashCode => Object.hash(period, date, planId, userId);
 }
 
 /// 8.2: l'aderenza dell'orizzonte richiesto.
 @riverpod
-Future<AdherenceStatistics> adherenceStatistics(Ref ref, StatisticsQuery query) =>
-    ref.watch(statisticsApiProvider).adherence(query.period, planId: query.planId, userId: query.userId);
+Future<AdherenceStatistics> adherenceStatistics(Ref ref, StatisticsQuery query) => ref
+    .watch(statisticsApiProvider)
+    .adherence(query.period, date: query.date, planId: query.planId, userId: query.userId);
 
 /// 8.3: frequenza degli allenamenti e confronti.
 @riverpod
-Future<WorkoutStatistics> workoutStatistics(Ref ref, StatisticsQuery query) =>
-    ref.watch(statisticsApiProvider).workouts(query.period, planId: query.planId, userId: query.userId);
+Future<WorkoutStatistics> workoutStatistics(Ref ref, StatisticsQuery query) => ref
+    .watch(statisticsApiProvider)
+    .workouts(query.period, date: query.date, planId: query.planId, userId: query.userId);
 
 /// 8.4: andamento di peso e misure.
 @riverpod
-Future<MeasurementStatistics> measurementStatistics(Ref ref, StatisticsQuery query) =>
-    ref.watch(statisticsApiProvider).measurements(query.period, planId: query.planId, userId: query.userId);
+Future<MeasurementStatistics> measurementStatistics(Ref ref, StatisticsQuery query) => ref
+    .watch(statisticsApiProvider)
+    .measurements(query.period, date: query.date, planId: query.planId, userId: query.userId);
 
 /// AN-4, 11.3: l'elenco tabellare delle misurazioni del periodo, in coda
 /// al grafico, dove ora si registrano e si modificano. Distinto da

@@ -47,12 +47,18 @@ class WorkoutStatisticsView extends ConsumerWidget {
         StatisticsHeadline(
           value: '${statistics.total}',
           unit: statistics.total == 1 ? 'allenamento' : 'allenamenti',
-          caption: describePeriod(context, 
-            statistics.period,
-            statistics.from,
-            statistics.to,
-            statistics.planName,
-          ),
+          // AD-8bis: su settimana e mese il periodo è già nel navigatore,
+          // per esteso. Sul piano no — là il navigatore porta il solo nome —
+          // e la didascalia ne dichiara l'intervallo.
+          caption: statistics.period == StatisticsPeriod.plan
+              ? describePeriod(
+                  context,
+                  statistics.period,
+                  statistics.from,
+                  statistics.to,
+                  statistics.planName,
+                )
+              : null,
         ),
         // SA-15: sull'orizzonte del piano i giorni di sospensione, esclusi
         // dall'aderenza, concorrono invece qui per intero (SA-14).

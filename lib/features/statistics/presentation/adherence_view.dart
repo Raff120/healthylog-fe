@@ -120,7 +120,7 @@ class AdherenceView extends ConsumerWidget {
     );
   }
 
-  ({double? value, String caption}) _shownValue(BuildContext context, int? periodIndex) {
+  ({double? value, String? caption}) _shownValue(BuildContext context, int? periodIndex) {
     if (periodIndex != null && periodIndex < statistics.periods.length) {
       final period = statistics.periods[periodIndex];
       final end = period.endDate == null ? context.l10n.planViewOngoing : formatDate(context, period.endDate!);
@@ -129,9 +129,14 @@ class AdherenceView extends ConsumerWidget {
         caption: context.l10n.adherencePeriodRange(formatDate(context, period.startDate), end),
       );
     }
+    // AD-8bis: su settimana e mese il periodo è già nel navigatore, per
+    // esteso; sul piano la didascalia ne dichiara l'intervallo, che il
+    // nome da solo non dice.
     return (
       value: statistics.value,
-      caption: describePeriod(context, statistics.period, statistics.from, statistics.to, statistics.planName),
+      caption: statistics.period == StatisticsPeriod.plan
+          ? describePeriod(context, statistics.period, statistics.from, statistics.to, statistics.planName)
+          : null,
     );
   }
 }
