@@ -329,6 +329,38 @@ void main() {
     expect(find.text('Profilo'), findsOneWidget);
   });
 
+  /// AQ-16, 3.2: il pulsante dell'acqua sta **sopra** la barra
+  /// fluttuante, non sotto. La barra non appartiene alla schermata ma
+  /// alla navicella che la contiene, e il pulsante che l'ignorasse le
+  /// finirebbe dietro (segnalato dall'utente).
+  testWidgets('il pulsante dell\'acqua sta sopra la barra fluttuante (3.2)', (tester) async {
+    await _pumpAuthenticatedApp(tester, role: 'USER');
+
+    final fab = tester.getRect(find.byType(FloatingActionButton));
+    final bar = tester.getRect(find.byKey(const ValueKey('bottomNavBar')));
+
+    expect(fab.bottom, lessThanOrEqualTo(bar.top),
+        reason: 'il pulsante finisce sotto la barra: fab=$fab barra=$bar');
+  });
+
+  /// La stessa verifica sul pulsante delle misurazioni (11.3), che
+  /// condivide il meccanismo: se lo scostamento fosse letto nel punto
+  /// sbagliato finirebbe dietro la barra allo stesso modo.
+  testWidgets('anche il pulsante delle misurazioni sta sopra la barra (3.2)', (tester) async {
+    await _pumpAuthenticatedApp(tester, role: 'USER');
+
+    await tester.tap(find.text('Statistiche'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Corpo'));
+    await tester.pumpAndSettle();
+
+    final fab = tester.getRect(find.byType(FloatingActionButton));
+    final bar = tester.getRect(find.byKey(const ValueKey('bottomNavBar')));
+
+    expect(fab.bottom, lessThanOrEqualTo(bar.top),
+        reason: 'il pulsante finisce sotto la barra: fab=$fab barra=$bar');
+  });
+
   testWidgets('il tocco su Profilo naviga e conserva la barra', (tester) async {
     await _pumpAuthenticatedApp(tester, role: 'USER');
 

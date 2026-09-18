@@ -125,7 +125,11 @@ class PlanScreen extends ConsumerWidget {
               ref.watch(selectedGroupMemberProvider) == null &&
               !ref.watch(sideBySideModeProvider) &&
               !selectedDate.isAfter(dateOnly(DateTime.now()))
-          ? WaterFabMenu(date: selectedDate)
+          // 3.2: lo scostamento che scavalca la barra fluttuante si
+          // misura **qui**, sopra la Scaffold della schermata: più sotto
+          // la spaziatura è già stata consumata, e il pulsante finirebbe
+          // dietro la barra (segnalato dall'utente).
+          ? WaterFabMenu(date: selectedDate, bottomInset: bottomBarFabInset(context))
           : null,
       // 3.2: il contenuto scorre sotto la barra fluttuante.
       body: SafeArea(

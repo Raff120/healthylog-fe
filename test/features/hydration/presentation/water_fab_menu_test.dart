@@ -107,7 +107,9 @@ Future<_HydrationAdapter> _pump(WidgetTester tester) async {
         theme: AppTheme.light,
         home: Scaffold(
           body: const SizedBox.expand(),
-          floatingActionButton: WaterFabMenu(date: DateTime.now()),
+          // 3.2: lo scostamento arriva dall'alto, dal chiamante che
+          // conosce la barra fluttuante. Qui non ve n'è alcuna.
+          floatingActionButton: WaterFabMenu(date: DateTime.now(), bottomInset: 0),
         ),
       ),
     ),

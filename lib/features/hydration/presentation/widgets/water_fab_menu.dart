@@ -3,7 +3,6 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../app/navigation/bottom_bar_insets.dart';
 import '../../../../app/theme/app_spacing.dart';
 import '../../../../app/theme/theme_context.dart';
 import '../../../../l10n/l10n_context.dart';
@@ -31,9 +30,19 @@ import 'water_amount_sheet.dart';
 /// membro (AQ-20), su quella futura (AQ-9) e nella vista settimanale
 /// (AQ-18).
 class WaterFabMenu extends ConsumerStatefulWidget {
-  const WaterFabMenu({super.key, required this.date});
+  const WaterFabMenu({super.key, required this.date, required this.bottomInset});
 
   final DateTime date;
+
+  /// 3.2: quanto il pulsante deve alzarsi per scavalcare la barra
+  /// fluttuante (`bottom_bar_insets.dart`).
+  ///
+  /// **Lo riceve e non lo misura.** La barra non appartiene alla
+  /// schermata ma alla navicella che la contiene, e la sua misura vive
+  /// nella `MediaQuery` che sta **sopra** la Scaffold: letta di qui —
+  /// dentro la Scaffold, dove la spaziatura è già stata consumata —
+  /// varrebbe zero, e il pulsante finirebbe dietro la barra.
+  final double bottomInset;
 
   /// Lato del pulsante (6.2) e raggio dell'arco su cui si dispone il
   /// ventaglio.
@@ -48,7 +57,6 @@ class _WaterFabMenuState extends ConsumerState<WaterFabMenu> {
   bool _open = false;
 
   Future<void> _openFan() async {
-    final inset = bottomBarFabInset(context);
     setState(() => _open = true);
     await showGeneralDialog<void>(
       context: context,
@@ -60,7 +68,7 @@ class _WaterFabMenuState extends ConsumerState<WaterFabMenu> {
       barrierColor: context.colors.scrim,
       transitionDuration: AppSpacing.motionStateTransition,
       pageBuilder: (dialogContext, animation, _) =>
-          _WaterFan(date: widget.date, fabInset: inset, animation: animation),
+          _WaterFan(date: widget.date, fabInset: widget.bottomInset, animation: animation),
     );
     if (mounted) setState(() => _open = false);
   }
@@ -71,7 +79,7 @@ class _WaterFabMenuState extends ConsumerState<WaterFabMenu> {
 
     return Padding(
       // 3.2: il pulsante mobile scavalca la barra fluttuante.
-      padding: EdgeInsets.only(bottom: bottomBarFabInset(context)),
+      padding: EdgeInsets.only(bottom: widget.bottomInset),
       child: FloatingActionButton(
         key: const Key('waterFab'),
         onPressed: _openFan,
