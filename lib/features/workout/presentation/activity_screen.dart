@@ -76,6 +76,12 @@ class ActivityScreen extends ConsumerWidget {
 /// 10.1: pianificazione in forma compatta, elenco degli allenamenti
 /// registrati e pulsante mobile per la registrazione.
 ///
+/// Pianificazione, chip dei filtri ed elenco stanno in un **unico
+/// scorrimento** (segnalato dall'utente): la card stava fuori da esso e
+/// restava fissa in cima mentre l'elenco le scorreva sotto, sottraendo
+/// spazio agli allenamenti proprio dove ve n'è più bisogno. È un
+/// riepilogo, non un'intestazione: si consulta e si lascia andare.
+///
 /// "Cosa non compare": nessun totale di calorie, nessuna media, nessun
 /// grafico (CB-9); nessun conteggio di allenamenti mancanti rispetto
 /// all'obiettivo, nessun sollecito (RA-18, OS-10).
@@ -89,36 +95,47 @@ class _WorkoutsView extends ConsumerWidget {
     final workouts = ref.watch(workoutsProvider);
     final filters = ref.watch(workoutFilterControllerProvider);
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        const PlanningCard(),
-        if (!filters.isEmpty) const _FilterChips(),
-        Expanded(
-          child: workouts.when(
-            loading: () => const Center(child: CircularProgressIndicator()),
-            error: (error, _) => Center(
+    return CustomScrollView(
+      slivers: [
+        const SliverToBoxAdapter(child: PlanningCard()),
+        if (!filters.isEmpty) const SliverToBoxAdapter(child: _FilterChips()),
+        workouts.when(
+          // Attesa ed errore riempiono quel che resta sotto la card, che
+          // è già a schermo e ha letture proprie: non la si fa sparire
+          // per uno stato che non la riguarda.
+          loading: () => const SliverFillRemaining(
+            hasScrollBody: false,
+            child: Center(child: CircularProgressIndicator()),
+          ),
+          error: (error, _) => SliverFillRemaining(
+            hasScrollBody: false,
+            child: Center(
               child: Text(
                 describeApiError(context, error.asApiException?.code ?? ''),
                 style: typography.bodyMedium.copyWith(color: colors.textSecondary),
               ),
             ),
-            data: (items) => items.isEmpty
-                // 4.4 interfaccia.md, RA-18: constatazione neutra, mai la
-                // segnalazione di una mancanza.
-                ? EmptyStateView(
+          ),
+          data: (items) => items.isEmpty
+              // 4.4 interfaccia.md, RA-18: constatazione neutra, mai la
+              // segnalazione di una mancanza.
+              ? SliverFillRemaining(
+                  hasScrollBody: false,
+                  child: EmptyStateView(
                     icon: Icons.directions_run_outlined,
                     title: filters.isEmpty
                         ? context.l10n.workoutNoneRecorded
                         : context.l10n.workoutNoneWithFilters,
-                  )
-                : ListView.builder(
-                    padding: EdgeInsets.fromLTRB(
-                      AppSpacing.md,
-                      AppSpacing.sm,
-                      AppSpacing.md,
-                      AppSpacing.xxl + bottomBarInset(context),
-                    ),
+                  ),
+                )
+              : SliverPadding(
+                  padding: EdgeInsets.fromLTRB(
+                    AppSpacing.md,
+                    AppSpacing.sm,
+                    AppSpacing.md,
+                    AppSpacing.xxl + bottomBarInset(context),
+                  ),
+                  sliver: SliverList.builder(
                     itemCount: items.length,
                     itemBuilder: (context, index) => Padding(
                       padding: const EdgeInsets.only(bottom: AppSpacing.xs),
@@ -129,7 +146,7 @@ class _WorkoutsView extends ConsumerWidget {
                       ),
                     ),
                   ),
-          ),
+                ),
         ),
       ],
     );

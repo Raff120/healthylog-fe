@@ -12,6 +12,7 @@ import '../../data/hydration_models.dart';
 import '../../providers/hydration_providers.dart';
 import '../hydration_formatting.dart';
 import 'water_entries_sheet.dart';
+import 'water_goal_sheet.dart';
 
 /// L'idratazione in coda al segmento *Aderenza* (11.1 interfaccia.md;
 /// 8.6 funzionale).
@@ -25,6 +26,12 @@ import 'water_entries_sheet.dart';
 /// **sola evidenza**, pieno e tenue della medesima tinta d'accento: mai
 /// un colore di merito, mai un premio, mai una striscia di giornate
 /// consecutive, mai un punteggio (AQ-23).
+///
+/// AQ-11, AQ-26: l'obiettivo giornaliero si imposta **da qui**, dove la
+/// linea di riferimento che ne discende è sotto gli occhi. Stava fra i
+/// dati personali, dove non lo si trovava (segnalato dall'utente, vedi
+/// decisioni.md). AQ-17 resta osservato: la vista quotidiana continua a
+/// non recare né totale né obiettivo.
 ///
 /// La contiguità con l'aderenza è di presentazione e **non di calcolo**
 /// (AQ-30): l'idratazione non concorre in alcun modo al valore che sta
@@ -67,10 +74,18 @@ class WaterStatisticsSection extends ConsumerWidget {
           )
         else
           _Chart(statistics: statistics),
+        // AQ-11, AQ-12: l'obiettivo e il comando che lo imposta,
+        // riservati all'Utente sui propri dati — il Nutrizionista non si
+        // dà gli obiettivi del Paziente (AQ-28bis per analogia).
+        // Compare anche senza alcuna registrazione: è allora che un
+        // traguardo si dà, non dopo.
+        if (query.userId == null) ...[
+          const SizedBox(height: AppSpacing.xs),
+          const _GoalRow(),
+        ],
         // AQ-28, AQ-28bis: l'elenco da cui si rettifica, riservato
         // all'Utente sui propri dati — il Nutrizionista consulta.
         if (query.userId == null && !statistics.isEmpty) ...[
-          const SizedBox(height: AppSpacing.xs),
           Align(
             alignment: Alignment.centerLeft,
             child: TextButton.icon(
@@ -120,6 +135,43 @@ class _Chart extends ConsumerWidget {
       // modalità della linea del peso obiettivo (AN-6).
       referenceValue: goal?.toDouble(),
       referenceLabel: goal == null ? null : formatVolume(context, goal, units),
+    );
+  }
+}
+
+/// AQ-11, AQ-26: l'obiettivo giornaliero e il comando che lo imposta.
+///
+/// AQ-23: il valore e nulla più — nessun avanzamento, nessuna striscia
+/// di giornate raggiunte, nessun punteggio. Quel che l'obiettivo fa lo
+/// fa sul grafico sopra, dove distingue le barre.
+class _GoalRow extends ConsumerWidget {
+  const _GoalRow();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final colors = context.colors;
+    final typography = context.typography;
+    final units = ref.watch(unitSystemProvider);
+    final goal = ref.watch(dailyWaterGoalProvider).value;
+
+    return Row(
+      children: [
+        Expanded(
+          child: Text(
+            goal == null
+                ? context.l10n.waterGoalNone
+                : context.l10n.waterGoalReference(formatVolume(context, goal, units)),
+            style: typography.bodyMedium.copyWith(
+              color: goal == null ? colors.textSecondary : colors.textPrimary,
+            ),
+          ),
+        ),
+        TextButton(
+          key: const Key('waterGoalButton'),
+          onPressed: () => showWaterGoalSheet(context),
+          child: Text(goal == null ? context.l10n.commonSet : context.l10n.commonEdit),
+        ),
+      ],
     );
   }
 }

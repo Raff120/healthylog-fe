@@ -238,6 +238,9 @@ class L10nEn extends L10n {
   String get commonSearch => 'Search';
 
   @override
+  String get commonSet => 'Set';
+
+  @override
   String get commonShare => 'Share';
 
   @override
@@ -1858,6 +1861,21 @@ class L10nEn extends L10n {
   String get swapChooseDestination => 'Choose where to move it';
 
   @override
+  String get targetWeightHelp =>
+      'It will appear on the weight chart as a reference line.';
+
+  @override
+  String get targetWeightNone => 'No target weight';
+
+  @override
+  String get targetWeightRemove => 'Remove target weight';
+
+  @override
+  String targetWeightValue(String value) {
+    return 'Target weight $value';
+  }
+
+  @override
   String templateDeleteConfirmBody(String name) {
     return 'Plans already created from “$name” are unaffected.';
   }
@@ -2320,6 +2338,12 @@ class L10nEn extends L10n {
 
   @override
   String get waterGoalLabel => 'Daily water goal';
+
+  @override
+  String get waterGoalNone => 'No water goal';
+
+  @override
+  String get waterGoalRemove => 'Remove goal';
 
   @override
   String waterGoalReference(String value) {

@@ -10,6 +10,7 @@ import 'app/theme/theme_mode_controller.dart';
 import 'core/api/client_build.dart';
 import 'core/device/device_insets.dart';
 import 'core/device/page_chrome.dart';
+import 'core/device/system_gesture_guard.dart';
 import 'l10n/app_locale.dart';
 import 'l10n/generated/app_localizations.dart';
 import 'l10n/locale_controller.dart';
@@ -56,8 +57,14 @@ class HealthyLogApp extends ConsumerWidget {
       // dispositivo che il motore non riferisce — tastiera di sistema e
       // zone riservate — sono immesse in `MediaQuery`
       // (`device_insets.dart`). MP-2, MP-5, MP-9.
+      // La striscia del gesto di sistema al bordo inferiore è sottratta
+      // allo scorrimento una volta sola, sopra l'intera applicazione
+      // (`system_gesture_guard.dart`, 3.2 interfaccia.md): sta dentro
+      // l'involucro delle misure perché è di là che le riceve sul web.
       builder: (context, child) => PageChromeSync(
-        child: withDeviceInsets(child: child ?? const SizedBox.shrink()),
+        child: withDeviceInsets(
+          child: withSystemGestureGuard(child: child ?? const SizedBox.shrink()),
+        ),
       ),
       // LO-1, LO-2: la lingua scelta dall'Utente, indipendente da quella
       // del sistema operativo. Governa insieme le traduzioni
