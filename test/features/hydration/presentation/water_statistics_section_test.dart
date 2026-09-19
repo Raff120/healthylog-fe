@@ -21,6 +21,7 @@ Future<void> _pump(
   required List<Map<String, dynamic>> days,
   int? goalMl,
   String? userId,
+  List<int?>? goalWrites,
 }) async {
   tester.view.physicalSize = const Size(500, 1200);
   tester.view.devicePixelRatio = 1.0;
@@ -29,7 +30,9 @@ Future<void> _pump(
   await tester.pumpWidget(
     ProviderScope(
       overrides: [
-        hydrationApiProvider.overrideWithValue(stubHydrationApi(days: days, goalMl: goalMl)),
+        hydrationApiProvider.overrideWithValue(
+          stubHydrationApi(days: days, goalMl: goalMl, goalWrites: goalWrites),
+        ),
       ],
       child: MaterialApp(
         locale: testLocale,
@@ -156,5 +159,73 @@ void main() {
     );
 
     expect(find.byKey(const Key('waterEntriesButton')), findsNothing);
+  });
+
+  /// AQ-11, AQ-12: l'obiettivo si imposta da qui, dove la linea di
+  /// riferimento che ne discende è sotto gli occhi. Stava fra i dati
+  /// personali, dove non lo si trovava (segnalato dall'utente).
+  testWidgets('presenta l\'obiettivo vigente e ne offre la modifica (AQ-11)', (tester) async {
+    await _pump(tester, days: [
+      {'date': '2026-03-02', 'totalMl': 1800},
+    ], goalMl: 2000);
+
+    expect(find.text('Obiettivo 2 L'), findsOneWidget);
+    expect(find.byKey(const Key('waterGoalButton')), findsOneWidget);
+  });
+
+  /// 4.4: l'assenza è una constatazione, non una mancanza da rimediare.
+  testWidgets('in sua assenza constata e resta raggiungibile (4.4)', (tester) async {
+    await _pump(tester, days: const []);
+
+    expect(find.text('Nessun obiettivo d\u2019acqua'), findsOneWidget);
+    // È senza registrazioni che un traguardo si dà, non dopo.
+    expect(find.byKey(const Key('waterGoalButton')), findsOneWidget);
+  });
+
+  testWidgets('il foglio scrive l\'obiettivo sul server (AQ-12)', (tester) async {
+    final writes = <int?>[];
+    await _pump(tester, days: [
+      {'date': '2026-03-02', 'totalMl': 1800},
+    ], goalWrites: writes);
+
+    await tester.tap(find.byKey(const Key('waterGoalButton')));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byKey(const Key('waterGoalField')), '2500');
+    await tester.pump();
+    await tester.tap(find.text('Salva'));
+    await tester.pumpAndSettle();
+
+    expect(writes, [2500]);
+  });
+
+  /// AQ-15, DS-20: la rimozione è un'azione esplicita, e il valore nullo
+  /// è quel che la esprime.
+  testWidgets('il foglio rimuove l\'obiettivo (AQ-15)', (tester) async {
+    final writes = <int?>[];
+    await _pump(tester, days: [
+      {'date': '2026-03-02', 'totalMl': 1800},
+    ], goalMl: 2000, goalWrites: writes);
+
+    await tester.tap(find.byKey(const Key('waterGoalButton')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('waterGoalRemove')));
+    await tester.pumpAndSettle();
+
+    expect(writes, [null]);
+  });
+
+  /// AQ-28bis per analogia: il Nutrizionista consulta e non si dà gli
+  /// obiettivi del Paziente.
+  testWidgets('il Nutrizionista non imposta l\'obiettivo del Paziente', (tester) async {
+    await _pump(
+      tester,
+      days: [
+        {'date': '2026-03-02', 'totalMl': 1800},
+      ],
+      goalMl: 2000,
+      userId: 'patient-1',
+    );
+
+    expect(find.byKey(const Key('waterGoalButton')), findsNothing);
   });
 }

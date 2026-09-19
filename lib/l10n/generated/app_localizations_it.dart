@@ -238,6 +238,9 @@ class L10nIt extends L10n {
   String get commonSearch => 'Cerca';
 
   @override
+  String get commonSet => 'Imposta';
+
+  @override
   String get commonShare => 'Condividi';
 
   @override
@@ -1874,6 +1877,21 @@ class L10nIt extends L10n {
   String get swapChooseDestination => 'Scegli dove spostarlo';
 
   @override
+  String get targetWeightHelp =>
+      'Comparirà nel grafico del peso come linea di riferimento.';
+
+  @override
+  String get targetWeightNone => 'Nessun peso obiettivo';
+
+  @override
+  String get targetWeightRemove => 'Rimuovi peso obiettivo';
+
+  @override
+  String targetWeightValue(String value) {
+    return 'Peso obiettivo $value';
+  }
+
+  @override
   String templateDeleteConfirmBody(String name) {
     return 'I piani già creati da «$name» non ne risentono.';
   }
@@ -2337,6 +2355,12 @@ class L10nIt extends L10n {
 
   @override
   String get waterGoalLabel => 'Obiettivo d’acqua';
+
+  @override
+  String get waterGoalNone => 'Nessun obiettivo d’acqua';
+
+  @override
+  String get waterGoalRemove => 'Rimuovi obiettivo';
 
   @override
   String waterGoalReference(String value) {

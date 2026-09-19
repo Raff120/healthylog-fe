@@ -69,6 +69,7 @@
   "commonRevoke": "Revoke",
   "commonSave": "Save",
   "commonSearch": "Search",
+  "commonSet": "Set",
   "commonShare": "Share",
   "commonToday": "Today",
   "commonUnderstood": "Got it",
@@ -526,6 +527,17 @@
   "statisticsWholePlan": "Whole plan",
   "statisticsWorkouts": "Workouts",
   "swapChooseDestination": "Choose where to move it",
+  "targetWeightHelp": "It will appear on the weight chart as a reference line.",
+  "targetWeightNone": "No target weight",
+  "targetWeightRemove": "Remove target weight",
+  "targetWeightValue": "Target weight {value}",
+  "@targetWeightValue": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
   "templateDeleteConfirmBody": "Plans already created from “{name}” are unaffected.",
   "templateDeleteConfirmTitle": "Delete the template?",
   "templateLastEdited": "Last edited: {when}",
@@ -722,6 +734,8 @@
   "waterEntriesTitle": "Additions in the period",
   "waterGoalHelp": "It will appear in the statistics as a reference for the water you drank.",
   "waterGoalLabel": "Daily water goal",
+  "waterGoalNone": "No water goal",
+  "waterGoalRemove": "Remove goal",
   "waterGoalReference": "Goal {value}",
   "waterNoEntries": "No additions recorded",
   "waterRemoveConfirm": "Remove {value}?",

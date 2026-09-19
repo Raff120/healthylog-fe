@@ -4,12 +4,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../app/theme/app_spacing.dart';
 import '../../../app/theme/theme_context.dart';
 import '../../../l10n/l10n_context.dart';
+import '../../identity/presentation/widgets/target_weight_sheet.dart';
+import '../../identity/providers/profile_providers.dart';
 import '../../measurement/presentation/measurement_list.dart';
 import '../data/statistics_models.dart';
 import '../providers/statistics_providers.dart';
 import 'statistics_formatting.dart';
+import '../../../l10n/formats.dart';
 import '../../../l10n/units.dart';
-import '../../identity/providers/profile_providers.dart';
 import 'statistics_presentation.dart';
 import 'widgets/measure_line_chart.dart';
 import 'widgets/statistics_headline.dart';
@@ -28,6 +30,12 @@ import '../../../app/navigation/bottom_bar_insets.dart';
 /// La direzione desiderabile non è determinabile dal sistema: un calo di
 /// peso non è per definizione un miglioramento.
 ///
+/// AN-6, PR-8: il peso obiettivo si imposta **da qui**, dove la linea di
+/// riferimento che ne discende è sotto gli occhi. Stava fra i dati
+/// personali, dove non lo si trovava (segnalato dall'utente, vedi
+/// decisioni.md). Vi resta raggiungibile anche in assenza di
+/// misurazioni: è allora che lo si dà, non dopo.
+///
 /// AN-12: nessuna elaborazione ulteriore — non medie mobili, non
 /// proiezioni, non tassi di variazione, non indici derivati dal rapporto
 /// tra peso e altezza. AN-19: l'andamento non è messo in relazione con
@@ -44,15 +52,22 @@ class BodyStatisticsView extends ConsumerWidget {
 
     if (statistics.series.isEmpty) {
       // AN-2: non si presentano grafici vuoti; 4.4: constatazione neutra.
-      return Center(
-        child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.xxl),
-          child: Text(
+      return ListView(
+        padding: EdgeInsets.fromLTRB(
+          AppSpacing.md,
+          AppSpacing.xxl,
+          AppSpacing.md,
+          AppSpacing.xs + bottomBarInset(context),
+        ),
+        children: [
+          Text(
             context.l10n.bodyStatsNoMeasurements,
             style: typography.titleMedium.copyWith(color: colors.textSecondary),
             textAlign: TextAlign.center,
           ),
-        ),
+          const SizedBox(height: AppSpacing.lg),
+          const _TargetWeightRow(),
+        ],
       );
     }
 
@@ -138,6 +153,12 @@ class BodyStatisticsView extends ConsumerWidget {
                   context.l10n.bodyStatsNutritionistLegend,
                   style: typography.caption.copyWith(color: colors.textSecondary),
                 ),
+              // AN-6, PR-8: il riferimento riguarda il solo peso, e il
+              // comando che lo imposta sta dove la linea compare.
+              if (series.measure.hasTarget) ...[
+                const SizedBox(height: AppSpacing.xs),
+                const _TargetWeightRow(),
+              ],
               const SizedBox(height: AppSpacing.lg),
               Text(context.l10n.bodyMeasurementsTitle, style: typography.overline.copyWith(color: colors.textTertiary)),
             ],
@@ -177,6 +198,48 @@ class _PeriodMeasurements extends ConsumerWidget {
     return measurements.maybeWhen(
       data: (items) => MeasurementList(items: items),
       orElse: () => const SizedBox.shrink(),
+    );
+  }
+}
+
+/// PR-8, AN-6: il peso obiettivo e il comando che lo imposta.
+///
+/// OS-10 vale anche qui per analogia: nessun avanzamento, nessuna
+/// distanza residua, nessun tempo stimato (AN-9, PR-9). Il valore e
+/// nulla più.
+class _TargetWeightRow extends ConsumerWidget {
+  const _TargetWeightRow();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final colors = context.colors;
+    final typography = context.typography;
+    final units = ref.watch(unitSystemProvider);
+    // Il profilo e non il responso delle statistiche: è lì che
+    // l'obiettivo vive, e vi si aggiorna appena salvato.
+    final target = ref.watch(profileControllerProvider).value?.targetWeightKg;
+
+    return Row(
+      children: [
+        Expanded(
+          child: Text(
+            target == null
+                ? context.l10n.targetWeightNone
+                : context.l10n.targetWeightValue(
+                    '${formatDecimal(context, weightToDisplay(target, units))} '
+                    '${weightUnit(context, units)}',
+                  ),
+            style: typography.bodyMedium.copyWith(
+              color: target == null ? colors.textSecondary : colors.textPrimary,
+            ),
+          ),
+        ),
+        TextButton(
+          key: const Key('targetWeightButton'),
+          onPressed: () => showTargetWeightSheet(context),
+          child: Text(target == null ? context.l10n.commonSet : context.l10n.commonEdit),
+        ),
+      ],
     );
   }
 }
