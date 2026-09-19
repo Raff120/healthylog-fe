@@ -112,6 +112,7 @@
   "commonRevoke": "Revoca",
   "commonSave": "Salva",
   "commonSearch": "Cerca",
+  "commonSet": "Imposta",
   "commonShare": "Condividi",
   "commonToday": "Oggi",
   "commonUnderstood": "Ho capito",
@@ -1149,6 +1150,17 @@
   "statisticsWholePlan": "Intero piano",
   "statisticsWorkouts": "Allenamenti",
   "swapChooseDestination": "Scegli dove spostarlo",
+  "targetWeightHelp": "Comparirà nel grafico del peso come linea di riferimento.",
+  "targetWeightNone": "Nessun peso obiettivo",
+  "targetWeightRemove": "Rimuovi peso obiettivo",
+  "targetWeightValue": "Peso obiettivo {value}",
+  "@targetWeightValue": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
   "templateDeleteConfirmBody": "I piani già creati da «{name}» non ne risentono.",
   "@templateDeleteConfirmBody": {
     "placeholders": {
@@ -1431,6 +1443,8 @@
   "waterEntriesTitle": "Aggiunte del periodo",
   "waterGoalHelp": "Comparirà nelle statistiche come riferimento dell’acqua bevuta.",
   "waterGoalLabel": "Obiettivo d’acqua",
+  "waterGoalNone": "Nessun obiettivo d’acqua",
+  "waterGoalRemove": "Rimuovi obiettivo",
   "waterGoalReference": "Obiettivo {value}",
   "@waterGoalReference": {
     "placeholders": {

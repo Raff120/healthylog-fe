@@ -6,6 +6,7 @@ import '../../../core/api/api_client.dart';
 import '../../../core/auth/session_controller.dart';
 import '../../../l10n/locale_controller.dart';
 import '../../../l10n/unit_system.dart';
+import '../../statistics/providers/statistics_providers.dart';
 import '../data/profile_api.dart';
 import '../data/profile_models.dart';
 
@@ -35,6 +36,35 @@ class ProfileController extends _$ProfileController {
     final profile = await ref.read(profileApiProvider).updateProfile(request);
     state = AsyncValue.data(profile);
     return profile;
+  }
+
+  /// PR-8: il solo peso obiettivo, impostato dal segmento *Corpo* di
+  /// *Statistiche* — dove la linea di riferimento che ne discende (AN-6)
+  /// è sotto gli occhi (11.3 interfaccia.md, vedi decisioni.md).
+  ///
+  /// `PATCH /me` porta il profilo per intero e non ha un campo proprio
+  /// per l'obiettivo: gli altri valori sono ripresi immutati da quelli
+  /// vigenti. Nessuno di essi è toccato, l'indirizzo compreso — sicché
+  /// non si innesca la verifica di AC-5.
+  Future<void> saveTargetWeight(double? targetWeightKg) async {
+    final profile = state.value;
+    if (profile == null) return;
+    await save(UpdateProfileRequest(
+      email: profile.email,
+      username: profile.username,
+      firstName: profile.firstName,
+      lastName: profile.lastName,
+      birthDate: profile.birthDate,
+      birthPlace: profile.birthPlace,
+      sex: profile.sex,
+      height: profile.height,
+      // PR-10: l'obiettivo nullo lo rimuove.
+      targetWeightKg: targetWeightKg,
+    ));
+    // AN-6: la linea di riferimento arriva col responso delle statistiche
+    // e non dal profilo: senza rilettura il grafico resterebbe alla
+    // vecchia.
+    ref.invalidate(measurementStatisticsProvider);
   }
 
   /// LO-2, LO-4: lingua e unità di misura (12.2 interfaccia.md).

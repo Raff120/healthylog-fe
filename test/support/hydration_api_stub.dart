@@ -17,12 +17,14 @@ HydrationApi stubHydrationApi({
   List<Map<String, dynamic>> days = const [],
   int? goalMl,
   List<Map<String, dynamic>>? statisticsDaily,
+  List<int?>? goalWrites,
 }) {
   final dio = Dio(BaseOptions(baseUrl: 'http://example.test'))
     ..httpClientAdapter = _HydrationStubAdapter(
       days: days,
       goalMl: goalMl,
       statisticsDaily: statisticsDaily,
+      goalWrites: goalWrites ?? <int?>[],
     )
     ..interceptors.add(ApiErrorInterceptor());
   return HydrationApi(dio);
@@ -33,11 +35,15 @@ class _HydrationStubAdapter implements HttpClientAdapter {
     required this.days,
     required this.goalMl,
     required this.statisticsDaily,
+    required this.goalWrites,
   });
 
   final List<Map<String, dynamic>> days;
-  final int? goalMl;
+  int? goalMl;
   final List<Map<String, dynamic>>? statisticsDaily;
+
+  /// AQ-12: gli obiettivi scritti, nell'ordine in cui lo sono stati.
+  final List<int?> goalWrites;
 
   @override
   void close({bool force = false}) {}
@@ -59,7 +65,15 @@ class _HydrationStubAdapter implements HttpClientAdapter {
       }).toList();
       return _json(200, selected);
     }
-    if (options.path == '/me/water-goal') return _json(200, {'valueMl': goalMl});
+    if (options.path == '/me/water-goal') {
+      // AQ-12: la scrittura dell'obiettivo (`PUT`) è registrata e vale da
+      // subito per le letture successive.
+      if (options.method == 'PUT') {
+        goalWrites.add((options.data as Map)['valueMl'] as int?);
+        goalMl = goalWrites.last;
+      }
+      return _json(200, {'valueMl': goalMl});
+    }
     if (options.path == '/statistics/water') {
       final daily = statisticsDaily ??
           days.map((day) => {'date': day['date'], 'totalMl': day['totalMl'], 'goalMl': goalMl}).toList();

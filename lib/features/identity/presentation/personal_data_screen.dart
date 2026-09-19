@@ -9,10 +9,7 @@ import '../../../core/api/api_exception.dart';
 import '../../../core/widgets/app_primary_button.dart';
 import '../../../core/widgets/app_text_field.dart';
 import '../../../l10n/l10n_context.dart';
-import '../../../l10n/unit_system.dart';
 import '../../../l10n/units.dart';
-import '../../hydration/domain/water_amounts.dart';
-import '../../hydration/providers/hydration_providers.dart';
 import '../data/account_role.dart';
 import '../data/profile_models.dart';
 import '../domain/registration_field_validators.dart';
@@ -36,26 +33,18 @@ class _PersonalDataScreenState extends ConsumerState<PersonalDataScreen> {
   final _email = TextEditingController();
   final _birthPlace = TextEditingController();
   final _height = TextEditingController();
-  // PR-8: peso obiettivo, facoltativo. Sta nel profilo e non fra le
-  // misurazioni (11.3 interfaccia.md): non è un dato rilevato ma un
-  // riferimento che l'Utente si dà.
-  final _targetWeight = TextEditingController();
-  // AQ-11: obiettivo giornaliero d'acqua, facoltativo. Sta qui accanto al
-  // peso obiettivo — è un traguardo che ci si dà una volta, non
-  // un'operazione quotidiana — e non nella vista giornaliera, dove la sua
-  // presenza inviterebbe a rincorrerlo (AQ-17, 12.1 interfaccia.md).
-  final _waterGoal = TextEditingController();
 
   DateTime? _birthDate;
   BiologicalSex? _sex;
   bool _submitted = false;
   bool _initialized = false;
-  bool _waterGoalInitialized = false;
 
-  /// AQ-12, DS-21: l'obiettivo viaggia per conto proprio (EP-9) e si
-  /// scrive solo se mutato — una scrittura a vuoto aggiungerebbe alla
-  /// serie datata un elemento che non registra alcun cambiamento.
-  int? _originalWaterGoalMl;
+  /// PR-8: il peso obiettivo non è più un campo di questo modulo — si
+  /// imposta dal segmento *Corpo* di *Statistiche* (11.3 interfaccia.md,
+  /// vedi decisioni.md). `PATCH /me` porta però il profilo per intero, e
+  /// il valore vigente va riferito immutato: ometterlo lo rimuoverebbe
+  /// (PR-10).
+  double? _targetWeightKg;
   String _originalUsername = '';
   String _originalEmail = '';
 
@@ -69,8 +58,6 @@ class _PersonalDataScreenState extends ConsumerState<PersonalDataScreen> {
     _email.dispose();
     _birthPlace.dispose();
     _height.dispose();
-    _targetWeight.dispose();
-    _waterGoal.dispose();
     super.dispose();
   }
 
@@ -82,38 +69,20 @@ class _PersonalDataScreenState extends ConsumerState<PersonalDataScreen> {
     _username.text = profile.username;
     _email.text = profile.email;
     _birthPlace.text = profile.birthPlace;
-    // LO-4, LO-7: altezza e peso obiettivo sono conservati in centimetri
-    // e chilogrammi e presentati nel sistema scelto. Il pollice è
-    // presentato con un decimale: 0,1 pollici valgono 2,54 mm, meno del
-    // mezzo centimetro su cui l'altezza è arrotondata al ritorno, sicché
-    // il giro di conversione restituisce il centimetro di partenza.
+    // LO-4, LO-7: l'altezza è conservata in centimetri e presentata nel
+    // sistema scelto. Il pollice è presentato con un decimale: 0,1
+    // pollici valgono 2,54 mm, meno del mezzo centimetro su cui l'altezza
+    // è arrotondata al ritorno, sicché il giro di conversione restituisce
+    // il centimetro di partenza.
     final units = ref.read(unitSystemProvider);
     _height.text = profile.height == null
         ? ''
         : _formatDecimal(lengthToDisplay(profile.height!.toDouble(), units));
-    _targetWeight.text = profile.targetWeightKg == null
-        ? ''
-        : _formatDecimal(weightToDisplay(profile.targetWeightKg!, units));
+    _targetWeightKg = profile.targetWeightKg;
     _birthDate = profile.birthDate;
     _sex = profile.sex;
     _originalUsername = profile.username;
     _originalEmail = profile.email;
-  }
-
-  /// L'obiettivo non appartiene al profilo (EP-9) e arriva da una
-  /// lettura propria: si valorizza quando questa si risolve, non con gli
-  /// altri campi.
-  void _initializeWaterGoal(int? goalMl, UnitSystem units) {
-    if (_waterGoalInitialized) return;
-    _waterGoalInitialized = true;
-    _originalWaterGoalMl = goalMl;
-    _waterGoal.text = goalMl == null ? '' : _formatDecimal(volumeToDisplay(goalMl, units));
-  }
-
-  /// LO-7: l'obiettivo torna in millilitri, unità di conservazione.
-  int? _waterGoalValue() {
-    final shown = _shownValue(_waterGoal);
-    return shown == null ? null : volumeToStorage(shown, ref.read(unitSystemProvider));
   }
 
   void _onUsernameChanged(String value) {
@@ -147,16 +116,6 @@ class _PersonalDataScreenState extends ConsumerState<PersonalDataScreen> {
       'birthDate': _birthDate == null ? 'REQUIRED' : null,
       'sex': _sex == null ? 'REQUIRED' : null,
       'height': heightText.isEmpty ? null : (_shownValue(_height) == null ? 'INVALID_FORMAT' : null),
-      // PR-9: nessun giudizio sulla congruità del valore, solo la sua
-      // leggibilità come numero.
-      'targetWeightKg': _targetWeightValue() == null && _targetWeight.text.trim().isNotEmpty
-          ? 'INVALID_FORMAT'
-          : null,
-      // AQ-24: nessun giudizio sulla congruità dell'obiettivo, solo la
-      // sua leggibilità come numero.
-      'waterGoalMl': _waterGoalValue() == null && _waterGoal.text.trim().isNotEmpty
-          ? 'INVALID_FORMAT'
-          : null,
     };
     final availability = ref.read(usernameAvailabilityControllerProvider);
     if (errors['username'] == null &&
@@ -184,12 +143,6 @@ class _PersonalDataScreenState extends ConsumerState<PersonalDataScreen> {
     return rounded == rounded.roundToDouble() ? rounded.round().toString() : rounded.toString();
   }
 
-  /// LO-7: il peso obiettivo torna in chilogrammi, unità di conservazione.
-  double? _targetWeightValue() {
-    final shown = _shownValue(_targetWeight);
-    return shown == null ? null : weightToStorage(shown, ref.read(unitSystemProvider));
-  }
-
   /// PR-6: l'altezza è conservata in centimetri interi.
   int? _heightValue() {
     final shown = _shownValue(_height);
@@ -212,8 +165,8 @@ class _PersonalDataScreenState extends ConsumerState<PersonalDataScreen> {
               birthPlace: _birthPlace.text.trim(),
               sex: _sex!,
               height: _heightValue(),
-              // PR-10: il campo lasciato vuoto rimuove il peso obiettivo.
-              targetWeightKg: _targetWeightValue(),
+              // PR-8: riferito immutato, non più modificabile da qui.
+              targetWeightKg: _targetWeightKg,
             ),
           );
     } catch (error) {
@@ -229,16 +182,6 @@ class _PersonalDataScreenState extends ConsumerState<PersonalDataScreen> {
         );
       }
       return;
-    }
-
-    // AQ-12, EP-9: l'obiettivo ha un endpoint proprio, perché la scrittura
-    // non sostituisce un valore ma aggiunge un elemento alla serie datata
-    // (DS-19). Segue il salvataggio del profilo e non lo precede: se
-    // quello fallisce, questo non è avvenuto.
-    final waterGoal = _waterGoalValue();
-    if (waterGoal != _originalWaterGoalMl) {
-      await ref.read(dailyWaterGoalProvider.notifier).save(waterGoal);
-      _originalWaterGoalMl = waterGoal;
     }
 
     if (!mounted) return;
@@ -275,12 +218,6 @@ class _PersonalDataScreenState extends ConsumerState<PersonalDataScreen> {
     final profileState = ref.watch(profileControllerProvider);
     // LO-4: le etichette recano l'unità del sistema scelto.
     final units = ref.watch(unitSystemProvider);
-    // AQ-11, EP-9: l'obiettivo d'acqua non appartiene al profilo e si
-    // legge per conto proprio; il campo si valorizza quando la lettura
-    // si risolve.
-    final waterGoal = ref.watch(dailyWaterGoalProvider);
-    if (waterGoal.hasValue) _initializeWaterGoal(waterGoal.value, units);
-
     return Scaffold(
       backgroundColor: colors.background,
       appBar: AppBar(
@@ -383,36 +320,6 @@ class _PersonalDataScreenState extends ConsumerState<PersonalDataScreen> {
                         value: _sex,
                         onChanged: (value) => setState(() => _sex = value),
                         errorText: _errorFor('sex'),
-                      ),
-                      const SizedBox(height: AppSpacing.sm),
-                      AppTextField(
-                        label: context.l10n.measureWithUnit(
-                          context.l10n.personalDataTargetWeight,
-                          weightUnit(context, units),
-                        ),
-                        controller: _targetWeight,
-                        keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                        errorText: _errorFor('targetWeightKg'),
-                      ),
-                      const SizedBox(height: AppSpacing.sm),
-                      AppTextField(
-                        key: const Key('waterGoalField'),
-                        label: context.l10n.measureWithUnit(
-                          context.l10n.waterGoalLabel,
-                          units == UnitSystem.imperial
-                              ? context.l10n.unitFluidOunces
-                              : context.l10n.unitQuantityMilliliter,
-                        ),
-                        controller: _waterGoal,
-                        keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                        errorText: _errorFor('waterGoalMl'),
-                      ),
-                      const SizedBox(height: AppSpacing.xxs),
-                      // 12.1: la didascalia ne dichiara l'unico impiego —
-                      // e che non è un contatore da rincorrere (AQ-17).
-                      Text(
-                        context.l10n.waterGoalHelp,
-                        style: context.typography.caption.copyWith(color: context.colors.textTertiary),
                       ),
                       const SizedBox(height: AppSpacing.sm),
                       AppTextField(

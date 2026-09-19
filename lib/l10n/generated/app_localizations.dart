@@ -511,6 +511,12 @@ abstract class L10n {
   /// **'Cerca'**
   String get commonSearch;
 
+  /// No description provided for @commonSet.
+  ///
+  /// In it, this message translates to:
+  /// **'Imposta'**
+  String get commonSet;
+
   /// No description provided for @commonShare.
   ///
   /// In it, this message translates to:
@@ -3253,6 +3259,30 @@ abstract class L10n {
   /// **'Scegli dove spostarlo'**
   String get swapChooseDestination;
 
+  /// No description provided for @targetWeightHelp.
+  ///
+  /// In it, this message translates to:
+  /// **'Comparirà nel grafico del peso come linea di riferimento.'**
+  String get targetWeightHelp;
+
+  /// No description provided for @targetWeightNone.
+  ///
+  /// In it, this message translates to:
+  /// **'Nessun peso obiettivo'**
+  String get targetWeightNone;
+
+  /// No description provided for @targetWeightRemove.
+  ///
+  /// In it, this message translates to:
+  /// **'Rimuovi peso obiettivo'**
+  String get targetWeightRemove;
+
+  /// No description provided for @targetWeightValue.
+  ///
+  /// In it, this message translates to:
+  /// **'Peso obiettivo {value}'**
+  String targetWeightValue(String value);
+
   /// No description provided for @templateDeleteConfirmBody.
   ///
   /// In it, this message translates to:
@@ -3966,6 +3996,18 @@ abstract class L10n {
   /// In it, this message translates to:
   /// **'Obiettivo d’acqua'**
   String get waterGoalLabel;
+
+  /// No description provided for @waterGoalNone.
+  ///
+  /// In it, this message translates to:
+  /// **'Nessun obiettivo d’acqua'**
+  String get waterGoalNone;
+
+  /// No description provided for @waterGoalRemove.
+  ///
+  /// In it, this message translates to:
+  /// **'Rimuovi obiettivo'**
+  String get waterGoalRemove;
 
   /// No description provided for @waterGoalReference.
   ///

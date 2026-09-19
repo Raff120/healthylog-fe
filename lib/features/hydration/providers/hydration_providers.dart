@@ -46,6 +46,11 @@ class DailyWaterGoal extends _$DailyWaterGoal {
     // AQ-16: il totale della giornata si presenta accanto all'obiettivo,
     // che è appena mutato.
     ref.invalidate(waterIntakeDayProvider);
+    // AQ-26: la linea di riferimento e la distinzione fra giornata
+    // raggiunta e non raggiunta arrivano col responso delle statistiche.
+    // L'obiettivo si imposta ora da lì (11.1 interfaccia.md, vedi
+    // decisioni.md): senza rilettura il grafico resterebbe alla vecchia.
+    ref.invalidate(waterStatisticsProvider);
   }
 }
 
