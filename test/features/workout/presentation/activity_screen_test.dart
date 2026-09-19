@@ -277,4 +277,29 @@ void main() {
     expect(adapter.listQueries.last['activityType'], 'Bocce');
   });
 
+
+  /// Segnalato dall'utente: la card della pianificazione restava fissa in
+  /// cima mentre l'elenco le scorreva sotto. È un riepilogo, non
+  /// un'intestazione, e scorre con quanto la segue.
+  testWidgets('la card della pianificazione scorre insieme all\'elenco', (tester) async {
+    final today = DateTime.now();
+    await _pumpActivity(tester, weeklyGoal: 3, workouts: [
+      for (var index = 0; index < 20; index++)
+        _workout(
+          id: 'w-$index',
+          date: today.subtract(Duration(days: index)),
+          activityType: 'Corsa',
+          calories: 300,
+        ),
+    ]);
+
+    final before = tester.getTopLeft(find.text('PIANIFICAZIONE')).dy;
+    await tester.drag(find.text('PIANIFICAZIONE'), const Offset(0, -60));
+    await tester.pump();
+
+    // La card si è mossa con l'elenco: il tocco che la prende scorre la
+    // schermata intera, e non la lascia dov'era.
+    expect(tester.getTopLeft(find.text('PIANIFICAZIONE')).dy, closeTo(before - 60, 1));
+  });
+
 }
