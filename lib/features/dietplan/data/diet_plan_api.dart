@@ -87,6 +87,20 @@ class DietPlanApi {
   /// piano è Attivo.
   Future<void> delete(String id) => _dio.delete('/diet-plans/$id');
 
+  /// NP-1, NP-2: la nota personale del piano, al solo proprietario; `null`
+  /// se non scritta.
+  Future<String?> personalNote(String id) async {
+    final response = await _dio.get('/diet-plans/$id/personal-note');
+    return (response.data as Map<String, dynamic>)['note'] as String?;
+  }
+
+  /// NP-1: vuota, la rimuove. Restituisce la nota come il server la
+  /// conserva.
+  Future<String?> updatePersonalNote(String id, String? note) async {
+    final response = await _dio.put('/diet-plans/$id/personal-note', data: {'note': note});
+    return (response.data as Map<String, dynamic>)['note'] as String?;
+  }
+
   /// PV-12, PV-13, PV-15: il PDF del piano, con il nome del file che il
   /// server propone nell'intestazione `Content-Disposition`.
   Future<ExportedPlanFile> export(String id) async {
