@@ -49,7 +49,11 @@ class PlanScreen extends ConsumerWidget {
     final typography = context.typography;
     final viewMode = ref.watch(selectedPlanViewProvider);
     final selectedDate = ref.watch(selectedDayProvider);
-    final swapSelection = ref.watch(mealSwapSelectionProvider);
+    final slotSwapSelection = ref.watch(mealSwapSelectionProvider);
+    // IN-28: la selezione delle giornate occupa l'intestazione come quella
+    // degli slot, e le due non convivono (vedi DaySwapSelection).
+    final daySwapSelection = ref.watch(daySwapSelectionProvider);
+    final swapSelection = slotSwapSelection ?? daySwapSelection;
     // VG-8, GE-18: il selettore esiste solo per chi appartiene a un
     // Gruppo. Riservargli comunque la zona di sinistra sottraeva
     // larghezza al segmented control anche a chi non lo vede mai.
@@ -89,11 +93,18 @@ class PlanScreen extends ConsumerWidget {
                 value: viewMode,
                 onChanged: (mode) => ref.read(selectedPlanViewProvider.notifier).select(mode),
               )
-            : Text(context.l10n.swapChooseDestination, style: typography.titleMedium.copyWith(color: colors.textPrimary)),
+            : Text(
+                daySwapSelection != null
+                    ? context.l10n.daySwapChooseDestination
+                    : context.l10n.swapChooseDestination,
+                style: typography.titleMedium.copyWith(color: colors.textPrimary),
+              ),
         actions: swapSelection == null
             ? [
                 // MD-8, MD-11: modifica della sola giornata selezionata, sul
-                // proprio piano e per chi ne ha titolo (non il Paziente, UT-8).
+                // proprio piano e per chi ne ha titolo (non il Paziente, UT-8);
+                // IN-28: inversione della giornata intera, anche al Paziente
+                // e al Cuoco sulla giornata di un membro.
                 if (viewMode == PlanViewMode.day) _DayMenu(selectedDate: selectedDate),
                 // 12.3, 3.1: icona notifiche nell'intestazione di ogni
                 // destinazione principale, dopo l'azione contestuale
@@ -104,7 +115,10 @@ class PlanScreen extends ConsumerWidget {
               ]
             : [
                 TextButton(
-                  onPressed: () => ref.read(mealSwapSelectionProvider.notifier).cancel(),
+                  onPressed: () {
+                    ref.read(mealSwapSelectionProvider.notifier).cancel();
+                    ref.read(daySwapSelectionProvider.notifier).cancel();
+                  },
                   child: Text(context.l10n.commonCancel),
                 ),
               ],
@@ -508,18 +522,33 @@ class _DayMenu extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final member = ref.watch(selectedGroupMemberProvider);
     final sideBySide = ref.watch(sideBySideModeProvider);
-    if (member != null || sideBySide) return const SizedBox.shrink();
-    final day = ref.watch(planDayProvider(selectedDate)).value;
+    if (sideBySide) return const SizedBox.shrink();
+    // CU-2: il Cuoco inverte anche sulla giornata di un membro, ma non la
+    // modifica (CU-9); il membro semplice non fa né l'una né l'altra.
+    if (member != null && !ref.watch(isCookProvider)) return const SizedBox.shrink();
+    final day = ref.watch(planDayProvider(selectedDate, userId: member)).value;
     if (day == null || day.coverage != PlanDayCoverage.active) return const SizedBox.shrink();
-    if (ref.watch(isPlanLockedProvider(day.planId))) return const SizedBox.shrink();
     if (dateOnly(selectedDate).isBefore(dateOnly(DateTime.now()))) return const SizedBox.shrink();
+    // UT-8: il Paziente non modifica la giornata, ma la inverte (PZ-3).
+    final canEdit = member == null && !ref.watch(isPlanLockedProvider(day.planId));
+    // IN-28, 6.5 e 3.3 interfaccia.md: il tocco prolungato della
+    // settimanale non resta l'unica via all'inversione di giornate.
+    final canSwap = isDaySwapOriginEligible(day);
+    if (!canEdit && !canSwap) return const SizedBox.shrink();
     return PopupMenuButton<String>(
       tooltip: context.l10n.planMoreActions,
       onSelected: (value) {
         if (value == 'edit-day') context.push('/plan-days/${isoDate(selectedDate)}/edit');
+        if (value == 'swap-day') {
+          // Come per lo slot (4.1), la destinazione si sceglie nella
+          // settimanale, dove le giornate sono visibili insieme (VS-8).
+          ref.read(daySwapSelectionProvider.notifier).start(DaySwapOrigin.of(day));
+          ref.read(selectedPlanViewProvider.notifier).select(PlanViewMode.week);
+        }
       },
       itemBuilder: (context) => [
-        PopupMenuItem(value: 'edit-day', child: Text(context.l10n.planEditThisDay)),
+        if (canEdit) PopupMenuItem(value: 'edit-day', child: Text(context.l10n.planEditThisDay)),
+        if (canSwap) PopupMenuItem(value: 'swap-day', child: Text(context.l10n.daySwapAction)),
       ],
     );
   }

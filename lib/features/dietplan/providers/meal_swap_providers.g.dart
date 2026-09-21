@@ -89,7 +89,7 @@ final class MealSwapSelectionProvider
   }
 }
 
-String _$mealSwapSelectionHash() => r'cd8c8972dd14f0e593b2201c60922394d0668d1e';
+String _$mealSwapSelectionHash() => r'4f834d4398f3aaed9eb658b1a68ba104afa504f2';
 
 /// Se non `null`, la vista settimanale è in modalità di selezione (6.5
 /// interfaccia.md).
@@ -166,6 +166,138 @@ String _$mealSwapControllerHash() =>
 /// [PlanDaySlotStatusController].
 
 abstract class _$MealSwapController extends $Notifier<AsyncValue<void>?> {
+  AsyncValue<void>? build();
+  @$mustCallSuper
+  @override
+  WhenComplete runBuild() {
+    final ref = this.ref as $Ref<AsyncValue<void>?, AsyncValue<void>?>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<AsyncValue<void>?, AsyncValue<void>?>,
+              AsyncValue<void>?,
+              Object?,
+              Object?
+            >;
+    return element.handleCreate(ref, build);
+  }
+}
+
+/// Se non `null`, la vista settimanale è in modalità di selezione delle
+/// giornate (6.5 interfaccia.md, IN-28). Esclusiva con quella degli slot:
+/// l'avvio dell'una annulla l'altra.
+
+@ProviderFor(DaySwapSelection)
+final daySwapSelectionProvider = DaySwapSelectionProvider._();
+
+/// Se non `null`, la vista settimanale è in modalità di selezione delle
+/// giornate (6.5 interfaccia.md, IN-28). Esclusiva con quella degli slot:
+/// l'avvio dell'una annulla l'altra.
+final class DaySwapSelectionProvider
+    extends $NotifierProvider<DaySwapSelection, DaySwapOrigin?> {
+  /// Se non `null`, la vista settimanale è in modalità di selezione delle
+  /// giornate (6.5 interfaccia.md, IN-28). Esclusiva con quella degli slot:
+  /// l'avvio dell'una annulla l'altra.
+  DaySwapSelectionProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'daySwapSelectionProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$daySwapSelectionHash();
+
+  @$internal
+  @override
+  DaySwapSelection create() => DaySwapSelection();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(DaySwapOrigin? value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<DaySwapOrigin?>(value),
+    );
+  }
+}
+
+String _$daySwapSelectionHash() => r'98c71a10991055b9d6d979fd6504e155aa6a6766';
+
+/// Se non `null`, la vista settimanale è in modalità di selezione delle
+/// giornate (6.5 interfaccia.md, IN-28). Esclusiva con quella degli slot:
+/// l'avvio dell'una annulla l'altra.
+
+abstract class _$DaySwapSelection extends $Notifier<DaySwapOrigin?> {
+  DaySwapOrigin? build();
+  @$mustCallSuper
+  @override
+  WhenComplete runBuild() {
+    final ref = this.ref as $Ref<DaySwapOrigin?, DaySwapOrigin?>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<DaySwapOrigin?, DaySwapOrigin?>,
+              DaySwapOrigin?,
+              Object?,
+              Object?
+            >;
+    return element.handleCreate(ref, build);
+  }
+}
+
+/// Esecuzione dell'inversione di giornate (IN-28), sul modello di
+/// [MealSwapController]: nessuno stato oltre all'esito, e le giornate si
+/// rileggono invalidando le cache.
+
+@ProviderFor(DaySwapController)
+final daySwapControllerProvider = DaySwapControllerProvider._();
+
+/// Esecuzione dell'inversione di giornate (IN-28), sul modello di
+/// [MealSwapController]: nessuno stato oltre all'esito, e le giornate si
+/// rileggono invalidando le cache.
+final class DaySwapControllerProvider
+    extends $NotifierProvider<DaySwapController, AsyncValue<void>?> {
+  /// Esecuzione dell'inversione di giornate (IN-28), sul modello di
+  /// [MealSwapController]: nessuno stato oltre all'esito, e le giornate si
+  /// rileggono invalidando le cache.
+  DaySwapControllerProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'daySwapControllerProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$daySwapControllerHash();
+
+  @$internal
+  @override
+  DaySwapController create() => DaySwapController();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(AsyncValue<void>? value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<AsyncValue<void>?>(value),
+    );
+  }
+}
+
+String _$daySwapControllerHash() => r'5e288e0ddab4d3ab4f72d2055fe08a4f221d74fe';
+
+/// Esecuzione dell'inversione di giornate (IN-28), sul modello di
+/// [MealSwapController]: nessuno stato oltre all'esito, e le giornate si
+/// rileggono invalidando le cache.
+
+abstract class _$DaySwapController extends $Notifier<AsyncValue<void>?> {
   AsyncValue<void>? build();
   @$mustCallSuper
   @override
