@@ -68,6 +68,8 @@ Map<String, dynamic> _planJson({
   String name = 'Dieta di prova',
   String status = 'DRAFT',
   List<Map<String, dynamic>>? mondaySlots,
+  int weeks = 1,
+  String? content,
 }) {
   const days = ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY'];
   return {
@@ -79,12 +81,25 @@ Map<String, dynamic> _planJson({
     'status': status,
     'startDate': '2026-09-07',
     'endDate': null,
-    'weeklySchedule': days.map((day) {
-      final slots = day == 'MONDAY' && mondaySlots != null
-          ? mondaySlots
-          : [for (var i = 0; i < _slotTypesInOrder.length; i++) _slotJson(_slotTypesInOrder[i], i)];
-      return {'dayOfWeek': day, 'slots': slots};
-    }).toList(),
+    'weeklySchedule': [
+      for (var week = 1; week <= weeks; week++)
+        for (final day in days)
+          {
+            // Il primo schema dei test non recava settimana: è la forma
+            // anteriore ai piani su più settimane, che si legge come prima.
+            if (weeks > 1) 'week': week,
+            'dayOfWeek': day,
+            'slots': day == 'MONDAY' && mondaySlots != null && week == 1
+                ? mondaySlots
+                : [
+                    for (var i = 0; i < _slotTypesInOrder.length; i++)
+                      {
+                        ..._slotJson(_slotTypesInOrder[i], i, content: content),
+                        'slotId': '${_slotTypesInOrder[i]}-$i-$week-$day',
+                      },
+                  ],
+          },
+    ],
     'createdAt': '2026-09-01T00:00:00Z',
     'updatedAt': '2026-09-01T00:00:00Z',
   };
@@ -511,5 +526,120 @@ void main() {
 
     expect(find.byType(AlertDialog), findsOneWidget);
     expect(find.textContaining('Per terminarlo oggi usa «Concludi»'), findsOneWidget);
+  });
+
+  group('settimane dello schema (PA-2bis, 7.3 interfaccia.md)', () {
+    Future<void> openHeaderMenu(WidgetTester tester) async {
+      await tester.tap(find.byType(PopupMenuButton<String>));
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('con una settimana sola non compare la riga delle settimane, e il menu non offre la rimozione',
+        (tester) async {
+      final dio = Dio(BaseOptions(baseUrl: 'http://example.test'));
+      dio.httpClientAdapter = _JsonAdapter((_) => _planJson());
+      dio.interceptors.add(ApiErrorInterceptor());
+
+      await _pumpScheduleScreen(tester, DietPlanApi(dio));
+      expect(find.text('Settimana 1'), findsNothing);
+
+      await openHeaderMenu(tester);
+      expect(find.text('Aggiungi settimana'), findsOneWidget);
+      expect(find.text('Rimuovi settimana'), findsNothing);
+    });
+
+    testWidgets('la settimana aggiunta copia quella in redazione e si salva con la propria, senza identificativi',
+        (tester) async {
+      Map<String, dynamic>? sent;
+      final dio = Dio(BaseOptions(baseUrl: 'http://example.test'));
+      dio.httpClientAdapter = _JsonAdapter((options) {
+        if (options.method == 'PUT') {
+          sent = options.data as Map<String, dynamic>;
+          return _planJson(weeks: 2, content: 'Yogurt');
+        }
+        return _planJson(content: 'Yogurt');
+      });
+      dio.interceptors.add(ApiErrorInterceptor());
+
+      await _pumpScheduleScreen(tester, DietPlanApi(dio));
+      await openHeaderMenu(tester);
+      await tester.tap(find.text('Aggiungi settimana'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Settimana 1'), findsOneWidget);
+      expect(find.text('Settimana 2'), findsOneWidget);
+      expect(find.text('Modifiche non salvate'), findsOneWidget);
+
+      await tester.tap(find.text('Salva'));
+      await tester.pumpAndSettle();
+
+      final days = (sent!['days'] as List).cast<Map<String, dynamic>>();
+      expect(days, hasLength(14));
+      expect(days.where((day) => day['week'] == 1), hasLength(7));
+      final secondWeek = days.where((day) => day['week'] == 2).toList();
+      expect(secondWeek, hasLength(7));
+      final copiedSlots = secondWeek.expand((day) => (day['slots'] as List).cast<Map<String, dynamic>>());
+      expect(copiedSlots, hasLength(7 * _slotTypesInOrder.length));
+      expect(copiedSlots.every((slot) => slot['slotId'] == null), isTrue);
+      final copiedItems = copiedSlots.expand((slot) => (slot['items'] as List).cast<Map<String, dynamic>>());
+      expect(copiedItems.every((item) => item['itemId'] == null && item['name'] == 'Yogurt'), isTrue);
+    });
+
+    testWidgets('la rimozione chiede conferma, fa scalare le settimane e lascia una settimana sola', (tester) async {
+      Map<String, dynamic>? sent;
+      final dio = Dio(BaseOptions(baseUrl: 'http://example.test'));
+      dio.httpClientAdapter = _JsonAdapter((options) {
+        if (options.method == 'PUT') {
+          sent = options.data as Map<String, dynamic>;
+          return _planJson(content: 'Yogurt');
+        }
+        return _planJson(weeks: 2, content: 'Yogurt');
+      });
+      dio.interceptors.add(ApiErrorInterceptor());
+
+      await _pumpScheduleScreen(tester, DietPlanApi(dio));
+      await tester.tap(find.text('Settimana 1'));
+      await tester.pumpAndSettle();
+      await openHeaderMenu(tester);
+      await tester.tap(find.text('Rimuovi settimana'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Rimuovere la settimana 1?'), findsOneWidget);
+      await tester.tap(find.text('Rimuovi'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Settimana 1'), findsNothing);
+      expect(find.text('Settimana 2'), findsNothing);
+
+      await tester.tap(find.text('Salva'));
+      await tester.pumpAndSettle();
+
+      final days = (sent!['days'] as List).cast<Map<String, dynamic>>();
+      expect(days, hasLength(7));
+      expect(days.every((day) => day['week'] == 1), isTrue);
+      // La settimana rimasta è la seconda, scalata al primo posto.
+      expect((days.first['slots'] as List).first['slotId'], 'BREAKFAST-0-2-MONDAY');
+    });
+
+    testWidgets('l\'elenco dei giorni incompleti nomina la settimana, e il tocco vi conduce (CD-15)', (tester) async {
+      final semantics = tester.ensureSemantics();
+      final dio = Dio(BaseOptions(baseUrl: 'http://example.test'));
+      dio.httpClientAdapter = _JsonAdapter((_) => _planJson(weeks: 2));
+      dio.interceptors.add(ApiErrorInterceptor());
+
+      await _pumpScheduleScreen(tester, DietPlanApi(dio));
+      await tester.tap(find.text('Conferma piano'));
+      await tester.pumpAndSettle();
+
+      expect(find.widgetWithText(ListTile, 'Settimana 1 · Lunedì'), findsOneWidget);
+      await tester.scrollUntilVisible(find.widgetWithText(ListTile, 'Settimana 2 · Domenica'), 100,
+          scrollable: find.descendant(of: find.byType(BottomSheet), matching: find.byType(Scrollable)));
+      await tester.tap(find.widgetWithText(ListTile, 'Settimana 2 · Domenica'));
+      await tester.pumpAndSettle();
+
+      expect(tester.getSemantics(find.text('Settimana 2')), isSemantics(isSelected: true));
+      expect(tester.getSemantics(find.text('Settimana 1')), isSemantics(isSelected: false));
+      semantics.dispose();
+    });
   });
 }
