@@ -2251,6 +2251,48 @@ abstract class L10n {
   /// **'Dati personali'**
   String get personalDataTitle;
 
+  /// No description provided for @personalDayNameAdd.
+  ///
+  /// In it, this message translates to:
+  /// **'Dai un nome alla giornata'**
+  String get personalDayNameAdd;
+
+  /// No description provided for @personalDayNameEdit.
+  ///
+  /// In it, this message translates to:
+  /// **'Rinomina la giornata'**
+  String get personalDayNameEdit;
+
+  /// No description provided for @personalDayNameLabel.
+  ///
+  /// In it, this message translates to:
+  /// **'Nome della giornata'**
+  String get personalDayNameLabel;
+
+  /// No description provided for @personalNoteAdd.
+  ///
+  /// In it, this message translates to:
+  /// **'Aggiungi una nota per te'**
+  String get personalNoteAdd;
+
+  /// No description provided for @personalNoteLabel.
+  ///
+  /// In it, this message translates to:
+  /// **'La tua nota'**
+  String get personalNoteLabel;
+
+  /// No description provided for @personalPlanNotesTitle.
+  ///
+  /// In it, this message translates to:
+  /// **'Le tue note'**
+  String get personalPlanNotesTitle;
+
+  /// No description provided for @personalTextPrivacy.
+  ///
+  /// In it, this message translates to:
+  /// **'La vedi solo tu: né il nutrizionista né il tuo gruppo. Lasciala vuota per toglierla.'**
+  String get personalTextPrivacy;
+
   /// No description provided for @planActionComplete.
   ///
   /// In it, this message translates to:

@@ -229,16 +229,30 @@ class _DayCardState extends ConsumerState<_DayCard> {
               ),
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: AppSpacing.xs),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      weekdayLabel(context, weekdayOf(day.date)),
-                      style: typography.titleMedium.copyWith(
-                        color: outOfPlan ? colors.textTertiary : colors.textPrimary,
-                      ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          weekdayLabel(context, weekdayOf(day.date)),
+                          style: typography.titleMedium.copyWith(
+                            color: outOfPlan ? colors.textTertiary : colors.textPrimary,
+                          ),
+                        ),
+                        Text('${day.date.day}', style: typography.caption.copyWith(color: colors.textSecondary)),
+                      ],
                     ),
-                    Text('${day.date.day}', style: typography.caption.copyWith(color: colors.textSecondary)),
+                    // NP-1, 6.4: il nome personale della giornata, che la
+                    // proiezione del proprietario soltanto reca (NP-2).
+                    if (day.dayName != null)
+                      Text(
+                        day.dayName!,
+                        style: typography.caption.copyWith(color: colors.accent),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                   ],
                 ),
               ),
