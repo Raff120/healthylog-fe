@@ -143,7 +143,7 @@ class DietPlanViewScreen extends ConsumerWidget {
               ],
               const SizedBox(height: AppSpacing.lg),
               _SectionTitle(context.l10n.planViewWeeklySchedule),
-              for (final day in plan.weeklySchedule) DayPreview(day: day),
+              SchedulePreview(days: plan.weeklySchedule),
               // ST-5, IN-27: lo storico delle inversioni operate sul piano.
               const SizedBox(height: AppSpacing.lg),
               _SectionTitle(context.l10n.planViewSwapHistory),

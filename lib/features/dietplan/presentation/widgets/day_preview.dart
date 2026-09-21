@@ -67,3 +67,40 @@ class DayPreview extends StatelessWidget {
     );
   }
 }
+
+/// Lo schema per intero, di sola lettura (7.4 interfaccia.md, TP-1): con
+/// più settimane i giorni sono raggruppati sotto la propria, in ordine;
+/// con una sola si presentano come prima dei piani su più settimane.
+class SchedulePreview extends StatelessWidget {
+  const SchedulePreview({super.key, required this.days});
+
+  final List<DietPlanWeekDay> days;
+
+  @override
+  Widget build(BuildContext context) {
+    final weekCount = weekCountOf(days);
+    if (weekCount == 1) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [for (final day in days) DayPreview(day: day)],
+      );
+    }
+    final colors = context.colors;
+    final typography = context.typography;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        for (var week = 1; week <= weekCount; week++) ...[
+          Padding(
+            padding: const EdgeInsets.only(top: AppSpacing.xs, bottom: AppSpacing.sm),
+            child: Text(
+              context.l10n.scheduleWeek(week).toUpperCase(),
+              style: typography.overline.copyWith(color: colors.textTertiary),
+            ),
+          ),
+          for (final day in days.where((day) => day.week == week)) DayPreview(day: day),
+        ],
+      ],
+    );
+  }
+}

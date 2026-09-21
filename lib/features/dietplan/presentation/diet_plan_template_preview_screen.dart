@@ -145,7 +145,7 @@ class DietPlanTemplatePreviewScreen extends ConsumerWidget {
                 child: ListView(
                   padding: const EdgeInsets.all(AppSpacing.md),
                   children: [
-                    for (final day in template.weeklySchedule) DayPreview(day: day),
+                    SchedulePreview(days: template.weeklySchedule),
                   ],
                 ),
               ),
