@@ -16,6 +16,7 @@ import '../data/plan_status.dart';
 import '../domain/current_diet_plan.dart';
 import '../providers/diet_plan_providers.dart';
 import 'widgets/delete_plan_dialog.dart';
+import 'widgets/personal_plan_note_dialog.dart';
 
 /// Gestione dei piani (7.1 interfaccia.md, raggiunta da Profilo → Piani):
 /// la card del piano in corso (Attivo, Sospeso o il prossimo Programmato,
@@ -261,6 +262,9 @@ class DietPlanManagementScreen extends ConsumerWidget {
                     onEditInPlace: () => _editInPlace(context, current.id),
                     onDelete: () => _delete(context, ref, current.id, current.status),
                     onExport: () => _export(context, ref, current.id),
+                    // NP-1: al proprietario, Paziente compreso — per lui
+                    // è la sola azione della card (UT-8, NP-3).
+                    onPersonalNotes: () => editPersonalPlanNote(context, ref, current.id),
                   ),
                   if (others.isNotEmpty) const SizedBox(height: AppSpacing.md),
                 ],
@@ -304,6 +308,7 @@ class _CurrentPlanCard extends StatelessWidget {
     required this.onEditInPlace,
     required this.onDelete,
     required this.onExport,
+    required this.onPersonalNotes,
   });
 
   final DietPlan plan;
@@ -324,6 +329,7 @@ class _CurrentPlanCard extends StatelessWidget {
   final VoidCallback onEditInPlace;
   final VoidCallback onDelete;
   final VoidCallback onExport;
+  final VoidCallback onPersonalNotes;
 
   /// 7.1: la riga di stato del piano in corso. L'Attivo si presenta come
   /// "In corso", non con il nome tecnico dello stato.
@@ -369,7 +375,12 @@ class _CurrentPlanCard extends StatelessWidget {
             spacing: AppSpacing.xs,
             runSpacing: AppSpacing.xs,
             children: [
-              for (final action in locked ? const <_PlanAction>[] : _actionsFor(context, plan.status))
+              for (final action in [
+                ...locked ? const <_PlanAction>[] : _actionsFor(context, plan.status),
+                // NP-1, NP-3: le annotazioni non sono contenuto del piano, e
+                // il piano bloccato del Paziente non le esclude.
+                _PlanAction(context.l10n.personalPlanNotesTitle, onPersonalNotes),
+              ])
                 OutlinedButton(
                   onPressed: acting ? null : action.onPressed,
                   style: action.destructive

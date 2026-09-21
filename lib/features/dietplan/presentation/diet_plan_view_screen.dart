@@ -8,6 +8,7 @@ import '../../../core/api/api_error_messages.dart';
 import '../../../core/api/api_exception.dart';
 import '../../../l10n/formats.dart';
 import '../../../l10n/l10n_context.dart';
+import '../../identity/providers/profile_providers.dart';
 import '../../statistics/data/statistics_models.dart';
 import '../../statistics/presentation/statistics_formatting.dart';
 import '../../statistics/presentation/widgets/breakdown_row.dart';
@@ -23,6 +24,7 @@ import 'plan_status_presentation.dart';
 import 'slot_type_presentation.dart';
 import 'widgets/day_preview.dart';
 import 'widgets/delete_plan_dialog.dart';
+import 'widgets/personal_plan_note_dialog.dart';
 
 /// Dettaglio di un piano Concluso (7.5 interfaccia.md, ST-7): sola
 /// lettura, nella composizione prescritta — intestazione, periodi di
@@ -126,6 +128,13 @@ class DietPlanViewScreen extends ConsumerWidget {
                 planPeriodLabel(context, plan, (date) => formatDate(context, date)),
                 style: typography.bodyMedium.copyWith(color: colors.textSecondary),
               ),
+              // NP-1, NP-2, 7.5: la nota personale, al solo proprietario —
+              // per il Nutrizionista che legge il piano non esiste.
+              if (plan.ownerId == ref.watch(profileControllerProvider).value?.id) ...[
+                const SizedBox(height: AppSpacing.lg),
+                _SectionTitle(context.l10n.personalPlanNotesTitle),
+                _PersonalPlanNote(planId: plan.id),
+              ],
               // ST-9: il piano riattivato presenta l'elenco dei periodi
               // attraversati, con date e aderenza di ciascuno.
               if (plan.hasMultiplePeriods) ...[
@@ -152,6 +161,40 @@ class DietPlanViewScreen extends ConsumerWidget {
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+/// NP-1, 7.5: la nota personale del piano, la sola parte modificabile
+/// della schermata perché è del proprietario e non del piano (NP-3).
+class _PersonalPlanNote extends ConsumerWidget {
+  const _PersonalPlanNote({required this.planId});
+
+  final String planId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final colors = context.colors;
+    final typography = context.typography;
+    ref.watch(personalPlanNoteControllerProvider);
+    final note = ref.watch(personalPlanNoteProvider(planId)).value;
+    if (note == null || note.trim().isEmpty) {
+      return Align(
+        alignment: Alignment.centerLeft,
+        child: TextButton.icon(
+          onPressed: () => editPersonalPlanNote(context, ref, planId),
+          icon: Icon(Icons.edit_note, size: 18, color: colors.accent),
+          label: Text(context.l10n.personalNoteAdd, style: typography.label.copyWith(color: colors.accent)),
+        ),
+      );
+    }
+    return InkWell(
+      onTap: () => editPersonalPlanNote(context, ref, planId),
+      borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: AppSpacing.xxs),
+        child: Text(note, style: typography.bodyMedium.copyWith(color: colors.textPrimary)),
       ),
     );
   }

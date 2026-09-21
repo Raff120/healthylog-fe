@@ -414,6 +414,41 @@ void main() {
     expect(find.byType(FloatingActionButton), findsNothing);
   });
 
+  /// NP-1, NP-3: sul piano redatto dal Nutrizionista il Paziente non ha
+  /// azioni, ma le proprie note sì — sono sue, non contenuto del piano.
+  testWidgets('il Paziente raggiunge le proprie note dal piano in corso (NP-1)', (tester) async {
+    final dio = Dio(BaseOptions(baseUrl: 'http://example.test'));
+    dio.httpClientAdapter = _JsonAdapter((options) {
+      if (options.path.endsWith('/personal-note')) return {'note': 'Chiedere del pane integrale'};
+      final plan = _planJson(status: 'ACTIVE');
+      plan['authorId'] = 'nutri-1';
+      plan['authorRole'] = 'NUTRITIONIST';
+      return _isListRequest(options) ? [plan] : plan;
+    });
+    dio.interceptors.add(ApiErrorInterceptor());
+    final careApi = stubCareApi(currentLink: {
+      'id': 'link-1',
+      'nutritionistId': 'nutri-1',
+      'nutritionistFirstName': 'Anna',
+      'nutritionistLastName': 'Verdi',
+      'patientId': 'user-1',
+      'patientFirstName': 'Mario',
+      'patientLastName': 'Rossi',
+      'status': 'ACTIVE',
+      'createdAt': '2026-09-01T00:00:00Z',
+      'revokedAt': null,
+    });
+
+    await _pumpManagementScreen(tester, DietPlanApi(dio), careApi: careApi);
+    expect(find.text('Modifica'), findsNothing);
+
+    await tester.tap(find.text('Le tue note'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Chiedere del pane integrale'), findsOneWidget);
+    expect(find.textContaining('La vedi solo tu'), findsOneWidget);
+  });
+
   /// PZ-9, CP-12: il piano redatto dal Paziente stesso resta di sua competenza anche da collegato.
   testWidgets('il Paziente conserva le azioni sul piano redatto da sé (PZ-9)', (tester) async {
     final dio = Dio(BaseOptions(baseUrl: 'http://example.test'));

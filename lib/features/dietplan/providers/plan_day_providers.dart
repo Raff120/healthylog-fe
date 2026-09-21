@@ -184,6 +184,29 @@ class PlanDaySlotStatusController extends _$PlanDaySlotStatusController {
   }
 }
 
+/// NP-1: nome della giornata e nota degli slot, sulla propria giornata
+/// soltanto (NP-2). Il nome appartiene al giorno dello schema e la nota
+/// allo slot dello schema, che ricorrono in altre date: si rileggono
+/// perciò tutte le giornate, non la sola annotata.
+@riverpod
+class PersonalAnnotationController extends _$PersonalAnnotationController {
+  @override
+  AsyncValue<void>? build() => null;
+
+  Future<void> saveDayName(DateTime date, String? name) =>
+      _run(() => ref.read(planDayApiProvider).updatePersonalName(date, name));
+
+  Future<void> saveSlotNote(DateTime date, String slotId, String? note) =>
+      _run(() => ref.read(planDayApiProvider).updatePersonalSlotNote(date, slotId, note));
+
+  Future<void> _run(Future<void> Function() write) async {
+    state = const AsyncValue.loading();
+    state = await AsyncValue.guard(write);
+    ref.invalidate(planDayProvider);
+    ref.invalidate(planDayRangeProvider);
+  }
+}
+
 /// MD-8: modifica della singola occorrenza. A salvataggio riuscito la
 /// giornata in cache è sostituita per intero con quella restituita —
 /// stesso criterio della spunta — così la vista giornaliera la riflette

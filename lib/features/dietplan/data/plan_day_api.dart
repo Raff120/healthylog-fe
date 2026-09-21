@@ -76,6 +76,17 @@ class PlanDayApi {
   /// MD-8, EP-2: modifica della singola occorrenza. [userId] designa il
   /// Paziente su cui il Nutrizionista opera (F22). La risposta è la
   /// giornata aggiornata, nello stesso formato di [getDay].
+  /// NP-1, EP-12: il nome personale della giornata, scritto per data — il
+  /// server lo riferisce al giorno dello schema del contenuto. Vuoto, lo
+  /// rimuove.
+  Future<void> updatePersonalName(DateTime date, String? name) =>
+      _dio.put('/plan-days/${isoDate(date)}/name', data: {'name': name});
+
+  /// NP-1, EP-12: la nota personale dello slot, riferita dal server allo
+  /// slot dello schema del contenuto. Vuota, la rimuove.
+  Future<void> updatePersonalSlotNote(DateTime date, String slotId, String? note) =>
+      _dio.put('/plan-days/${isoDate(date)}/slots/$slotId/personal-note', data: {'note': note});
+
   Future<PlanDay> updateOccurrence(DateTime date, UpdatePlanDayRequest request, {String? userId}) async {
     final response = await _dio.put(
       '/plan-days/${isoDate(date)}',

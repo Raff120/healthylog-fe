@@ -1272,6 +1272,31 @@ class L10nEn extends L10n {
   String get personalDataTitle => 'Personal details';
 
   @override
+  String get personalDayNameAdd => 'Name this day';
+
+  @override
+  String get personalDayNameEdit => 'Rename this day';
+
+  @override
+  String get personalDayNameLabel => 'Day name';
+
+  @override
+  String get personalNoteAdd => 'Add a note for yourself';
+
+  @override
+  String get personalNoteLabel => 'Your note';
+
+  @override
+  String get personalPlanNotesAction => 'Your notes on the plan';
+
+  @override
+  String get personalPlanNotesTitle => 'Your notes';
+
+  @override
+  String get personalTextPrivacy =>
+      'Only you can see it: not your nutritionist, not your group. Leave it empty to remove it.';
+
+  @override
   String get planActionComplete => 'Complete';
 
   @override

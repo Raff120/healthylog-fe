@@ -28,6 +28,8 @@ import 'widgets/day_pager.dart';
 import 'widgets/group_day_grid_view.dart';
 import 'widgets/meal_card.dart';
 import 'widgets/member_selector.dart';
+import 'widgets/personal_plan_note_dialog.dart';
+import 'widgets/personal_text_dialog.dart';
 import 'widgets/plan_status_banner.dart';
 import 'widgets/segmented_view_control.dart';
 import 'widgets/week_selector.dart';
@@ -333,6 +335,9 @@ class _DayContent extends ConsumerWidget {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          // NP-1, 6.2: il nome che il proprietario ha dato alla giornata,
+          // sotto il selettore della data. Solo sulla propria (NP-2).
+          if (day.dayName != null) _DayNameHeader(name: day.dayName!),
           DayWorkoutsSection(date: day.date),
           Expanded(child: _MealsContent(day: day)),
         ],
@@ -518,6 +523,27 @@ class _DayMenu extends ConsumerWidget {
 
   final DateTime selectedDate;
 
+  /// NP-1, 6.2: il nome si dà in un dialogo a campo singolo, e vuoto si
+  /// toglie. Riguarda il giorno dello schema da cui viene il contenuto,
+  /// che il server risolve dalla data (EP-12).
+  Future<void> _nameDay(BuildContext context, WidgetRef ref, PlanDay day) async {
+    final name = await showPersonalTextDialog(
+      context,
+      title: day.dayName == null ? context.l10n.personalDayNameAdd : context.l10n.personalDayNameEdit,
+      label: context.l10n.personalDayNameLabel,
+      initialText: day.dayName ?? '',
+      maxLength: 40,
+    );
+    if (name == null || !context.mounted) return;
+    await ref.read(personalAnnotationControllerProvider.notifier).saveDayName(selectedDate, name.isEmpty ? null : name);
+    if (!context.mounted) return;
+    ref.read(personalAnnotationControllerProvider)?.whenOrNull(
+          error: (error, _) => ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(describeApiError(context, error.asApiException?.code ?? ''))),
+          ),
+        );
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final member = ref.watch(selectedGroupMemberProvider);
@@ -526,18 +552,30 @@ class _DayMenu extends ConsumerWidget {
     // CU-2: il Cuoco inverte anche sulla giornata di un membro, ma non la
     // modifica (CU-9); il membro semplice non fa né l'una né l'altra.
     if (member != null && !ref.watch(isCookProvider)) return const SizedBox.shrink();
+    // Tiene vivo il controller delle annotazioni per la durata della
+    // scrittura, come per le altre operazioni della schermata.
+    ref.watch(personalAnnotationControllerProvider);
     final day = ref.watch(planDayProvider(selectedDate, userId: member)).value;
-    if (day == null || day.coverage != PlanDayCoverage.active) return const SizedBox.shrink();
-    if (dateOnly(selectedDate).isBefore(dateOnly(DateTime.now()))) return const SizedBox.shrink();
+    if (day == null || day.planId == null) return const SizedBox.shrink();
+    final operable = day.coverage == PlanDayCoverage.active && !dateOnly(selectedDate).isBefore(dateOnly(DateTime.now()));
     // UT-8: il Paziente non modifica la giornata, ma la inverte (PZ-3).
-    final canEdit = member == null && !ref.watch(isPlanLockedProvider(day.planId));
+    final canEdit = operable && member == null && !ref.watch(isPlanLockedProvider(day.planId));
     // IN-28, 6.5 e 3.3 interfaccia.md: il tocco prolungato della
     // settimanale non resta l'unica via all'inversione di giornate.
-    final canSwap = isDaySwapOriginEligible(day);
-    if (!canEdit && !canSwap) return const SizedBox.shrink();
+    final canSwap = operable && isDaySwapOriginEligible(day);
+    // NP-1, NP-3: il nome è del solo proprietario (NP-2), e non è
+    // contenuto del piano — si dà anche guardando il passato, o un piano
+    // non ancora in corso. Non sulla giornata sospesa, che non presenta
+    // contenuto.
+    final canName = member == null &&
+        day.coverage != PlanDayCoverage.none &&
+        day.coverage != PlanDayCoverage.suspended;
+    if (!canEdit && !canSwap && !canName) return const SizedBox.shrink();
     return PopupMenuButton<String>(
       tooltip: context.l10n.planMoreActions,
       onSelected: (value) {
+        if (value == 'name-day') _nameDay(context, ref, day);
+        if (value == 'plan-notes') editPersonalPlanNote(context, ref, day.planId!);
         if (value == 'edit-day') context.push('/plan-days/${isoDate(selectedDate)}/edit');
         if (value == 'swap-day') {
           // Come per lo slot (4.1), la destinazione si sceglie nella
@@ -547,9 +585,35 @@ class _DayMenu extends ConsumerWidget {
         }
       },
       itemBuilder: (context) => [
+        if (canName)
+          PopupMenuItem(
+            value: 'name-day',
+            child: Text(day.dayName == null ? context.l10n.personalDayNameAdd : context.l10n.personalDayNameEdit),
+          ),
+        // NP-1, 6.2: la nota del piano, raggiungibile da dove si passa ogni
+        // giorno, e non solo dal dettaglio del piano.
+        if (canName) PopupMenuItem(value: 'plan-notes', child: Text(context.l10n.personalPlanNotesAction)),
         if (canEdit) PopupMenuItem(value: 'edit-day', child: Text(context.l10n.planEditThisDay)),
         if (canSwap) PopupMenuItem(value: 'swap-day', child: Text(context.l10n.daySwapAction)),
       ],
+    );
+  }
+}
+
+/// NP-1, 6.2: il nome personale della giornata, in accento sotto il
+/// selettore della data, allineato ai margini delle card.
+class _DayNameHeader extends StatelessWidget {
+  const _DayNameHeader({required this.name});
+
+  final String name;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final typography = context.typography;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(AppSpacing.md, AppSpacing.xs, AppSpacing.md, 0),
+      child: Text(name, style: typography.titleMedium.copyWith(color: colors.accent)),
     );
   }
 }
