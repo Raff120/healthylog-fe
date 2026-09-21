@@ -541,6 +541,18 @@ abstract class L10n {
   /// **'Nessuno slot'**
   String get dayPreviewNoSlots;
 
+  /// No description provided for @daySwapAction.
+  ///
+  /// In it, this message translates to:
+  /// **'Scambia la giornata'**
+  String get daySwapAction;
+
+  /// No description provided for @daySwapChooseDestination.
+  ///
+  /// In it, this message translates to:
+  /// **'Scegli con quale giornata scambiarla'**
+  String get daySwapChooseDestination;
+
   /// No description provided for @deleteAccountConfirm.
   ///
   /// In it, this message translates to:
@@ -1009,6 +1021,12 @@ abstract class L10n {
   /// **'Questo pasto è già stato consumato.'**
   String get errorSlotAlreadyConsumed;
 
+  /// No description provided for @errorSlotAlreadySkipped.
+  ///
+  /// In it, this message translates to:
+  /// **'Una delle due giornate ha un pasto saltato.'**
+  String get errorSlotAlreadySkipped;
+
   /// No description provided for @errorSwapDifferentDays.
   ///
   /// In it, this message translates to:
@@ -1026,6 +1044,12 @@ abstract class L10n {
   /// In it, this message translates to:
   /// **'Questo giorno è già trascorso.'**
   String get errorSwapPastDay;
+
+  /// No description provided for @errorSwapSameDay.
+  ///
+  /// In it, this message translates to:
+  /// **'È la stessa giornata.'**
+  String get errorSwapSameDay;
 
   /// No description provided for @errorSwapTypeNotAllowed.
   ///
@@ -1728,6 +1752,12 @@ abstract class L10n {
   /// In it, this message translates to:
   /// **'La tua richiesta di collegamento è stata rifiutata.'**
   String get notificationCareRequestRejected;
+
+  /// IN-32, IG-8: inversione di giornate intere disposta dal Cuoco.
+  ///
+  /// In it, this message translates to:
+  /// **'Due giornate del tuo piano sono state scambiate: {first} e {second}.'**
+  String notificationDaySwapped(String first, String second);
 
   /// No description provided for @notificationGroupCookGranted.
   ///
@@ -2568,6 +2598,12 @@ abstract class L10n {
   /// In it, this message translates to:
   /// **'Riprenderà quando lo deciderai'**
   String get planSuspendedHint;
+
+  /// IN-32: voce dello storico per l'inversione di giornate intere.
+  ///
+  /// In it, this message translates to:
+  /// **'{first} ↔ {second} · giornata intera'**
+  String planViewDaySwap(String first, String second);
 
   /// No description provided for @planViewNoSwaps.
   ///

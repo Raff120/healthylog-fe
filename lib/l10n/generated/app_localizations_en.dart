@@ -253,6 +253,12 @@ class L10nEn extends L10n {
   String get dayPreviewNoSlots => 'No slots';
 
   @override
+  String get daySwapAction => 'Swap this day';
+
+  @override
+  String get daySwapChooseDestination => 'Choose the day to swap it with';
+
+  @override
   String get deleteAccountConfirm => 'Request deletion';
 
   @override
@@ -521,6 +527,10 @@ class L10nEn extends L10n {
   String get errorSlotAlreadyConsumed => 'This meal has already been consumed.';
 
   @override
+  String get errorSlotAlreadySkipped =>
+      'One of the two days has a skipped meal.';
+
+  @override
   String get errorSwapDifferentDays => 'They must belong to the same day.';
 
   @override
@@ -528,6 +538,9 @@ class L10nEn extends L10n {
 
   @override
   String get errorSwapPastDay => 'This day has already passed.';
+
+  @override
+  String get errorSwapSameDay => 'It is the same day.';
 
   @override
   String get errorSwapTypeNotAllowed =>
@@ -950,6 +963,11 @@ class L10nEn extends L10n {
   @override
   String get notificationCareRequestRejected =>
       'Your link request was declined.';
+
+  @override
+  String notificationDaySwapped(String first, String second) {
+    return 'Two days of your plan were swapped: $first and $second.';
+  }
 
   @override
   String notificationGroupCookGranted(String group) {
@@ -1446,6 +1464,11 @@ class L10nEn extends L10n {
 
   @override
   String get planSuspendedHint => 'It resumes when you decide';
+
+  @override
+  String planViewDaySwap(String first, String second) {
+    return '$first ↔ $second · whole day';
+  }
 
   @override
   String get planViewNoSwaps => 'No swaps on this plan.';

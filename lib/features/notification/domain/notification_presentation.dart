@@ -83,6 +83,12 @@ NotificationPresentation describeNotification(BuildContext context, AppNotificat
         text: l10n.mealSwappedNotification(_onDate(context, payload['firstDate'])),
         destination: '/home',
       ),
+    // IN-32, IG-8: le due giornate scambiate dal Cuoco.
+    NotificationType.daySwappedByCook => NotificationPresentation(
+        icon: Icons.swap_vert,
+        text: l10n.notificationDaySwapped(_day(context, payload['firstDate']), _day(context, payload['secondDate'])),
+        destination: '/home',
+      ),
     NotificationType.slotMarkedByCook => NotificationPresentation(
         icon: Icons.check_box_outlined,
         text: l10n.notificationSlotMarked(

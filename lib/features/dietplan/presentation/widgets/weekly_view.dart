@@ -59,6 +59,15 @@ class WeeklyView extends ConsumerWidget {
         ),
       );
     });
+    // IN-28: l'inversione di giornate, con il medesimo trattamento.
+    ref.watch(daySwapControllerProvider);
+    ref.listen(daySwapControllerProvider, (previous, next) {
+      next?.whenOrNull(
+        error: (error, _) => ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(describeApiError(context, error.asApiException?.code ?? ''))),
+        ),
+      );
+    });
 
     return rangeState.when(
       loading: () => const Center(child: CircularProgressIndicator()),
@@ -137,7 +146,11 @@ class _WeekGrid extends StatelessWidget {
 /// giorno, data, fondo in accento tenue se corrente — VS-5) e, sotto,
 /// le righe sintetiche degli slot (VS-3) ovvero una constatazione in
 /// `caption` per un giorno fuori dal piano attivo (VS-7).
-class _DayCard extends ConsumerWidget {
+///
+/// IN-28, 6.5 interfaccia.md: il tocco prolungato sull'intestazione avvia
+/// l'inversione della giornata intera. Durante la selezione il pannello
+/// intero è il bersaglio, e i suoi slot non reagiscono al tocco.
+class _DayCard extends ConsumerStatefulWidget {
   const _DayCard({required this.day, required this.isToday, required this.onSelectDay});
 
   final PlanDay day;
@@ -145,26 +158,73 @@ class _DayCard extends ConsumerWidget {
   final ValueChanged<DateTime> onSelectDay;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<_DayCard> createState() => _DayCardState();
+}
+
+class _DayCardState extends ConsumerState<_DayCard> {
+  /// 6.5: la ragione del rifiuto si dà a chi insiste, non al primo tocco.
+  bool _incompatibleTapped = false;
+
+  void _onSelectionTap(DaySwapOrigin origin, MealSwapHighlight highlight) {
+    switch (highlight) {
+      case MealSwapHighlight.origin:
+        ref.read(daySwapSelectionProvider.notifier).cancel();
+      case MealSwapHighlight.compatible:
+        ref.read(daySwapControllerProvider.notifier).swap(
+              origin,
+              widget.day.date,
+              userId: ref.read(selectedGroupMemberProvider),
+            );
+      case MealSwapHighlight.incompatible:
+        if (_incompatibleTapped) {
+          final reason = daySwapRejectionReason(origin, widget.day)!;
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(describeApiError(context, reason))));
+        }
+        setState(() => _incompatibleTapped = true);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final colors = context.colors;
     final typography = context.typography;
+    final day = widget.day;
+    final isToday = widget.isToday;
     final outOfPlan = day.coverage != PlanDayCoverage.active;
 
-    return DecoratedBox(
+    // CU-2, UT-12: il Cuoco inverte anche sul piano di un membro, il
+    // membro semplice resta in consultazione — come per gli slot.
+    final member = ref.watch(selectedGroupMemberProvider);
+    final readOnly = member != null && !ref.watch(isCookProvider);
+    final daySelection = ref.watch(daySwapSelectionProvider);
+    final slotSelection = ref.watch(mealSwapSelectionProvider);
+    if (daySelection == null) _incompatibleTapped = false;
+    final highlight = daySelection == null ? null : daySwapHighlightFor(daySelection, day);
+    final canStart = !readOnly && daySelection == null && slotSelection == null && isDaySwapOriginEligible(day);
+
+    final card = DecoratedBox(
       decoration: BoxDecoration(
         color: colors.surface,
         borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+        border: switch (highlight) {
+          MealSwapHighlight.origin => Border.all(color: colors.accent, width: 2),
+          MealSwapHighlight.compatible => Border.all(color: colors.accent, width: 1),
+          _ => null,
+        },
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         mainAxisSize: MainAxisSize.min,
         children: [
           InkWell(
-            onTap: () => onSelectDay(day.date),
+            onTap: () => widget.onSelectDay(day.date),
+            onLongPress: canStart
+                ? () => ref.read(daySwapSelectionProvider.notifier).start(DaySwapOrigin.of(day))
+                : null,
             borderRadius: const BorderRadius.vertical(top: Radius.circular(AppSpacing.radiusMd)),
             child: DecoratedBox(
               decoration: BoxDecoration(
-                color: isToday ? colors.accentSubtle : Colors.transparent,
+                color: isToday || highlight == MealSwapHighlight.origin ? colors.accentSubtle : Colors.transparent,
                 borderRadius: const BorderRadius.vertical(top: Radius.circular(AppSpacing.radiusMd)),
               ),
               child: Padding(
@@ -195,10 +255,25 @@ class _DayCard extends ConsumerWidget {
           // VS-6, 6.4: gli allenamenti in coda al pannello, in sola
           // presentazione. CU-10: assenti sulla settimana di un altro
           // membro del Gruppo.
-          if (ref.watch(selectedGroupMemberProvider) == null)
-            WeekDayWorkouts(weekStart: startOfWeek(day.date), date: day.date),
+          if (member == null) WeekDayWorkouts(weekStart: startOfWeek(day.date), date: day.date),
           const SizedBox(height: AppSpacing.xxs),
         ],
+      ),
+    );
+
+    if (daySelection == null) return card;
+    // 6.5: le giornate non ammesse al 40%, e il pannello intero risponde
+    // al tocco in luogo dei suoi elementi.
+    return Opacity(
+      opacity: highlight == MealSwapHighlight.incompatible ? 0.4 : 1,
+      child: Semantics(
+        button: true,
+        selected: highlight == MealSwapHighlight.origin,
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: () => _onSelectionTap(daySelection, highlight!),
+          child: IgnorePointer(child: card),
+        ),
       ),
     );
   }

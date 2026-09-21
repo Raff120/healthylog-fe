@@ -92,7 +92,10 @@ class MealSwapSelection extends _$MealSwapSelection {
   @override
   MealSwapOrigin? build() => null;
 
-  void start(MealSwapOrigin origin) => state = origin;
+  void start(MealSwapOrigin origin) {
+    ref.read(daySwapSelectionProvider.notifier).cancel();
+    state = origin;
+  }
   void cancel() => state = null;
 }
 
@@ -124,6 +127,96 @@ class MealSwapController extends _$MealSwapController {
           secondSlotId: destinationSlotId,
         ));
     ref.read(mealSwapSelectionProvider.notifier).cancel();
+    final weekStart = startOfWeek(origin.date);
+    ref.invalidate(planDayRangeProvider(weekStart, weekStart.add(const Duration(days: 6)), userId: userId));
+    ref.invalidate(planDayProvider(origin.date, userId: userId));
+    ref.invalidate(planDayProvider(destinationDate, userId: userId));
+    ref.invalidate(groupPlanDayProvider(origin.date));
+    ref.invalidate(groupPlanDayProvider(destinationDate));
+  }
+}
+
+/// La giornata scelta come origine dell'inversione di giornate intere
+/// (IN-28): il piano, la data e lo stato di ciascuno dei suoi slot, quanto
+/// serve alla valutazione locale (MS-24).
+class DaySwapOrigin {
+  const DaySwapOrigin({required this.planId, required this.date, required this.statuses});
+
+  factory DaySwapOrigin.of(PlanDay day) => DaySwapOrigin(
+        planId: day.planId!,
+        date: day.date,
+        statuses: [for (final slot in day.slots) slot.status],
+      );
+
+  final String planId;
+  final DateTime date;
+  final List<SlotStatus> statuses;
+}
+
+/// MS-24, condizioni 1, 3 e 5-6 applicate alla sola giornata di origine:
+/// simmetriche fra origine e destinazione, una giornata che già le viola non
+/// origina alcuna inversione ammessa — la selezione non si avvia.
+bool isDaySwapOriginEligible(PlanDay day) {
+  if (day.coverage != PlanDayCoverage.active || day.planId == null) return false;
+  if (day.date.isBefore(dateOnly(DateTime.now()))) return false;
+  return day.slots.every((slot) => slot.status == SlotStatus.toConsume);
+}
+
+/// IN-21: la ragione del rifiuto per la giornata [day] come destinazione,
+/// `null` se ammessa (IN-20, MS-24).
+String? daySwapRejectionReason(DaySwapOrigin origin, PlanDay day) {
+  // IN-15, come per gli slot: un confine di piano nella settimana non deve
+  // apparire compatibile, e non ha un codice proprio.
+  if (day.planId != origin.planId || day.coverage != PlanDayCoverage.active) return 'PLAN_NOT_ACTIVE';
+  return validateDaySwap(
+    planStatus: PlanStatus.active,
+    first: DaySwapCandidate(date: origin.date, statuses: origin.statuses),
+    second: DaySwapCandidate(date: day.date, statuses: [for (final slot in day.slots) slot.status]),
+    today: dateOnly(DateTime.now()),
+  );
+}
+
+/// L'esito dell'evidenziazione di una giornata durante la selezione (6.5
+/// interfaccia.md), con i medesimi valori degli slot.
+MealSwapHighlight daySwapHighlightFor(DaySwapOrigin origin, PlanDay day) {
+  if (day.date == origin.date) return MealSwapHighlight.origin;
+  return daySwapRejectionReason(origin, day) == null ? MealSwapHighlight.compatible : MealSwapHighlight.incompatible;
+}
+
+/// Se non `null`, la vista settimanale è in modalità di selezione delle
+/// giornate (6.5 interfaccia.md, IN-28). Esclusiva con quella degli slot:
+/// l'avvio dell'una annulla l'altra.
+@riverpod
+class DaySwapSelection extends _$DaySwapSelection {
+  @override
+  DaySwapOrigin? build() => null;
+
+  void start(DaySwapOrigin origin) {
+    ref.read(mealSwapSelectionProvider.notifier).cancel();
+    state = origin;
+  }
+
+  void cancel() => state = null;
+}
+
+/// Esecuzione dell'inversione di giornate (IN-28), sul modello di
+/// [MealSwapController]: nessuno stato oltre all'esito, e le giornate si
+/// rileggono invalidando le cache.
+@riverpod
+class DaySwapController extends _$DaySwapController {
+  @override
+  AsyncValue<void>? build() => null;
+
+  /// CU-2: [userId] per l'inversione disposta dal Cuoco sul piano di un
+  /// membro, a determinare quale cache rinnovare.
+  Future<void> swap(DaySwapOrigin origin, DateTime destinationDate, {String? userId}) async {
+    state = const AsyncValue.loading();
+    state = await AsyncValue.guard(() => ref.read(mealSwapApiProvider).swapDays(
+          planId: origin.planId,
+          firstDate: origin.date,
+          secondDate: destinationDate,
+        ));
+    ref.read(daySwapSelectionProvider.notifier).cancel();
     final weekStart = startOfWeek(origin.date);
     ref.invalidate(planDayRangeProvider(weekStart, weekStart.add(const Duration(days: 6)), userId: userId));
     ref.invalidate(planDayProvider(origin.date, userId: userId));

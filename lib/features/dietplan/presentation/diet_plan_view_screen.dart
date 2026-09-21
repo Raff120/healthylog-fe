@@ -323,9 +323,12 @@ class _SwapHistory extends ConsumerWidget {
     );
   }
 
-  String _describe(BuildContext context, MealSwapLog log) =>
-      '${formatDate(context, log.first.date)} ${slotTypeLabel(context, log.first.type)} '
-      '↔ ${formatDate(context, log.second.date)} ${slotTypeLabel(context, log.second.type)}';
+  /// 6.5 interfaccia.md: la voce di giornate nomina le sole due date
+  /// (IN-32, CO-11bis).
+  String _describe(BuildContext context, MealSwapLog log) => log.kind == MealSwapKind.day
+      ? context.l10n.planViewDaySwap(formatDate(context, log.first.date), formatDate(context, log.second.date))
+      : '${formatDate(context, log.first.date)} ${slotTypeLabel(context, log.first.type!)} '
+          '↔ ${formatDate(context, log.second.date)} ${slotTypeLabel(context, log.second.type!)}';
 }
 
 /// 7.5: la striscia di stato del piano concluso, in maiuscolo. L'Attivo
