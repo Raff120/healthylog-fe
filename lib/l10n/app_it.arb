@@ -117,6 +117,8 @@
   "commonToday": "Oggi",
   "commonUnderstood": "Ho capito",
   "dayPreviewNoSlots": "Nessuno slot",
+  "daySwapAction": "Scambia la giornata",
+  "daySwapChooseDestination": "Scegli con quale giornata scambiarla",
   "deleteAccountConfirm": "Richiedi l'eliminazione",
   "deleteAccountConfirmTitle": "Eliminare l'account?",
   "deleteAccountGracePeriod": "La richiesta apre un periodo di ripensamento di sette giorni: durante il periodo l'account è disattivato e nessun terzo vi accede, ma i dati restano. Accedendo di nuovo la richiesta si annulla.",
@@ -229,9 +231,11 @@
   "errorPlanTransitionNotAllowed": "Questa operazione non è più possibile per il piano.",
   "errorRefreshTokenInvalid": "La sessione non è più valida. Accedi di nuovo.",
   "errorSlotAlreadyConsumed": "Questo pasto è già stato consumato.",
+  "errorSlotAlreadySkipped": "Una delle due giornate ha un pasto saltato.",
   "errorSwapDifferentDays": "Devono appartenere allo stesso giorno.",
   "errorSwapDifferentWeeks": "Appartengono a settimane diverse.",
   "errorSwapPastDay": "Questo giorno è già trascorso.",
+  "errorSwapSameDay": "È la stessa giornata.",
   "errorSwapTypeNotAllowed": "Questi pasti non sono invertibili tra loro.",
   "errorTimezoneInvalid": "Fuso orario non riconosciuto.",
   "errorUsernameAlreadyUsed": "Questo nome utente è già in uso.",
@@ -488,6 +492,18 @@
   "notificationCareRequestAccepted": "La tua richiesta di collegamento è stata accettata.",
   "notificationCareRequestReceived": "Hai ricevuto una richiesta di collegamento professionale.",
   "notificationCareRequestRejected": "La tua richiesta di collegamento è stata rifiutata.",
+  "notificationDaySwapped": "Due giornate del tuo piano sono state scambiate: {first} e {second}.",
+  "@notificationDaySwapped": {
+    "description": "IN-32, IG-8: inversione di giornate intere disposta dal Cuoco.",
+    "placeholders": {
+      "first": {
+        "type": "String"
+      },
+      "second": {
+        "type": "String"
+      }
+    }
+  },
   "notificationGroupCookGranted": "Sei stato nominato Cuoco del gruppo{group}.",
   "@notificationGroupCookGranted": {
     "placeholders": {
@@ -878,6 +894,18 @@
   "planStatusSuspended": "Sospeso",
   "planSuspended": "Piano sospeso",
   "planSuspendedHint": "Riprenderà quando lo deciderai",
+  "planViewDaySwap": "{first} ↔ {second} · giornata intera",
+  "@planViewDaySwap": {
+    "description": "IN-32: voce dello storico per l'inversione di giornate intere.",
+    "placeholders": {
+      "first": {
+        "type": "String"
+      },
+      "second": {
+        "type": "String"
+      }
+    }
+  },
   "planViewNoSwaps": "Nessuna inversione su questo piano.",
   "planViewOngoing": "in corso",
   "planViewOngoingUpper": "IN CORSO",
