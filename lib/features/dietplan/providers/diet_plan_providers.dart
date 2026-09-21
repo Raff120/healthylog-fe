@@ -146,3 +146,21 @@ class DietPlanExportController extends _$DietPlanExportController {
     state = outcome;
   }
 }
+
+/// NP-1: la nota personale del piano. Da osservare soltanto quando chi
+/// guarda ne è il proprietario: per chiunque altro non esiste (NP-2).
+@riverpod
+Future<String?> personalPlanNote(Ref ref, String planId) =>
+    ref.watch(dietPlanApiProvider).personalNote(planId);
+
+@riverpod
+class PersonalPlanNoteController extends _$PersonalPlanNoteController {
+  @override
+  AsyncValue<void>? build() => null;
+
+  Future<void> save(String planId, String? note) async {
+    state = const AsyncValue.loading();
+    state = await AsyncValue.guard(() => ref.read(dietPlanApiProvider).updatePersonalNote(planId, note));
+    ref.invalidate(personalPlanNoteProvider(planId));
+  }
+}

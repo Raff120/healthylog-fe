@@ -51,6 +51,18 @@ class EditableSlot {
         adherenceWeight: slot.type == SlotType.snack ? 0.5 : 1.0,
       );
 
+  /// 7.3 interfaccia: la copia di uno slot per una settimana aggiunta, con
+  /// quanto vi è scritto in quel momento — anche non ancora salvato. Senza
+  /// identificativo né per sé né per i propri elementi: è uno slot nuovo, e
+  /// lo riceverà al salvataggio (CO-7, CO-7bis).
+  factory EditableSlot.copyOf(EditableSlot source) => EditableSlot(
+        type: source.type,
+        label: source.labelController.text,
+        note: source.noteController.text,
+        items: source.items.map(EditableItem.copyOf).toList(),
+        adherenceWeight: source.adherenceWeight,
+      );
+
   /// GG-3, AD-5bis: un nuovo spuntino/pasto riceve lo stesso peso
   /// predefinito applicato dal backend alla composizione iniziale — non
   /// duplicato per un valore diverso, in attesa del salvataggio.
@@ -174,6 +186,20 @@ class EditableItem {
         alternatives: item.alternatives.map(EditableAlternative.fromModel).toList(),
       );
 
+  /// Copia di un elemento per una settimana aggiunta ([EditableSlot.copyOf]),
+  /// priva dell'identificativo.
+  factory EditableItem.copyOf(EditableItem source) {
+    final model = source.toModel();
+    return EditableItem(
+      kindCode: model.kindCode,
+      name: model.name,
+      quantity: model.quantity,
+      unitCode: model.unitCode,
+      recipeText: model.recipeText ?? '',
+      alternatives: model.alternatives.map(EditableAlternative.fromModel).toList(),
+    );
+  }
+
   /// CO-7bis: `null` per un elemento appena aggiunto, cui l'identificativo lo
   /// assegna il sistema al salvataggio.
   final String? itemId;
@@ -218,16 +244,21 @@ class EditableItem {
   }
 }
 
-/// Giorno-modello in redazione (OG-1): il proprio giorno della settimana e
-/// gli slot che lo compongono in quel momento.
+/// Giorno-modello in redazione (OG-1): la settimana del ciclo e il giorno
+/// della settimana cui appartiene, e gli slot che lo compongono in quel
+/// momento.
 class EditableDay {
-  EditableDay({required this.dayOfWeek, required this.slots});
+  EditableDay({this.week = DietPlanWeekDay.firstWeek, required this.dayOfWeek, required this.slots});
 
   factory EditableDay.fromWeekDay(DietPlanWeekDay day) => EditableDay(
+        week: day.week,
         dayOfWeek: day.dayOfWeek,
         slots: day.slots.map(EditableSlot.fromSlot).toList(),
       );
 
+  /// Settimana del ciclo (OG-1bis). Mutabile: la rimozione di una
+  /// settimana fa scalare di un posto le successive (7.3 interfaccia).
+  int week;
   final Weekday dayOfWeek;
   final List<EditableSlot> slots;
 
@@ -238,7 +269,8 @@ class EditableDay {
   bool hasType(SlotType type) => slots.any((slot) => slot.type == type);
 
   UpdateDietPlanWeekDayRequest toRequest() =>
-      UpdateDietPlanWeekDayRequest(dayOfWeek: dayOfWeek, slots: slots.map((slot) => slot.toRequest()).toList());
+      UpdateDietPlanWeekDayRequest(
+          week: week, dayOfWeek: dayOfWeek, slots: slots.map((slot) => slot.toRequest()).toList());
 
   void dispose() {
     for (final slot in slots) {

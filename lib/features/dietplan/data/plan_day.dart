@@ -15,6 +15,7 @@ class PlanDaySlot {
     required this.status,
     required this.replacementNote,
     this.statusChangedBy,
+    this.personalNote,
   });
 
   factory PlanDaySlot.fromJson(Map<String, dynamic> json) => PlanDaySlot(
@@ -27,6 +28,7 @@ class PlanDaySlot {
     status: SlotStatus.fromJson(json['status'] as String),
     replacementNote: json['replacementNote'] as String?,
     statusChangedBy: json['statusChangedBy'] as String?,
+    personalNote: json['personalNote'] as String?,
   );
 
   /// VR-10: `null` se tipo o stato non sono noti a questa versione del
@@ -58,6 +60,11 @@ class PlanDaySlot {
   /// (non nella proiezione riservata ad altri).
   final String? statusChangedBy;
 
+  /// NP-1, CO-19: la nota personale del proprietario sul contenuto dello
+  /// slot, già risolta dal server sull'origine del contenuto. Presente
+  /// solo nella vista del proprietario (NP-2).
+  final String? personalNote;
+
   /// Per la cache locale di sola lettura (PL-6, F14): mai inviato al
   /// backend, che ha le proprie rappresentazioni dedicate in scrittura
   /// (`UpdatePlanDaySlotStatusRequest`).
@@ -71,6 +78,7 @@ class PlanDaySlot {
     'status': status.toJson(),
     'replacementNote': replacementNote,
     'statusChangedBy': statusChangedBy,
+    'personalNote': personalNote,
   };
 }
 
@@ -86,6 +94,7 @@ class PlanDay {
     required this.planStartDate,
     required this.planEndDate,
     required this.slots,
+    this.dayName,
   });
 
   factory PlanDay.fromJson(Map<String, dynamic> json) => PlanDay(
@@ -103,6 +112,7 @@ class PlanDay {
         .map((e) => PlanDaySlot.tryFromJson(e as Map<String, dynamic>))
         .nonNulls
         .toList(),
+    dayName: json['dayName'] as String?,
   );
 
   final DateTime date;
@@ -112,4 +122,9 @@ class PlanDay {
   final DateTime? planStartDate;
   final DateTime? planEndDate;
   final List<PlanDaySlot> slots;
+
+  /// NP-1, CO-19: il nome personale della giornata, risolto dal server sul
+  /// giorno dello schema da cui viene il contenuto. Solo nella vista del
+  /// proprietario (NP-2), e non conservato dalla cache locale.
+  final String? dayName;
 }

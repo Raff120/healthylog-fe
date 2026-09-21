@@ -541,6 +541,18 @@ abstract class L10n {
   /// **'Nessuno slot'**
   String get dayPreviewNoSlots;
 
+  /// No description provided for @daySwapAction.
+  ///
+  /// In it, this message translates to:
+  /// **'Scambia la giornata'**
+  String get daySwapAction;
+
+  /// No description provided for @daySwapChooseDestination.
+  ///
+  /// In it, this message translates to:
+  /// **'Scegli con quale giornata scambiarla'**
+  String get daySwapChooseDestination;
+
   /// No description provided for @deleteAccountConfirm.
   ///
   /// In it, this message translates to:
@@ -1009,6 +1021,12 @@ abstract class L10n {
   /// **'Questo pasto è già stato consumato.'**
   String get errorSlotAlreadyConsumed;
 
+  /// No description provided for @errorSlotAlreadySkipped.
+  ///
+  /// In it, this message translates to:
+  /// **'Una delle due giornate ha un pasto saltato.'**
+  String get errorSlotAlreadySkipped;
+
   /// No description provided for @errorSwapDifferentDays.
   ///
   /// In it, this message translates to:
@@ -1026,6 +1044,12 @@ abstract class L10n {
   /// In it, this message translates to:
   /// **'Questo giorno è già trascorso.'**
   String get errorSwapPastDay;
+
+  /// No description provided for @errorSwapSameDay.
+  ///
+  /// In it, this message translates to:
+  /// **'È la stessa giornata.'**
+  String get errorSwapSameDay;
 
   /// No description provided for @errorSwapTypeNotAllowed.
   ///
@@ -1729,6 +1753,12 @@ abstract class L10n {
   /// **'La tua richiesta di collegamento è stata rifiutata.'**
   String get notificationCareRequestRejected;
 
+  /// IN-32, IG-8: inversione di giornate intere disposta dal Cuoco.
+  ///
+  /// In it, this message translates to:
+  /// **'Due giornate del tuo piano sono state scambiate: {first} e {second}.'**
+  String notificationDaySwapped(String first, String second);
+
   /// No description provided for @notificationGroupCookGranted.
   ///
   /// In it, this message translates to:
@@ -2221,6 +2251,54 @@ abstract class L10n {
   /// **'Dati personali'**
   String get personalDataTitle;
 
+  /// No description provided for @personalDayNameAdd.
+  ///
+  /// In it, this message translates to:
+  /// **'Dai un nome alla giornata'**
+  String get personalDayNameAdd;
+
+  /// No description provided for @personalDayNameEdit.
+  ///
+  /// In it, this message translates to:
+  /// **'Rinomina la giornata'**
+  String get personalDayNameEdit;
+
+  /// No description provided for @personalDayNameLabel.
+  ///
+  /// In it, this message translates to:
+  /// **'Nome della giornata'**
+  String get personalDayNameLabel;
+
+  /// No description provided for @personalNoteAdd.
+  ///
+  /// In it, this message translates to:
+  /// **'Aggiungi una nota per te'**
+  String get personalNoteAdd;
+
+  /// No description provided for @personalNoteLabel.
+  ///
+  /// In it, this message translates to:
+  /// **'La tua nota'**
+  String get personalNoteLabel;
+
+  /// No description provided for @personalPlanNotesAction.
+  ///
+  /// In it, this message translates to:
+  /// **'Le tue note sul piano'**
+  String get personalPlanNotesAction;
+
+  /// No description provided for @personalPlanNotesTitle.
+  ///
+  /// In it, this message translates to:
+  /// **'Le tue note'**
+  String get personalPlanNotesTitle;
+
+  /// No description provided for @personalTextPrivacy.
+  ///
+  /// In it, this message translates to:
+  /// **'La vedi solo tu: né il nutrizionista né il tuo gruppo. Lasciala vuota per toglierla.'**
+  String get personalTextPrivacy;
+
   /// No description provided for @planActionComplete.
   ///
   /// In it, this message translates to:
@@ -2569,6 +2647,12 @@ abstract class L10n {
   /// **'Riprenderà quando lo deciderai'**
   String get planSuspendedHint;
 
+  /// IN-32: voce dello storico per l'inversione di giornate intere.
+  ///
+  /// In it, this message translates to:
+  /// **'{first} ↔ {second} · giornata intera'**
+  String planViewDaySwap(String first, String second);
+
   /// No description provided for @planViewNoSwaps.
   ///
   /// In it, this message translates to:
@@ -2857,6 +2941,12 @@ abstract class L10n {
   /// **'Seguo un piano'**
   String get roleUserTitle;
 
+  /// No description provided for @scheduleAddWeek.
+  ///
+  /// In it, this message translates to:
+  /// **'Aggiungi settimana'**
+  String get scheduleAddWeek;
+
   /// No description provided for @scheduleConfirmPlan.
   ///
   /// In it, this message translates to:
@@ -2869,10 +2959,28 @@ abstract class L10n {
   /// **'Schema incompleto'**
   String get scheduleIncompleteTitle;
 
+  /// No description provided for @scheduleRemoveWeek.
+  ///
+  /// In it, this message translates to:
+  /// **'Rimuovi settimana'**
+  String get scheduleRemoveWeek;
+
+  /// No description provided for @scheduleRemoveWeekBody.
+  ///
+  /// In it, this message translates to:
+  /// **'I suoi sette giorni e i loro pasti saranno tolti dallo schema, e le settimane successive scaleranno di un posto. Diventa effettivo al salvataggio.'**
+  String get scheduleRemoveWeekBody;
+
+  /// PA-2bis, 7.3 interfaccia: conferma della rimozione della settimana in redazione.
+  ///
+  /// In it, this message translates to:
+  /// **'Rimuovere la settimana {week}?'**
+  String scheduleRemoveWeekTitle(int week);
+
   /// No description provided for @scheduleRetroactivityNotice.
   ///
   /// In it, this message translates to:
-  /// **'Le modifiche decorrono da oggi e valgono per tutte le settimane: le giornate già trascorse restano invariate. Per cambiare una sola giornata, usa «Modifica questa giornata» dalla vista del giorno.'**
+  /// **'Le modifiche decorrono da oggi e valgono per le settimane a venire: le giornate già trascorse restano invariate. Per cambiare una sola giornata, usa «Modifica questa giornata» dalla vista del giorno.'**
   String get scheduleRetroactivityNotice;
 
   /// No description provided for @scheduleSave.
@@ -2910,6 +3018,18 @@ abstract class L10n {
   /// In it, this message translates to:
   /// **'Redazione dello schema'**
   String get scheduleTitle;
+
+  /// PA-2: una settimana del ciclo dello schema.
+  ///
+  /// In it, this message translates to:
+  /// **'Settimana {week}'**
+  String scheduleWeek(int week);
+
+  /// PA-2: un giorno dello schema con la sua settimana, quando ve n'è più d'una.
+  ///
+  /// In it, this message translates to:
+  /// **'Settimana {week} · {day}'**
+  String scheduleWeekDay(int week, String day);
 
   /// No description provided for @settingsDeleteAccount.
   ///

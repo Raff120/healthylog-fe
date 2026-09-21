@@ -253,6 +253,12 @@ class L10nIt extends L10n {
   String get dayPreviewNoSlots => 'Nessuno slot';
 
   @override
+  String get daySwapAction => 'Scambia la giornata';
+
+  @override
+  String get daySwapChooseDestination => 'Scegli con quale giornata scambiarla';
+
+  @override
   String get deleteAccountConfirm => 'Richiedi l\'eliminazione';
 
   @override
@@ -528,6 +534,10 @@ class L10nIt extends L10n {
   String get errorSlotAlreadyConsumed => 'Questo pasto è già stato consumato.';
 
   @override
+  String get errorSlotAlreadySkipped =>
+      'Una delle due giornate ha un pasto saltato.';
+
+  @override
   String get errorSwapDifferentDays => 'Devono appartenere allo stesso giorno.';
 
   @override
@@ -535,6 +545,9 @@ class L10nIt extends L10n {
 
   @override
   String get errorSwapPastDay => 'Questo giorno è già trascorso.';
+
+  @override
+  String get errorSwapSameDay => 'È la stessa giornata.';
 
   @override
   String get errorSwapTypeNotAllowed =>
@@ -961,6 +974,11 @@ class L10nIt extends L10n {
       'La tua richiesta di collegamento è stata rifiutata.';
 
   @override
+  String notificationDaySwapped(String first, String second) {
+    return 'Due giornate del tuo piano sono state scambiate: $first e $second.';
+  }
+
+  @override
   String notificationGroupCookGranted(String group) {
     return 'Sei stato nominato Cuoco del gruppo$group.';
   }
@@ -1264,6 +1282,31 @@ class L10nIt extends L10n {
   String get personalDataTitle => 'Dati personali';
 
   @override
+  String get personalDayNameAdd => 'Dai un nome alla giornata';
+
+  @override
+  String get personalDayNameEdit => 'Rinomina la giornata';
+
+  @override
+  String get personalDayNameLabel => 'Nome della giornata';
+
+  @override
+  String get personalNoteAdd => 'Aggiungi una nota per te';
+
+  @override
+  String get personalNoteLabel => 'La tua nota';
+
+  @override
+  String get personalPlanNotesAction => 'Le tue note sul piano';
+
+  @override
+  String get personalPlanNotesTitle => 'Le tue note';
+
+  @override
+  String get personalTextPrivacy =>
+      'La vedi solo tu: né il nutrizionista né il tuo gruppo. Lasciala vuota per toglierla.';
+
+  @override
   String get planActionComplete => 'Concludi';
 
   @override
@@ -1459,6 +1502,11 @@ class L10nIt extends L10n {
   String get planSuspendedHint => 'Riprenderà quando lo deciderai';
 
   @override
+  String planViewDaySwap(String first, String second) {
+    return '$first ↔ $second · giornata intera';
+  }
+
+  @override
   String get planViewNoSwaps => 'Nessuna inversione su questo piano.';
 
   @override
@@ -1626,14 +1674,29 @@ class L10nIt extends L10n {
   String get roleUserTitle => 'Seguo un piano';
 
   @override
+  String get scheduleAddWeek => 'Aggiungi settimana';
+
+  @override
   String get scheduleConfirmPlan => 'Conferma piano';
 
   @override
   String get scheduleIncompleteTitle => 'Schema incompleto';
 
   @override
+  String get scheduleRemoveWeek => 'Rimuovi settimana';
+
+  @override
+  String get scheduleRemoveWeekBody =>
+      'I suoi sette giorni e i loro pasti saranno tolti dallo schema, e le settimane successive scaleranno di un posto. Diventa effettivo al salvataggio.';
+
+  @override
+  String scheduleRemoveWeekTitle(int week) {
+    return 'Rimuovere la settimana $week?';
+  }
+
+  @override
   String get scheduleRetroactivityNotice =>
-      'Le modifiche decorrono da oggi e valgono per tutte le settimane: le giornate già trascorse restano invariate. Per cambiare una sola giornata, usa «Modifica questa giornata» dalla vista del giorno.';
+      'Le modifiche decorrono da oggi e valgono per le settimane a venire: le giornate già trascorse restano invariate. Per cambiare una sola giornata, usa «Modifica questa giornata» dalla vista del giorno.';
 
   @override
   String get scheduleSave => 'Salva modifiche';
@@ -1660,6 +1723,16 @@ class L10nIt extends L10n {
 
   @override
   String get scheduleTitle => 'Redazione dello schema';
+
+  @override
+  String scheduleWeek(int week) {
+    return 'Settimana $week';
+  }
+
+  @override
+  String scheduleWeekDay(int week, String day) {
+    return 'Settimana $week · $day';
+  }
 
   @override
   String get settingsDeleteAccount => 'Elimina account';

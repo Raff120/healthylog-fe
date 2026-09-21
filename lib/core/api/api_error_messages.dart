@@ -38,6 +38,8 @@ String describeApiError(BuildContext context, String code) {
     // interfaccia.md).
     'SWAP_PAST_DAY' => l10n.errorSwapPastDay,
     'SLOT_ALREADY_CONSUMED' => l10n.errorSlotAlreadyConsumed,
+    'SLOT_ALREADY_SKIPPED' => l10n.errorSlotAlreadySkipped,
+    'SWAP_SAME_DAY' => l10n.errorSwapSameDay,
     'SWAP_TYPE_NOT_ALLOWED' => l10n.errorSwapTypeNotAllowed,
     'SWAP_DIFFERENT_WEEKS' => l10n.errorSwapDifferentWeeks,
     'SWAP_DIFFERENT_DAYS' => l10n.errorSwapDifferentDays,

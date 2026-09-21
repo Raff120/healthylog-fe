@@ -12,6 +12,7 @@ import '../../../group/providers/cooking_group_providers.dart';
 import '../../../identity/providers/profile_providers.dart';
 import '../../data/plan_day.dart';
 import '../../data/slot_status.dart';
+import 'personal_text_dialog.dart';
 import 'slot_items_view.dart';
 import '../../data/slot_type.dart';
 import '../../domain/plan_day_date.dart';
@@ -136,6 +137,8 @@ class _MealCardState extends ConsumerState<MealCard> {
     // gestore del tocco restituisce il controllo, prima che la risposta
     // asincrona possa scriverne lo stato (`UnmountedRefException`).
     ref.watch(planDaySlotStatusControllerProvider);
+    // NP-1: lo stesso per la scrittura della nota personale.
+    ref.watch(personalAnnotationControllerProvider);
 
     // OF-20: nessuna scrittura è disponibile offline nella v1.
     final offline = !ref.watch(connectivityStatusProvider);
@@ -227,6 +230,13 @@ class _MealCardState extends ConsumerState<MealCard> {
                         ],
                       ),
                     ],
+                    // NP-1, NP-2, 4.1: la nota personale, sulla sola propria
+                    // giornata. Distinta da quella dell'autore del piano, che
+                    // la precede.
+                    if (_expanded && widget.member == null) ...[
+                      const SizedBox(height: AppSpacing.sm),
+                      _PersonalNote(note: slot.personalNote, onEdit: offline ? null : () => _editPersonalNote(context)),
+                    ],
                     if (_expanded && cookAttributionName != null) ...[
                       const SizedBox(height: AppSpacing.sm),
                       Row(
@@ -300,6 +310,30 @@ class _MealCardState extends ConsumerState<MealCard> {
         ),
       ),
     );
+  }
+
+  /// NP-1, 4.1: la nota si scrive in un dialogo con area di testo, e vuota
+  /// si toglie. Il server la riferisce allo slot dello schema del
+  /// contenuto, che può non essere questo (EP-12, NP-5).
+  Future<void> _editPersonalNote(BuildContext context) async {
+    final note = await showPersonalTextDialog(
+      context,
+      title: context.l10n.personalNoteLabel,
+      label: context.l10n.personalNoteLabel,
+      initialText: widget.slot.personalNote ?? '',
+      maxLength: 500,
+      multiline: true,
+    );
+    if (note == null || !mounted) return;
+    await ref
+        .read(personalAnnotationControllerProvider.notifier)
+        .saveSlotNote(widget.date, widget.slot.slotId, note.isEmpty ? null : note);
+    if (!context.mounted) return;
+    ref.read(personalAnnotationControllerProvider)?.whenOrNull(
+          error: (error, _) => ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(describeApiError(context, error.asApiException?.code ?? ''))),
+          ),
+        );
   }
 
   /// MS-8, condizioni 1/3/4 applicate a questo solo slot (stesso
@@ -557,6 +591,54 @@ class _SpuntaButton extends StatelessWidget {
             size: 20,
             color: active && enabled ? color : colors.textTertiary,
           ),
+        ),
+      ),
+    );
+  }
+}
+
+/// NP-1, 4.1: la nota personale nella card aperta — il testo, toccabile
+/// per modificarlo, ovvero l'azione di aggiungerla. [onEdit] `null`
+/// quando la scrittura non è disponibile (OF-20): la nota resta leggibile.
+class _PersonalNote extends StatelessWidget {
+  const _PersonalNote({required this.note, required this.onEdit});
+
+  final String? note;
+  final VoidCallback? onEdit;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final typography = context.typography;
+    final text = note?.trim();
+    if (text == null || text.isEmpty) {
+      if (onEdit == null) return const SizedBox.shrink();
+      return Align(
+        alignment: Alignment.centerLeft,
+        child: TextButton.icon(
+          onPressed: onEdit,
+          icon: Icon(Icons.edit_note, size: 18, color: colors.accent),
+          label: Text(context.l10n.personalNoteAdd, style: typography.label.copyWith(color: colors.accent)),
+        ),
+      );
+    }
+    return InkWell(
+      onTap: onEdit,
+      borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+      child: Semantics(
+        label: context.l10n.personalNoteLabel,
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(Icons.edit_note, size: 16, color: colors.accent),
+            const SizedBox(width: AppSpacing.xxs),
+            Expanded(
+              child: Text(
+                text,
+                style: typography.bodyMedium.copyWith(color: colors.textPrimary, fontStyle: FontStyle.italic),
+              ),
+            ),
+          ],
         ),
       ),
     );

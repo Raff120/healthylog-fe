@@ -514,3 +514,141 @@ abstract class _$DietPlanExportController extends $Notifier<AsyncValue<void>?> {
     return element.handleCreate(ref, build);
   }
 }
+
+/// NP-1: la nota personale del piano. Da osservare soltanto quando chi
+/// guarda ne è il proprietario: per chiunque altro non esiste (NP-2).
+
+@ProviderFor(personalPlanNote)
+final personalPlanNoteProvider = PersonalPlanNoteFamily._();
+
+/// NP-1: la nota personale del piano. Da osservare soltanto quando chi
+/// guarda ne è il proprietario: per chiunque altro non esiste (NP-2).
+
+final class PersonalPlanNoteProvider
+    extends $FunctionalProvider<AsyncValue<String?>, String?, FutureOr<String?>>
+    with $FutureModifier<String?>, $FutureProvider<String?> {
+  /// NP-1: la nota personale del piano. Da osservare soltanto quando chi
+  /// guarda ne è il proprietario: per chiunque altro non esiste (NP-2).
+  PersonalPlanNoteProvider._({
+    required PersonalPlanNoteFamily super.from,
+    required String super.argument,
+  }) : super(
+         retry: null,
+         name: r'personalPlanNoteProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$personalPlanNoteHash();
+
+  @override
+  String toString() {
+    return r'personalPlanNoteProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  $FutureProviderElement<String?> $createElement($ProviderPointer pointer) =>
+      $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<String?> create(Ref ref) {
+    final argument = this.argument as String;
+    return personalPlanNote(ref, argument);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is PersonalPlanNoteProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$personalPlanNoteHash() => r'aa4b4aa5583b0581bb32ec8f324e8b7b66bd1b5a';
+
+/// NP-1: la nota personale del piano. Da osservare soltanto quando chi
+/// guarda ne è il proprietario: per chiunque altro non esiste (NP-2).
+
+final class PersonalPlanNoteFamily extends $Family
+    with $FunctionalFamilyOverride<FutureOr<String?>, String> {
+  PersonalPlanNoteFamily._()
+    : super(
+        retry: null,
+        name: r'personalPlanNoteProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  /// NP-1: la nota personale del piano. Da osservare soltanto quando chi
+  /// guarda ne è il proprietario: per chiunque altro non esiste (NP-2).
+
+  PersonalPlanNoteProvider call(String planId) =>
+      PersonalPlanNoteProvider._(argument: planId, from: this);
+
+  @override
+  String toString() => r'personalPlanNoteProvider';
+}
+
+@ProviderFor(PersonalPlanNoteController)
+final personalPlanNoteControllerProvider =
+    PersonalPlanNoteControllerProvider._();
+
+final class PersonalPlanNoteControllerProvider
+    extends $NotifierProvider<PersonalPlanNoteController, AsyncValue<void>?> {
+  PersonalPlanNoteControllerProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'personalPlanNoteControllerProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$personalPlanNoteControllerHash();
+
+  @$internal
+  @override
+  PersonalPlanNoteController create() => PersonalPlanNoteController();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(AsyncValue<void>? value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<AsyncValue<void>?>(value),
+    );
+  }
+}
+
+String _$personalPlanNoteControllerHash() =>
+    r'7743413a726d82b377fbd2a5237c0e07ea5d4e71';
+
+abstract class _$PersonalPlanNoteController
+    extends $Notifier<AsyncValue<void>?> {
+  AsyncValue<void>? build();
+  @$mustCallSuper
+  @override
+  WhenComplete runBuild() {
+    final ref = this.ref as $Ref<AsyncValue<void>?, AsyncValue<void>?>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<AsyncValue<void>?, AsyncValue<void>?>,
+              AsyncValue<void>?,
+              Object?,
+              Object?
+            >;
+    return element.handleCreate(ref, build);
+  }
+}

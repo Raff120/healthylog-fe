@@ -253,6 +253,12 @@ class L10nEn extends L10n {
   String get dayPreviewNoSlots => 'No slots';
 
   @override
+  String get daySwapAction => 'Swap this day';
+
+  @override
+  String get daySwapChooseDestination => 'Choose the day to swap it with';
+
+  @override
   String get deleteAccountConfirm => 'Request deletion';
 
   @override
@@ -521,6 +527,10 @@ class L10nEn extends L10n {
   String get errorSlotAlreadyConsumed => 'This meal has already been consumed.';
 
   @override
+  String get errorSlotAlreadySkipped =>
+      'One of the two days has a skipped meal.';
+
+  @override
   String get errorSwapDifferentDays => 'They must belong to the same day.';
 
   @override
@@ -528,6 +538,9 @@ class L10nEn extends L10n {
 
   @override
   String get errorSwapPastDay => 'This day has already passed.';
+
+  @override
+  String get errorSwapSameDay => 'It is the same day.';
 
   @override
   String get errorSwapTypeNotAllowed =>
@@ -952,6 +965,11 @@ class L10nEn extends L10n {
       'Your link request was declined.';
 
   @override
+  String notificationDaySwapped(String first, String second) {
+    return 'Two days of your plan were swapped: $first and $second.';
+  }
+
+  @override
   String notificationGroupCookGranted(String group) {
     return 'You were made Cook of the group$group.';
   }
@@ -1254,6 +1272,31 @@ class L10nEn extends L10n {
   String get personalDataTitle => 'Personal details';
 
   @override
+  String get personalDayNameAdd => 'Name this day';
+
+  @override
+  String get personalDayNameEdit => 'Rename this day';
+
+  @override
+  String get personalDayNameLabel => 'Day name';
+
+  @override
+  String get personalNoteAdd => 'Add a note for yourself';
+
+  @override
+  String get personalNoteLabel => 'Your note';
+
+  @override
+  String get personalPlanNotesAction => 'Your notes on the plan';
+
+  @override
+  String get personalPlanNotesTitle => 'Your notes';
+
+  @override
+  String get personalTextPrivacy =>
+      'Only you can see it: not your nutritionist, not your group. Leave it empty to remove it.';
+
+  @override
   String get planActionComplete => 'Complete';
 
   @override
@@ -1448,6 +1491,11 @@ class L10nEn extends L10n {
   String get planSuspendedHint => 'It resumes when you decide';
 
   @override
+  String planViewDaySwap(String first, String second) {
+    return '$first ↔ $second · whole day';
+  }
+
+  @override
   String get planViewNoSwaps => 'No swaps on this plan.';
 
   @override
@@ -1612,14 +1660,29 @@ class L10nEn extends L10n {
   String get roleUserTitle => 'I follow a plan';
 
   @override
+  String get scheduleAddWeek => 'Add week';
+
+  @override
   String get scheduleConfirmPlan => 'Confirm plan';
 
   @override
   String get scheduleIncompleteTitle => 'Incomplete schedule';
 
   @override
+  String get scheduleRemoveWeek => 'Remove week';
+
+  @override
+  String get scheduleRemoveWeekBody =>
+      'Its seven days and their meals will be removed from the schedule, and the following weeks will move up one place. It takes effect when you save.';
+
+  @override
+  String scheduleRemoveWeekTitle(int week) {
+    return 'Remove week $week?';
+  }
+
+  @override
   String get scheduleRetroactivityNotice =>
-      'Changes take effect today and apply to every week: days already past remain unchanged. To change a single day, use “Edit this day” from the day view.';
+      'Changes take effect today and apply to the weeks ahead: days already past remain unchanged. To change a single day, use “Edit this day” from the day view.';
 
   @override
   String get scheduleSave => 'Save changes';
@@ -1646,6 +1709,16 @@ class L10nEn extends L10n {
 
   @override
   String get scheduleTitle => 'Weekly schedule';
+
+  @override
+  String scheduleWeek(int week) {
+    return 'Week $week';
+  }
+
+  @override
+  String scheduleWeekDay(int week, String day) {
+    return 'Week $week · $day';
+  }
 
   @override
   String get settingsDeleteAccount => 'Delete account';

@@ -18,20 +18,22 @@ import '../data/weekday.dart';
 import '../providers/diet_plan_providers.dart';
 import '../providers/diet_plan_template_providers.dart';
 import 'editable_slot.dart';
+import 'editable_weeks.dart';
 import 'slot_type_presentation.dart';
 import 'weekday_presentation.dart';
-import 'widgets/day_selector.dart';
-import 'widgets/day_sidebar.dart';
 import 'widgets/delete_plan_dialog.dart';
 import 'widgets/name_description_dialog.dart';
 import 'widgets/plan_period_dialog.dart';
+import 'widgets/schedule_navigation.dart';
 import 'widgets/slot_card.dart';
 
 
 /// Redazione dello schema settimanale (7.3 interfaccia.md, CD-5, CD-7,
 /// CD-8, CD-10, CD-11, MP-6): un giorno per volta con selettore in cima
 /// su `compact`, navigazione dei giorni affiancata alla redazione su
-/// `expanded` e oltre (MP-6, 7.3 interfaccia.md).
+/// `expanded` e oltre (MP-6, 7.3 interfaccia.md). Con più settimane
+/// (PA-2) la navigazione sceglie prima la settimana, e il menu
+/// dell'intestazione ne aggiunge o ne toglie (PA-2bis).
 ///
 /// La stessa schermata serve anche la modifica di un piano Attivo o
 /// Sospeso (5.3 funzionale, MD-1): una striscia informativa avverte che
@@ -52,15 +54,31 @@ class DietPlanScheduleScreen extends ConsumerStatefulWidget {
 
 class _DietPlanScheduleScreenState extends ConsumerState<DietPlanScheduleScreen> {
   List<EditableDay>? _days;
-  late Weekday _selectedDay;
+  int _selectedWeek = DietPlanWeekDay.firstWeek;
+  Weekday _selectedDay = Weekday.monday;
   bool _dirty = false;
   bool _saving = false;
 
+  /// Dopo un salvataggio la redazione resta sul giorno in cui si trovava,
+  /// se c'è ancora: con più settimane, tornare ogni volta alla prima
+  /// costringerebbe a ritrovare il punto.
   void _initializeFrom(DietPlan plan) {
     if (_days != null) return;
     _days = plan.weeklySchedule.map(EditableDay.fromWeekDay).toList();
-    _selectedDay = _days!.first.dayOfWeek;
+    if (!_days!.any((day) => day.week == _selectedWeek && day.dayOfWeek == _selectedDay)) {
+      _select(_days!.first);
+    }
   }
+
+  void _select(EditableDay day) {
+    _selectedWeek = day.week;
+    _selectedDay = day.dayOfWeek;
+  }
+
+  /// CD-15: il giorno col nome della sua settimana, quando ve n'è più d'una.
+  String _dayLabel(EditableDay day) => _days!.weekCount > 1
+      ? context.l10n.scheduleWeekDay(day.week, weekdayLabel(context, day.dayOfWeek))
+      : weekdayLabel(context, day.dayOfWeek);
 
   @override
   void dispose() {
@@ -68,7 +86,34 @@ class _DietPlanScheduleScreenState extends ConsumerState<DietPlanScheduleScreen>
     super.dispose();
   }
 
-  EditableDay get _currentDay => _days!.firstWhere((day) => day.dayOfWeek == _selectedDay);
+  EditableDay get _currentDay =>
+      _days!.firstWhere((day) => day.week == _selectedWeek && day.dayOfWeek == _selectedDay);
+
+  /// PA-2bis, 7.3 interfaccia: la settimana nuova copia quella in
+  /// redazione e diventa la selezionata, sul medesimo giorno.
+  void _addWeek() {
+    setState(() {
+      _selectedWeek = _days!.appendCopyOfWeek(_selectedWeek);
+      _dirty = true;
+    });
+  }
+
+  /// PA-2bis, 7.3 interfaccia: toglie la settimana in redazione, previa
+  /// conferma. Si resta sulla medesima posizione, ovvero sull'ultima se
+  /// era quella tolta.
+  Future<void> _removeWeek() async {
+    final confirmed = await _confirmDialog(
+      title: context.l10n.scheduleRemoveWeekTitle(_selectedWeek),
+      message: context.l10n.scheduleRemoveWeekBody,
+      confirmLabel: context.l10n.commonRemove,
+    );
+    if (confirmed != true || !mounted) return;
+    setState(() {
+      _days!.removeWeek(_selectedWeek);
+      if (_selectedWeek > _days!.weekCount) _selectedWeek = _days!.weekCount;
+      _dirty = true;
+    });
+  }
 
   void _markDirty() => setState(() => _dirty = true);
 
@@ -201,7 +246,7 @@ class _DietPlanScheduleScreenState extends ConsumerState<DietPlanScheduleScreen>
         return slotIndex >= day.slots.length ? null : day.slots[slotIndex];
       });
       setState(() {
-        if (outcome.dayIndex != null) _selectedDay = _days![outcome.dayIndex!].dayOfWeek;
+        if (outcome.dayIndex != null) _select(_days![outcome.dayIndex!]);
       });
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -270,7 +315,7 @@ class _DietPlanScheduleScreenState extends ConsumerState<DietPlanScheduleScreen>
           // schema è stato modificato altrove nel frattempo): si rimanda
           // comunque a un giorno, sul modello sotto, ma senza poter
           // essere puntuali quanto la verifica locale.
-          setState(() => _selectedDay = _days!.first.dayOfWeek);
+          setState(() => _select(_days!.first));
         }
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(describeApiError(context, exception?.code ?? ''))),
@@ -309,7 +354,7 @@ class _DietPlanScheduleScreenState extends ConsumerState<DietPlanScheduleScreen>
                   children: [
                     for (final day in incompleteDays)
                       ListTile(
-                        title: Text(weekdayLabel(context, day.dayOfWeek), style: typography.bodyLarge.copyWith(color: colors.textPrimary)),
+                        title: Text(_dayLabel(day), style: typography.bodyLarge.copyWith(color: colors.textPrimary)),
                         subtitle: Text(
                           context.l10n.scheduleSlotsWithoutContent(
                               day.slots.where((slot) => slot.isEmpty).length),
@@ -318,7 +363,7 @@ class _DietPlanScheduleScreenState extends ConsumerState<DietPlanScheduleScreen>
                         trailing: Icon(Icons.chevron_right, color: colors.textTertiary),
                         onTap: () {
                           Navigator.of(sheetContext).pop();
-                          setState(() => _selectedDay = day.dayOfWeek);
+                          setState(() => _select(day));
                         },
                       ),
                   ],
@@ -516,8 +561,15 @@ class _DietPlanScheduleScreenState extends ConsumerState<DietPlanScheduleScreen>
                 if (value == 'edit-period') _editPeriod(planState.value!);
                 if (value == 'save-as-template') _saveAsTemplate(planState.value?.name ?? '');
                 if (value == 'delete') _delete(planState.value!.status);
+                if (value == 'add-week') _addWeek();
+                if (value == 'remove-week') _removeWeek();
               },
               itemBuilder: (context) => [
+                // PA-2bis: fino a quattro settimane, e mai meno di una.
+                if (_days != null && _days!.canAddWeek)
+                  PopupMenuItem(value: 'add-week', child: Text(context.l10n.scheduleAddWeek)),
+                if (_days != null && _days!.canRemoveWeek)
+                  PopupMenuItem(value: 'remove-week', child: Text(context.l10n.scheduleRemoveWeek)),
                 // ST-7: il Concluso non arriva a questa schermata, ma la
                 // condizione resta esplicita — il server lo rifiuterebbe.
                 if (planState.value != null && planState.value!.status != PlanStatus.completed)
@@ -552,10 +604,13 @@ class _DietPlanScheduleScreenState extends ConsumerState<DietPlanScheduleScreen>
                   children: [
                     SizedBox(
                       width: AppSpacing.widthDayNavigationSidebar,
-                      child: DaySidebar(
+                      child: ScheduleNavigation(
                         days: _days!,
-                        selected: _selectedDay,
-                        onSelect: (d) => setState(() => _selectedDay = d),
+                        selectedWeek: _selectedWeek,
+                        selectedDay: _selectedDay,
+                        onSelectWeek: (week) => setState(() => _selectedWeek = week),
+                        onSelectDay: (d) => setState(() => _selectedDay = d),
+                        sidebar: true,
                       ),
                     ),
                     const VerticalDivider(width: 1),
@@ -576,10 +631,13 @@ class _DietPlanScheduleScreenState extends ConsumerState<DietPlanScheduleScreen>
                         color: colors.surface,
                         border: Border(bottom: BorderSide(color: colors.dividerStrong)),
                       ),
-                      child: DaySelector(
+                      child: ScheduleNavigation(
                         days: _days!,
-                        selected: _selectedDay,
-                        onSelect: (d) => setState(() => _selectedDay = d),
+                        selectedWeek: _selectedWeek,
+                        selectedDay: _selectedDay,
+                        onSelectWeek: (week) => setState(() => _selectedWeek = week),
+                        onSelectDay: (d) => setState(() => _selectedDay = d),
+                        sidebar: false,
                       ),
                     ),
                     Expanded(child: _buildDayEditor(day)),

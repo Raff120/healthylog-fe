@@ -1,5 +1,6 @@
-/// Motore delle inversioni (6.4 funzionale, 7.1 tecnica): replica di
-/// `MealSwapValidator` sul backend (MS-1, MS-3, FE-7). Stesse regole,
+/// Motore delle inversioni (6.4 funzionale, 7.1 tecnica), di slot e di
+/// giornate intere (IN-28, MS-24): replica di `MealSwapValidator` sul
+/// backend (MS-1, MS-3, FE-7). Stesse regole,
 /// stesso ordine di valutazione (MS-8, MS-9): ogni modifica DEVE toccare
 /// entrambe le attuazioni nel medesimo intervento (MS-22).
 library;
@@ -55,6 +56,48 @@ String? validateMealSwap({
       return 'SWAP_DIFFERENT_DAYS';
     }
   } else if (startOfWeek(first.date) != startOfWeek(second.date)) {
+    return 'SWAP_DIFFERENT_WEEKS';
+  }
+  return null;
+}
+
+/// Una giornata coinvolta nell'inversione di giornate intere (MS-24), con
+/// lo stato di consumo di ciascuno dei suoi slot — vuoto per una giornata
+/// priva di slot (IN-31). `date` deve essere normalizzata ([dateOnly]).
+class DaySwapCandidate {
+  const DaySwapCandidate({required this.date, required this.statuses});
+
+  final DateTime date;
+  final List<SlotStatus> statuses;
+}
+
+/// MS-24: replica di `MealSwapValidator.validateDaySwap` — stesse
+/// condizioni, stesso ordine, arresto al primo rifiuto. `null` se
+/// l'inversione di giornate è ammessa. Come per gli slot, il medesimo piano
+/// (condizione 2) è del chiamante.
+String? validateDaySwap({
+  required PlanStatus planStatus,
+  required DaySwapCandidate first,
+  required DaySwapCandidate second,
+  required DateTime today,
+}) {
+  if (planStatus != PlanStatus.active) {
+    return 'PLAN_NOT_ACTIVE';
+  }
+  if (first.date.isBefore(today) || second.date.isBefore(today)) {
+    return 'SWAP_PAST_DAY';
+  }
+  if (first.date == second.date) {
+    return 'SWAP_SAME_DAY';
+  }
+  if (first.statuses.contains(SlotStatus.consumed) || second.statuses.contains(SlotStatus.consumed)) {
+    return 'SLOT_ALREADY_CONSUMED';
+  }
+  // IN-30: a differenza dello slot, anche il saltato impedisce.
+  if (first.statuses.contains(SlotStatus.skipped) || second.statuses.contains(SlotStatus.skipped)) {
+    return 'SLOT_ALREADY_SKIPPED';
+  }
+  if (startOfWeek(first.date) != startOfWeek(second.date)) {
     return 'SWAP_DIFFERENT_WEEKS';
   }
   return null;

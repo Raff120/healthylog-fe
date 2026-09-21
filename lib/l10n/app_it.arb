@@ -117,6 +117,8 @@
   "commonToday": "Oggi",
   "commonUnderstood": "Ho capito",
   "dayPreviewNoSlots": "Nessuno slot",
+  "daySwapAction": "Scambia la giornata",
+  "daySwapChooseDestination": "Scegli con quale giornata scambiarla",
   "deleteAccountConfirm": "Richiedi l'eliminazione",
   "deleteAccountConfirmTitle": "Eliminare l'account?",
   "deleteAccountGracePeriod": "La richiesta apre un periodo di ripensamento di sette giorni: durante il periodo l'account è disattivato e nessun terzo vi accede, ma i dati restano. Accedendo di nuovo la richiesta si annulla.",
@@ -229,9 +231,11 @@
   "errorPlanTransitionNotAllowed": "Questa operazione non è più possibile per il piano.",
   "errorRefreshTokenInvalid": "La sessione non è più valida. Accedi di nuovo.",
   "errorSlotAlreadyConsumed": "Questo pasto è già stato consumato.",
+  "errorSlotAlreadySkipped": "Una delle due giornate ha un pasto saltato.",
   "errorSwapDifferentDays": "Devono appartenere allo stesso giorno.",
   "errorSwapDifferentWeeks": "Appartengono a settimane diverse.",
   "errorSwapPastDay": "Questo giorno è già trascorso.",
+  "errorSwapSameDay": "È la stessa giornata.",
   "errorSwapTypeNotAllowed": "Questi pasti non sono invertibili tra loro.",
   "errorTimezoneInvalid": "Fuso orario non riconosciuto.",
   "errorUsernameAlreadyUsed": "Questo nome utente è già in uso.",
@@ -488,6 +492,18 @@
   "notificationCareRequestAccepted": "La tua richiesta di collegamento è stata accettata.",
   "notificationCareRequestReceived": "Hai ricevuto una richiesta di collegamento professionale.",
   "notificationCareRequestRejected": "La tua richiesta di collegamento è stata rifiutata.",
+  "notificationDaySwapped": "Due giornate del tuo piano sono state scambiate: {first} e {second}.",
+  "@notificationDaySwapped": {
+    "description": "IN-32, IG-8: inversione di giornate intere disposta dal Cuoco.",
+    "placeholders": {
+      "first": {
+        "type": "String"
+      },
+      "second": {
+        "type": "String"
+      }
+    }
+  },
   "notificationGroupCookGranted": "Sei stato nominato Cuoco del gruppo{group}.",
   "@notificationGroupCookGranted": {
     "placeholders": {
@@ -782,6 +798,14 @@
   "personalDataTargetWeight": "Peso obiettivo",
   "personalDataTargetWeightKg": "Peso obiettivo (kg)",
   "personalDataTitle": "Dati personali",
+  "personalDayNameAdd": "Dai un nome alla giornata",
+  "personalDayNameEdit": "Rinomina la giornata",
+  "personalDayNameLabel": "Nome della giornata",
+  "personalNoteAdd": "Aggiungi una nota per te",
+  "personalNoteLabel": "La tua nota",
+  "personalPlanNotesAction": "Le tue note sul piano",
+  "personalPlanNotesTitle": "Le tue note",
+  "personalTextPrivacy": "La vedi solo tu: né il nutrizionista né il tuo gruppo. Lasciala vuota per toglierla.",
   "planActionComplete": "Concludi",
   "planActionDelete": "Elimina",
   "planActionEdit": "Modifica",
@@ -878,6 +902,18 @@
   "planStatusSuspended": "Sospeso",
   "planSuspended": "Piano sospeso",
   "planSuspendedHint": "Riprenderà quando lo deciderai",
+  "planViewDaySwap": "{first} ↔ {second} · giornata intera",
+  "@planViewDaySwap": {
+    "description": "IN-32: voce dello storico per l'inversione di giornate intere.",
+    "placeholders": {
+      "first": {
+        "type": "String"
+      },
+      "second": {
+        "type": "String"
+      }
+    }
+  },
   "planViewNoSwaps": "Nessuna inversione su questo piano.",
   "planViewOngoing": "in corso",
   "planViewOngoingUpper": "IN CORSO",
@@ -975,9 +1011,21 @@
   "roleUser": "Utente",
   "roleUserDescription": "Consulti la tua dieta, segni i pasti e registri gli allenamenti",
   "roleUserTitle": "Seguo un piano",
+  "scheduleAddWeek": "Aggiungi settimana",
   "scheduleConfirmPlan": "Conferma piano",
   "scheduleIncompleteTitle": "Schema incompleto",
-  "scheduleRetroactivityNotice": "Le modifiche decorrono da oggi e valgono per tutte le settimane: le giornate già trascorse restano invariate. Per cambiare una sola giornata, usa «Modifica questa giornata» dalla vista del giorno.",
+  "scheduleRemoveWeek": "Rimuovi settimana",
+  "scheduleRemoveWeekBody": "I suoi sette giorni e i loro pasti saranno tolti dallo schema, e le settimane successive scaleranno di un posto. Diventa effettivo al salvataggio.",
+  "scheduleRemoveWeekTitle": "Rimuovere la settimana {week}?",
+  "@scheduleRemoveWeekTitle": {
+    "description": "PA-2bis, 7.3 interfaccia: conferma della rimozione della settimana in redazione.",
+    "placeholders": {
+      "week": {
+        "type": "int"
+      }
+    }
+  },
+  "scheduleRetroactivityNotice": "Le modifiche decorrono da oggi e valgono per le settimane a venire: le giornate già trascorse restano invariate. Per cambiare una sola giornata, usa «Modifica questa giornata» dalla vista del giorno.",
   "scheduleSave": "Salva modifiche",
   "scheduleSaveAsTemplate": "Salva come template",
   "scheduleSaved": "Piano salvato.",
@@ -992,6 +1040,27 @@
   },
   "scheduleTemplateCreated": "Template creato.",
   "scheduleTitle": "Redazione dello schema",
+  "scheduleWeek": "Settimana {week}",
+  "@scheduleWeek": {
+    "description": "PA-2: una settimana del ciclo dello schema.",
+    "placeholders": {
+      "week": {
+        "type": "int"
+      }
+    }
+  },
+  "scheduleWeekDay": "Settimana {week} · {day}",
+  "@scheduleWeekDay": {
+    "description": "PA-2: un giorno dello schema con la sua settimana, quando ve n'è più d'una.",
+    "placeholders": {
+      "week": {
+        "type": "int"
+      },
+      "day": {
+        "type": "String"
+      }
+    }
+  },
   "settingsDeleteAccount": "Elimina account",
   "settingsDevices": "Dispositivi collegati",
   "settingsLanguage": "Lingua",

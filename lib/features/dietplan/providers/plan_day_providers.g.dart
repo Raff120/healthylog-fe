@@ -866,6 +866,79 @@ abstract class _$PlanDaySlotStatusController
   }
 }
 
+/// NP-1: nome della giornata e nota degli slot, sulla propria giornata
+/// soltanto (NP-2). Il nome appartiene al giorno dello schema e la nota
+/// allo slot dello schema, che ricorrono in altre date: si rileggono
+/// perciò tutte le giornate, non la sola annotata.
+
+@ProviderFor(PersonalAnnotationController)
+final personalAnnotationControllerProvider =
+    PersonalAnnotationControllerProvider._();
+
+/// NP-1: nome della giornata e nota degli slot, sulla propria giornata
+/// soltanto (NP-2). Il nome appartiene al giorno dello schema e la nota
+/// allo slot dello schema, che ricorrono in altre date: si rileggono
+/// perciò tutte le giornate, non la sola annotata.
+final class PersonalAnnotationControllerProvider
+    extends $NotifierProvider<PersonalAnnotationController, AsyncValue<void>?> {
+  /// NP-1: nome della giornata e nota degli slot, sulla propria giornata
+  /// soltanto (NP-2). Il nome appartiene al giorno dello schema e la nota
+  /// allo slot dello schema, che ricorrono in altre date: si rileggono
+  /// perciò tutte le giornate, non la sola annotata.
+  PersonalAnnotationControllerProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'personalAnnotationControllerProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$personalAnnotationControllerHash();
+
+  @$internal
+  @override
+  PersonalAnnotationController create() => PersonalAnnotationController();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(AsyncValue<void>? value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<AsyncValue<void>?>(value),
+    );
+  }
+}
+
+String _$personalAnnotationControllerHash() =>
+    r'7d4c4aa431eb3b8b8e3e2386ed22ac21be705ddf';
+
+/// NP-1: nome della giornata e nota degli slot, sulla propria giornata
+/// soltanto (NP-2). Il nome appartiene al giorno dello schema e la nota
+/// allo slot dello schema, che ricorrono in altre date: si rileggono
+/// perciò tutte le giornate, non la sola annotata.
+
+abstract class _$PersonalAnnotationController
+    extends $Notifier<AsyncValue<void>?> {
+  AsyncValue<void>? build();
+  @$mustCallSuper
+  @override
+  WhenComplete runBuild() {
+    final ref = this.ref as $Ref<AsyncValue<void>?, AsyncValue<void>?>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<AsyncValue<void>?, AsyncValue<void>?>,
+              AsyncValue<void>?,
+              Object?,
+              Object?
+            >;
+    return element.handleCreate(ref, build);
+  }
+}
+
 /// MD-8: modifica della singola occorrenza. A salvataggio riuscito la
 /// giornata in cache è sostituita per intero con quella restituita —
 /// stesso criterio della spunta — così la vista giornaliera la riflette

@@ -29,6 +29,19 @@ class MealSwapApi {
     );
   }
 
+  /// IN-28, MS-25: inversione di due giornate intere. Come per gli slot la
+  /// risposta non è usata: le giornate si rileggono invalidando la cache.
+  Future<void> swapDays({
+    required String planId,
+    required DateTime firstDate,
+    required DateTime secondDate,
+  }) {
+    return _dio.post(
+      '/diet-plans/$planId/day-swaps',
+      data: {'firstDate': isoDate(firstDate), 'secondDate': isoDate(secondDate)},
+    );
+  }
+
   /// IN-24, ST-5: lo storico delle inversioni operate sul piano, in ordine
   /// cronologico decrescente e di sola lettura (IN-25).
   Future<List<MealSwapLog>> history(String planId) async {
