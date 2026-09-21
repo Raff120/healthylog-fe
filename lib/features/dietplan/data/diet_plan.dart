@@ -43,9 +43,17 @@ class DietPlanSlot {
 
 /// Rispecchia `DietPlanWeekDayResponse` sul backend (OG-1).
 class DietPlanWeekDay {
-  const DietPlanWeekDay({required this.dayOfWeek, required this.slots});
+  const DietPlanWeekDay({this.week = firstWeek, required this.dayOfWeek, required this.slots});
+
+  /// PA-2bis: la settimana di ogni giorno che non ne dichiari una.
+  static const firstWeek = 1;
+
+  /// PA-2bis: numero massimo di settimane dello schema (tabella dei
+  /// parametri della tecnica). Il server lo fa comunque rispettare.
+  static const maxWeeks = 4;
 
   factory DietPlanWeekDay.fromJson(Map<String, dynamic> json) => DietPlanWeekDay(
+        week: (json['week'] as num?)?.toInt() ?? firstWeek,
         dayOfWeek: Weekday.fromJson(json['dayOfWeek'] as String),
         slots: (json['slots'] as List)
             .map((e) => DietPlanSlot.tryFromJson(e as Map<String, dynamic>))
@@ -57,9 +65,16 @@ class DietPlanWeekDay {
   static DietPlanWeekDay? tryFromJson(Map<String, dynamic> json) =>
       Weekday.tryFromJson(json['dayOfWeek'] as String) == null ? null : DietPlanWeekDay.fromJson(json);
 
+  /// Settimana del ciclo cui il giorno appartiene, da 1 (OG-1bis).
+  final int week;
   final Weekday dayOfWeek;
   final List<DietPlanSlot> slots;
 }
+
+/// OG-1bis: il numero di settimane dello schema è quello dei giorni che le
+/// recano, non un dato a parte. Almeno una.
+int weekCountOf(Iterable<DietPlanWeekDay> days) =>
+    days.fold(DietPlanWeekDay.firstWeek, (count, day) => day.week > count ? day.week : count);
 
 /// Un periodo di svolgimento (CO-6) o di sospensione (CV-S3) del piano.
 /// [endDate] assente indica un periodo tuttora in corso — è così che il

@@ -7,6 +7,7 @@ import '../../../app/theme/theme_context.dart';
 import '../../../core/api/api_error_messages.dart';
 import '../../../core/api/api_exception.dart';
 import '../../../l10n/l10n_context.dart';
+import '../data/diet_plan.dart';
 import '../data/diet_plan_requests.dart';
 import '../data/diet_plan_template.dart';
 import '../data/slot_type.dart';
@@ -14,9 +15,9 @@ import '../data/weekday.dart';
 import '../domain/slot_item_errors.dart';
 import '../providers/diet_plan_template_providers.dart';
 import 'editable_slot.dart';
+import 'editable_weeks.dart';
 import 'slot_type_presentation.dart';
-import 'widgets/day_selector.dart';
-import 'widgets/day_sidebar.dart';
+import 'widgets/schedule_navigation.dart';
 import 'widgets/slot_card.dart';
 
 
@@ -40,14 +41,23 @@ class DietPlanTemplateScheduleScreen extends ConsumerStatefulWidget {
 
 class _DietPlanTemplateScheduleScreenState extends ConsumerState<DietPlanTemplateScheduleScreen> {
   List<EditableDay>? _days;
-  late Weekday _selectedDay;
+  int _selectedWeek = DietPlanWeekDay.firstWeek;
+  Weekday _selectedDay = Weekday.monday;
   bool _dirty = false;
   bool _saving = false;
 
+  /// Come per il piano: dopo un salvataggio si resta dove si era.
   void _initializeFrom(DietPlanTemplate template) {
     if (_days != null) return;
     _days = template.weeklySchedule.map(EditableDay.fromWeekDay).toList();
-    _selectedDay = _days!.first.dayOfWeek;
+    if (!_days!.any((day) => day.week == _selectedWeek && day.dayOfWeek == _selectedDay)) {
+      _select(_days!.first);
+    }
+  }
+
+  void _select(EditableDay day) {
+    _selectedWeek = day.week;
+    _selectedDay = day.dayOfWeek;
   }
 
   @override
@@ -56,7 +66,31 @@ class _DietPlanTemplateScheduleScreenState extends ConsumerState<DietPlanTemplat
     super.dispose();
   }
 
-  EditableDay get _currentDay => _days!.firstWhere((day) => day.dayOfWeek == _selectedDay);
+  EditableDay get _currentDay =>
+      _days!.firstWhere((day) => day.week == _selectedWeek && day.dayOfWeek == _selectedDay);
+
+  /// TP-1, PA-2bis: il template ha settimane come il piano, e le si
+  /// aggiunge e toglie allo stesso modo (7.3 e 7.4 interfaccia.md).
+  void _addWeek() {
+    setState(() {
+      _selectedWeek = _days!.appendCopyOfWeek(_selectedWeek);
+      _dirty = true;
+    });
+  }
+
+  Future<void> _removeWeek() async {
+    final confirmed = await _confirmDialog(
+      title: context.l10n.scheduleRemoveWeekTitle(_selectedWeek),
+      message: context.l10n.scheduleRemoveWeekBody,
+      confirmLabel: context.l10n.commonRemove,
+    );
+    if (confirmed != true || !mounted) return;
+    setState(() {
+      _days!.removeWeek(_selectedWeek);
+      if (_selectedWeek > _days!.weekCount) _selectedWeek = _days!.weekCount;
+      _dirty = true;
+    });
+  }
 
   void _markDirty() => setState(() => _dirty = true);
 
@@ -142,7 +176,7 @@ class _DietPlanTemplateScheduleScreenState extends ConsumerState<DietPlanTemplat
         return slotIndex >= day.slots.length ? null : day.slots[slotIndex];
       });
       setState(() {
-        if (outcome.dayIndex != null) _selectedDay = _days![outcome.dayIndex!].dayOfWeek;
+        if (outcome.dayIndex != null) _select(_days![outcome.dayIndex!]);
       });
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -211,6 +245,10 @@ class _DietPlanTemplateScheduleScreenState extends ConsumerState<DietPlanTemplat
     final colors = context.colors;
     final typography = context.typography;
     final templateState = ref.watch(dietPlanTemplateScheduleControllerProvider(widget.templateId));
+    // Come nella redazione del piano: il menu delle settimane
+    // nell'intestazione ha bisogno dei giorni fin dal primo fotogramma in
+    // cui il template è disponibile, e l'intestazione precede il corpo.
+    templateState.whenData(_initializeFrom);
 
     return PopScope(
       canPop: !_dirty,
@@ -267,6 +305,20 @@ class _DietPlanTemplateScheduleScreenState extends ConsumerState<DietPlanTemplat
                 ),
               ),
             ),
+            // PA-2bis: fino a quattro settimane, e mai meno di una.
+            if (_days != null && (_days!.canAddWeek || _days!.canRemoveWeek))
+              PopupMenuButton<String>(
+                onSelected: (value) {
+                  if (value == 'add-week') _addWeek();
+                  if (value == 'remove-week') _removeWeek();
+                },
+                itemBuilder: (context) => [
+                  if (_days!.canAddWeek)
+                    PopupMenuItem(value: 'add-week', child: Text(context.l10n.scheduleAddWeek)),
+                  if (_days!.canRemoveWeek)
+                    PopupMenuItem(value: 'remove-week', child: Text(context.l10n.scheduleRemoveWeek)),
+                ],
+              ),
           ],
         ),
         body: SafeArea(
@@ -288,10 +340,13 @@ class _DietPlanTemplateScheduleScreenState extends ConsumerState<DietPlanTemplat
                   children: [
                     SizedBox(
                       width: AppSpacing.widthDayNavigationSidebar,
-                      child: DaySidebar(
+                      child: ScheduleNavigation(
                         days: _days!,
-                        selected: _selectedDay,
-                        onSelect: (d) => setState(() => _selectedDay = d),
+                        selectedWeek: _selectedWeek,
+                        selectedDay: _selectedDay,
+                        onSelectWeek: (week) => setState(() => _selectedWeek = week),
+                        onSelectDay: (d) => setState(() => _selectedDay = d),
+                        sidebar: true,
                       ),
                     ),
                     const VerticalDivider(width: 1),
@@ -302,7 +357,14 @@ class _DietPlanTemplateScheduleScreenState extends ConsumerState<DietPlanTemplat
 
               return Column(
                 children: [
-                  DaySelector(days: _days!, selected: _selectedDay, onSelect: (d) => setState(() => _selectedDay = d)),
+                  ScheduleNavigation(
+                    days: _days!,
+                    selectedWeek: _selectedWeek,
+                    selectedDay: _selectedDay,
+                    onSelectWeek: (week) => setState(() => _selectedWeek = week),
+                    onSelectDay: (d) => setState(() => _selectedDay = d),
+                    sidebar: false,
+                  ),
                   const Divider(height: 1),
                   Expanded(child: _buildDayEditor(day)),
                 ],

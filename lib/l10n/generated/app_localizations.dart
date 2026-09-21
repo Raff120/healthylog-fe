@@ -2857,6 +2857,12 @@ abstract class L10n {
   /// **'Seguo un piano'**
   String get roleUserTitle;
 
+  /// No description provided for @scheduleAddWeek.
+  ///
+  /// In it, this message translates to:
+  /// **'Aggiungi settimana'**
+  String get scheduleAddWeek;
+
   /// No description provided for @scheduleConfirmPlan.
   ///
   /// In it, this message translates to:
@@ -2869,10 +2875,28 @@ abstract class L10n {
   /// **'Schema incompleto'**
   String get scheduleIncompleteTitle;
 
+  /// No description provided for @scheduleRemoveWeek.
+  ///
+  /// In it, this message translates to:
+  /// **'Rimuovi settimana'**
+  String get scheduleRemoveWeek;
+
+  /// No description provided for @scheduleRemoveWeekBody.
+  ///
+  /// In it, this message translates to:
+  /// **'I suoi sette giorni e i loro pasti saranno tolti dallo schema, e le settimane successive scaleranno di un posto. Diventa effettivo al salvataggio.'**
+  String get scheduleRemoveWeekBody;
+
+  /// PA-2bis, 7.3 interfaccia: conferma della rimozione della settimana in redazione.
+  ///
+  /// In it, this message translates to:
+  /// **'Rimuovere la settimana {week}?'**
+  String scheduleRemoveWeekTitle(int week);
+
   /// No description provided for @scheduleRetroactivityNotice.
   ///
   /// In it, this message translates to:
-  /// **'Le modifiche decorrono da oggi e valgono per tutte le settimane: le giornate già trascorse restano invariate. Per cambiare una sola giornata, usa «Modifica questa giornata» dalla vista del giorno.'**
+  /// **'Le modifiche decorrono da oggi e valgono per le settimane a venire: le giornate già trascorse restano invariate. Per cambiare una sola giornata, usa «Modifica questa giornata» dalla vista del giorno.'**
   String get scheduleRetroactivityNotice;
 
   /// No description provided for @scheduleSave.
@@ -2910,6 +2934,18 @@ abstract class L10n {
   /// In it, this message translates to:
   /// **'Redazione dello schema'**
   String get scheduleTitle;
+
+  /// PA-2: una settimana del ciclo dello schema.
+  ///
+  /// In it, this message translates to:
+  /// **'Settimana {week}'**
+  String scheduleWeek(int week);
+
+  /// PA-2: un giorno dello schema con la sua settimana, quando ve n'è più d'una.
+  ///
+  /// In it, this message translates to:
+  /// **'Settimana {week} · {day}'**
+  String scheduleWeekDay(int week, String day);
 
   /// No description provided for @settingsDeleteAccount.
   ///

@@ -1612,14 +1612,29 @@ class L10nEn extends L10n {
   String get roleUserTitle => 'I follow a plan';
 
   @override
+  String get scheduleAddWeek => 'Add week';
+
+  @override
   String get scheduleConfirmPlan => 'Confirm plan';
 
   @override
   String get scheduleIncompleteTitle => 'Incomplete schedule';
 
   @override
+  String get scheduleRemoveWeek => 'Remove week';
+
+  @override
+  String get scheduleRemoveWeekBody =>
+      'Its seven days and their meals will be removed from the schedule, and the following weeks will move up one place. It takes effect when you save.';
+
+  @override
+  String scheduleRemoveWeekTitle(int week) {
+    return 'Remove week $week?';
+  }
+
+  @override
   String get scheduleRetroactivityNotice =>
-      'Changes take effect today and apply to every week: days already past remain unchanged. To change a single day, use “Edit this day” from the day view.';
+      'Changes take effect today and apply to the weeks ahead: days already past remain unchanged. To change a single day, use “Edit this day” from the day view.';
 
   @override
   String get scheduleSave => 'Save changes';
@@ -1646,6 +1661,16 @@ class L10nEn extends L10n {
 
   @override
   String get scheduleTitle => 'Weekly schedule';
+
+  @override
+  String scheduleWeek(int week) {
+    return 'Week $week';
+  }
+
+  @override
+  String scheduleWeekDay(int week, String day) {
+    return 'Week $week · $day';
+  }
 
   @override
   String get settingsDeleteAccount => 'Delete account';

@@ -100,12 +100,16 @@ class UpdateDietPlanSlotRequest {
 }
 
 class UpdateDietPlanWeekDayRequest {
-  const UpdateDietPlanWeekDayRequest({required this.dayOfWeek, required this.slots});
+  const UpdateDietPlanWeekDayRequest({this.week = 1, required this.dayOfWeek, required this.slots});
 
+  /// Settimana del ciclo (OG-1bis). Sempre inviata: omessa, il server
+  /// intenderebbe la prima, e le altre settimane andrebbero perdute.
+  final int week;
   final Weekday dayOfWeek;
   final List<UpdateDietPlanSlotRequest> slots;
 
   Map<String, dynamic> toJson() => {
+        'week': week,
         'dayOfWeek': dayOfWeek.toJson(),
         'slots': slots.map((e) => e.toJson()).toList(),
       };

@@ -1626,14 +1626,29 @@ class L10nIt extends L10n {
   String get roleUserTitle => 'Seguo un piano';
 
   @override
+  String get scheduleAddWeek => 'Aggiungi settimana';
+
+  @override
   String get scheduleConfirmPlan => 'Conferma piano';
 
   @override
   String get scheduleIncompleteTitle => 'Schema incompleto';
 
   @override
+  String get scheduleRemoveWeek => 'Rimuovi settimana';
+
+  @override
+  String get scheduleRemoveWeekBody =>
+      'I suoi sette giorni e i loro pasti saranno tolti dallo schema, e le settimane successive scaleranno di un posto. Diventa effettivo al salvataggio.';
+
+  @override
+  String scheduleRemoveWeekTitle(int week) {
+    return 'Rimuovere la settimana $week?';
+  }
+
+  @override
   String get scheduleRetroactivityNotice =>
-      'Le modifiche decorrono da oggi e valgono per tutte le settimane: le giornate già trascorse restano invariate. Per cambiare una sola giornata, usa «Modifica questa giornata» dalla vista del giorno.';
+      'Le modifiche decorrono da oggi e valgono per le settimane a venire: le giornate già trascorse restano invariate. Per cambiare una sola giornata, usa «Modifica questa giornata» dalla vista del giorno.';
 
   @override
   String get scheduleSave => 'Salva modifiche';
@@ -1660,6 +1675,16 @@ class L10nIt extends L10n {
 
   @override
   String get scheduleTitle => 'Redazione dello schema';
+
+  @override
+  String scheduleWeek(int week) {
+    return 'Settimana $week';
+  }
+
+  @override
+  String scheduleWeekDay(int week, String day) {
+    return 'Settimana $week · $day';
+  }
 
   @override
   String get settingsDeleteAccount => 'Elimina account';

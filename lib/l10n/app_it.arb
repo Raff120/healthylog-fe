@@ -975,9 +975,21 @@
   "roleUser": "Utente",
   "roleUserDescription": "Consulti la tua dieta, segni i pasti e registri gli allenamenti",
   "roleUserTitle": "Seguo un piano",
+  "scheduleAddWeek": "Aggiungi settimana",
   "scheduleConfirmPlan": "Conferma piano",
   "scheduleIncompleteTitle": "Schema incompleto",
-  "scheduleRetroactivityNotice": "Le modifiche decorrono da oggi e valgono per tutte le settimane: le giornate già trascorse restano invariate. Per cambiare una sola giornata, usa «Modifica questa giornata» dalla vista del giorno.",
+  "scheduleRemoveWeek": "Rimuovi settimana",
+  "scheduleRemoveWeekBody": "I suoi sette giorni e i loro pasti saranno tolti dallo schema, e le settimane successive scaleranno di un posto. Diventa effettivo al salvataggio.",
+  "scheduleRemoveWeekTitle": "Rimuovere la settimana {week}?",
+  "@scheduleRemoveWeekTitle": {
+    "description": "PA-2bis, 7.3 interfaccia: conferma della rimozione della settimana in redazione.",
+    "placeholders": {
+      "week": {
+        "type": "int"
+      }
+    }
+  },
+  "scheduleRetroactivityNotice": "Le modifiche decorrono da oggi e valgono per le settimane a venire: le giornate già trascorse restano invariate. Per cambiare una sola giornata, usa «Modifica questa giornata» dalla vista del giorno.",
   "scheduleSave": "Salva modifiche",
   "scheduleSaveAsTemplate": "Salva come template",
   "scheduleSaved": "Piano salvato.",
@@ -992,6 +1004,27 @@
   },
   "scheduleTemplateCreated": "Template creato.",
   "scheduleTitle": "Redazione dello schema",
+  "scheduleWeek": "Settimana {week}",
+  "@scheduleWeek": {
+    "description": "PA-2: una settimana del ciclo dello schema.",
+    "placeholders": {
+      "week": {
+        "type": "int"
+      }
+    }
+  },
+  "scheduleWeekDay": "Settimana {week} · {day}",
+  "@scheduleWeekDay": {
+    "description": "PA-2: un giorno dello schema con la sua settimana, quando ve n'è più d'una.",
+    "placeholders": {
+      "week": {
+        "type": "int"
+      },
+      "day": {
+        "type": "String"
+      }
+    }
+  },
   "settingsDeleteAccount": "Elimina account",
   "settingsDevices": "Dispositivi collegati",
   "settingsLanguage": "Lingua",
