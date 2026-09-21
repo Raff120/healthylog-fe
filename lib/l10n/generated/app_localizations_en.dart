@@ -1287,6 +1287,9 @@ class L10nEn extends L10n {
   String get personalNoteLabel => 'Your note';
 
   @override
+  String get personalPlanNotesAction => 'Your notes on the plan';
+
+  @override
   String get personalPlanNotesTitle => 'Your notes';
 
   @override

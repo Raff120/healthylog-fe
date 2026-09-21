@@ -24,7 +24,7 @@ import 'plan_status_presentation.dart';
 import 'slot_type_presentation.dart';
 import 'widgets/day_preview.dart';
 import 'widgets/delete_plan_dialog.dart';
-import 'widgets/personal_text_dialog.dart';
+import 'widgets/personal_plan_note_dialog.dart';
 
 /// Dettaglio di un piano Concluso (7.5 interfaccia.md, ST-7): sola
 /// lettura, nella composizione prescritta — intestazione, periodi di
@@ -173,25 +173,6 @@ class _PersonalPlanNote extends ConsumerWidget {
 
   final String planId;
 
-  Future<void> _edit(BuildContext context, WidgetRef ref, String? current) async {
-    final note = await showPersonalTextDialog(
-      context,
-      title: context.l10n.personalPlanNotesTitle,
-      label: context.l10n.personalNoteLabel,
-      initialText: current ?? '',
-      maxLength: 2000,
-      multiline: true,
-    );
-    if (note == null || !context.mounted) return;
-    await ref.read(personalPlanNoteControllerProvider.notifier).save(planId, note.isEmpty ? null : note);
-    if (!context.mounted) return;
-    ref.read(personalPlanNoteControllerProvider)?.whenOrNull(
-          error: (error, _) => ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(describeApiError(context, error.asApiException?.code ?? ''))),
-          ),
-        );
-  }
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final colors = context.colors;
@@ -202,14 +183,14 @@ class _PersonalPlanNote extends ConsumerWidget {
       return Align(
         alignment: Alignment.centerLeft,
         child: TextButton.icon(
-          onPressed: () => _edit(context, ref, null),
+          onPressed: () => editPersonalPlanNote(context, ref, planId),
           icon: Icon(Icons.edit_note, size: 18, color: colors.accent),
           label: Text(context.l10n.personalNoteAdd, style: typography.label.copyWith(color: colors.accent)),
         ),
       );
     }
     return InkWell(
-      onTap: () => _edit(context, ref, note),
+      onTap: () => editPersonalPlanNote(context, ref, planId),
       borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: AppSpacing.xxs),

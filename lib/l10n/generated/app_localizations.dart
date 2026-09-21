@@ -2281,6 +2281,12 @@ abstract class L10n {
   /// **'La tua nota'**
   String get personalNoteLabel;
 
+  /// No description provided for @personalPlanNotesAction.
+  ///
+  /// In it, this message translates to:
+  /// **'Le tue note sul piano'**
+  String get personalPlanNotesAction;
+
   /// No description provided for @personalPlanNotesTitle.
   ///
   /// In it, this message translates to:

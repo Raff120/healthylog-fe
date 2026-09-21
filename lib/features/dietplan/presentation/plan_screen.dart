@@ -28,6 +28,7 @@ import 'widgets/day_pager.dart';
 import 'widgets/group_day_grid_view.dart';
 import 'widgets/meal_card.dart';
 import 'widgets/member_selector.dart';
+import 'widgets/personal_plan_note_dialog.dart';
 import 'widgets/personal_text_dialog.dart';
 import 'widgets/plan_status_banner.dart';
 import 'widgets/segmented_view_control.dart';
@@ -574,6 +575,7 @@ class _DayMenu extends ConsumerWidget {
       tooltip: context.l10n.planMoreActions,
       onSelected: (value) {
         if (value == 'name-day') _nameDay(context, ref, day);
+        if (value == 'plan-notes') editPersonalPlanNote(context, ref, day.planId!);
         if (value == 'edit-day') context.push('/plan-days/${isoDate(selectedDate)}/edit');
         if (value == 'swap-day') {
           // Come per lo slot (4.1), la destinazione si sceglie nella
@@ -588,6 +590,9 @@ class _DayMenu extends ConsumerWidget {
             value: 'name-day',
             child: Text(day.dayName == null ? context.l10n.personalDayNameAdd : context.l10n.personalDayNameEdit),
           ),
+        // NP-1, 6.2: la nota del piano, raggiungibile da dove si passa ogni
+        // giorno, e non solo dal dettaglio del piano.
+        if (canName) PopupMenuItem(value: 'plan-notes', child: Text(context.l10n.personalPlanNotesAction)),
         if (canEdit) PopupMenuItem(value: 'edit-day', child: Text(context.l10n.planEditThisDay)),
         if (canSwap) PopupMenuItem(value: 'swap-day', child: Text(context.l10n.daySwapAction)),
       ],

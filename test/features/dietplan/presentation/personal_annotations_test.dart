@@ -223,6 +223,8 @@ void main() {
           workoutApiProvider.overrideWithValue(stubWorkoutApi()),
           hydrationApiProvider.overrideWithValue(stubHydrationApi()),
           planDayApiProvider.overrideWithValue(PlanDayApi(_dio(adapter))),
+          dietPlanApiProvider.overrideWithValue(
+              DietPlanApi(_dio(_Adapter((_) => {'note': 'Chiedere del pane integrale'})))),
           cookingGroupApiProvider.overrideWithValue(CookingGroupApi(_dio(notFound))),
           appDatabaseProvider.overrideWithValue(AppDatabase(NativeDatabase.memory())),
         ],
@@ -260,6 +262,17 @@ void main() {
 
       expect(adapter.puts.single.path, '/plan-days/${isoDate(dateOnly(DateTime.now()))}/name');
       expect(adapter.puts.single.data, {'name': 'Giorno leggero'});
+    });
+
+    testWidgets('il menu conduce anche alla nota del piano (NP-1)', (tester) async {
+      await pumpPlanScreen(tester);
+
+      await tester.tap(find.byTooltip('Altre azioni'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Le tue note sul piano'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Chiedere del pane integrale'), findsOneWidget);
     });
 
     testWidgets('col nome dato, il menu lo rinomina', (tester) async {
