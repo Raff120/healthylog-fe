@@ -119,6 +119,19 @@
   "dayPreviewNoSlots": "Nessuno slot",
   "daySwapAction": "Scambia la giornata",
   "daySwapChooseDestination": "Scegli con quale giornata scambiarla",
+  "daySwapConfirmBody": "Tutti i pasti di {first} e di {second} si scambieranno di posto.",
+  "@daySwapConfirmBody": {
+    "description": "6.5, 4.5 interfaccia.md: conferma dello scambio di giornate intere (IN-28).",
+    "placeholders": {
+      "first": {
+        "type": "String"
+      },
+      "second": {
+        "type": "String"
+      }
+    }
+  },
+  "daySwapConfirmTitle": "Scambiare le giornate?",
   "deleteAccountConfirm": "Richiedi l'eliminazione",
   "deleteAccountConfirmTitle": "Eliminare l'account?",
   "deleteAccountGracePeriod": "La richiesta apre un periodo di ripensamento di sette giorni: durante il periodo l'account è disattivato e nessun terzo vi accede, ma i dati restano. Accedendo di nuovo la richiesta si annulla.",
@@ -406,6 +419,31 @@
   "mealStatusVerbConsumed": "Consumato",
   "mealStatusVerbRestored": "Ripristinato",
   "mealStatusVerbSkipped": "Saltato",
+  "mealSwapConfirmBody": "{first} e {second} si scambieranno di posto.",
+  "@mealSwapConfirmBody": {
+    "description": "6.5, 4.5 interfaccia.md: conferma dell'inversione di due slot.",
+    "placeholders": {
+      "first": {
+        "type": "String"
+      },
+      "second": {
+        "type": "String"
+      }
+    }
+  },
+  "mealSwapConfirmSlot": "{slot} di {day}",
+  "@mealSwapConfirmSlot": {
+    "description": "Lo slot nella conferma dell'inversione: tipo e giornata.",
+    "placeholders": {
+      "slot": {
+        "type": "String"
+      },
+      "day": {
+        "type": "String"
+      }
+    }
+  },
+  "mealSwapConfirmTitle": "Scambiare i pasti?",
   "mealSwappedNotification": "Due pasti del tuo piano sono stati invertiti{when}.",
   "@mealSwappedNotification": {
     "placeholders": {
@@ -1250,6 +1288,10 @@
   "statisticsWholePlan": "Intero piano",
   "statisticsWorkouts": "Allenamenti",
   "swapChooseDestination": "Scegli dove spostarlo",
+  "swapConfirmAction": "Scambia",
+  "@swapConfirmAction": {
+    "description": "Etichetta di conferma dell'inversione (4.5: dice cosa accade)."
+  },
   "targetWeightHelp": "Comparirà nel grafico del peso come linea di riferimento.",
   "targetWeightNone": "Nessun peso obiettivo",
   "targetWeightRemove": "Rimuovi peso obiettivo",

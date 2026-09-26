@@ -12,8 +12,11 @@ import 'package:healthylog/core/storage/app_database.dart';
 import 'package:healthylog/features/care/providers/care_providers.dart';
 import 'package:healthylog/features/dietplan/data/meal_swap_api.dart';
 import 'package:healthylog/features/dietplan/data/plan_day_api.dart';
+import 'package:healthylog/features/dietplan/data/slot_status.dart';
+import 'package:healthylog/features/dietplan/data/slot_type.dart';
 import 'package:healthylog/features/dietplan/domain/plan_day_date.dart';
 import 'package:healthylog/features/dietplan/presentation/plan_screen.dart';
+import 'package:healthylog/l10n/formats.dart';
 import 'package:healthylog/features/dietplan/providers/meal_swap_providers.dart';
 import 'package:healthylog/features/dietplan/providers/plan_day_providers.dart';
 import 'package:healthylog/features/group/data/cooking_group_api.dart';
@@ -168,6 +171,8 @@ void main() {
 
     await tester.tap(find.text('Pasto di venerdì'), warnIfMissed: false);
     await tester.pumpAndSettle();
+    await tester.tap(find.widgetWithText(TextButton, 'Scambia'));
+    await tester.pumpAndSettle();
 
     expect(adapter.posts, hasLength(1));
     expect(adapter.posts.single.path, '/diet-plans/plan-1/day-swaps');
@@ -226,5 +231,139 @@ void main() {
 
     expect(find.text('Scegli con quale giornata scambiarla'), findsOneWidget);
     expect(find.text('Pasto di ${_labels[dateOnly(DateTime.now()).weekday - 1]}'), findsOneWidget);
+  });
+
+  /// 6.5: avviata dalla giornaliera, la selezione vi riporta al termine,
+  /// sulla giornata di partenza anche se nel frattempo si è navigato.
+  group('ritorno alla giornaliera', () {
+    final tuesday = nextWeekStart.add(const Duration(days: 1));
+
+    Future<ProviderContainer> startFromDailyView(WidgetTester tester, _Adapter adapter) async {
+      await pump(tester, adapter);
+      final container = ProviderScope.containerOf(tester.element(find.byType(PlanScreen)));
+      container.read(selectedDayProvider.notifier).select(tuesday);
+      await tester.pumpAndSettle();
+      await tester.tap(find.byTooltip('Altre azioni'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Scambia la giornata'));
+      await tester.pumpAndSettle();
+      expect(container.read(selectedPlanViewProvider), PlanViewMode.week);
+      return container;
+    }
+
+    testWidgets('compiuto lo scambio, torna alla giornata di partenza', (tester) async {
+      final adapter = _Adapter(nextWeekStart);
+      final container = await startFromDailyView(tester, adapter);
+      container.read(selectedDayProvider.notifier).select(nextWeekStart.add(const Duration(days: 4)));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Pasto di venerdì'), warnIfMissed: false);
+      await tester.pumpAndSettle();
+      await tester.tap(find.widgetWithText(TextButton, 'Scambia'));
+      await tester.pumpAndSettle();
+
+      expect(adapter.posts, hasLength(1));
+      expect(container.read(selectedPlanViewProvider), PlanViewMode.day);
+      expect(container.read(selectedDayProvider), tuesday);
+      expect(find.text('Pasto di martedì'), findsOneWidget);
+    });
+
+    testWidgets('Annulla riporta alla giornata di partenza', (tester) async {
+      final adapter = _Adapter(nextWeekStart);
+      final container = await startFromDailyView(tester, adapter);
+
+      await tester.tap(find.text('Annulla'));
+      await tester.pumpAndSettle();
+
+      expect(adapter.posts, isEmpty);
+      expect(container.read(selectedPlanViewProvider), PlanViewMode.day);
+      expect(container.read(selectedDayProvider), tuesday);
+    });
+
+    testWidgets('avviata dalla settimanale, vi resta', (tester) async {
+      final adapter = _Adapter(nextWeekStart);
+      await pump(tester, adapter);
+      await openNextWeek(tester);
+      final container = ProviderScope.containerOf(tester.element(find.byType(PlanScreen)));
+
+      await tester.longPress(find.text('Martedì'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Pasto di venerdì'), warnIfMissed: false);
+      await tester.pumpAndSettle();
+      await tester.tap(find.widgetWithText(TextButton, 'Scambia'));
+      await tester.pumpAndSettle();
+
+      expect(adapter.posts, hasLength(1));
+      expect(container.read(selectedPlanViewProvider), PlanViewMode.week);
+    });
+  });
+
+  /// 6.5, 4.5: lo scambio si compie previa conferma semplice, che nomina
+  /// ciò che si scambia; rinunciare lascia attiva la selezione.
+  group('conferma dello scambio', () {
+    final tuesday = nextWeekStart.add(const Duration(days: 1));
+    final friday = nextWeekStart.add(const Duration(days: 4));
+
+    testWidgets('delle giornate: nomina le due giornate, e Annulla non scambia', (tester) async {
+      final adapter = _Adapter(nextWeekStart);
+      await pump(tester, adapter);
+      await openNextWeek(tester);
+
+      await tester.longPress(find.text('Martedì'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Pasto di venerdì'), warnIfMissed: false);
+      await tester.pumpAndSettle();
+
+      expect(find.text('Scambiare le giornate?'), findsOneWidget);
+      final context = tester.element(find.byType(PlanScreen));
+      expect(
+        find.text('Tutti i pasti di ${formatWeekdayDayAndMonth(context, tuesday)} '
+            'e di ${formatWeekdayDayAndMonth(context, friday)} si scambieranno di posto.'),
+        findsOneWidget,
+      );
+
+      await tester.tap(find.widgetWithText(TextButton, 'Annulla').last);
+      await tester.pumpAndSettle();
+
+      expect(adapter.posts, isEmpty);
+      expect(find.text('Scegli con quale giornata scambiarla'), findsOneWidget);
+    });
+
+    testWidgets('degli slot: nomina i due pasti, e conferma lo scambio', (tester) async {
+      final adapter = _Adapter(nextWeekStart);
+      await pump(tester, adapter);
+      await openNextWeek(tester);
+      ProviderScope.containerOf(tester.element(find.byType(PlanScreen))).read(mealSwapSelectionProvider.notifier).start(
+            MealSwapOrigin(
+              planId: 'plan-1',
+              date: tuesday,
+              slotId: 's1',
+              type: SlotType.lunch,
+              status: SlotStatus.toConsume,
+            ),
+          );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Pasto di venerdì'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Scambiare i pasti?'), findsOneWidget);
+      final context = tester.element(find.byType(PlanScreen));
+      expect(
+        find.text('Pranzo di ${formatWeekdayDayAndMonth(context, tuesday)} '
+            'e Pranzo di ${formatWeekdayDayAndMonth(context, friday)} si scambieranno di posto.'),
+        findsOneWidget,
+      );
+      expect(adapter.posts, isEmpty);
+
+      await tester.tap(find.widgetWithText(TextButton, 'Scambia'));
+      await tester.pumpAndSettle();
+
+      expect(adapter.posts, hasLength(1));
+      expect(adapter.posts.single.data, {
+        'first': {'date': isoDate(tuesday), 'slotId': 's1'},
+        'second': {'date': isoDate(friday), 'slotId': 's4'},
+      });
+    });
   });
 }

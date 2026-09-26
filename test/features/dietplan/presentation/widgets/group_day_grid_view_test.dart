@@ -306,6 +306,8 @@ void main() {
         expect(container.read(selectedGroupMemberProvider), 'user-2');
         expect(container.read(selectedPlanViewProvider), PlanViewMode.week);
         expect(container.read(sideBySideModeProvider), isFalse);
+        // 6.5: al termine si torna alla giornaliera, di nuovo affiancata.
+        expect(container.read(swapReturnPointProvider)?.sideBySide, isTrue);
       },
     );
 

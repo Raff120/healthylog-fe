@@ -349,15 +349,19 @@ class _MealCardState extends ConsumerState<MealCard> {
   /// 6.5, 4.1 interfaccia.md: l'inversione si avvia anche dalla card
   /// espansa della vista giornaliera, ma la scelta della destinazione
   /// resta compito della vista settimanale, il solo contesto in cui
-  /// origine e destinazione sono visibili insieme (VS-8).
+  /// origine e destinazione sono visibili insieme (VS-8). Al termine si
+  /// torna alla giornata di partenza.
   void _startMove(BuildContext context) {
-    ref.read(mealSwapSelectionProvider.notifier).start(MealSwapOrigin(
-          planId: widget.planId!,
-          date: dateOnly(widget.date),
-          slotId: widget.slot.slotId,
-          type: widget.slot.type,
-          status: widget.slot.status,
-        ));
+    ref.read(mealSwapSelectionProvider.notifier).start(
+          MealSwapOrigin(
+            planId: widget.planId!,
+            date: dateOnly(widget.date),
+            slotId: widget.slot.slotId,
+            type: widget.slot.type,
+            status: widget.slot.status,
+          ),
+          returnTo: SwapReturn(date: widget.date),
+        );
     ref.read(selectedPlanViewProvider.notifier).select(PlanViewMode.week);
   }
 

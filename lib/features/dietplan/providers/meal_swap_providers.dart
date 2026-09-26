@@ -85,6 +85,39 @@ String? mealSwapRejectionReason(MealSwapOrigin origin, PlanDay day, PlanDaySlot 
   );
 }
 
+/// Dove riportare chi ha avviato l'inversione dalla vista giornaliera
+/// (6.5 interfaccia.md): la giornata di partenza e, se vi si trovava, la
+/// modalità affiancata (VG-12), che l'avvio disattiva per condurre alla
+/// settimanale.
+class SwapReturn {
+  const SwapReturn({required this.date, this.sideBySide = false});
+
+  final DateTime date;
+  final bool sideBySide;
+}
+
+/// Il punto di ritorno della selezione in corso, `null` se avviata dalla
+/// settimanale. Registrato all'avvio della selezione, ripristinato al suo
+/// termine — scambio compiuto, rifiutato o abbandonato (6.5). Conservato
+/// anche senza osservatori: nessuna schermata lo presenta, e altrimenti
+/// Riverpod lo scarterebbe fra l'avvio e il termine.
+@Riverpod(keepAlive: true)
+class SwapReturnPoint extends _$SwapReturnPoint {
+  @override
+  SwapReturn? build() => null;
+
+  void _record(SwapReturn? point) => state = point;
+
+  void _restore() {
+    final point = state;
+    if (point == null) return;
+    state = null;
+    ref.read(selectedDayProvider.notifier).select(point.date);
+    if (point.sideBySide) ref.read(sideBySideModeProvider.notifier).enable();
+    ref.read(selectedPlanViewProvider.notifier).select(PlanViewMode.day);
+  }
+}
+
 /// Se non `null`, la vista settimanale è in modalità di selezione (6.5
 /// interfaccia.md).
 @riverpod
@@ -92,11 +125,24 @@ class MealSwapSelection extends _$MealSwapSelection {
   @override
   MealSwapOrigin? build() => null;
 
-  void start(MealSwapOrigin origin) {
-    ref.read(daySwapSelectionProvider.notifier).cancel();
+  /// [returnTo] se l'avvio viene dalla vista giornaliera: al termine della
+  /// selezione vi si torna (6.5).
+  void start(MealSwapOrigin origin, {SwapReturn? returnTo}) {
+    ref.read(daySwapSelectionProvider.notifier)._discard();
+    ref.read(swapReturnPointProvider.notifier)._record(returnTo);
     state = origin;
   }
-  void cancel() => state = null;
+
+  /// Termine della selezione, per qualunque via (6.5): riporta alla
+  /// giornaliera se di lì era partita.
+  void cancel() {
+    state = null;
+    ref.read(swapReturnPointProvider.notifier)._restore();
+  }
+
+  /// L'avvio della selezione delle giornate prende il posto di questa:
+  /// non è un termine, e non riporta ad alcuna vista.
+  void _discard() => state = null;
 }
 
 /// Esecuzione dello scambio (AP-11). Nessuno stato da esporre oltre
@@ -191,12 +237,19 @@ class DaySwapSelection extends _$DaySwapSelection {
   @override
   DaySwapOrigin? build() => null;
 
-  void start(DaySwapOrigin origin) {
-    ref.read(mealSwapSelectionProvider.notifier).cancel();
+  /// [returnTo] come per gli slot ([MealSwapSelection.start]).
+  void start(DaySwapOrigin origin, {SwapReturn? returnTo}) {
+    ref.read(mealSwapSelectionProvider.notifier)._discard();
+    ref.read(swapReturnPointProvider.notifier)._record(returnTo);
     state = origin;
   }
 
-  void cancel() => state = null;
+  void cancel() {
+    state = null;
+    ref.read(swapReturnPointProvider.notifier)._restore();
+  }
+
+  void _discard() => state = null;
 }
 
 /// Esecuzione dell'inversione di giornate (IN-28), sul modello di

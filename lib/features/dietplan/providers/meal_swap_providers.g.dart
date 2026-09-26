@@ -50,6 +50,80 @@ final class MealSwapApiProvider
 
 String _$mealSwapApiHash() => r'5c9cb93d79ab543772aed27b97319b9318d9890f';
 
+/// Il punto di ritorno della selezione in corso, `null` se avviata dalla
+/// settimanale. Registrato all'avvio della selezione, ripristinato al suo
+/// termine — scambio compiuto, rifiutato o abbandonato (6.5). Conservato
+/// anche senza osservatori: nessuna schermata lo presenta, e altrimenti
+/// Riverpod lo scarterebbe fra l'avvio e il termine.
+
+@ProviderFor(SwapReturnPoint)
+final swapReturnPointProvider = SwapReturnPointProvider._();
+
+/// Il punto di ritorno della selezione in corso, `null` se avviata dalla
+/// settimanale. Registrato all'avvio della selezione, ripristinato al suo
+/// termine — scambio compiuto, rifiutato o abbandonato (6.5). Conservato
+/// anche senza osservatori: nessuna schermata lo presenta, e altrimenti
+/// Riverpod lo scarterebbe fra l'avvio e il termine.
+final class SwapReturnPointProvider
+    extends $NotifierProvider<SwapReturnPoint, SwapReturn?> {
+  /// Il punto di ritorno della selezione in corso, `null` se avviata dalla
+  /// settimanale. Registrato all'avvio della selezione, ripristinato al suo
+  /// termine — scambio compiuto, rifiutato o abbandonato (6.5). Conservato
+  /// anche senza osservatori: nessuna schermata lo presenta, e altrimenti
+  /// Riverpod lo scarterebbe fra l'avvio e il termine.
+  SwapReturnPointProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'swapReturnPointProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$swapReturnPointHash();
+
+  @$internal
+  @override
+  SwapReturnPoint create() => SwapReturnPoint();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(SwapReturn? value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<SwapReturn?>(value),
+    );
+  }
+}
+
+String _$swapReturnPointHash() => r'2c480d944cfa81c061538bbd5d413ca71cb321aa';
+
+/// Il punto di ritorno della selezione in corso, `null` se avviata dalla
+/// settimanale. Registrato all'avvio della selezione, ripristinato al suo
+/// termine — scambio compiuto, rifiutato o abbandonato (6.5). Conservato
+/// anche senza osservatori: nessuna schermata lo presenta, e altrimenti
+/// Riverpod lo scarterebbe fra l'avvio e il termine.
+
+abstract class _$SwapReturnPoint extends $Notifier<SwapReturn?> {
+  SwapReturn? build();
+  @$mustCallSuper
+  @override
+  WhenComplete runBuild() {
+    final ref = this.ref as $Ref<SwapReturn?, SwapReturn?>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<SwapReturn?, SwapReturn?>,
+              SwapReturn?,
+              Object?,
+              Object?
+            >;
+    return element.handleCreate(ref, build);
+  }
+}
+
 /// Se non `null`, la vista settimanale è in modalità di selezione (6.5
 /// interfaccia.md).
 
@@ -89,7 +163,7 @@ final class MealSwapSelectionProvider
   }
 }
 
-String _$mealSwapSelectionHash() => r'4f834d4398f3aaed9eb658b1a68ba104afa504f2';
+String _$mealSwapSelectionHash() => r'f4d2619993fa3a6d810bfbb11bd1c17b8bf5d5e7';
 
 /// Se non `null`, la vista settimanale è in modalità di selezione (6.5
 /// interfaccia.md).
@@ -225,7 +299,7 @@ final class DaySwapSelectionProvider
   }
 }
 
-String _$daySwapSelectionHash() => r'98c71a10991055b9d6d979fd6504e155aa6a6766';
+String _$daySwapSelectionHash() => r'52839bdad9d9742bac7a27ba69114932124aac09';
 
 /// Se non `null`, la vista settimanale è in modalità di selezione delle
 /// giornate (6.5 interfaccia.md, IN-28). Esclusiva con quella degli slot:
