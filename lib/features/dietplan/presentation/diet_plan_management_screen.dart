@@ -180,9 +180,15 @@ class DietPlanManagementScreen extends ConsumerWidget {
     // UT-8, F22: il collegamento vigente decide le facoltà sul piano.
     final careLink = ref.watch(currentCareLinkOrNullProvider);
     final canCreate = canCreateOwnPlan(careLink);
+    // 7.1: la voce Template attende che il collegamento sia noto (l'assenza
+    // di collegamento si presenta come errore): finché è in caricamento
+    // `canCreate` vale anche per il Paziente, a cui la voce non comparirebbe
+    // che per un istante, e partirebbe la richiesta del conteggio.
+    final careLinkState = ref.watch(currentCareLinkProvider);
+    final showTemplates = canCreate && (careLinkState.hasValue || careLinkState.hasError);
     // PL-8: i template non sono conservati localmente. Senza risposta
     // (caricamento, assenza di connessione) la voce resta, senza conteggio.
-    final templateCount = canCreate ? ref.watch(dietPlanTemplateListProvider).value?.length : null;
+    final templateCount = showTemplates ? ref.watch(dietPlanTemplateListProvider).value?.length : null;
 
     return Scaffold(
       backgroundColor: colors.background,
@@ -248,8 +254,10 @@ class DietPlanManagementScreen extends ConsumerWidget {
                         ),
                       ),
                       // 7.1: chi ha template ma nessun piano deve poterli ritrovare.
-                      const SizedBox(height: AppSpacing.xl),
-                      _TemplatesTile(count: templateCount, onTap: () => _openTemplates(context)),
+                      if (showTemplates) ...[
+                        const SizedBox(height: AppSpacing.xl),
+                        _TemplatesTile(count: templateCount, onTap: () => _openTemplates(context)),
+                      ],
                     ],
                   ),
                 ),
@@ -297,7 +305,7 @@ class DietPlanManagementScreen extends ConsumerWidget {
                               : '/diet-plans/${plan.id}/schedule'),
                     ),
                   ),
-                if (canCreate) ...[
+                if (showTemplates) ...[
                   const SizedBox(height: AppSpacing.md),
                   _TemplatesTile(count: templateCount, onTap: () => _openTemplates(context)),
                 ],
