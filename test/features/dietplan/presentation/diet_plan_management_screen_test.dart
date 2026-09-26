@@ -11,10 +11,12 @@ import 'package:go_router/go_router.dart';
 import 'package:healthylog/app/theme/app_theme.dart';
 import 'package:healthylog/core/api/api_error_interceptor.dart';
 import 'package:healthylog/features/dietplan/data/diet_plan_api.dart';
+import 'package:healthylog/features/dietplan/data/diet_plan_template_api.dart';
 import 'package:healthylog/features/dietplan/presentation/diet_plan_management_screen.dart';
 import 'package:healthylog/features/care/data/care_api.dart';
 import 'package:healthylog/features/care/providers/care_providers.dart';
 import 'package:healthylog/features/dietplan/providers/diet_plan_providers.dart';
+import 'package:healthylog/features/dietplan/providers/diet_plan_template_providers.dart';
 import 'package:healthylog/features/notification/providers/notification_providers.dart';
 
 import '../../../support/care_api_stub.dart';
@@ -87,7 +89,12 @@ Map<String, dynamic> _planJson({
 /// lettura dell'elenco.
 bool _isListRequest(RequestOptions options) => options.method == 'GET' && options.path == '/diet-plans';
 
-Future<void> _pumpManagementScreen(WidgetTester tester, DietPlanApi api, {CareApi? careApi}) async {
+Future<void> _pumpManagementScreen(
+  WidgetTester tester,
+  DietPlanApi api, {
+  CareApi? careApi,
+  DietPlanTemplateApi? templateApi,
+}) async {
   final router = GoRouter(
     initialLocation: '/profile/plans',
     routes: [
@@ -101,6 +108,7 @@ Future<void> _pumpManagementScreen(WidgetTester tester, DietPlanApi api, {CareAp
         path: '/diet-plans/:id',
         builder: (context, state) => Scaffold(body: Text('Vista ${state.pathParameters['id']}')),
       ),
+      GoRoute(path: '/diet-plan-templates', builder: (context, state) => const Scaffold(body: Text('Elenco template'))),
     ],
   );
 
@@ -110,6 +118,7 @@ Future<void> _pumpManagementScreen(WidgetTester tester, DietPlanApi api, {CareAp
         dietPlanApiProvider.overrideWithValue(api),
         // F22: nessun collegamento (Utente autonomo), salvo indicazione contraria.
         careApiProvider.overrideWithValue(careApi ?? stubCareApi()),
+        if (templateApi != null) dietPlanTemplateApiProvider.overrideWithValue(templateApi),
         // NT-8, F28: l'indicatore delle notifiche è presente nell'intestazione
         // di ogni destinazione principale (3.1).
         notificationApiProvider.overrideWithValue(stubNotificationApi()),
@@ -528,5 +537,105 @@ void main() {
 
     expect(find.text('Ripreso'), findsOneWidget);
     expect(find.textContaining('3 periodi'), findsOneWidget);
+  });
+
+  group('voce Template (7.1, UT-7)', () {
+    Map<String, dynamic> templateJson(String id) => {
+          'id': id,
+          'name': 'Template $id',
+          'description': null,
+          'updatedAt': '2026-09-01T00:00:00Z',
+        };
+
+    bool isTemplateListRequest(RequestOptions options) =>
+        options.method == 'GET' && options.path == '/diet-plan-templates';
+
+    /// Un solo client per piani e template: le due richieste di elenco si
+    /// distinguono per percorso.
+    Dio dioWith({required List<Map<String, dynamic>> plans, Object? templates}) {
+      final dio = Dio(BaseOptions(baseUrl: 'http://example.test'));
+      dio.httpClientAdapter = _JsonAdapter((options) {
+        if (isTemplateListRequest(options)) return templates;
+        if (_isListRequest(options)) return plans;
+        return plans.isEmpty ? null : plans.first;
+      });
+      dio.interceptors.add(ApiErrorInterceptor());
+      return dio;
+    }
+
+    testWidgets('compare in coda ai piani con il conteggio e apre l\'elenco dei template', (tester) async {
+      final dio = dioWith(
+        plans: [_planJson(status: 'ACTIVE')],
+        templates: [templateJson('t1'), templateJson('t2')],
+      );
+
+      await _pumpManagementScreen(tester, DietPlanApi(dio), templateApi: DietPlanTemplateApi(dio));
+
+      expect(find.text('Template'), findsOneWidget);
+      expect(find.text('2 template'), findsOneWidget);
+      await tester.tap(find.text('Template'));
+      await tester.pumpAndSettle();
+      expect(find.text('Elenco template'), findsOneWidget);
+    });
+
+    testWidgets('compare anche senza template, per crearne uno da zero (TP-4)', (tester) async {
+      final dio = dioWith(plans: [_planJson(status: 'ACTIVE')], templates: const <dynamic>[]);
+
+      await _pumpManagementScreen(tester, DietPlanApi(dio), templateApi: DietPlanTemplateApi(dio));
+
+      expect(find.text('Template'), findsOneWidget);
+      expect(find.text('Nessun template'), findsOneWidget);
+    });
+
+    testWidgets('compare sotto lo stato vuoto, per chi ha template ma nessun piano', (tester) async {
+      final dio = dioWith(plans: const [], templates: [templateJson('t1')]);
+
+      await _pumpManagementScreen(tester, DietPlanApi(dio), templateApi: DietPlanTemplateApi(dio));
+
+      expect(find.text('Inizia da qui'), findsOneWidget);
+      expect(find.text('1 template'), findsOneWidget);
+      await tester.tap(find.text('Template'));
+      await tester.pumpAndSettle();
+      expect(find.text('Elenco template'), findsOneWidget);
+    });
+
+    testWidgets('senza risposta sui template resta, priva di conteggio (PL-8)', (tester) async {
+      final dio = dioWith(
+        plans: [_planJson(status: 'ACTIVE')],
+        templates: const _ErrorResponse(500, {'code': 'INTERNAL_ERROR'}),
+      );
+
+      await _pumpManagementScreen(tester, DietPlanApi(dio), templateApi: DietPlanTemplateApi(dio));
+
+      expect(find.text('Template'), findsOneWidget);
+      expect(find.textContaining('template'), findsNothing);
+    });
+
+    testWidgets('è assente al Paziente, che non gestisce template (2.5 funzionale)', (tester) async {
+      final requests = <String>[];
+      final dio = dioWith(plans: [_planJson(status: 'ACTIVE')], templates: const <dynamic>[]);
+      dio.interceptors.insert(0, InterceptorsWrapper(onRequest: (options, handler) {
+        requests.add(options.path);
+        handler.next(options);
+      }));
+      final careApi = stubCareApi(currentLink: {
+        'id': 'link-1',
+        'nutritionistId': 'nutri-1',
+        'nutritionistFirstName': 'Anna',
+        'nutritionistLastName': 'Verdi',
+        'patientId': 'user-1',
+        'patientFirstName': 'Mario',
+        'patientLastName': 'Rossi',
+        'status': 'ACTIVE',
+        'createdAt': '2026-09-01T00:00:00Z',
+        'revokedAt': null,
+      });
+
+      await _pumpManagementScreen(tester, DietPlanApi(dio), careApi: careApi, templateApi: DietPlanTemplateApi(dio));
+
+      expect(find.text('Template'), findsNothing);
+      // Nemmeno la richiesta del conteggio parte.
+      expect(requests, isNot(contains('/diet-plan-templates')));
+    });
   });
 }
