@@ -1818,6 +1818,46 @@ class L10nEn extends L10n {
       'How much this meal counts towards adherence. At zero it is not counted.';
 
   @override
+  String get slotCopyAction => 'Copy to…';
+
+  @override
+  String get slotCopyConfirm => 'Copy';
+
+  @override
+  String slotCopyDone(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Content copied to $count slots',
+      one: 'Content copied to 1 slot',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get slotCopyReplaceAction => 'Replace';
+
+  @override
+  String slotCopyReplaceBody(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          '$count of the chosen slots already have content: it will be replaced.',
+      one: 'One of the chosen slots already has content: it will be replaced.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get slotCopyReplaceTitle => 'Replace the content?';
+
+  @override
+  String slotCopySheetTitle(String slot) {
+    return 'Copy “$slot” to…';
+  }
+
+  @override
   String get slotDescriptiveLabel => 'Descriptive label';
 
   @override

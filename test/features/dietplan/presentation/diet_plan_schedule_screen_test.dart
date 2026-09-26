@@ -642,4 +642,120 @@ void main() {
       semantics.dispose();
     });
   });
+
+  group('copia del contenuto di uno slot (CD-8bis, 7.3 interfaccia.md)', () {
+    List<Map<String, dynamic>> mondaySlots() => [
+          {
+            ..._slotJson('BREAKFAST', 0, recipeName: 'Porridge', recipeText: "Cuocere l'avena"),
+            'note': 'Senza zucchero',
+            'adherenceWeight': 0.8,
+          },
+          _slotJson('LUNCH', 1),
+        ];
+
+    Future<void> openCopySheet(WidgetTester tester) async {
+      await tester.tap(find.text('Colazione'));
+      await tester.pumpAndSettle();
+      await tester.ensureVisible(find.text('Copia in…'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Copia in…'));
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('sostituisce il contenuto degli slot scelti, anche in un altro giorno, e attende il salvataggio',
+        (tester) async {
+      Map<String, dynamic>? sent;
+      final dio = Dio(BaseOptions(baseUrl: 'http://example.test'));
+      dio.httpClientAdapter = _JsonAdapter((options) {
+        if (options.method == 'PUT') {
+          sent = options.data as Map<String, dynamic>;
+        }
+        return _planJson(mondaySlots: mondaySlots(), content: 'Yogurt');
+      });
+      dio.interceptors.add(ApiErrorInterceptor());
+
+      await _pumpScheduleScreen(tester, DietPlanApi(dio));
+      await openCopySheet(tester);
+
+      expect(find.text('Copia «Colazione» in…'), findsOneWidget);
+      // L'origine non è fra le destinazioni: la prima colazione offerta è
+      // quella del martedì.
+      expect(find.text('Lunedì'), findsWidgets);
+      await tester.tap(find.widgetWithText(CheckboxListTile, 'Pranzo').first);
+      await tester.tap(find.widgetWithText(CheckboxListTile, 'Colazione').first);
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Copia'));
+      await tester.pumpAndSettle();
+
+      // La colazione del martedì aveva già un elemento: conferma semplice.
+      expect(find.text('Sostituire il contenuto?'), findsOneWidget);
+      expect(find.text('Uno degli slot scelti ha già un contenuto: sarà sostituito.'), findsOneWidget);
+      await tester.tap(find.text('Sostituisci'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Contenuto copiato in 2 slot'), findsOneWidget);
+      expect(find.text('Modifiche non salvate'), findsOneWidget);
+
+      await tester.tap(find.text('Salva'));
+      await tester.pumpAndSettle();
+
+      final days = (sent!['days'] as List).cast<Map<String, dynamic>>();
+      List<Map<String, dynamic>> slotsOf(String day) =>
+          (days.firstWhere((d) => d['dayOfWeek'] == day)['slots'] as List).cast<Map<String, dynamic>>();
+
+      final mondayLunch = slotsOf('MONDAY').firstWhere((slot) => slot['type'] == 'LUNCH');
+      expect(mondayLunch['slotId'], 'LUNCH-1');
+      expect(mondayLunch['note'], 'Senza zucchero');
+      expect(mondayLunch['adherenceWeight'], 0.8);
+      final copied = (mondayLunch['items'] as List).cast<Map<String, dynamic>>().single;
+      expect(copied['itemId'], isNull);
+      expect(copied['kind'], 'RECIPE');
+      expect(copied['name'], 'Porridge');
+      expect(copied['recipeText'], "Cuocere l'avena");
+
+      final tuesdayBreakfast = slotsOf('TUESDAY').firstWhere((slot) => slot['type'] == 'BREAKFAST');
+      expect(tuesdayBreakfast['slotId'], 'BREAKFAST-0-1-TUESDAY');
+      expect((tuesdayBreakfast['items'] as List).single['name'], 'Porridge');
+
+      // Gli altri slot non sono toccati.
+      final wednesdayBreakfast = slotsOf('WEDNESDAY').firstWhere((slot) => slot['type'] == 'BREAKFAST');
+      expect((wednesdayBreakfast['items'] as List).single['name'], 'Yogurt');
+    });
+
+    testWidgets('annullare la conferma lascia la destinazione com\'era, senza modifiche pendenti', (tester) async {
+      final dio = Dio(BaseOptions(baseUrl: 'http://example.test'));
+      dio.httpClientAdapter = _JsonAdapter((_) => _planJson(mondaySlots: mondaySlots(), content: 'Yogurt'));
+      dio.interceptors.add(ApiErrorInterceptor());
+
+      await _pumpScheduleScreen(tester, DietPlanApi(dio));
+      await openCopySheet(tester);
+      await tester.tap(find.widgetWithText(CheckboxListTile, 'Colazione').first);
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Copia'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Annulla'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Modifiche non salvate'), findsNothing);
+    });
+
+    testWidgets('senza destinazioni l\'azione non compare', (tester) async {
+      final dio = Dio(BaseOptions(baseUrl: 'http://example.test'));
+      dio.httpClientAdapter = _JsonAdapter((_) {
+        final plan = _planJson(mondaySlots: [_slotJson('BREAKFAST', 0, content: 'Yogurt')]);
+        for (final day in (plan['weeklySchedule'] as List).cast<Map<String, dynamic>>()) {
+          if (day['dayOfWeek'] != 'MONDAY') day['slots'] = <Map<String, dynamic>>[];
+        }
+        return plan;
+      });
+      dio.interceptors.add(ApiErrorInterceptor());
+
+      await _pumpScheduleScreen(tester, DietPlanApi(dio));
+      await tester.tap(find.text('Colazione'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Rimuovi'), findsOneWidget);
+      expect(find.text('Copia in…'), findsNothing);
+    });
+  });
 }

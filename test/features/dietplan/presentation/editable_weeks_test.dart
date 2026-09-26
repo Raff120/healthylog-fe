@@ -89,4 +89,22 @@ void main() {
       expect(EditableDay(dayOfWeek: Weekday.monday, slots: []).toRequest().toJson()['week'], 1);
     });
   });
+
+  /// CD-8bis: le destinazioni della copia sono ogni altro slot di ogni
+  /// giorno, nell'ordine dello schema anche quando la redazione tiene i
+  /// giorni altrimenti.
+  test('le destinazioni della copia escludono la sola origine e seguono settimana e giorno', () {
+    final days = [...week(2, slotId: 's2'), ...week(1, slotId: 's1')];
+    final monday = days.firstWhere((day) => day.week == 1 && day.dayOfWeek == Weekday.monday);
+    final source = monday.slots.single;
+
+    final targets = days.copyTargetsFor(source);
+
+    expect(targets, hasLength(13));
+    expect(targets.first.$1.week, 1);
+    expect(targets.first.$1.dayOfWeek, Weekday.tuesday);
+    expect(targets.last.$1.week, 2);
+    expect(targets.last.$1.dayOfWeek, Weekday.sunday);
+    expect(targets.expand((target) => target.$2).contains(source), isFalse);
+  });
 }

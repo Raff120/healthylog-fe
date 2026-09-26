@@ -96,4 +96,85 @@ void main() {
       expect(items.first.recipeText, isNull);
     });
   });
+
+  /// CD-8bis: la copia del contenuto di uno slot in un altro, verificata
+  /// sul solo modello di redazione.
+  group('EditableSlot.replaceContentWith', () {
+    EditableSlot source({SlotType type = SlotType.snack, String label = 'Metà mattina'}) => EditableSlot(
+          slotId: 'source',
+          type: type,
+          label: label,
+          note: 'Senza zucchero',
+          adherenceWeight: 0.3,
+          items: [
+            EditableItem(
+              itemId: 'item-1',
+              name: 'Yogurt greco',
+              quantity: 150,
+              unitCode: 'GRAM',
+              alternatives: [EditableAlternative(name: 'Kefir', quantity: 200, unitCode: 'MILLILITER')],
+            ),
+            EditableItem(itemId: 'item-2', kindCode: 'RECIPE', name: 'Porridge', recipeText: "Cuocere l'avena"),
+          ],
+        );
+
+    test('sostituisce elementi, alternative, ricette, nota e peso, senza identificativi degli elementi', () {
+      final target = EditableSlot(
+        slotId: 'target',
+        type: SlotType.snack,
+        label: 'Merenda',
+        note: 'Vecchia nota',
+        adherenceWeight: 0.5,
+        items: [EditableItem(itemId: 'old', name: 'Mela')],
+      );
+
+      target.replaceContentWith(source());
+
+      final request = target.toRequest();
+      expect(request.slotId, 'target');
+      expect(request.type, SlotType.snack);
+      expect(request.label, 'Metà mattina');
+      expect(request.note, 'Senza zucchero');
+      expect(request.adherenceWeight, 0.3);
+      expect(request.items.map((item) => item.name), ['Yogurt greco', 'Porridge']);
+      expect(request.items.every((item) => item.itemId == null), isTrue);
+      expect(request.items.first.quantity, 150);
+      expect(request.items.first.unitCode, 'GRAM');
+      expect(request.items.first.alternatives.single.name, 'Kefir');
+      expect(request.items.last.recipeText, "Cuocere l'avena");
+    });
+
+    test('copia anche quanto non è ancora salvato, e la copia resta indipendente', () {
+      final origin = source();
+      origin.items.first.nameController.text = 'Yogurt bianco';
+      final target = EditableSlot(type: SlotType.lunch, adherenceWeight: 1);
+
+      target.replaceContentWith(origin);
+      origin.items.first.nameController.text = 'Skyr';
+      origin.noteController.text = 'Altra nota';
+
+      expect(target.items.first.nameController.text, 'Yogurt bianco');
+      expect(target.noteController.text, 'Senza zucchero');
+    });
+
+    test("l'etichetta si copia solo fra spuntini (GG-10)", () {
+      final snack = EditableSlot(type: SlotType.snack, label: 'Merenda', adherenceWeight: 0.5);
+      snack.replaceContentWith(source(type: SlotType.breakfast, label: ''));
+      expect(snack.labelController.text, 'Merenda');
+
+      final lunch = EditableSlot(type: SlotType.lunch, adherenceWeight: 1);
+      lunch.replaceContentWith(source());
+      expect(lunch.toRequest().label, isNull);
+      expect(lunch.type, SlotType.lunch);
+    });
+
+    test('nella modifica della singola giornata il peso non si copia (MD-8)', () {
+      final target = EditableSlot(type: SlotType.snack, adherenceWeight: 0.5);
+
+      target.replaceContentWith(source(), includeAdherenceWeight: false);
+
+      expect(target.adherenceWeight, 0.5);
+      expect(target.items, hasLength(2));
+    });
+  });
 }

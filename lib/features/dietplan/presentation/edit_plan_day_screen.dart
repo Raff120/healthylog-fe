@@ -21,6 +21,7 @@ import '../providers/plan_day_providers.dart';
 import 'editable_slot.dart';
 import 'slot_type_presentation.dart';
 import 'widgets/slot_card.dart';
+import 'widgets/slot_copy_sheet.dart';
 
 
 /// Modifica della singola occorrenza giornaliera (5.3 funzionale, MD-8,
@@ -87,6 +88,23 @@ class _EditPlanDayScreenState extends ConsumerState<EditPlanDayScreen> {
       _dirty = true;
     });
     slot.dispose();
+  }
+
+  /// CD-8bis, MD-8: le destinazioni della copia sono gli altri slot della
+  /// sola giornata non ancora consumati (MD-3).
+  List<EditableSlot> _copyTargetsFor(EditableSlot source) =>
+      _slots!.where((slot) => !identical(slot, source) && !_isConsumed(slot)).toList();
+
+  /// CD-8bis, MD-8: la copia nella singola giornata non tocca il peso, che
+  /// qui non si redige.
+  Future<void> _copySlot(EditableSlot slot) async {
+    final copied = await copySlotContent(
+      context,
+      source: slot,
+      groups: [SlotCopyGroup(slots: _copyTargetsFor(slot))],
+      includeAdherenceWeight: false,
+    );
+    if (copied && mounted) _markDirty();
   }
 
   void _reorder(int oldIndex, int newIndex) {
@@ -295,6 +313,7 @@ class _EditPlanDayScreenState extends ConsumerState<EditPlanDayScreen> {
                           index: index,
                           onChanged: _markDirty,
                           onRemove: () => _removeSlot(slot),
+                          onCopy: _copyTargetsFor(slot).isEmpty ? null : () => _copySlot(slot),
                           showAdherenceWeight: false,
                         );
                       },

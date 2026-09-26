@@ -3205,6 +3205,48 @@ abstract class L10n {
   /// **'Quanto questo pasto incide sull\'aderenza. A zero non viene conteggiato.'**
   String get slotAdherenceWeightHelp;
 
+  /// No description provided for @slotCopyAction.
+  ///
+  /// In it, this message translates to:
+  /// **'Copia in…'**
+  String get slotCopyAction;
+
+  /// No description provided for @slotCopyConfirm.
+  ///
+  /// In it, this message translates to:
+  /// **'Copia'**
+  String get slotCopyConfirm;
+
+  /// CD-8bis: esito della copia del contenuto di uno slot.
+  ///
+  /// In it, this message translates to:
+  /// **'{count, plural, =1{Contenuto copiato in 1 slot} other{Contenuto copiato in {count} slot}}'**
+  String slotCopyDone(int count);
+
+  /// No description provided for @slotCopyReplaceAction.
+  ///
+  /// In it, this message translates to:
+  /// **'Sostituisci'**
+  String get slotCopyReplaceAction;
+
+  /// CD-8bis, 4.5 interfaccia: conferma semplice della sostituzione.
+  ///
+  /// In it, this message translates to:
+  /// **'{count, plural, =1{Uno degli slot scelti ha già un contenuto: sarà sostituito.} other{{count} degli slot scelti hanno già un contenuto: sarà sostituito.}}'**
+  String slotCopyReplaceBody(int count);
+
+  /// No description provided for @slotCopyReplaceTitle.
+  ///
+  /// In it, this message translates to:
+  /// **'Sostituire il contenuto?'**
+  String get slotCopyReplaceTitle;
+
+  /// CD-8bis: titolo del foglio che sceglie gli slot di destinazione.
+  ///
+  /// In it, this message translates to:
+  /// **'Copia «{slot}» in…'**
+  String slotCopySheetTitle(String slot);
+
   /// No description provided for @slotDescriptiveLabel.
   ///
   /// In it, this message translates to:
