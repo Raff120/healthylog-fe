@@ -227,4 +227,65 @@ void main() {
     expect(find.text('Scegli con quale giornata scambiarla'), findsOneWidget);
     expect(find.text('Pasto di ${_labels[dateOnly(DateTime.now()).weekday - 1]}'), findsOneWidget);
   });
+
+  /// 6.5: avviata dalla giornaliera, la selezione vi riporta al termine,
+  /// sulla giornata di partenza anche se nel frattempo si è navigato.
+  group('ritorno alla giornaliera', () {
+    final tuesday = nextWeekStart.add(const Duration(days: 1));
+
+    Future<ProviderContainer> startFromDailyView(WidgetTester tester, _Adapter adapter) async {
+      await pump(tester, adapter);
+      final container = ProviderScope.containerOf(tester.element(find.byType(PlanScreen)));
+      container.read(selectedDayProvider.notifier).select(tuesday);
+      await tester.pumpAndSettle();
+      await tester.tap(find.byTooltip('Altre azioni'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Scambia la giornata'));
+      await tester.pumpAndSettle();
+      expect(container.read(selectedPlanViewProvider), PlanViewMode.week);
+      return container;
+    }
+
+    testWidgets('compiuto lo scambio, torna alla giornata di partenza', (tester) async {
+      final adapter = _Adapter(nextWeekStart);
+      final container = await startFromDailyView(tester, adapter);
+      container.read(selectedDayProvider.notifier).select(nextWeekStart.add(const Duration(days: 4)));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Pasto di venerdì'), warnIfMissed: false);
+      await tester.pumpAndSettle();
+
+      expect(adapter.posts, hasLength(1));
+      expect(container.read(selectedPlanViewProvider), PlanViewMode.day);
+      expect(container.read(selectedDayProvider), tuesday);
+      expect(find.text('Pasto di martedì'), findsOneWidget);
+    });
+
+    testWidgets('Annulla riporta alla giornata di partenza', (tester) async {
+      final adapter = _Adapter(nextWeekStart);
+      final container = await startFromDailyView(tester, adapter);
+
+      await tester.tap(find.text('Annulla'));
+      await tester.pumpAndSettle();
+
+      expect(adapter.posts, isEmpty);
+      expect(container.read(selectedPlanViewProvider), PlanViewMode.day);
+      expect(container.read(selectedDayProvider), tuesday);
+    });
+
+    testWidgets('avviata dalla settimanale, vi resta', (tester) async {
+      final adapter = _Adapter(nextWeekStart);
+      await pump(tester, adapter);
+      await openNextWeek(tester);
+      final container = ProviderScope.containerOf(tester.element(find.byType(PlanScreen)));
+
+      await tester.longPress(find.text('Martedì'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Pasto di venerdì'), warnIfMissed: false);
+      await tester.pumpAndSettle();
+
+      expect(adapter.posts, hasLength(1));
+      expect(container.read(selectedPlanViewProvider), PlanViewMode.week);
+    });
+  });
 }
