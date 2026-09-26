@@ -101,6 +101,7 @@ Future<void> _pumpManagementScreen(WidgetTester tester, DietPlanApi api, {CareAp
         path: '/diet-plans/:id',
         builder: (context, state) => Scaffold(body: Text('Vista ${state.pathParameters['id']}')),
       ),
+      GoRoute(path: '/diet-plan-templates', builder: (context, state) => const Scaffold(body: Text('Elenco template'))),
     ],
   );
 
@@ -528,5 +529,61 @@ void main() {
 
     expect(find.text('Ripreso'), findsOneWidget);
     expect(find.textContaining('3 periodi'), findsOneWidget);
+  });
+
+  group('pulsante Template nell\'intestazione (7.1, UT-7)', () {
+    Finder templatesButton() => find.descendant(of: find.byType(AppBar), matching: find.text('Template'));
+
+    testWidgets('compare a destra dell\'intestazione e apre l\'elenco dei template', (tester) async {
+      final dio = Dio(BaseOptions(baseUrl: 'http://example.test'));
+      dio.httpClientAdapter = _JsonAdapter((options) {
+        if (_isListRequest(options)) return [_planJson(status: 'ACTIVE')];
+        return _planJson(status: 'ACTIVE');
+      });
+      dio.interceptors.add(ApiErrorInterceptor());
+
+      await _pumpManagementScreen(tester, DietPlanApi(dio));
+
+      expect(templatesButton(), findsOneWidget);
+      await tester.tap(templatesButton());
+      await tester.pumpAndSettle();
+      expect(find.text('Elenco template'), findsOneWidget);
+    });
+
+    testWidgets('compare anche nello stato vuoto, per chi ha template ma nessun piano', (tester) async {
+      final dio = Dio(BaseOptions(baseUrl: 'http://example.test'));
+      dio.httpClientAdapter = _JsonAdapter((_) => const <dynamic>[]);
+      dio.interceptors.add(ApiErrorInterceptor());
+
+      await _pumpManagementScreen(tester, DietPlanApi(dio));
+
+      expect(find.text('Inizia da qui'), findsOneWidget);
+      expect(templatesButton(), findsOneWidget);
+    });
+
+    testWidgets('è assente al Paziente, che non gestisce template (2.5 funzionale)', (tester) async {
+      final dio = Dio(BaseOptions(baseUrl: 'http://example.test'));
+      dio.httpClientAdapter = _JsonAdapter((options) {
+        if (_isListRequest(options)) return [_planJson(status: 'ACTIVE')];
+        return _planJson(status: 'ACTIVE');
+      });
+      dio.interceptors.add(ApiErrorInterceptor());
+      final careApi = stubCareApi(currentLink: {
+        'id': 'link-1',
+        'nutritionistId': 'nutri-1',
+        'nutritionistFirstName': 'Anna',
+        'nutritionistLastName': 'Verdi',
+        'patientId': 'user-1',
+        'patientFirstName': 'Mario',
+        'patientLastName': 'Rossi',
+        'status': 'ACTIVE',
+        'createdAt': '2026-09-01T00:00:00Z',
+        'revokedAt': null,
+      });
+
+      await _pumpManagementScreen(tester, DietPlanApi(dio), careApi: careApi);
+
+      expect(templatesButton(), findsNothing);
+    });
   });
 }
