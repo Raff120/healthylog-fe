@@ -7,6 +7,7 @@ import '../../../../core/api/api_error_messages.dart';
 import '../../../../l10n/l10n_context.dart';
 import '../../data/plan_day.dart';
 import 'slot_items_view.dart';
+import 'swap_confirmations.dart';
 import '../../data/slot_status.dart';
 import '../../data/slot_type.dart';
 import '../../providers/meal_swap_providers.dart';
@@ -121,6 +122,25 @@ class _WeekSlotRowState extends ConsumerState<WeekSlotRow> {
     );
   }
 
+  /// 6.5, 4.5: lo scambio si compie previa conferma; rinunciando la
+  /// selezione resta attiva.
+  Future<void> _confirmAndSwap(BuildContext context, MealSwapOrigin origin) async {
+    final confirmed = await confirmMealSwap(
+      context,
+      firstDate: origin.date,
+      firstType: origin.type,
+      secondDate: widget.day.date,
+      secondType: widget.slot.type,
+    );
+    if (!confirmed || !mounted) return;
+    ref.read(mealSwapControllerProvider.notifier).swap(
+          origin,
+          widget.day.date,
+          widget.slot.slotId,
+          userId: ref.read(selectedGroupMemberProvider),
+        );
+  }
+
   void _onTap(BuildContext context, bool readOnly, MealSwapOrigin? origin, MealSwapHighlight? highlight) {
     if (origin == null) {
       // VS-4: fuori dalla selezione, il tocco apre il contenuto integrale.
@@ -152,12 +172,7 @@ class _WeekSlotRowState extends ConsumerState<WeekSlotRow> {
         // tocco sulla stessa origine non ha altra azione sensata.
         ref.read(mealSwapSelectionProvider.notifier).cancel();
       case MealSwapHighlight.compatible:
-        ref.read(mealSwapControllerProvider.notifier).swap(
-              origin,
-              widget.day.date,
-              widget.slot.slotId,
-              userId: ref.read(selectedGroupMemberProvider),
-            );
+        _confirmAndSwap(context, origin);
       case MealSwapHighlight.incompatible:
         if (_incompatibleTapped) {
           // Sempre non nullo qui: `highlight` è già incompatibile.

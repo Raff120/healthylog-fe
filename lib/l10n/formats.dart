@@ -32,6 +32,11 @@ String formatDateAndTime(BuildContext context, DateTime value) {
 String formatDayAndMonth(BuildContext context, DateTime date) =>
     DateFormat.MMMd(_locale(context)).format(date);
 
+/// Giorno della settimana, giorno e mese per esteso, per nominare una
+/// giornata in una frase (4.5: la conferma dell'inversione).
+String formatWeekdayDayAndMonth(BuildContext context, DateTime date) =>
+    DateFormat.MMMMEEEEd(_locale(context)).format(date);
+
 /// Giorno e mese in forma compatta, per le etichette degli assi (AD-14).
 String formatDayAndMonthShort(BuildContext context, DateTime date) =>
     DateFormat.Md(_locale(context)).format(date);

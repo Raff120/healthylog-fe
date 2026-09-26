@@ -553,6 +553,18 @@ abstract class L10n {
   /// **'Scegli con quale giornata scambiarla'**
   String get daySwapChooseDestination;
 
+  /// 6.5, 4.5 interfaccia.md: conferma dello scambio di giornate intere (IN-28).
+  ///
+  /// In it, this message translates to:
+  /// **'Tutti i pasti di {first} e di {second} si scambieranno di posto.'**
+  String daySwapConfirmBody(String first, String second);
+
+  /// No description provided for @daySwapConfirmTitle.
+  ///
+  /// In it, this message translates to:
+  /// **'Scambiare le giornate?'**
+  String get daySwapConfirmTitle;
+
   /// No description provided for @deleteAccountConfirm.
   ///
   /// In it, this message translates to:
@@ -1560,6 +1572,24 @@ abstract class L10n {
   /// In it, this message translates to:
   /// **'Saltato'**
   String get mealStatusVerbSkipped;
+
+  /// 6.5, 4.5 interfaccia.md: conferma dell'inversione di due slot.
+  ///
+  /// In it, this message translates to:
+  /// **'{first} e {second} si scambieranno di posto.'**
+  String mealSwapConfirmBody(String first, String second);
+
+  /// Lo slot nella conferma dell'inversione: tipo e giornata.
+  ///
+  /// In it, this message translates to:
+  /// **'{slot} di {day}'**
+  String mealSwapConfirmSlot(String slot, String day);
+
+  /// No description provided for @mealSwapConfirmTitle.
+  ///
+  /// In it, this message translates to:
+  /// **'Scambiare i pasti?'**
+  String get mealSwapConfirmTitle;
 
   /// No description provided for @mealSwappedNotification.
   ///
@@ -3420,6 +3450,12 @@ abstract class L10n {
   /// In it, this message translates to:
   /// **'Scegli dove spostarlo'**
   String get swapChooseDestination;
+
+  /// Etichetta di conferma dell'inversione (4.5: dice cosa accade).
+  ///
+  /// In it, this message translates to:
+  /// **'Scambia'**
+  String get swapConfirmAction;
 
   /// No description provided for @targetWeightHelp.
   ///
