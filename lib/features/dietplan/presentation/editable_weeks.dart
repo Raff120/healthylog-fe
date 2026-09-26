@@ -20,6 +20,20 @@ extension EditableWeeks on List<EditableDay> {
 
   bool weekHasIncompleteSlot(int week) => any((day) => day.week == week && day.hasIncompleteSlot);
 
+  /// CD-8bis: i giorni che offrono destinazioni alla copia del contenuto di
+  /// [source], nell'ordine dello schema — settimana, poi giorno —, ciascuno
+  /// con i propri slot tranne l'origine. I giorni senza destinazioni non vi
+  /// compaiono.
+  List<(EditableDay, List<EditableSlot>)> copyTargetsFor(EditableSlot source) {
+    final ordered = [...this]..sort((a, b) =>
+        a.week != b.week ? a.week.compareTo(b.week) : a.dayOfWeek.index.compareTo(b.dayOfWeek.index));
+    return [
+      for (final day in ordered)
+        if (day.slots.any((slot) => !identical(slot, source)))
+          (day, day.slots.where((slot) => !identical(slot, source)).toList()),
+    ];
+  }
+
   /// 7.3 interfaccia: la settimana aggiunta è una copia di [week], accodata
   /// in fondo. Restituisce il numero della nuova.
   int appendCopyOfWeek(int week) {

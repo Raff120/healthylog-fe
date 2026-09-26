@@ -19,6 +19,7 @@ import 'editable_weeks.dart';
 import 'slot_type_presentation.dart';
 import 'widgets/schedule_navigation.dart';
 import 'widgets/slot_card.dart';
+import 'widgets/slot_copy_sheet.dart';
 
 
 /// Redazione dello schema del template (7.4 interfaccia.md, "medesima
@@ -117,6 +118,17 @@ class _DietPlanTemplateScheduleScreenState extends ConsumerState<DietPlanTemplat
     slot.dispose();
   }
 
+  /// CD-8bis: copia il contenuto di [slot] in altri slot dello schema,
+  /// di qualsiasi giorno e settimana.
+  Future<void> _copySlot(EditableSlot slot) async {
+    final copied = await copySlotContent(
+      context,
+      source: slot,
+      groups: scheduleCopyGroups(context, _days!, slot),
+    );
+    if (copied && mounted) _markDirty();
+  }
+
   void _reorder(int oldIndex, int newIndex) {
     setState(() {
       final slot = _currentDay.slots.removeAt(oldIndex);
@@ -212,6 +224,7 @@ class _DietPlanTemplateScheduleScreenState extends ConsumerState<DietPlanTemplat
                 index: index,
                 onChanged: _markDirty,
                 onRemove: () => _removeSlot(slot),
+                onCopy: _days!.copyTargetsFor(slot).isEmpty ? null : () => _copySlot(slot),
               );
             },
           ),
