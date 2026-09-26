@@ -14,6 +14,7 @@ import '../../domain/plan_day_date.dart';
 import '../../providers/meal_swap_providers.dart';
 import '../../providers/plan_day_providers.dart';
 import '../weekday_presentation.dart';
+import 'swap_confirmations.dart';
 import 'week_slot_row.dart';
 import '../../../../app/navigation/bottom_bar_insets.dart';
 
@@ -165,16 +166,24 @@ class _DayCardState extends ConsumerState<_DayCard> {
   /// 6.5: la ragione del rifiuto si dà a chi insiste, non al primo tocco.
   bool _incompatibleTapped = false;
 
+  /// 6.5, 4.5: come per gli slot, lo scambio si compie previa conferma e
+  /// la rinuncia lascia attiva la selezione.
+  Future<void> _confirmAndSwap(DaySwapOrigin origin) async {
+    final confirmed = await confirmDaySwap(context, firstDate: origin.date, secondDate: widget.day.date);
+    if (!confirmed || !mounted) return;
+    ref.read(daySwapControllerProvider.notifier).swap(
+          origin,
+          widget.day.date,
+          userId: ref.read(selectedGroupMemberProvider),
+        );
+  }
+
   void _onSelectionTap(DaySwapOrigin origin, MealSwapHighlight highlight) {
     switch (highlight) {
       case MealSwapHighlight.origin:
         ref.read(daySwapSelectionProvider.notifier).cancel();
       case MealSwapHighlight.compatible:
-        ref.read(daySwapControllerProvider.notifier).swap(
-              origin,
-              widget.day.date,
-              userId: ref.read(selectedGroupMemberProvider),
-            );
+        _confirmAndSwap(origin);
       case MealSwapHighlight.incompatible:
         if (_incompatibleTapped) {
           final reason = daySwapRejectionReason(origin, widget.day)!;

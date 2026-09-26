@@ -84,6 +84,10 @@ class SideBySideMode extends _$SideBySideMode {
     }
   }
 
+  /// Ripristino al ritorno da un'inversione avviata in modalità
+  /// affiancata (6.5): la vista giornaliera la riporta da sé.
+  void enable() => state = true;
+
   void disable() => state = false;
 }
 

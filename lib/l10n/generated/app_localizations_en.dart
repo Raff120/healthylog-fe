@@ -259,6 +259,14 @@ class L10nEn extends L10n {
   String get daySwapChooseDestination => 'Choose the day to swap it with';
 
   @override
+  String daySwapConfirmBody(String first, String second) {
+    return 'All meals of $first and $second will swap places.';
+  }
+
+  @override
+  String get daySwapConfirmTitle => 'Swap the days?';
+
+  @override
   String get deleteAccountConfirm => 'Request deletion';
 
   @override
@@ -850,6 +858,19 @@ class L10nEn extends L10n {
 
   @override
   String get mealStatusVerbSkipped => 'Skipped';
+
+  @override
+  String mealSwapConfirmBody(String first, String second) {
+    return '$first and $second will swap places.';
+  }
+
+  @override
+  String mealSwapConfirmSlot(String slot, String day) {
+    return '$slot on $day';
+  }
+
+  @override
+  String get mealSwapConfirmTitle => 'Swap the meals?';
 
   @override
   String mealSwappedNotification(String when) {
@@ -1972,6 +1993,9 @@ class L10nEn extends L10n {
 
   @override
   String get swapChooseDestination => 'Choose where to move it';
+
+  @override
+  String get swapConfirmAction => 'Swap';
 
   @override
   String get targetWeightHelp =>

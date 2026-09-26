@@ -37,6 +37,11 @@ import 'widgets/personal_plan_note_dialog.dart';
 /// (`DietPlanViewScreen`) la vista di sola lettura del Concluso — la cui
 /// riattivazione (CV-7) resta comunque a F27, che la costruirà per
 /// intero.
+///
+/// A destra dell'intestazione, il pulsante *Template* conduce alla
+/// raccolta dei template (7.4): è il punto d'accesso dell'Utente alla loro
+/// gestione (UT-7, TP-12). Assente al Paziente, alle stesse condizioni del
+/// pulsante di creazione (2.5 funzionale).
 class DietPlanManagementScreen extends ConsumerWidget {
   const DietPlanManagementScreen({super.key});
 
@@ -149,6 +154,10 @@ class DietPlanManagementScreen extends ConsumerWidget {
         );
   }
 
+  /// 7.1, 7.4: schermata in avanti, con freccia di ritorno; per l'Utente
+  /// `MainShell` vi ritrae da sé la barra di navigazione.
+  void _openTemplates(BuildContext context) => context.push('/diet-plan-templates');
+
   Future<void> _act(BuildContext context, WidgetRef ref, Future<void> Function() action) async {
     await action();
     if (!context.mounted) return;
@@ -170,6 +179,12 @@ class DietPlanManagementScreen extends ConsumerWidget {
     // UT-8, F22: il collegamento vigente decide le facoltà sul piano.
     final careLink = ref.watch(currentCareLinkOrNullProvider);
     final canCreate = canCreateOwnPlan(careLink);
+    // 7.1: il pulsante Template attende che il collegamento sia noto (l'assenza
+    // di collegamento si presenta come errore): finché è in caricamento
+    // `canCreate` vale anche per il Paziente, a cui il pulsante non
+    // comparirebbe che per un istante.
+    final careLinkState = ref.watch(currentCareLinkProvider);
+    final showTemplates = canCreate && (careLinkState.hasValue || careLinkState.hasError);
 
     return Scaffold(
       backgroundColor: colors.background,
@@ -178,6 +193,17 @@ class DietPlanManagementScreen extends ConsumerWidget {
         elevation: 0,
         scrolledUnderElevation: 0,
         title: Text(context.l10n.profilePlans, style: typography.titleMedium.copyWith(color: colors.textPrimary)),
+        actions: [
+          if (showTemplates)
+            Padding(
+              padding: const EdgeInsets.only(right: AppSpacing.xs),
+              child: TextButton.icon(
+                onPressed: () => _openTemplates(context),
+                icon: Icon(Icons.description_outlined, color: colors.accent),
+                label: Text(context.l10n.navTemplates, style: typography.label.copyWith(color: colors.accent)),
+              ),
+            ),
+        ],
       ),
       // 7.1 interfaccia.md: "Pulsante mobile in basso a destra", sempre
       // presente — non solo nello stato vuoto.

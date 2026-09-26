@@ -666,6 +666,13 @@ void main() {
 
       // VS-8: la scelta della destinazione avviene sempre in settimanale.
       expect(find.text('Scegli dove spostarlo'), findsOneWidget);
+
+      // 6.5: il termine della selezione riporta alla giornaliera di partenza.
+      await tester.tap(find.text('Annulla'));
+      await tester.pumpAndSettle();
+      final container = ProviderScope.containerOf(tester.element(find.byType(PlanScreen)));
+      expect(container.read(selectedPlanViewProvider), PlanViewMode.day);
+      expect(container.read(selectedDayProvider), today);
     },
   );
 
