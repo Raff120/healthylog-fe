@@ -11,7 +11,8 @@ import '../slot_type_presentation.dart';
 
 /// Card espandibile di uno slot (7.3 interfaccia.md). Chiusa: icona,
 /// etichetta, contenuto troncato, maniglia di riordino. Aperta: i campi
-/// di redazione (CD-8, GG-14, GG-15, AD-5) e la rimozione.
+/// di redazione (CD-8, GG-14, GG-15, AD-5), la copia in altri slot
+/// (CD-8bis) e la rimozione.
 class SlotCard extends StatefulWidget {
   const SlotCard({
     super.key,
@@ -19,6 +20,7 @@ class SlotCard extends StatefulWidget {
     required this.index,
     required this.onChanged,
     required this.onRemove,
+    this.onCopy,
     this.showAdherenceWeight = true,
   });
 
@@ -26,6 +28,10 @@ class SlotCard extends StatefulWidget {
   final int index;
   final VoidCallback onChanged;
   final VoidCallback onRemove;
+
+  /// CD-8bis: "Copia in…". `null` quando non vi sono slot di destinazione
+  /// ammessi, e l'azione non compare (7.3 interfaccia.md).
+  final VoidCallback? onCopy;
 
   /// MD-8: nella modifica della singola occorrenza il peso di aderenza
   /// non è in gioco — resta quello dello slot (o il predefinito per uno
@@ -163,13 +169,22 @@ class _SlotCardState extends State<SlotCard> {
                   ),
                   ],
                   const SizedBox(height: AppSpacing.md),
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: TextButton.icon(
-                      onPressed: widget.onRemove,
-                      icon: Icon(Icons.delete_outline, color: colors.error),
-                      label: Text(context.l10n.commonRemove, style: typography.label.copyWith(color: colors.error)),
-                    ),
+                  Wrap(
+                    alignment: WrapAlignment.end,
+                    spacing: AppSpacing.xs,
+                    children: [
+                      if (widget.onCopy != null)
+                        TextButton.icon(
+                          onPressed: widget.onCopy,
+                          icon: Icon(Icons.content_copy, color: colors.accent),
+                          label: Text(context.l10n.slotCopyAction, style: typography.label.copyWith(color: colors.accent)),
+                        ),
+                      TextButton.icon(
+                        onPressed: widget.onRemove,
+                        icon: Icon(Icons.delete_outline, color: colors.error),
+                        label: Text(context.l10n.commonRemove, style: typography.label.copyWith(color: colors.error)),
+                      ),
+                    ],
                   ),
                 ],
               ),

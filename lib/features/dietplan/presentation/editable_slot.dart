@@ -89,6 +89,31 @@ class EditableSlot {
   /// concorre alla segnalazione di incompletezza del giorno (CD-15, GG-13).
   bool get isEmpty => items.isEmpty;
 
+  /// CD-8bis: sostituisce il contenuto con una copia di quello di
+  /// [source], con quanto vi è scritto in quel momento — anche non ancora
+  /// salvato. Lo slot conserva il proprio tipo (GG-5) e il proprio
+  /// identificativo, cui restano agganciate le annotazioni personali
+  /// (NP-4); gli elementi copiati sono nuovi e ricevono l'identificativo al
+  /// salvataggio (CO-7bis).
+  ///
+  /// L'etichetta ha senso solo fra spuntini (GG-10): altrimenti resta la
+  /// propria. Il peso non si copia nella modifica della singola giornata
+  /// (MD-8), dove non si redige: [includeAdherenceWeight] a `false`.
+  void replaceContentWith(EditableSlot source, {bool includeAdherenceWeight = true}) {
+    final copies = source.items.map(EditableItem.copyOf).toList();
+    for (final item in items) {
+      item.dispose();
+    }
+    items
+      ..clear()
+      ..addAll(copies);
+    noteController.text = source.noteController.text;
+    if (type == SlotType.snack && source.type == SlotType.snack) {
+      labelController.text = source.labelController.text;
+    }
+    if (includeAdherenceWeight) adherenceWeight = source.adherenceWeight;
+  }
+
   void dispose() {
     labelController.dispose();
     noteController.dispose();
@@ -186,8 +211,9 @@ class EditableItem {
         alternatives: item.alternatives.map(EditableAlternative.fromModel).toList(),
       );
 
-  /// Copia di un elemento per una settimana aggiunta ([EditableSlot.copyOf]),
-  /// priva dell'identificativo.
+  /// Copia di un elemento per una settimana aggiunta ([EditableSlot.copyOf])
+  /// o per la copia del contenuto di uno slot
+  /// ([EditableSlot.replaceContentWith]), priva dell'identificativo.
   factory EditableItem.copyOf(EditableItem source) {
     final model = source.toModel();
     return EditableItem(

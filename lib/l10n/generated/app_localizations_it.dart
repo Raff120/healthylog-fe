@@ -1832,6 +1832,46 @@ class L10nIt extends L10n {
       'Quanto questo pasto incide sull\'aderenza. A zero non viene conteggiato.';
 
   @override
+  String get slotCopyAction => 'Copia in…';
+
+  @override
+  String get slotCopyConfirm => 'Copia';
+
+  @override
+  String slotCopyDone(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Contenuto copiato in $count slot',
+      one: 'Contenuto copiato in 1 slot',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get slotCopyReplaceAction => 'Sostituisci';
+
+  @override
+  String slotCopyReplaceBody(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          '$count degli slot scelti hanno già un contenuto: sarà sostituito.',
+      one: 'Uno degli slot scelti ha già un contenuto: sarà sostituito.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get slotCopyReplaceTitle => 'Sostituire il contenuto?';
+
+  @override
+  String slotCopySheetTitle(String slot) {
+    return 'Copia «$slot» in…';
+  }
+
+  @override
   String get slotDescriptiveLabel => 'Etichetta descrittiva';
 
   @override

@@ -1125,6 +1125,37 @@
     }
   },
   "slotAdherenceWeightHelp": "Quanto questo pasto incide sull'aderenza. A zero non viene conteggiato.",
+  "slotCopyAction": "Copia in…",
+  "slotCopyConfirm": "Copia",
+  "slotCopyDone": "{count, plural, =1{Contenuto copiato in 1 slot} other{Contenuto copiato in {count} slot}}",
+  "@slotCopyDone": {
+    "description": "CD-8bis: esito della copia del contenuto di uno slot.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "slotCopyReplaceAction": "Sostituisci",
+  "slotCopyReplaceBody": "{count, plural, =1{Uno degli slot scelti ha già un contenuto: sarà sostituito.} other{{count} degli slot scelti hanno già un contenuto: sarà sostituito.}}",
+  "@slotCopyReplaceBody": {
+    "description": "CD-8bis, 4.5 interfaccia: conferma semplice della sostituzione.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "slotCopyReplaceTitle": "Sostituire il contenuto?",
+  "slotCopySheetTitle": "Copia «{slot}» in…",
+  "@slotCopySheetTitle": {
+    "description": "CD-8bis: titolo del foglio che sceglie gli slot di destinazione.",
+    "placeholders": {
+      "slot": {
+        "type": "String"
+      }
+    }
+  },
   "slotDescriptiveLabel": "Etichetta descrittiva",
   "slotNotSpecified": "Non specificato",
   "slotRecipeText": "Testo della ricetta",
