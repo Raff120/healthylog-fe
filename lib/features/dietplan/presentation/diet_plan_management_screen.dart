@@ -15,6 +15,7 @@ import '../data/diet_plan.dart';
 import '../data/plan_status.dart';
 import '../domain/current_diet_plan.dart';
 import '../providers/diet_plan_providers.dart';
+import '../providers/diet_plan_template_providers.dart';
 import 'widgets/delete_plan_dialog.dart';
 import 'widgets/personal_plan_note_dialog.dart';
 
@@ -37,6 +38,11 @@ import 'widgets/personal_plan_note_dialog.dart';
 /// (`DietPlanViewScreen`) la vista di sola lettura del Concluso — la cui
 /// riattivazione (CV-7) resta comunque a F27, che la costruirà per
 /// intero.
+///
+/// In coda all'elenco, e anche sotto lo stato vuoto, la voce *Template*
+/// conduce alla raccolta dei template (7.4): è il punto d'accesso
+/// dell'Utente alla loro gestione (UT-7, TP-12). Assente al Paziente, alle
+/// stesse condizioni del pulsante di creazione (2.5 funzionale).
 class DietPlanManagementScreen extends ConsumerWidget {
   const DietPlanManagementScreen({super.key});
 
@@ -149,6 +155,10 @@ class DietPlanManagementScreen extends ConsumerWidget {
         );
   }
 
+  /// 7.1, 7.4: schermata in avanti, con freccia di ritorno; per l'Utente
+  /// `MainShell` vi ritrae da sé la barra di navigazione.
+  void _openTemplates(BuildContext context) => context.push('/diet-plan-templates');
+
   Future<void> _act(BuildContext context, WidgetRef ref, Future<void> Function() action) async {
     await action();
     if (!context.mounted) return;
@@ -170,6 +180,9 @@ class DietPlanManagementScreen extends ConsumerWidget {
     // UT-8, F22: il collegamento vigente decide le facoltà sul piano.
     final careLink = ref.watch(currentCareLinkOrNullProvider);
     final canCreate = canCreateOwnPlan(careLink);
+    // PL-8: i template non sono conservati localmente. Senza risposta
+    // (caricamento, assenza di connessione) la voce resta, senza conteggio.
+    final templateCount = canCreate ? ref.watch(dietPlanTemplateListProvider).value?.length : null;
 
     return Scaffold(
       backgroundColor: colors.background,
@@ -234,6 +247,9 @@ class DietPlanManagementScreen extends ConsumerWidget {
                           onPressed: () => context.push('/diet-plans/new'),
                         ),
                       ),
+                      // 7.1: chi ha template ma nessun piano deve poterli ritrovare.
+                      const SizedBox(height: AppSpacing.xl),
+                      _TemplatesTile(count: templateCount, onTap: () => _openTemplates(context)),
                     ],
                   ),
                 ),
@@ -281,6 +297,10 @@ class DietPlanManagementScreen extends ConsumerWidget {
                               : '/diet-plans/${plan.id}/schedule'),
                     ),
                   ),
+                if (canCreate) ...[
+                  const SizedBox(height: AppSpacing.md),
+                  _TemplatesTile(count: templateCount, onTap: () => _openTemplates(context)),
+                ],
               ],
             );
           },
@@ -519,6 +539,55 @@ class _OtherPlanTile extends StatelessWidget {
                 ),
                 const SizedBox(width: AppSpacing.xs),
               ],
+              Icon(Icons.chevron_right, color: colors.textTertiary),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Voce *Template* in coda all'elenco (7.1 interfaccia.md): distinta dai
+/// piani per icona, senza indicatore di stato. [count] assente finché
+/// l'elenco dei template non è disponibile (PL-8).
+class _TemplatesTile extends StatelessWidget {
+  const _TemplatesTile({required this.count, required this.onTap});
+
+  final int? count;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final typography = context.typography;
+    final count = this.count;
+
+    return Material(
+      color: colors.surface,
+      borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.sm),
+          child: Row(
+            children: [
+              Icon(Icons.description_outlined, color: colors.textSecondary),
+              const SizedBox(width: AppSpacing.sm),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(context.l10n.navTemplates, style: typography.titleMedium.copyWith(color: colors.textPrimary)),
+                    if (count != null)
+                      Text(
+                        context.l10n.plansTemplatesCount(count),
+                        style: typography.caption.copyWith(color: colors.textSecondary),
+                      ),
+                  ],
+                ),
+              ),
               Icon(Icons.chevron_right, color: colors.textTertiary),
             ],
           ),

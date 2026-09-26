@@ -987,6 +987,15 @@
     }
   },
   "plansStartHere": "Inizia da qui",
+  "plansTemplatesCount": "{count, plural, =0{Nessun template} =1{1 template} other{{count} template}}",
+  "@plansTemplatesCount": {
+    "description": "7.1 interfaccia.md: conteggio della voce Template in coda all'elenco dei piani (UT-7).",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "plansWithdrawConfirmBody": "Tornerà in Bozza: potrai riprenderlo dalla redazione.",
   "plansWithdrawConfirmTitle": "Ritirare il piano?",
   "privacyPolicyAccept": "Accetto l'informativa sul trattamento dei dati",

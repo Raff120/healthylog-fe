@@ -450,6 +450,7 @@
   "plansPatientNotice": "Your nutritionist manages the plan content: you can tick and swap meals.",
   "plansPeriodCount": "{count} periods",
   "plansStartHere": "Start here",
+  "plansTemplatesCount": "{count, plural, =0{No templates} =1{1 template} other{{count} templates}}",
   "plansWithdrawConfirmBody": "It goes back to Draft: you can resume editing it.",
   "plansWithdrawConfirmTitle": "Withdraw the plan?",
   "privacyPolicyAccept": "I accept the data processing notice",

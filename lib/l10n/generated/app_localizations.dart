@@ -2797,6 +2797,12 @@ abstract class L10n {
   /// **'Inizia da qui'**
   String get plansStartHere;
 
+  /// 7.1 interfaccia.md: conteggio della voce Template in coda all'elenco dei piani (UT-7).
+  ///
+  /// In it, this message translates to:
+  /// **'{count, plural, =0{Nessun template} =1{1 template} other{{count} template}}'**
+  String plansTemplatesCount(int count);
+
   /// No description provided for @plansWithdrawConfirmBody.
   ///
   /// In it, this message translates to:
