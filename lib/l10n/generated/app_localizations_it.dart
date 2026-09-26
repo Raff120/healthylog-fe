@@ -1594,18 +1594,6 @@ class L10nIt extends L10n {
   String get plansStartHere => 'Inizia da qui';
 
   @override
-  String plansTemplatesCount(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '$count template',
-      one: '1 template',
-      zero: 'Nessun template',
-    );
-    return '$_temp0';
-  }
-
-  @override
   String get plansWithdrawConfirmBody =>
       'Tornerà in Bozza: potrai riprenderlo dalla redazione.';
 
