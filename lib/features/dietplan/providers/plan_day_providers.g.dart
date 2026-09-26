@@ -358,7 +358,7 @@ final class SideBySideModeProvider
   }
 }
 
-String _$sideBySideModeHash() => r'054a04e34c82532889afbe25b3767dca667125a4';
+String _$sideBySideModeHash() => r'2916c923094e841264f93236d5c769f6477526d1';
 
 /// VG-12: la modalità affiancata, indipendente da [SelectedGroupMember]
 /// — disattivandola si torna esattamente al membro che era selezionato

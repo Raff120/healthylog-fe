@@ -579,8 +579,9 @@ class _DayMenu extends ConsumerWidget {
         if (value == 'edit-day') context.push('/plan-days/${isoDate(selectedDate)}/edit');
         if (value == 'swap-day') {
           // Come per lo slot (4.1), la destinazione si sceglie nella
-          // settimanale, dove le giornate sono visibili insieme (VS-8).
-          ref.read(daySwapSelectionProvider.notifier).start(DaySwapOrigin.of(day));
+          // settimanale, dove le giornate sono visibili insieme (VS-8), e al
+          // termine si torna alla giornata di partenza.
+          ref.read(daySwapSelectionProvider.notifier).start(DaySwapOrigin.of(day), returnTo: SwapReturn(date: day.date));
           ref.read(selectedPlanViewProvider.notifier).select(PlanViewMode.week);
         }
       },

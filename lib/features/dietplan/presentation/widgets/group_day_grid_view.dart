@@ -678,17 +678,21 @@ class _GroupSlotCellState extends ConsumerState<_GroupSlotCell> {
   /// cui origine e destinazione sono visibili insieme: l'avvio vi
   /// conduce, dopo aver reso corrente il membro di quella colonna —
   /// sicché la settimanale ne mostra le giornate e l'intestazione ne
-  /// dichiara il nome (VG-11).
+  /// dichiara il nome (VG-11). Al termine si torna alla giornata di
+  /// partenza, di nuovo in modalità affiancata.
   void _startMove(PlanDaySlot slot) {
     ref.read(selectedGroupMemberProvider.notifier).select(_memberUserId);
     ref.read(sideBySideModeProvider.notifier).disable();
-    ref.read(mealSwapSelectionProvider.notifier).start(MealSwapOrigin(
-          planId: widget.member.planId!,
-          date: dateOnly(widget.date),
-          slotId: slot.slotId,
-          type: slot.type,
-          status: slot.status,
-        ));
+    ref.read(mealSwapSelectionProvider.notifier).start(
+          MealSwapOrigin(
+            planId: widget.member.planId!,
+            date: dateOnly(widget.date),
+            slotId: slot.slotId,
+            type: slot.type,
+            status: slot.status,
+          ),
+          returnTo: SwapReturn(date: widget.date, sideBySide: true),
+        );
     ref.read(selectedPlanViewProvider.notifier).select(PlanViewMode.week);
   }
 
