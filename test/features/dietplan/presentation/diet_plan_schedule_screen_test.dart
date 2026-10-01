@@ -370,6 +370,95 @@ void main() {
     expect(find.text('Schema incompleto'), findsOneWidget);
   });
 
+  testWidgets('un piano Programmato si modifica con "Salva modifiche", senza striscia né ritiro (CV-6)', (tester) async {
+    final dio = Dio(BaseOptions(baseUrl: 'http://example.test'));
+    final requests = <String>[];
+    dio.httpClientAdapter = _JsonAdapter((options) {
+      requests.add('${options.method} ${options.path}');
+      return _planJson(status: 'SCHEDULED', content: 'Pasta');
+    });
+    dio.interceptors.add(ApiErrorInterceptor());
+
+    await _pumpScheduleScreen(tester, DietPlanApi(dio));
+
+    expect(find.textContaining('decorrono da oggi'), findsNothing);
+    expect(find.text('Conferma piano'), findsNothing);
+    expect(find.text('Salva modifiche'), findsOneWidget);
+
+    await tester.tap(find.text('Colazione'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Aggiungi elemento'));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.widgetWithText(TextField, 'Denominazione').last, 'Riso');
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Salva modifiche'));
+    await tester.pumpAndSettle();
+
+    expect(requests, contains('PUT /diet-plans/plan-1/schedule'));
+    expect(requests.where((request) => request.endsWith('/withdraw')), isEmpty);
+  });
+
+  testWidgets('il salvataggio di un piano Programmato con schema incompleto è impedito (MD-7)', (tester) async {
+    final dio = Dio(BaseOptions(baseUrl: 'http://example.test'));
+    var putCalled = false;
+    dio.httpClientAdapter = _JsonAdapter((options) {
+      if (options.method == 'PUT') putCalled = true;
+      return _planJson(status: 'SCHEDULED');
+    });
+    dio.interceptors.add(ApiErrorInterceptor());
+
+    await _pumpScheduleScreen(tester, DietPlanApi(dio));
+
+    await tester.tap(find.text('Colazione'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Aggiungi elemento'));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.widgetWithText(TextField, 'Denominazione').first, 'Yogurt e cereali');
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Salva modifiche'));
+    await tester.pumpAndSettle();
+
+    expect(putCalled, isFalse);
+    expect(find.text('Schema incompleto'), findsOneWidget);
+  });
+
+  testWidgets('il menu dell\'intestazione esporta il piano Programmato (PV-13)', (tester) async {
+    final dio = Dio(BaseOptions(baseUrl: 'http://example.test'));
+    var exportCalled = false;
+    dio.httpClientAdapter = _JsonAdapter((options) {
+      if (options.path.endsWith('/export')) {
+        exportCalled = true;
+        // Il fallimento evita la consegna del file, che il test non ha
+        // modo di ricevere: qui conta che la richiesta parta.
+        return const _ErrorResponse(500, {'code': 'INTERNAL_ERROR'});
+      }
+      return _planJson(status: 'SCHEDULED', content: 'Pasta');
+    });
+    dio.interceptors.add(ApiErrorInterceptor());
+
+    await _pumpScheduleScreen(tester, DietPlanApi(dio));
+    await tester.tap(find.byType(PopupMenuButton<String>));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Esporta'));
+    await tester.pumpAndSettle();
+
+    expect(exportCalled, isTrue);
+  });
+
+  testWidgets('il menu dell\'intestazione non esporta la Bozza (PV-13)', (tester) async {
+    final dio = Dio(BaseOptions(baseUrl: 'http://example.test'));
+    dio.httpClientAdapter = _JsonAdapter((_) => _planJson());
+    dio.interceptors.add(ApiErrorInterceptor());
+
+    await _pumpScheduleScreen(tester, DietPlanApi(dio));
+    await tester.tap(find.byType(PopupMenuButton<String>));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Salva come template'), findsOneWidget);
+    expect(find.text('Esporta'), findsNothing);
+  });
+
   testWidgets('il menu dell\'intestazione offre "Elimina" per il Sospeso ma non per l\'Attivo (CV-11)', (tester) async {
     final dio = Dio(BaseOptions(baseUrl: 'http://example.test'));
     dio.httpClientAdapter = _JsonAdapter((_) => _planJson(status: 'ACTIVE'));

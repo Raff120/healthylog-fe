@@ -66,6 +66,42 @@
       momento. Caricata l'applicazione, lo sfondo prende il tema che
       l'Utente ha scelto (`page_chrome.dart`).
     */
+    /*
+      Inter dichiarato anche per la pagina, oltre che per il motore. Il
+      testo dei campi è dipinto dal motore, ma cursore e selezione li
+      governa un campo nativo invisibile, sovrapposto, che il motore veste
+      con la stessa famiglia ("Inter"). Senza questa dichiarazione la
+      pagina non conosce Inter e il campo invisibile ripiega su un altro
+      carattere, di larghezze diverse: i gesti del sistema — la barra
+      spaziatrice come trackpad, le maniglie della selezione — si muovono
+      su un testo che non coincide con quello visibile, e il cursore salta
+      (segnalato dall'utente, vedi decisioni.md).
+
+      I file sono gli stessi che l'applicazione include (`pubspec.yaml`),
+      al percorso in cui la compilazione per il web li pubblica: nessuna
+      risorsa di rete in più (2.3 interfaccia.md).
+    */
+    @font-face {
+      font-family: "Inter";
+      font-weight: 400;
+      font-display: swap;
+      src: url("assets/assets/fonts/Inter/Inter-Regular.ttf") format("truetype");
+    }
+
+    @font-face {
+      font-family: "Inter";
+      font-weight: 500;
+      font-display: swap;
+      src: url("assets/assets/fonts/Inter/Inter-Medium.ttf") format("truetype");
+    }
+
+    @font-face {
+      font-family: "Inter";
+      font-weight: 600;
+      font-display: swap;
+      src: url("assets/assets/fonts/Inter/Inter-SemiBold.ttf") format("truetype");
+    }
+
     :root {
       color-scheme: light dark;
       --healthylog-background: #FAF9F7;

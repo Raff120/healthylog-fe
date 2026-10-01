@@ -36,14 +36,17 @@ import 'widgets/slot_copy_sheet.dart';
 /// (PA-2) la navigazione sceglie prima la settimana, e il menu
 /// dell'intestazione ne aggiunge o ne toglie (PA-2bis).
 ///
-/// La stessa schermata serve anche la modifica di un piano Attivo o
-/// Sospeso (5.3 funzionale, MD-1): una striscia informativa avverte che
-/// le modifiche decorrono da oggi (MD-2, MD-3), e "Conferma piano" è
-/// sostituito da "Salva modifiche" (7.3 interfaccia.md). Il salvataggio
+/// La stessa schermata serve anche la modifica di un piano Programmato
+/// (CV-6), Attivo o Sospeso (5.3 funzionale, MD-1): "Conferma piano" è
+/// sostituito da "Salva modifiche" (7.3 interfaccia.md), e per i due
+/// piani in vigore una striscia informativa avverte che le modifiche
+/// decorrono da oggi (MD-2, MD-3) — il Programmato non è ancora in
+/// vigore, e le modifiche valgono per intero. Il salvataggio
 /// come template (TP-5, CD-18) e l'eliminazione (CV-10, CV-11) compaiono
 /// nel menu dell'intestazione, disponibili in ogni momento — l'una non
 /// condizionata alle modifiche pendenti, l'altra assente per l'Attivo,
-/// che CV-11 esclude.
+/// che CV-11 esclude. Per un piano già confermato il menu offre anche
+/// l'esportazione (PV-13).
 class DietPlanScheduleScreen extends ConsumerStatefulWidget {
   const DietPlanScheduleScreen({super.key, required this.planId});
 
@@ -213,8 +216,8 @@ class _DietPlanScheduleScreenState extends ConsumerState<DietPlanScheduleScreen>
     );
   }
 
-  /// MD-7: su un piano non più in Bozza (Attivo o Sospeso) uno schema
-  /// incompleto non si salva — a differenza della Bozza, dove restare
+  /// MD-7: su un piano non più in Bozza (Programmato, Attivo o Sospeso)
+  /// uno schema incompleto non si salva — a differenza della Bozza, dove restare
   /// incompleti durante la redazione è normale. Stessa verifica locale
   /// di `_confirm` (CD-15), applicata qui solo quando rilevante.
   Future<void> _save() async {
@@ -272,6 +275,22 @@ class _DietPlanScheduleScreenState extends ConsumerState<DietPlanScheduleScreen>
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(describeApiError(context, exception?.code ?? ''))),
     );
+  }
+
+  /// PV-12, PV-13: l'esportazione dalla redazione, la stessa della card
+  /// del piano in corso. È il solo accesso per un Programmato che non sia
+  /// il piano in corso — una voce compatta, che apre direttamente qui.
+  Future<void> _export() async {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(context.l10n.planExportInProgress)),
+    );
+    await ref.read(dietPlanExportControllerProvider.notifier).export(widget.planId);
+    if (!mounted) return;
+    ref.read(dietPlanExportControllerProvider)?.whenOrNull(
+          error: (error, _) => ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(describeApiError(context, error.asApiException?.code ?? ''))),
+          ),
+        );
   }
 
   /// CV-10, CV-11: eliminazione definitiva, assente dal menu per l'Attivo
@@ -470,7 +489,7 @@ class _DietPlanScheduleScreenState extends ConsumerState<DietPlanScheduleScreen>
   }
 
   /// Fascia fissa in fondo, comune a "Conferma piano" (Bozza, CV-2) e
-  /// "Salva modifiche" (Attivo o Sospeso, MD-1) — cambia solo l'etichetta
+  /// "Salva modifiche" (Programmato, Attivo o Sospeso: CV-6, MD-1) — cambia solo l'etichetta
   /// e l'azione, non la disposizione.
   Widget _bottomActionBar({required String label, required bool loading, required VoidCallback? onPressed}) {
     final colors = context.colors;
@@ -500,6 +519,7 @@ class _DietPlanScheduleScreenState extends ConsumerState<DietPlanScheduleScreen>
     // li osserva).
     ref.watch(saveDietPlanAsTemplateControllerProvider);
     ref.watch(dietPlanLifecycleControllerProvider);
+    ref.watch(dietPlanExportControllerProvider);
     final confirming = ref.watch(confirmDietPlanControllerProvider)?.isLoading ?? false;
     // Inizializza `_days` prima dello Scaffold, non dentro il solo `data:`
     // del corpo: il menu "+" dell'intestazione ne ha bisogno fin dal primo
@@ -573,6 +593,7 @@ class _DietPlanScheduleScreenState extends ConsumerState<DietPlanScheduleScreen>
               onSelected: (value) {
                 if (value == 'edit-period') _editPeriod(planState.value!);
                 if (value == 'save-as-template') _saveAsTemplate(planState.value?.name ?? '');
+                if (value == 'export') _export();
                 if (value == 'delete') _delete(planState.value!.status);
                 if (value == 'add-week') _addWeek();
                 if (value == 'remove-week') _removeWeek();
@@ -588,6 +609,10 @@ class _DietPlanScheduleScreenState extends ConsumerState<DietPlanScheduleScreen>
                 if (planState.value != null && planState.value!.status != PlanStatus.completed)
                   PopupMenuItem(value: 'edit-period', child: Text(context.l10n.planPeriodEdit)),
                 PopupMenuItem(value: 'save-as-template', child: Text(context.l10n.scheduleSaveAsTemplate)),
+                // PV-13: un piano confermato si esporta anche da qui; la
+                // Bozza no, non essendo ancora un piano in corso.
+                if (planState.value != null && planState.value!.status != PlanStatus.draft)
+                  PopupMenuItem(value: 'export', child: Text(context.l10n.planActionExport)),
                 // CV-11: l'Attivo non compare, il server la rifiuterebbe comunque.
                 if (planState.value != null && planState.value!.status != PlanStatus.active)
                   PopupMenuItem(value: 'delete', child: Text(context.l10n.commonDelete, style: TextStyle(color: colors.error))),
@@ -658,14 +683,16 @@ class _DietPlanScheduleScreenState extends ConsumerState<DietPlanScheduleScreen>
                 );
               }
 
-              // MD-1, MD-2, MD-3, 7.3 interfaccia.md: la stessa schermata
-              // serve anche la modifica di un piano Attivo o Sospeso, con
-              // la sola striscia informativa in più e "Salva modifiche" al
-              // posto di "Conferma piano" — Programmato e Concluso non vi
-              // giungono mai (il primo passa per il ritiro, MD-1; il
-              // secondo ha la propria vista di sola lettura, 7.5), ma
-              // restano privi di fascia fissa per sicurezza.
+              // CV-6, MD-1, MD-2, MD-3, 7.3 interfaccia.md: la stessa
+              // schermata serve anche la modifica di un piano Programmato,
+              // Attivo o Sospeso, con "Salva modifiche" al posto di
+              // "Conferma piano". La striscia informativa è dei soli piani
+              // in vigore: il Programmato si modifica per intero, senza
+              // ritiro. Il Concluso non vi giunge mai (ha la propria vista
+              // di sola lettura, 7.5), ma resta privo di fascia fissa per
+              // sicurezza.
               final isActiveEdit = plan.status == PlanStatus.active || plan.status == PlanStatus.suspended;
+              final isConfirmedEdit = isActiveEdit || plan.status == PlanStatus.scheduled;
               final content = isActiveEdit
                   ? Column(children: [_buildActiveEditBanner(), Expanded(child: editor)])
                   : editor;
@@ -683,7 +710,7 @@ class _DietPlanScheduleScreenState extends ConsumerState<DietPlanScheduleScreen>
                 );
               }
 
-              if (isActiveEdit) {
+              if (isConfirmedEdit) {
                 return Column(
                   children: [
                     Expanded(child: content),

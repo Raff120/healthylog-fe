@@ -133,7 +133,7 @@ class _WorkoutsView extends ConsumerWidget {
                     AppSpacing.md,
                     AppSpacing.sm,
                     AppSpacing.md,
-                    AppSpacing.xxl + bottomBarInset(context),
+                    listEndPadding(context),
                   ),
                   sliver: SliverList.builder(
                     itemCount: items.length,

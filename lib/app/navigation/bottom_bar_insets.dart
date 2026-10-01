@@ -1,6 +1,8 @@
 import 'dart:math' as math;
 
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
+
+import '../theme/app_spacing.dart';
 
 /// Quanto la barra di navigazione fluttuante copre in fondo alla
 /// schermata, area sicura del dispositivo compresa (3.2 interfaccia.md).
@@ -18,6 +20,21 @@ import 'package:flutter/widgets.dart';
 /// esattamente ciò che serve: la stessa schermata vale per entrambe le
 /// disposizioni senza saperlo.
 double bottomBarInset(BuildContext context) => MediaQuery.paddingOf(context).bottom;
+
+/// La spaziatura in coda agli elenchi che scorrono sotto la barra
+/// fluttuante: l'ingombro della barra più lo stacco fra l'ultimo elemento
+/// e la barra stessa (3.2 interfaccia.md).
+///
+/// Lo stacco è `lg`. Dove la schermata ha un pulsante mobile resta `xxl`:
+/// il pulsante sta sopra la barra, allineato a destra, e uno stacco minore
+/// gli farebbe coprire i comandi dell'ultimo elemento a fine scorrimento —
+/// le spunte dell'ultimo pasto, anzitutto (segnalato dall'utente, vedi
+/// decisioni.md). Il pulsante si legge dalla `Scaffold` più vicina, che
+/// è quella della schermata: chi la compone non deve ricordarsene.
+double listEndPadding(BuildContext context) {
+  final hasFab = Scaffold.maybeOf(context)?.hasFloatingActionButton ?? false;
+  return (hasFab ? AppSpacing.xxl : AppSpacing.lg) + bottomBarInset(context);
+}
 
 /// Lo scostamento che il pulsante mobile deve aggiungere per restare sopra
 /// la barra fluttuante (3.2 interfaccia.md).
