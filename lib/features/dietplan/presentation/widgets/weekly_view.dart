@@ -99,7 +99,7 @@ class _WeekPanelList extends StatelessWidget {
         AppSpacing.md,
         AppSpacing.sm,
         AppSpacing.md,
-        AppSpacing.xxl + bottomBarInset(context),
+        listEndPadding(context),
       ),
       itemCount: days.length,
       separatorBuilder: (context, index) => const SizedBox(height: AppSpacing.xs),

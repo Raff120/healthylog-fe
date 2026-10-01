@@ -486,7 +486,7 @@ class _SlotsOrEmpty extends StatelessWidget {
         AppSpacing.md,
         AppSpacing.sm,
         AppSpacing.md,
-        AppSpacing.xxl + bottomBarInset(context),
+        listEndPadding(context),
       ),
       itemCount: slots.length,
       separatorBuilder: (context, index) =>
