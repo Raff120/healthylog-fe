@@ -70,6 +70,74 @@ void main() {
     expect(controller.offset, greaterThan(0));
   });
 
+  /// Un `PageView` orizzontale che arriva al bordo inferiore, come la
+  /// vista giornaliera. La superficie di prova è larga 800 quale che sia
+  /// la `size` dichiarata: i trascinamenti ne superano la metà.
+  Future<PageController> pumpPager(WidgetTester tester, {double padding = band, double minimumBand = 0}) async {
+    final controller = PageController();
+    addTearDown(controller.dispose);
+
+    await tester.pumpWidget(
+      MediaQuery(
+        data: MediaQueryData(
+          size: const Size(400, viewportHeight),
+          padding: EdgeInsets.only(bottom: padding),
+          viewPadding: EdgeInsets.only(bottom: padding),
+        ),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: withSystemGestureGuard(
+            minimumBand: minimumBand,
+            child: PageView.builder(
+              controller: controller,
+              itemBuilder: (context, index) => Text('giorno $index'),
+            ),
+          ),
+        ),
+      ),
+    );
+    return controller;
+  }
+
+  /// La risalita obliqua: segnalato dall'utente, cambiava giornata.
+  testWidgets('la risalita obliqua dalla striscia non cambia pagina', (tester) async {
+    final controller = await pumpPager(tester);
+
+    await tester.dragFrom(
+      const Offset(700, viewportHeight - band / 2),
+      const Offset(-500, -120),
+    );
+    await tester.pumpAndSettle();
+
+    expect(controller.page, 0);
+  });
+
+  testWidgets('lo scorrimento orizzontale sopra la striscia cambia pagina come prima', (tester) async {
+    final controller = await pumpPager(tester);
+
+    await tester.dragFrom(
+      const Offset(700, viewportHeight / 2),
+      const Offset(-500, 0),
+    );
+    await tester.pumpAndSettle();
+
+    expect(controller.page, 1);
+  });
+
+  /// Sul web la zona riservata può risultare nulla benché il gesto di
+  /// sistema esista: la striscia minima resta.
+  testWidgets('senza zona riservata resta la striscia minima, se dichiarata', (tester) async {
+    final controller = await pumpPager(tester, padding: 0, minimumBand: 24);
+
+    await tester.dragFrom(
+      const Offset(700, viewportHeight - 12),
+      const Offset(-500, -60),
+    );
+    await tester.pumpAndSettle();
+
+    expect(controller.page, 0);
+  });
+
   /// L'involucro non è un diaframma: contende il solo trascinamento
   /// verticale, e il tocco raggiunge quanto sta sotto.
   testWidgets('il tocco dentro la striscia raggiunge il comando sottostante',

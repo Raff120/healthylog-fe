@@ -98,7 +98,7 @@ class _PatientsScreenState extends ConsumerState<PatientsScreen> {
             AppSpacing.md,
             AppSpacing.md,
             AppSpacing.md,
-            AppSpacing.xxl * 2 + bottomBarInset(context),
+            listEndPadding(context),
           ),
           children: [
             if (requests.isNotEmpty) ...[

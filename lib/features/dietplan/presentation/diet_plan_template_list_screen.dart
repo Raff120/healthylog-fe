@@ -103,7 +103,7 @@ class DietPlanTemplateListScreen extends ConsumerWidget {
                 AppSpacing.md,
                 AppSpacing.md,
                 AppSpacing.md,
-                AppSpacing.xxl + bottomBarInset(context),
+                listEndPadding(context),
               ),
               itemCount: templates.length,
               separatorBuilder: (context, index) => const SizedBox(height: AppSpacing.sm),
