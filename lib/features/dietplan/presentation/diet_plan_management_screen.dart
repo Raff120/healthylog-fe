@@ -106,27 +106,10 @@ class DietPlanManagementScreen extends ConsumerWidget {
     await _act(context, ref, () => ref.read(dietPlanLifecycleControllerProvider.notifier).withdraw(planId));
   }
 
-  /// CV-6: la modifica di un piano Programmato passa dal ritiro (nessun
-  /// altro meccanismo la consente sul backend), ma qui l'intento è
-  /// proseguire subito nella redazione, non restare nello stato
-  /// ritirato: nessuna conferma propria, a differenza di "Ritira" da
-  /// sola (4.5 interfaccia.md la riserva a quell'azione).
-  Future<void> _editScheduled(BuildContext context, WidgetRef ref, String planId) async {
-    await ref.read(dietPlanLifecycleControllerProvider.notifier).withdraw(planId);
-    if (!context.mounted) return;
-    final state = ref.read(dietPlanLifecycleControllerProvider);
-    if (state?.hasError ?? false) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(describeApiError(context, state?.error?.asApiException?.code ?? ''))),
-      );
-      return;
-    }
-    context.push('/diet-plans/$planId/schedule');
-  }
-
-  /// MD-1: un piano Attivo o Sospeso si modifica direttamente, senza
-  /// alcuna transizione di stato — a differenza del Programmato, resta
-  /// esattamente nello stesso stato mentre lo si redige.
+  /// CV-6, MD-1: un piano Programmato, Attivo o Sospeso si modifica
+  /// direttamente, senza alcuna transizione di stato — resta esattamente
+  /// nello stesso stato mentre lo si redige. Il Programmato non passa più
+  /// dal ritiro, che resta un'azione a sé (AS-11).
   void _editInPlace(BuildContext context, String planId) => context.push('/diet-plans/$planId/schedule');
 
   /// CV-10: mai proposta per l'Attivo (CV-11 la esclude a monte, nessun
@@ -284,7 +267,6 @@ class DietPlanManagementScreen extends ConsumerWidget {
                     onComplete: () => _complete(context, ref, current.id),
                     onWithdraw: () => _withdraw(context, ref, current.id),
                     onActivateNow: () => _activateNow(context, ref, current.id),
-                    onEditScheduled: () => _editScheduled(context, ref, current.id),
                     onEditInPlace: () => _editInPlace(context, current.id),
                     onDelete: () => _delete(context, ref, current.id, current.status),
                     onExport: () => _export(context, ref, current.id),
@@ -330,7 +312,6 @@ class _CurrentPlanCard extends StatelessWidget {
     required this.onComplete,
     required this.onWithdraw,
     required this.onActivateNow,
-    required this.onEditScheduled,
     required this.onEditInPlace,
     required this.onDelete,
     required this.onExport,
@@ -351,7 +332,6 @@ class _CurrentPlanCard extends StatelessWidget {
   final VoidCallback onComplete;
   final VoidCallback onWithdraw;
   final VoidCallback onActivateNow;
-  final VoidCallback onEditScheduled;
   final VoidCallback onEditInPlace;
   final VoidCallback onDelete;
   final VoidCallback onExport;
@@ -421,8 +401,8 @@ class _CurrentPlanCard extends StatelessWidget {
     );
   }
 
-  /// MD-1: Attivo e Sospeso si modificano ora direttamente (`onEditInPlace`),
-  /// non solo il Programmato (`onEditScheduled`, via ritiro). CV-10:
+  /// CV-6, MD-1: Programmato, Attivo e Sospeso si modificano direttamente
+  /// (`onEditInPlace`), senza transizione di stato. CV-10:
   /// "Elimina" compare solo per il Sospeso — mai per l'Attivo (CV-11).
   List<_PlanAction> _actionsFor(BuildContext context, PlanStatus status) {
     final l10n = context.l10n;
@@ -443,7 +423,7 @@ class _CurrentPlanCard extends StatelessWidget {
           _PlanAction(l10n.planActionDelete, onDelete, destructive: true),
         ],
       PlanStatus.scheduled => [
-          _PlanAction(l10n.planActionEdit, onEditScheduled),
+          _PlanAction(l10n.planActionEdit, onEditInPlace),
           _PlanAction(l10n.planActionWithdraw, onWithdraw),
           _PlanAction(l10n.plansActivateNow, onActivateNow),
           _PlanAction(l10n.planActionExport, onExport),
@@ -465,9 +445,8 @@ class _PlanAction {
 /// interfaccia.md, "Voci dell'elenco"): una Bozza da riprendere, un altro
 /// Programmato oltre al più vicino (PA-9), o un piano Concluso. Il tocco
 /// apre la redazione per Bozza/Programmato, la vista di sola lettura per
-/// il Concluso; per un Programmato ulteriore non esiste ancora
-/// un'anteprima dedicata (assente da 7.1 per questo caso, non ancora
-/// incontrato in pratica), apre comunque la redazione.
+/// il Concluso. Il Programmato vi si modifica direttamente (CV-6), come
+/// dalla card, e il menu della redazione ne offre l'esportazione (PV-13).
 ///
 /// Nessun pulsante di eliminazione qui: accostato al tocco che apre il
 /// piano, il rischio di premerlo per errore era troppo alto (segnalato
