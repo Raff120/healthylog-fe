@@ -36,10 +36,12 @@ import 'widgets/slot_copy_sheet.dart';
 /// (PA-2) la navigazione sceglie prima la settimana, e il menu
 /// dell'intestazione ne aggiunge o ne toglie (PA-2bis).
 ///
-/// La stessa schermata serve anche la modifica di un piano Attivo o
-/// Sospeso (5.3 funzionale, MD-1): una striscia informativa avverte che
-/// le modifiche decorrono da oggi (MD-2, MD-3), e "Conferma piano" è
-/// sostituito da "Salva modifiche" (7.3 interfaccia.md). Il salvataggio
+/// La stessa schermata serve anche la modifica di un piano Programmato
+/// (CV-6), Attivo o Sospeso (5.3 funzionale, MD-1): "Conferma piano" è
+/// sostituito da "Salva modifiche" (7.3 interfaccia.md), e per i due
+/// piani in vigore una striscia informativa avverte che le modifiche
+/// decorrono da oggi (MD-2, MD-3) — il Programmato non è ancora in
+/// vigore, e le modifiche valgono per intero. Il salvataggio
 /// come template (TP-5, CD-18) e l'eliminazione (CV-10, CV-11) compaiono
 /// nel menu dell'intestazione, disponibili in ogni momento — l'una non
 /// condizionata alle modifiche pendenti, l'altra assente per l'Attivo,
@@ -213,8 +215,8 @@ class _DietPlanScheduleScreenState extends ConsumerState<DietPlanScheduleScreen>
     );
   }
 
-  /// MD-7: su un piano non più in Bozza (Attivo o Sospeso) uno schema
-  /// incompleto non si salva — a differenza della Bozza, dove restare
+  /// MD-7: su un piano non più in Bozza (Programmato, Attivo o Sospeso)
+  /// uno schema incompleto non si salva — a differenza della Bozza, dove restare
   /// incompleti durante la redazione è normale. Stessa verifica locale
   /// di `_confirm` (CD-15), applicata qui solo quando rilevante.
   Future<void> _save() async {
@@ -470,7 +472,7 @@ class _DietPlanScheduleScreenState extends ConsumerState<DietPlanScheduleScreen>
   }
 
   /// Fascia fissa in fondo, comune a "Conferma piano" (Bozza, CV-2) e
-  /// "Salva modifiche" (Attivo o Sospeso, MD-1) — cambia solo l'etichetta
+  /// "Salva modifiche" (Programmato, Attivo o Sospeso: CV-6, MD-1) — cambia solo l'etichetta
   /// e l'azione, non la disposizione.
   Widget _bottomActionBar({required String label, required bool loading, required VoidCallback? onPressed}) {
     final colors = context.colors;
@@ -658,14 +660,16 @@ class _DietPlanScheduleScreenState extends ConsumerState<DietPlanScheduleScreen>
                 );
               }
 
-              // MD-1, MD-2, MD-3, 7.3 interfaccia.md: la stessa schermata
-              // serve anche la modifica di un piano Attivo o Sospeso, con
-              // la sola striscia informativa in più e "Salva modifiche" al
-              // posto di "Conferma piano" — Programmato e Concluso non vi
-              // giungono mai (il primo passa per il ritiro, MD-1; il
-              // secondo ha la propria vista di sola lettura, 7.5), ma
-              // restano privi di fascia fissa per sicurezza.
+              // CV-6, MD-1, MD-2, MD-3, 7.3 interfaccia.md: la stessa
+              // schermata serve anche la modifica di un piano Programmato,
+              // Attivo o Sospeso, con "Salva modifiche" al posto di
+              // "Conferma piano". La striscia informativa è dei soli piani
+              // in vigore: il Programmato si modifica per intero, senza
+              // ritiro. Il Concluso non vi giunge mai (ha la propria vista
+              // di sola lettura, 7.5), ma resta privo di fascia fissa per
+              // sicurezza.
               final isActiveEdit = plan.status == PlanStatus.active || plan.status == PlanStatus.suspended;
+              final isConfirmedEdit = isActiveEdit || plan.status == PlanStatus.scheduled;
               final content = isActiveEdit
                   ? Column(children: [_buildActiveEditBanner(), Expanded(child: editor)])
                   : editor;
@@ -683,7 +687,7 @@ class _DietPlanScheduleScreenState extends ConsumerState<DietPlanScheduleScreen>
                 );
               }
 
-              if (isActiveEdit) {
+              if (isConfirmedEdit) {
                 return Column(
                   children: [
                     Expanded(child: content),

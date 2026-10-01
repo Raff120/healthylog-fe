@@ -182,14 +182,8 @@ class PatientDetailScreen extends ConsumerWidget {
               _PatientPlanCard(
                 plan: current,
                 acting: acting,
-                onEdit: () => current.status == PlanStatus.scheduled
-                    ? _act(context, ref, () async {
-                        await ref.read(dietPlanLifecycleControllerProvider.notifier).withdraw(current.id);
-                        if (!context.mounted) return;
-                        if (ref.read(dietPlanLifecycleControllerProvider)?.hasError ?? false) return;
-                        context.push('/diet-plans/${current.id}/schedule');
-                      })
-                    : context.push('/diet-plans/${current.id}/schedule'),
+                // CV-6, MD-1: anche il Programmato si modifica senza ritiro.
+                onEdit: () => context.push('/diet-plans/${current.id}/schedule'),
                 onSuspend: () => _act(context, ref, () => ref.read(dietPlanLifecycleControllerProvider.notifier).suspend(current.id)),
                 onResume: () => _act(context, ref, () => ref.read(dietPlanLifecycleControllerProvider.notifier).resume(current.id)),
                 onComplete: () async {

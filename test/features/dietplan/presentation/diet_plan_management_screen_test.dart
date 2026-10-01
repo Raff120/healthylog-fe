@@ -211,7 +211,7 @@ void main() {
     expect(find.text('Attiva ora'), findsOneWidget);
   });
 
-  testWidgets('"Modifica" ritira il piano e conduce alla redazione senza conferma propria (CV-6)', (tester) async {
+  testWidgets('"Modifica" conduce alla redazione del Programmato senza ritirarlo (CV-6)', (tester) async {
     final dio = Dio(BaseOptions(baseUrl: 'http://example.test'));
     var withdrawCalled = false;
     dio.httpClientAdapter = _JsonAdapter((options) {
@@ -228,7 +228,7 @@ void main() {
     await tester.tap(find.text('Modifica'));
     await tester.pumpAndSettle();
 
-    expect(withdrawCalled, isTrue);
+    expect(withdrawCalled, isFalse);
     expect(find.text('Redazione plan-1'), findsOneWidget);
   });
 
