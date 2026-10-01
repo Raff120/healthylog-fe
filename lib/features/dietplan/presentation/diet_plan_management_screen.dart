@@ -446,7 +446,7 @@ class _PlanAction {
 /// Programmato oltre al più vicino (PA-9), o un piano Concluso. Il tocco
 /// apre la redazione per Bozza/Programmato, la vista di sola lettura per
 /// il Concluso. Il Programmato vi si modifica direttamente (CV-6), come
-/// dalla card.
+/// dalla card, e il menu della redazione ne offre l'esportazione (PV-13).
 ///
 /// Nessun pulsante di eliminazione qui: accostato al tocco che apre il
 /// piano, il rischio di premerlo per errore era troppo alto (segnalato

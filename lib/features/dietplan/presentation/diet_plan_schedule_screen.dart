@@ -45,7 +45,8 @@ import 'widgets/slot_copy_sheet.dart';
 /// come template (TP-5, CD-18) e l'eliminazione (CV-10, CV-11) compaiono
 /// nel menu dell'intestazione, disponibili in ogni momento — l'una non
 /// condizionata alle modifiche pendenti, l'altra assente per l'Attivo,
-/// che CV-11 esclude.
+/// che CV-11 esclude. Per un piano già confermato il menu offre anche
+/// l'esportazione (PV-13).
 class DietPlanScheduleScreen extends ConsumerStatefulWidget {
   const DietPlanScheduleScreen({super.key, required this.planId});
 
@@ -276,6 +277,22 @@ class _DietPlanScheduleScreenState extends ConsumerState<DietPlanScheduleScreen>
     );
   }
 
+  /// PV-12, PV-13: l'esportazione dalla redazione, la stessa della card
+  /// del piano in corso. È il solo accesso per un Programmato che non sia
+  /// il piano in corso — una voce compatta, che apre direttamente qui.
+  Future<void> _export() async {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(context.l10n.planExportInProgress)),
+    );
+    await ref.read(dietPlanExportControllerProvider.notifier).export(widget.planId);
+    if (!mounted) return;
+    ref.read(dietPlanExportControllerProvider)?.whenOrNull(
+          error: (error, _) => ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(describeApiError(context, error.asApiException?.code ?? ''))),
+          ),
+        );
+  }
+
   /// CV-10, CV-11: eliminazione definitiva, assente dal menu per l'Attivo
   /// (vedi `build`) — il server la rifiuta comunque, questa è solo
   /// l'anticipazione in interfaccia della stessa regola.
@@ -502,6 +519,7 @@ class _DietPlanScheduleScreenState extends ConsumerState<DietPlanScheduleScreen>
     // li osserva).
     ref.watch(saveDietPlanAsTemplateControllerProvider);
     ref.watch(dietPlanLifecycleControllerProvider);
+    ref.watch(dietPlanExportControllerProvider);
     final confirming = ref.watch(confirmDietPlanControllerProvider)?.isLoading ?? false;
     // Inizializza `_days` prima dello Scaffold, non dentro il solo `data:`
     // del corpo: il menu "+" dell'intestazione ne ha bisogno fin dal primo
@@ -575,6 +593,7 @@ class _DietPlanScheduleScreenState extends ConsumerState<DietPlanScheduleScreen>
               onSelected: (value) {
                 if (value == 'edit-period') _editPeriod(planState.value!);
                 if (value == 'save-as-template') _saveAsTemplate(planState.value?.name ?? '');
+                if (value == 'export') _export();
                 if (value == 'delete') _delete(planState.value!.status);
                 if (value == 'add-week') _addWeek();
                 if (value == 'remove-week') _removeWeek();
@@ -590,6 +609,10 @@ class _DietPlanScheduleScreenState extends ConsumerState<DietPlanScheduleScreen>
                 if (planState.value != null && planState.value!.status != PlanStatus.completed)
                   PopupMenuItem(value: 'edit-period', child: Text(context.l10n.planPeriodEdit)),
                 PopupMenuItem(value: 'save-as-template', child: Text(context.l10n.scheduleSaveAsTemplate)),
+                // PV-13: un piano confermato si esporta anche da qui; la
+                // Bozza no, non essendo ancora un piano in corso.
+                if (planState.value != null && planState.value!.status != PlanStatus.draft)
+                  PopupMenuItem(value: 'export', child: Text(context.l10n.planActionExport)),
                 // CV-11: l'Attivo non compare, il server la rifiuterebbe comunque.
                 if (planState.value != null && planState.value!.status != PlanStatus.active)
                   PopupMenuItem(value: 'delete', child: Text(context.l10n.commonDelete, style: TextStyle(color: colors.error))),
