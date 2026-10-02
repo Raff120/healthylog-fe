@@ -76,7 +76,10 @@ class SelectedStatisticsDate extends _$SelectedStatisticsDate {
 /// AD-8quater: gli estremi dell'orizzonte *Intervallo*, inclusivi. Non
 /// conservati tra le sessioni, come la data di [SelectedStatisticsDate]:
 /// assenti finché non se ne scelgono.
-@riverpod
+///
+/// Mantenuto in vita: le date si scelgono prima di passare all'orizzonte,
+/// quando nessuno le osserva ancora, e senza ciò andrebbero perdute.
+@Riverpod(keepAlive: true)
 class SelectedStatisticsRange extends _$SelectedStatisticsRange {
   @override
   ({DateTime from, DateTime to})? build() => null;

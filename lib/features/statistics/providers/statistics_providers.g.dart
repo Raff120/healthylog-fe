@@ -278,6 +278,9 @@ abstract class _$SelectedStatisticsDate extends $Notifier<DateTime> {
 /// AD-8quater: gli estremi dell'orizzonte *Intervallo*, inclusivi. Non
 /// conservati tra le sessioni, come la data di [SelectedStatisticsDate]:
 /// assenti finché non se ne scelgono.
+///
+/// Mantenuto in vita: le date si scelgono prima di passare all'orizzonte,
+/// quando nessuno le osserva ancora, e senza ciò andrebbero perdute.
 
 @ProviderFor(SelectedStatisticsRange)
 final selectedStatisticsRangeProvider = SelectedStatisticsRangeProvider._();
@@ -285,6 +288,9 @@ final selectedStatisticsRangeProvider = SelectedStatisticsRangeProvider._();
 /// AD-8quater: gli estremi dell'orizzonte *Intervallo*, inclusivi. Non
 /// conservati tra le sessioni, come la data di [SelectedStatisticsDate]:
 /// assenti finché non se ne scelgono.
+///
+/// Mantenuto in vita: le date si scelgono prima di passare all'orizzonte,
+/// quando nessuno le osserva ancora, e senza ciò andrebbero perdute.
 final class SelectedStatisticsRangeProvider
     extends
         $NotifierProvider<
@@ -294,13 +300,16 @@ final class SelectedStatisticsRangeProvider
   /// AD-8quater: gli estremi dell'orizzonte *Intervallo*, inclusivi. Non
   /// conservati tra le sessioni, come la data di [SelectedStatisticsDate]:
   /// assenti finché non se ne scelgono.
+  ///
+  /// Mantenuto in vita: le date si scelgono prima di passare all'orizzonte,
+  /// quando nessuno le osserva ancora, e senza ciò andrebbero perdute.
   SelectedStatisticsRangeProvider._()
     : super(
         from: null,
         argument: null,
         retry: null,
         name: r'selectedStatisticsRangeProvider',
-        isAutoDispose: true,
+        isAutoDispose: false,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
@@ -324,11 +333,14 @@ final class SelectedStatisticsRangeProvider
 }
 
 String _$selectedStatisticsRangeHash() =>
-    r'2078063c73bd5c42530839a19ab3b5c051bf92c7';
+    r'0ecabd2f67192c253f853bb6c638ab92f03df0c4';
 
 /// AD-8quater: gli estremi dell'orizzonte *Intervallo*, inclusivi. Non
 /// conservati tra le sessioni, come la data di [SelectedStatisticsDate]:
 /// assenti finché non se ne scelgono.
+///
+/// Mantenuto in vita: le date si scelgono prima di passare all'orizzonte,
+/// quando nessuno le osserva ancora, e senza ciò andrebbero perdute.
 
 abstract class _$SelectedStatisticsRange
     extends $Notifier<({DateTime from, DateTime to})?> {
