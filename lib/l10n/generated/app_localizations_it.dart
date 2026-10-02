@@ -1276,6 +1276,12 @@ class L10nIt extends L10n {
   String get patientsSortBy => 'Ordina';
 
   @override
+  String get periodAll => 'Tutto';
+
+  @override
+  String get periodCustom => 'Intervallo';
+
+  @override
   String get periodMonth => 'Mese';
 
   @override
@@ -1927,6 +1933,14 @@ class L10nIt extends L10n {
   String get statisticsBody => 'Corpo';
 
   @override
+  String get statisticsChangeRange => 'Cambia intervallo';
+
+  @override
+  String statisticsDateRange(String start, String end) {
+    return 'Dal $start al $end';
+  }
+
+  @override
   String statisticsExclusionDaysSuspended(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
@@ -1992,6 +2006,11 @@ class L10nIt extends L10n {
 
   @override
   String get statisticsPreviousPeriod => 'Periodo precedente';
+
+  @override
+  String statisticsSince(String date) {
+    return 'Dal $date';
+  }
 
   @override
   String get statisticsUnavailable => 'Statistiche non disponibili';

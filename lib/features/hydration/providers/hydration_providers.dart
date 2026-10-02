@@ -60,7 +60,7 @@ class DailyWaterGoal extends _$DailyWaterGoal {
 @riverpod
 Future<WaterStatistics> waterStatistics(Ref ref, StatisticsQuery query) =>
     ref.watch(hydrationApiProvider).statistics(query.period,
-        date: query.date, planId: query.planId, userId: query.userId);
+        date: query.date, from: query.from, to: query.to, planId: query.planId, userId: query.userId);
 
 /// AQ-5, AQ-7, AQ-8: aggiunta e annullamento. Ogni esito rinnova la
 /// giornata e le statistiche per invalidazione, come i controller degli

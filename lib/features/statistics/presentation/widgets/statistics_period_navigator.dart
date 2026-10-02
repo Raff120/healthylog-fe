@@ -5,12 +5,15 @@ import '../../../../app/theme/app_spacing.dart';
 import '../../../../app/theme/theme_context.dart';
 import '../../../../l10n/formats.dart';
 import '../../../../l10n/l10n_context.dart';
+import '../../../identity/providers/profile_providers.dart';
 import '../../../dietplan/data/diet_plan.dart';
 import '../../../dietplan/domain/plan_day_date.dart';
 import '../../../dietplan/presentation/widgets/week_selector.dart' show weekRangeLabel;
 import '../../../dietplan/providers/diet_plan_providers.dart';
 import '../../data/statistics_models.dart';
 import '../../providers/statistics_providers.dart';
+import '../statistics_presentation.dart';
+import 'statistics_range_picker.dart';
 
 /// Navigazione fra i periodi di *Statistiche* (AD-8bis, 11.1
 /// interfaccia.md): il periodo osservato con le frecce verso quelli
@@ -25,6 +28,10 @@ import '../../providers/statistics_providers.dart';
 /// Settimana e mese si scorrono per data; l'orizzonte *Piano* scorre i
 /// piani che sono stati in vigore, dal più recente al più antico: là il
 /// periodo è il piano, e non una finestra di calendario.
+///
+/// AD-8quater: su *Tutto* e *Intervallo* non c'è nulla da scorrere, e il
+/// navigatore dichiara il solo periodo — su *Intervallo*, al tocco, se ne
+/// cambiano le date.
 class StatisticsPeriodNavigator extends ConsumerWidget {
   const StatisticsPeriodNavigator({super.key});
 
@@ -32,7 +39,12 @@ class StatisticsPeriodNavigator extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final period = ref.watch(selectedStatisticsPeriodProvider).value;
     if (period == null) return const SizedBox.shrink();
-    return period == StatisticsPeriod.plan ? const _PlanNavigator() : _DateNavigator(period: period);
+    return switch (period) {
+      StatisticsPeriod.plan => const _PlanNavigator(),
+      StatisticsPeriod.all => const _SinceRegistration(),
+      StatisticsPeriod.custom => const _ChosenRange(),
+      StatisticsPeriod.week || StatisticsPeriod.month => _DateNavigator(period: period),
+    };
   }
 }
 
@@ -102,6 +114,98 @@ class _PlanNavigator extends ConsumerWidget {
       onNext: hasNewer ? () => controller.select(navigable[index - 1].id) : null,
       onCurrent: index > 0 ? () => controller.select(null) : null,
       currentLabel: context.l10n.statisticsCurrentPlan,
+    );
+  }
+}
+
+/// *Tutto*: dal giorno della registrazione a oggi (AH-21). Finché il
+/// profilo non lo dichiara, il periodo resta detto per nome.
+class _SinceRegistration extends ConsumerWidget {
+  const _SinceRegistration();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final registeredOn = ref.watch(profileControllerProvider).value?.registeredOn;
+    return _FixedPeriodRow(
+      label: registeredOn == null
+          ? statisticsPeriodLabel(context, StatisticsPeriod.all)
+          : context.l10n.statisticsSince(formatDate(context, registeredOn)),
+    );
+  }
+}
+
+/// *Intervallo*: le due date scelte; il tocco riapre il selettore per
+/// cambiarle (11.1 interfaccia.md).
+class _ChosenRange extends ConsumerWidget {
+  const _ChosenRange();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final range = ref.watch(selectedStatisticsRangeProvider);
+    return _FixedPeriodRow(
+      label: range == null
+          ? statisticsPeriodLabel(context, StatisticsPeriod.custom)
+          : context.l10n.statisticsDateRange(formatDate(context, range.from), formatDate(context, range.to)),
+      onTap: () => pickStatisticsRange(context, ref),
+      tooltip: context.l10n.statisticsChangeRange,
+    );
+  }
+}
+
+/// Il periodo senza frecce, alto quanto la riga del navigatore perché il
+/// contenuto non salti cambiando orizzonte. Con [onTap] reca l'icona del
+/// calendario in accento, a dire che il periodo si cambia di lì.
+class _FixedPeriodRow extends StatelessWidget {
+  const _FixedPeriodRow({required this.label, this.onTap, this.tooltip});
+
+  final String label;
+  final VoidCallback? onTap;
+  final String? tooltip;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final typography = context.typography;
+
+    final content = Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Flexible(
+          child: Text(
+            label,
+            textAlign: TextAlign.center,
+            style: typography.bodyLarge.copyWith(color: colors.textPrimary),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+        if (onTap != null) ...[
+          const SizedBox(width: AppSpacing.xs),
+          Icon(Icons.date_range_outlined, size: 18, color: colors.accent),
+        ],
+      ],
+    );
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(minHeight: kMinInteractiveDimension),
+        child: Center(
+          child: onTap == null
+              ? content
+              : Tooltip(
+                  message: tooltip ?? '',
+                  child: InkWell(
+                    onTap: onTap,
+                    borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs, vertical: AppSpacing.xxs),
+                      child: content,
+                    ),
+                  ),
+                ),
+        ),
+      ),
     );
   }
 }

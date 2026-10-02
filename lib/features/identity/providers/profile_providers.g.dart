@@ -87,7 +87,7 @@ final class ProfileControllerProvider
   ProfileController create() => ProfileController();
 }
 
-String _$profileControllerHash() => r'8e7ff61c185594d5001731262f360f9038292028';
+String _$profileControllerHash() => r'533debbf92023613e2e7fb803e988fec968be4c8';
 
 /// Profilo dell'Utente autenticato (PR-1, PR-4, PR-6). Caricato al primo
 /// accesso alla schermata e aggiornato dopo ogni modifica riuscita, così

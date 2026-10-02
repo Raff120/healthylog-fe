@@ -29,6 +29,9 @@ String describePeriod(
       StatisticsPeriod.plan => planName == null
           ? context.l10n.statisticsWholePlan
           : context.l10n.statisticsPlanRange(planName, formatDate(context, from), formatDate(context, to)),
+      StatisticsPeriod.all => context.l10n.statisticsSince(formatDate(context, from)),
+      StatisticsPeriod.custom =>
+        context.l10n.statisticsDateRange(formatDate(context, from), formatDate(context, to)),
     };
 
 /// AD-12, AH-16: i giorni dell'intervallo osservato che il calcolo
