@@ -63,12 +63,16 @@ class HydrationApi {
   Future<WaterStatistics> statistics(
     StatisticsPeriod period, {
     DateTime? date,
+    DateTime? from,
+    DateTime? to,
     String? planId,
     String? userId,
   }) async {
     final response = await _dio.get('/statistics/water', queryParameters: {
       'period': period.param,
       if (date != null) 'date': _isoDate(date),
+      if (from != null) 'from': _isoDate(from),
+      if (to != null) 'to': _isoDate(to),
       if (planId != null) 'planId': planId,
       if (userId != null) 'userId': userId,
     });

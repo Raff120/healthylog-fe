@@ -117,12 +117,20 @@ class StatisticsScreen extends ConsumerWidget {
                   mode: mode,
                   query: StatisticsQuery(
                     period: selectedPeriod,
-                    // AD-8bis: la data cui l'orizzonte si riferisce.
-                    // L'orizzonte *Piano* non se ne serve: là il periodo è
-                    // il piano.
-                    date: selectedPeriod == StatisticsPeriod.plan
-                        ? null
-                        : ref.watch(selectedStatisticsDateProvider),
+                    // AD-8bis: la data cui l'orizzonte si riferisce. Se ne
+                    // servono settimana e mese soltanto: su *Piano* il
+                    // periodo è il piano, su *Tutto* e *Intervallo*
+                    // (AD-8quater) sono gli estremi.
+                    date: selectedPeriod == StatisticsPeriod.week || selectedPeriod == StatisticsPeriod.month
+                        ? ref.watch(selectedStatisticsDateProvider)
+                        : null,
+                    // AH-21: gli estremi dell'intervallo scelto.
+                    from: selectedPeriod == StatisticsPeriod.custom
+                        ? ref.watch(selectedStatisticsRangeProvider)?.from
+                        : null,
+                    to: selectedPeriod == StatisticsPeriod.custom
+                        ? ref.watch(selectedStatisticsRangeProvider)?.to
+                        : null,
                     // 7.5: fuori dal dettaglio di un piano concluso non si
                     // indica alcun piano, e il backend intende quello in
                     // corso (PA-8).

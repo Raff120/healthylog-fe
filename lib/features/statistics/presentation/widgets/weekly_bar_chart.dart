@@ -39,6 +39,11 @@ class BarDatum {
 /// (AN-12, 11.1). La barra non muta colore in alcuna circostanza: non
 /// esprime un giudizio (AD-15, SA-16).
 ///
+/// Quando le barre non stanno nella larghezza disponibile il grafico
+/// scorre orizzontalmente e si apre sulle più recenti, all'estremo destro
+/// (11.1): su *Tutto* e sugli intervalli ampi (AD-8quater) sono quelle
+/// che si cercano.
+///
 /// [referenceValue] disegna la linea orizzontale di riferimento
 /// dell'obiettivo (11.2), con le stesse modalità della linea del peso
 /// obiettivo (AN-6).
@@ -142,7 +147,7 @@ class _WeeklyBarChartState extends State<WeeklyBarChart> {
           ),
         );
         return scrollable
-            ? SingleChildScrollView(scrollDirection: Axis.horizontal, child: content)
+            ? SingleChildScrollView(scrollDirection: Axis.horizontal, reverse: true, child: content)
             : content;
       },
     );

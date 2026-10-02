@@ -827,6 +827,8 @@
   },
   "patientsSelect": "Seleziona un paziente",
   "patientsSortBy": "Ordina",
+  "periodAll": "Tutto",
+  "periodCustom": "Intervallo",
   "periodMonth": "Mese",
   "periodPlan": "Piano",
   "periodWeek": "Settimana",
@@ -1205,6 +1207,18 @@
   "statisticsAdherence": "Aderenza",
   "statisticsAppearWithPlan": "Le statistiche del piano compaiono quando ne esiste uno.",
   "statisticsBody": "Corpo",
+  "statisticsChangeRange": "Cambia intervallo",
+  "statisticsDateRange": "Dal {start} al {end}",
+  "@statisticsDateRange": {
+    "placeholders": {
+      "start": {
+        "type": "String"
+      },
+      "end": {
+        "type": "String"
+      }
+    }
+  },
   "statisticsExclusionDaysSuspended": "{count, plural, =1{1 giorno di sospensione} other{{count} giorni di sospensione}}",
   "@statisticsExclusionDaysSuspended": {
     "placeholders": {
@@ -1273,6 +1287,14 @@
   "statisticsCurrentPlan": "In corso",
   "statisticsNextPeriod": "Periodo successivo",
   "statisticsPreviousPeriod": "Periodo precedente",
+  "statisticsSince": "Dal {date}",
+  "@statisticsSince": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
   "statisticsUnavailable": "Statistiche non disponibili",
   "statisticsWeekRange": "Settimana dal {start} al {end}",
   "@statisticsWeekRange": {

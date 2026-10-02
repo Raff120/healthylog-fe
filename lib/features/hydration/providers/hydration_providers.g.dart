@@ -287,7 +287,7 @@ final class DailyWaterGoalProvider
   DailyWaterGoal create() => DailyWaterGoal();
 }
 
-String _$dailyWaterGoalHash() => r'a67a52e50d15f3b35dd23a02d5e2137655813671';
+String _$dailyWaterGoalHash() => r'093dcb105a90b7f836e6f749392d167321a75dc5';
 
 /// AQ-11: l'obiettivo giornaliero vigente, `null` se non impostato.
 
@@ -375,7 +375,7 @@ final class WaterStatisticsProvider
   }
 }
 
-String _$waterStatisticsHash() => r'57a991cb4af77b0c10bb9d5144880daed79b2672';
+String _$waterStatisticsHash() => r'7e4938fd7aa5d1a2888179faf4530af54efa13bf';
 
 /// 8.6: consumo medio e andamento giornaliero dell'orizzonte. Il criterio
 /// è quello comune alle statistiche, [userId] compreso — ammesso al solo
@@ -446,7 +446,7 @@ final class WaterIntakeControllerProvider
 }
 
 String _$waterIntakeControllerHash() =>
-    r'6e826d892a06be9050f2d9db59ad13af80c1f4ac';
+    r'0f890d71b5c98ddfb55aeceb4920ad6e07f23f60';
 
 /// AQ-5, AQ-7, AQ-8: aggiunta e annullamento. Ogni esito rinnova la
 /// giornata e le statistiche per invalidazione, come i controller degli
