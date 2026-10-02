@@ -2227,6 +2227,18 @@ abstract class L10n {
   /// **'Ordina'**
   String get patientsSortBy;
 
+  /// No description provided for @periodAll.
+  ///
+  /// In it, this message translates to:
+  /// **'Tutto'**
+  String get periodAll;
+
+  /// No description provided for @periodCustom.
+  ///
+  /// In it, this message translates to:
+  /// **'Intervallo'**
+  String get periodCustom;
+
   /// No description provided for @periodMonth.
   ///
   /// In it, this message translates to:
@@ -3343,6 +3355,18 @@ abstract class L10n {
   /// **'Corpo'**
   String get statisticsBody;
 
+  /// No description provided for @statisticsChangeRange.
+  ///
+  /// In it, this message translates to:
+  /// **'Cambia intervallo'**
+  String get statisticsChangeRange;
+
+  /// No description provided for @statisticsDateRange.
+  ///
+  /// In it, this message translates to:
+  /// **'Dal {start} al {end}'**
+  String statisticsDateRange(String start, String end);
+
   /// No description provided for @statisticsExclusionDaysSuspended.
   ///
   /// In it, this message translates to:
@@ -3420,6 +3444,12 @@ abstract class L10n {
   /// In it, this message translates to:
   /// **'Periodo precedente'**
   String get statisticsPreviousPeriod;
+
+  /// No description provided for @statisticsSince.
+  ///
+  /// In it, this message translates to:
+  /// **'Dal {date}'**
+  String statisticsSince(String date);
 
   /// No description provided for @statisticsUnavailable.
   ///

@@ -118,7 +118,7 @@ void main() {
 
   /// Il selettore del periodo sta nell'intestazione, accanto alle pillole
   /// dei segmenti: governa la schermata e non il contenuto.
-  testWidgets('il selettore del periodo apre i tre orizzonti (AD-8, AD-10)', (tester) async {
+  testWidgets('il selettore del periodo apre gli orizzonti (AD-8)', (tester) async {
     await _pumpStatistics(tester, adherence: _adherence(value: 75));
 
     // L'orizzonte in uso è dichiarato nell'intestazione; gli altri due
@@ -130,8 +130,8 @@ void main() {
     await tester.tap(find.text('Mese'));
     await tester.pumpAndSettle();
 
-    // AD-8: settimana, mese e intero piano; AD-10: nessun intervallo
-    // personalizzato.
+    // AD-8: settimana, mese e intero piano. I due ulteriori di
+    // AD-8quater sono verificati in `statistics_full_range_test.dart`.
     expect(find.text('Settimana'), findsOneWidget);
     expect(find.text('Mese'), findsWidgets);
     expect(find.text('Piano'), findsOneWidget);

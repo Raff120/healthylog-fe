@@ -7,10 +7,12 @@ import '../../../../app/theme/theme_context.dart';
 import '../../data/statistics_models.dart';
 import '../../providers/statistics_providers.dart';
 import '../statistics_presentation.dart';
+import 'statistics_range_picker.dart';
 
-/// Selettore del periodo (11.1 interfaccia.md, AD-8): *Settimana* ·
-/// *Mese* · *Piano*, comune ai tre segmenti e conservato tra le sessioni
-/// (3.2).
+/// Selettore del periodo (11.1 interfaccia.md, AD-8, AD-8quater):
+/// *Settimana* · *Mese* · *Piano* · *Tutto* · *Intervallo*, comune ai tre
+/// segmenti e conservato tra le sessioni (3.2) — *Intervallo* escluso,
+/// le cui date non si conservano.
 ///
 /// Sta nell'intestazione, a sinistra delle pillole dei segmenti, dove
 /// *Piano* tiene il selettore del membro del Gruppo (4.2): governa la
@@ -20,8 +22,9 @@ import '../statistics_presentation.dart';
 /// non c'era allora modo di cambiare orizzonte se non passando a un altro
 /// segmento (segnalato dall'utente, vedi decisioni.md).
 ///
-/// AD-10: gli orizzonti sono i tre di AD-8, senza intervallo
-/// personalizzato.
+/// AD-8quater: la schermata presenta le sole statistiche proprie, e vi
+/// sono perciò offerti anche *Tutto* e *Intervallo*; la sezione del
+/// Paziente presso il Nutrizionista non si vale di questo selettore.
 class StatisticsPeriodSelector extends ConsumerWidget {
   const StatisticsPeriodSelector({super.key});
 
@@ -44,7 +47,7 @@ class StatisticsPeriodSelector extends ConsumerWidget {
     return PopupMenuButton<StatisticsPeriod>(
       color: colors.surface,
       initialValue: current,
-      onSelected: (period) => _select(ref, period, current),
+      onSelected: (period) => _select(context, ref, period, current),
       itemBuilder: (_) => [
         for (final period in StatisticsPeriod.values)
           CheckedPopupMenuItem(
@@ -78,11 +81,19 @@ class StatisticsPeriodSelector extends ConsumerWidget {
   }
 
   Future<void> _select(
+    BuildContext context,
     WidgetRef ref,
     StatisticsPeriod period,
     StatisticsPeriod current,
   ) async {
-    if (period == current) return;
+    // AD-8quater: *Intervallo* chiede le date, anche quando è già in uso —
+    // sceglierlo di nuovo è cambiarle. Annullata la scelta, l'orizzonte
+    // resta com'era.
+    if (period == StatisticsPeriod.custom) {
+      if (!await pickStatisticsRange(context, ref)) return;
+    } else if (period == current) {
+      return;
+    }
     await ref.read(selectedStatisticsPeriodProvider.notifier).select(period);
     // ST-10: cambiando orizzonte l'alternanza fra complessivo e singolo
     // periodo non ha più oggetto.

@@ -4,8 +4,8 @@ import '../../workout/data/workout_activity.dart';
 import '../../workout/data/workout_models.dart' show Weekday;
 
 /// Orizzonte di calcolo delle statistiche (AD-8, SA-10, AN-13): settimana,
-/// mese o intero piano. AD-10: l'intervallo personalizzato non è previsto
-/// in v1.
+/// mese o intero piano. AD-8quater: dalla registrazione a oggi, ovvero
+/// l'intervallo scelto — sulle sole statistiche proprie.
 ///
 /// Le denominazioni non sono qui ma in
 /// `presentation/statistics_presentation.dart`: dipendono dalla lingua
@@ -13,11 +13,17 @@ import '../../workout/data/workout_models.dart' show Weekday;
 enum StatisticsPeriod {
   week('WEEK'),
   month('MONTH'),
-  plan('PLAN');
+  plan('PLAN'),
+  all('ALL'),
+  custom('CUSTOM');
 
   const StatisticsPeriod(this.param);
 
   final String param;
+
+  /// AD-8quater: lo scorrimento di AD-8bis non vi ha oggetto — su *Tutto*
+  /// non c'è altro da vedere, su *Intervallo* si scelgono nuove date.
+  bool get isNavigable => this == week || this == month || this == plan;
 
   static StatisticsPeriod fromParam(String value) =>
       StatisticsPeriod.values.firstWhere((period) => period.param == value, orElse: () => StatisticsPeriod.week);

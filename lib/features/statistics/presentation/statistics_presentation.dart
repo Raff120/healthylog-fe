@@ -5,12 +5,14 @@ import '../../../l10n/unit_system.dart';
 import '../../../l10n/units.dart';
 import '../data/statistics_models.dart';
 
-/// Denominazione dell'orizzonte di calcolo (AD-8) nella lingua
-/// selezionata (LO-1).
+/// Denominazione dell'orizzonte di calcolo (AD-8, AD-8quater) nella
+/// lingua selezionata (LO-1).
 String statisticsPeriodLabel(BuildContext context, StatisticsPeriod period) => switch (period) {
       StatisticsPeriod.week => context.l10n.periodWeek,
       StatisticsPeriod.month => context.l10n.periodMonth,
       StatisticsPeriod.plan => context.l10n.periodPlan,
+      StatisticsPeriod.all => context.l10n.periodAll,
+      StatisticsPeriod.custom => context.l10n.periodCustom,
     };
 
 /// Denominazione della grandezza corporea (AN-1) nella lingua selezionata.

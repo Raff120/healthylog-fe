@@ -25,6 +25,7 @@ class Profile {
     required this.privacyAcceptanceRequired,
     required this.deletionRequestedAt,
     required this.deletionEffectiveAt,
+    this.registeredOn,
   });
 
   factory Profile.fromJson(Map<String, dynamic> json) => Profile(
@@ -49,6 +50,7 @@ class Profile {
         deletionEffectiveAt: json['deletionEffectiveAt'] == null
             ? null
             : DateTime.parse(json['deletionEffectiveAt'] as String).toLocal(),
+        registeredOn: json['registeredOn'] == null ? null : DateTime.parse(json['registeredOn'] as String),
       );
 
   final String id;
@@ -87,6 +89,11 @@ class Profile {
 
   /// PV-17: quando la cancellazione diventa definitiva.
   final DateTime? deletionEffectiveAt;
+
+  /// AH-21: il giorno della registrazione, da cui decorre l'orizzonte
+  /// *Tutto* delle statistiche (AD-8quater). Assente da un backend che
+  /// non lo dichiari ancora.
+  final DateTime? registeredOn;
 
   bool get isDeletionPending => deletionRequestedAt != null;
 }

@@ -110,6 +110,9 @@ abstract class _$SelectedStatisticsView extends $Notifier<StatisticsViewMode> {
 /// dell'utente, vedi decisioni.md): su una settimana sola l'andamento non
 /// si vede — la sezione settimanale di AD-14 non compare nemmeno — e le
 /// misurazioni corporee, che si registrano di rado, cadono spesso fuori.
+///
+/// AD-8quater: *Intervallo* non sopravvive alla riapertura, perché le sue
+/// date non si conservano ([SelectedStatisticsRange]); vi si torna al mese.
 
 @ProviderFor(SelectedStatisticsPeriod)
 final selectedStatisticsPeriodProvider = SelectedStatisticsPeriodProvider._();
@@ -121,6 +124,9 @@ final selectedStatisticsPeriodProvider = SelectedStatisticsPeriodProvider._();
 /// dell'utente, vedi decisioni.md): su una settimana sola l'andamento non
 /// si vede — la sezione settimanale di AD-14 non compare nemmeno — e le
 /// misurazioni corporee, che si registrano di rado, cadono spesso fuori.
+///
+/// AD-8quater: *Intervallo* non sopravvive alla riapertura, perché le sue
+/// date non si conservano ([SelectedStatisticsRange]); vi si torna al mese.
 final class SelectedStatisticsPeriodProvider
     extends $AsyncNotifierProvider<SelectedStatisticsPeriod, StatisticsPeriod> {
   /// 11.1: il selettore del periodo è comune ai tre segmenti ed è
@@ -130,6 +136,9 @@ final class SelectedStatisticsPeriodProvider
   /// dell'utente, vedi decisioni.md): su una settimana sola l'andamento non
   /// si vede — la sezione settimanale di AD-14 non compare nemmeno — e le
   /// misurazioni corporee, che si registrano di rado, cadono spesso fuori.
+  ///
+  /// AD-8quater: *Intervallo* non sopravvive alla riapertura, perché le sue
+  /// date non si conservano ([SelectedStatisticsRange]); vi si torna al mese.
   SelectedStatisticsPeriodProvider._()
     : super(
         from: null,
@@ -150,7 +159,7 @@ final class SelectedStatisticsPeriodProvider
 }
 
 String _$selectedStatisticsPeriodHash() =>
-    r'b7282804b34869fe69eb9ae7d839d4b17262383e';
+    r'8cd2713e5137c7d689c9c0aec25891f5904bfbd9';
 
 /// 11.1: il selettore del periodo è comune ai tre segmenti ed è
 /// conservato tra le sessioni (3.2), come la preferenza del tema.
@@ -159,6 +168,9 @@ String _$selectedStatisticsPeriodHash() =>
 /// dell'utente, vedi decisioni.md): su una settimana sola l'andamento non
 /// si vede — la sezione settimanale di AD-14 non compare nemmeno — e le
 /// misurazioni corporee, che si registrano di rado, cadono spesso fuori.
+///
+/// AD-8quater: *Intervallo* non sopravvive alla riapertura, perché le sue
+/// date non si conservano ([SelectedStatisticsRange]); vi si torna al mese.
 
 abstract class _$SelectedStatisticsPeriod
     extends $AsyncNotifier<StatisticsPeriod> {
@@ -256,6 +268,100 @@ abstract class _$SelectedStatisticsDate extends $Notifier<DateTime> {
             as $ClassProviderElement<
               AnyNotifier<DateTime, DateTime>,
               DateTime,
+              Object?,
+              Object?
+            >;
+    return element.handleCreate(ref, build);
+  }
+}
+
+/// AD-8quater: gli estremi dell'orizzonte *Intervallo*, inclusivi. Non
+/// conservati tra le sessioni, come la data di [SelectedStatisticsDate]:
+/// assenti finché non se ne scelgono.
+///
+/// Mantenuto in vita: le date si scelgono prima di passare all'orizzonte,
+/// quando nessuno le osserva ancora, e senza ciò andrebbero perdute.
+
+@ProviderFor(SelectedStatisticsRange)
+final selectedStatisticsRangeProvider = SelectedStatisticsRangeProvider._();
+
+/// AD-8quater: gli estremi dell'orizzonte *Intervallo*, inclusivi. Non
+/// conservati tra le sessioni, come la data di [SelectedStatisticsDate]:
+/// assenti finché non se ne scelgono.
+///
+/// Mantenuto in vita: le date si scelgono prima di passare all'orizzonte,
+/// quando nessuno le osserva ancora, e senza ciò andrebbero perdute.
+final class SelectedStatisticsRangeProvider
+    extends
+        $NotifierProvider<
+          SelectedStatisticsRange,
+          ({DateTime from, DateTime to})?
+        > {
+  /// AD-8quater: gli estremi dell'orizzonte *Intervallo*, inclusivi. Non
+  /// conservati tra le sessioni, come la data di [SelectedStatisticsDate]:
+  /// assenti finché non se ne scelgono.
+  ///
+  /// Mantenuto in vita: le date si scelgono prima di passare all'orizzonte,
+  /// quando nessuno le osserva ancora, e senza ciò andrebbero perdute.
+  SelectedStatisticsRangeProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'selectedStatisticsRangeProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$selectedStatisticsRangeHash();
+
+  @$internal
+  @override
+  SelectedStatisticsRange create() => SelectedStatisticsRange();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(({DateTime from, DateTime to})? value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<({DateTime from, DateTime to})?>(
+        value,
+      ),
+    );
+  }
+}
+
+String _$selectedStatisticsRangeHash() =>
+    r'0ecabd2f67192c253f853bb6c638ab92f03df0c4';
+
+/// AD-8quater: gli estremi dell'orizzonte *Intervallo*, inclusivi. Non
+/// conservati tra le sessioni, come la data di [SelectedStatisticsDate]:
+/// assenti finché non se ne scelgono.
+///
+/// Mantenuto in vita: le date si scelgono prima di passare all'orizzonte,
+/// quando nessuno le osserva ancora, e senza ciò andrebbero perdute.
+
+abstract class _$SelectedStatisticsRange
+    extends $Notifier<({DateTime from, DateTime to})?> {
+  ({DateTime from, DateTime to})? build();
+  @$mustCallSuper
+  @override
+  WhenComplete runBuild() {
+    final ref =
+        this.ref
+            as $Ref<
+              ({DateTime from, DateTime to})?,
+              ({DateTime from, DateTime to})?
+            >;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<
+                ({DateTime from, DateTime to})?,
+                ({DateTime from, DateTime to})?
+              >,
+              ({DateTime from, DateTime to})?,
               Object?,
               Object?
             >;
@@ -393,7 +499,7 @@ final class AdherenceStatisticsProvider
 }
 
 String _$adherenceStatisticsHash() =>
-    r'f247ac00e54e7a42dcac4843c14d1722d2ee9ade';
+    r'418ed41d5141fb39f1712430992508a04a9755cc';
 
 /// 8.2: l'aderenza dell'orizzonte richiesto.
 
@@ -483,7 +589,7 @@ final class WorkoutStatisticsProvider
   }
 }
 
-String _$workoutStatisticsHash() => r'0f682665d1dc66fa5b95c20758fb21af50c7c570';
+String _$workoutStatisticsHash() => r'2d39fe198381519ca0a486026af82462b52ad977';
 
 /// 8.3: frequenza degli allenamenti e confronti.
 
@@ -574,7 +680,7 @@ final class MeasurementStatisticsProvider
 }
 
 String _$measurementStatisticsHash() =>
-    r'a7150b5a375daf42aca7b441b9f3f4cba42c2aed';
+    r'e00f813e18e48b0338d279346e229a0c12ba67fa';
 
 /// 8.4: andamento di peso e misure.
 

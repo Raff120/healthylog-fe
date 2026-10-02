@@ -33,12 +33,16 @@ class SelectedStatisticsView extends _$SelectedStatisticsView {
 /// dell'utente, vedi decisioni.md): su una settimana sola l'andamento non
 /// si vede — la sezione settimanale di AD-14 non compare nemmeno — e le
 /// misurazioni corporee, che si registrano di rado, cadono spesso fuori.
+///
+/// AD-8quater: *Intervallo* non sopravvive alla riapertura, perché le sue
+/// date non si conservano ([SelectedStatisticsRange]); vi si torna al mese.
 @riverpod
 class SelectedStatisticsPeriod extends _$SelectedStatisticsPeriod {
   @override
   Future<StatisticsPeriod> build() async {
     final stored = await ref.watch(preferencesStoreProvider).read(_periodKey);
-    return stored == null ? StatisticsPeriod.month : StatisticsPeriod.fromParam(stored);
+    final period = stored == null ? StatisticsPeriod.month : StatisticsPeriod.fromParam(stored);
+    return period == StatisticsPeriod.custom ? StatisticsPeriod.month : period;
   }
 
   Future<void> select(StatisticsPeriod period) async {
@@ -69,6 +73,23 @@ class SelectedStatisticsDate extends _$SelectedStatisticsDate {
   }
 }
 
+/// AD-8quater: gli estremi dell'orizzonte *Intervallo*, inclusivi. Non
+/// conservati tra le sessioni, come la data di [SelectedStatisticsDate]:
+/// assenti finché non se ne scelgono.
+///
+/// Mantenuto in vita: le date si scelgono prima di passare all'orizzonte,
+/// quando nessuno le osserva ancora, e senza ciò andrebbero perdute.
+@Riverpod(keepAlive: true)
+class SelectedStatisticsRange extends _$SelectedStatisticsRange {
+  @override
+  ({DateTime from, DateTime to})? build() => null;
+
+  void select(DateTime from, DateTime to) => state = (
+        from: DateTime(from.year, from.month, from.day),
+        to: DateTime(to.year, to.month, to.day),
+      );
+}
+
 /// Il piano su cui riferire l'orizzonte *Piano*: quello indicato dal
 /// dettaglio di un piano concluso (7.5), altrimenti assente — e il
 /// backend intende allora quello in corso (PA-8).
@@ -84,13 +105,17 @@ class SelectedStatisticsPlan extends _$SelectedStatisticsPlan {
 /// [userId] è ammesso al solo Nutrizionista sul proprio Paziente (EP-4,
 /// ST-16bis).
 class StatisticsQuery {
-  const StatisticsQuery({required this.period, this.date, this.planId, this.userId});
+  const StatisticsQuery({required this.period, this.date, this.from, this.to, this.planId, this.userId});
 
   final StatisticsPeriod period;
 
   /// AD-8bis: la data cui l'orizzonte si riferisce. Assente vale oggi, che
   /// è quanto il backend intende in sua assenza.
   final DateTime? date;
+
+  /// AH-21: gli estremi dell'orizzonte *Intervallo*, inclusivi.
+  final DateTime? from;
+  final DateTime? to;
 
   final String? planId;
   final String? userId;
@@ -100,30 +125,35 @@ class StatisticsQuery {
       other is StatisticsQuery &&
       other.period == period &&
       other.date == date &&
+      other.from == from &&
+      other.to == to &&
       other.planId == planId &&
       other.userId == userId;
 
   @override
-  int get hashCode => Object.hash(period, date, planId, userId);
+  int get hashCode => Object.hash(period, date, from, to, planId, userId);
 }
 
 /// 8.2: l'aderenza dell'orizzonte richiesto.
 @riverpod
 Future<AdherenceStatistics> adherenceStatistics(Ref ref, StatisticsQuery query) => ref
     .watch(statisticsApiProvider)
-    .adherence(query.period, date: query.date, planId: query.planId, userId: query.userId);
+    .adherence(query.period,
+        date: query.date, from: query.from, to: query.to, planId: query.planId, userId: query.userId);
 
 /// 8.3: frequenza degli allenamenti e confronti.
 @riverpod
 Future<WorkoutStatistics> workoutStatistics(Ref ref, StatisticsQuery query) => ref
     .watch(statisticsApiProvider)
-    .workouts(query.period, date: query.date, planId: query.planId, userId: query.userId);
+    .workouts(query.period,
+        date: query.date, from: query.from, to: query.to, planId: query.planId, userId: query.userId);
 
 /// 8.4: andamento di peso e misure.
 @riverpod
 Future<MeasurementStatistics> measurementStatistics(Ref ref, StatisticsQuery query) => ref
     .watch(statisticsApiProvider)
-    .measurements(query.period, date: query.date, planId: query.planId, userId: query.userId);
+    .measurements(query.period,
+        date: query.date, from: query.from, to: query.to, planId: query.planId, userId: query.userId);
 
 /// AN-4, 11.3: l'elenco tabellare delle misurazioni del periodo, in coda
 /// al grafico, dove ora si registrano e si modificano. Distinto da

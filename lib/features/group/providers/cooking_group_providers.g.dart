@@ -400,7 +400,7 @@ final class CreateCookingGroupControllerProvider
 }
 
 String _$createCookingGroupControllerHash() =>
-    r'8782fa41142e3ec6576e55d9aaac42fd4e1ee68f';
+    r'5b9fafa911c2aff0f2045c4b34847f4e95ed6e72';
 
 /// GE-1, GE-2: creazione del Gruppo.
 
@@ -469,7 +469,7 @@ final class JoinCookingGroupControllerProvider
 }
 
 String _$joinCookingGroupControllerHash() =>
-    r'4504a28d4cf4754aedd51a62205ff1a58dd6168b';
+    r'34d78cf445be1cf9a0783a1fb60a6d8f24d62734';
 
 /// GR-9, GR-10, GR-11: adesione tramite codice, dopo la conferma esplicita
 /// raccolta dal foglio di adesione (l'anteprima l'ha già mostrata).
@@ -536,7 +536,7 @@ final class RenameCookingGroupControllerProvider
 }
 
 String _$renameCookingGroupControllerHash() =>
-    r'4c2665774d2e5c1c93632207696cfa12c7631b65';
+    r'1d804e7c457bfb9c3de2baf0ca9b6cf82e882b02';
 
 /// GE-12, GR-1: modifica della denominazione.
 
@@ -601,7 +601,7 @@ final class LeaveCookingGroupControllerProvider
 }
 
 String _$leaveCookingGroupControllerHash() =>
-    r'0177448f3bb5d7d2071a5ba33d997579eb854745';
+    r'2bdf6a2bd184ef8db244c928074cec7f210d97e9';
 
 /// GE-12, UT-14: uscita volontaria — a scioglimento avvenuto o meno, il
 /// Gruppo dell'Utente non è più quello di prima (`invalidate`).
@@ -664,7 +664,7 @@ final class DissolveCookingGroupControllerProvider
 }
 
 String _$dissolveCookingGroupControllerHash() =>
-    r'94ba29273ff6b026ec5d871b621f8569b8ee8a28';
+    r'8b781f44790c02fc45f9b715872989f7ae5f31e6';
 
 /// GE-12: scioglimento esplicito, riservato al Proprietario.
 
@@ -729,7 +729,7 @@ final class RemoveGroupMemberControllerProvider
 }
 
 String _$removeGroupMemberControllerHash() =>
-    r'32e03fd77dc73f53331800dd9b9fd60036cccc42';
+    r'f55605ba91135a3800b04e73ebc0149c55381c7d';
 
 /// GE-6: rimozione di un membro, riservata al Proprietario.
 
@@ -795,7 +795,7 @@ final class UpdateGroupMemberControllerProvider
 }
 
 String _$updateGroupMemberControllerHash() =>
-    r'a79e430cdd453a8bfb2484a0b06a25dd2d7fee65';
+    r'a6d7363403386df02ece53784720860bbab4345f';
 
 /// GE-7, GE-8: promozione a Cuoco o revoca del privilegio.
 
@@ -862,7 +862,7 @@ final class TransferGroupOwnershipControllerProvider
 }
 
 String _$transferGroupOwnershipControllerHash() =>
-    r'7896131f7fc02a4572cf0c95c26d437ea5c25d4d';
+    r'2f01b3ca7af46509926d6ee3a3c46196eadbd513';
 
 /// GE-9, GR-15: trasferimento volontario della proprietà.
 
@@ -934,7 +934,7 @@ final class GenerateInviteCodeControllerProvider
 }
 
 String _$generateInviteCodeControllerHash() =>
-    r'd147fb479a84ef0628eef890384f58615dff4617';
+    r'7b657e1a3b67f9e40970f4eddc8fdbe772a43e92';
 
 /// GR-7, GR-8: generazione di un nuovo codice — la stessa chiamata serve
 /// sia la prima generazione sia la rigenerazione (invalida quello
@@ -998,7 +998,7 @@ final class RevokeInviteCodeControllerProvider
 }
 
 String _$revokeInviteCodeControllerHash() =>
-    r'bc6cc1b73ab50b5f6d443c05c0b8765e13fde843';
+    r'28f7363eccfb1b8db64f5b03baf1308b0177d5c2';
 
 /// GR-7: revoca esplicita, senza generarne uno nuovo.
 
