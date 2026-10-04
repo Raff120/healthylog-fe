@@ -223,6 +223,12 @@ void main() {
   testWidgets('dalla giornaliera, «Scambia la giornata» porta alla settimanale in selezione (3.3)', (tester) async {
     final adapter = _Adapter(nextWeekStart);
     await pump(tester, adapter);
+    // Non la giornata corrente, che di domenica non ha nella propria
+    // settimana alcuna giornata con cui scambiarsi (IN-8) e non offrirebbe
+    // il comando: il martedì della settimana successiva lo ha sempre.
+    final container = ProviderScope.containerOf(tester.element(find.byType(PlanScreen)));
+    container.read(selectedDayProvider.notifier).select(nextWeekStart.add(const Duration(days: 1)));
+    await tester.pumpAndSettle();
 
     await tester.tap(find.byTooltip('Altre azioni'));
     await tester.pumpAndSettle();
@@ -230,7 +236,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Scegli con quale giornata scambiarla'), findsOneWidget);
-    expect(find.text('Pasto di ${_labels[dateOnly(DateTime.now()).weekday - 1]}'), findsOneWidget);
+    expect(find.text('Pasto di martedì'), findsOneWidget);
   });
 
   /// 6.5: avviata dalla giornaliera, la selezione vi riporta al termine,
