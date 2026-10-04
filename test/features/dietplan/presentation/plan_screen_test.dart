@@ -58,6 +58,32 @@ class _JsonAdapter implements HttpClientAdapter {
   }
 }
 
+/// Come [_JsonAdapter], registrando le richieste: serve a verificare che
+/// la spunta raggiunga il server (SP-11).
+class _RecordingJsonAdapter extends _JsonAdapter {
+  _RecordingJsonAdapter(super.body);
+
+  final requests = <RequestOptions>[];
+
+  @override
+  Future<ResponseBody> fetch(
+    RequestOptions options,
+    Stream<Uint8List>? requestStream,
+    Future<void>? cancelFuture,
+  ) {
+    requests.add(options);
+    // I piani posseduti, che la striscia della sospensione consulta: un
+    // elenco vuoto, così che la lettura non fallisca per rete e non
+    // faccia credere l'applicazione offline (OF-20).
+    if (options.path == '/diet-plans') {
+      return Future.value(ResponseBody.fromString('[]', 200, headers: {
+        Headers.contentTypeHeader: [Headers.jsonContentType],
+      }));
+    }
+    return super.fetch(options, requestStream, cancelFuture);
+  }
+}
+
 /// La data rispecchia sempre quella richiesta (EP-3): coincide qui con
 /// l'apertura della vista sulla giornata corrente (VG-2), la sola
 /// interrogata dagli adattatori a corpo fisso di questo file.
@@ -385,10 +411,11 @@ Map<String, dynamic> _dayJsonFor(String date, String content) => {
 
 Future<void> _pumpDailyView(
   WidgetTester tester,
-  Map<String, dynamic> dayJson,
-) async {
+  Map<String, dynamic> dayJson, {
+  HttpClientAdapter? adapter,
+}) async {
   final dio = Dio(BaseOptions(baseUrl: 'http://example.test'));
-  dio.httpClientAdapter = _JsonAdapter(dayJson);
+  dio.httpClientAdapter = adapter ?? _JsonAdapter(dayJson);
   dio.interceptors.add(ApiErrorInterceptor());
 
   await tester.pumpWidget(
@@ -401,6 +428,7 @@ Future<void> _pumpDailyView(
         workoutApiProvider.overrideWithValue(stubWorkoutApi()),
         hydrationApiProvider.overrideWithValue(stubHydrationApi()),
         planDayApiProvider.overrideWithValue(PlanDayApi(dio)),
+        if (adapter != null) dietPlanApiProvider.overrideWithValue(DietPlanApi(dio)),
         cookingGroupApiProvider.overrideWithValue(_noGroupCookingGroupApi()),
         appDatabaseProvider.overrideWithValue(
           AppDatabase(NativeDatabase.memory()),
@@ -976,6 +1004,27 @@ void main() {
       expect(find.text('Yogurt e cereali'), findsOneWidget);
     },
   );
+
+  /// SP-11 (rivisto, vedi decisioni.md): la spunta è ammessa su ogni
+  /// giornata coperta da un piano, qualunque ne sia lo stato. Il caso
+  /// segnalato era l'ultimo giorno di un piano dato per Concluso.
+  for (final coverage in ['COMPLETED', 'SCHEDULED', 'SUSPENDED']) {
+    testWidgets('si spunta anche su un piano $coverage (SP-11)', (tester) async {
+      final day = _dayJson()
+        ..['coverage'] = coverage
+        ..['planEndDate'] = '2026-10-04';
+      final adapter = _RecordingJsonAdapter(day);
+
+      await _pumpDailyView(tester, day, adapter: adapter);
+      await tester.tap(find.byIcon(Icons.check).first);
+      await tester.pumpAndSettle();
+
+      final patches = adapter.requests.where((request) => request.method == 'PATCH').toList();
+      expect(patches, hasLength(1));
+      expect(patches.single.path, endsWith('/slots/s1'));
+      expect(patches.single.data, {'status': 'CONSUMED', 'replacementNote': null});
+    });
+  }
 
   testWidgets(
     'un piano Programmato o Concluso senza pasti in quel giorno mostra comunque la striscia informativa (VG-18, GG-7)',
