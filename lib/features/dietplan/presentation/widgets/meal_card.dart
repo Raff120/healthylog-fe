@@ -576,7 +576,7 @@ class _SpuntaButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    return Material(
+    final button = Material(
       color: Colors.transparent,
       borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
       child: InkWell(
@@ -597,6 +597,16 @@ class _SpuntaButton extends StatelessWidget {
           ),
         ),
       ),
+    );
+    if (enabled || onDisabledTap != null) return button;
+    // 4.1: disabilitato e senza spiegazione da dare, il tocco si ferma
+    // qui. Lasciato passare, raggiungerebbe la card, che si aprirebbe e
+    // chiuderebbe come se il pulsante non ci fosse (segnalato
+    // dall'utente, vedi decisioni.md).
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: () {},
+      child: button,
     );
   }
 }
