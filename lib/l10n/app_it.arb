@@ -941,7 +941,14 @@
   "planStatusScheduled": "Programmato",
   "planStatusSuspended": "Sospeso",
   "planSuspended": "Piano sospeso",
-  "planSuspendedHint": "Riprenderà quando lo deciderai",
+  "planSuspendedSince": "Piano sospeso dal {date}",
+  "@planSuspendedSince": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
   "planViewDaySwap": "{first} ↔ {second} · giornata intera",
   "@planViewDaySwap": {
     "description": "IN-32: voce dello storico per l'inversione di giornate intere.",

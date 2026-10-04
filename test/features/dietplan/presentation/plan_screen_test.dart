@@ -993,7 +993,7 @@ void main() {
   );
 
   testWidgets(
-    'una giornata sospesa non presenta alcuno slot e offre "Riprendi" (VG-18, CV-S3)',
+    'una giornata sospesa presenta gli slot e offre "Riprendi" (VG-18, CV-S3)',
     (tester) async {
       var suspended = true;
       // CV-S6: la giornata cambia esito dopo la ripresa, non un corpo fisso.
@@ -1066,9 +1066,10 @@ void main() {
       );
       await tester.pumpAndSettle();
 
+      // CV-S3 (rivisto, vedi decisioni.md): la striscia dichiara la
+      // sospensione, e gli slot restano presenti e spuntabili (SP-11).
       expect(find.text('Piano sospeso'), findsOneWidget);
-      expect(find.text('Riprenderà quando lo deciderai'), findsOneWidget);
-      expect(find.text('Yogurt e cereali'), findsNothing);
+      expect(find.text('Yogurt e cereali'), findsOneWidget);
 
       await tester.tap(find.text('Riprendi'));
       await tester.pumpAndSettle();

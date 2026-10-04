@@ -1526,7 +1526,9 @@ class L10nIt extends L10n {
   String get planSuspended => 'Piano sospeso';
 
   @override
-  String get planSuspendedHint => 'Riprenderà quando lo deciderai';
+  String planSuspendedSince(String date) {
+    return 'Piano sospeso dal $date';
+  }
 
   @override
   String planViewDaySwap(String first, String second) {

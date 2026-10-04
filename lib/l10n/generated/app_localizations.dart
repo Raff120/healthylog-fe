@@ -2683,11 +2683,11 @@ abstract class L10n {
   /// **'Piano sospeso'**
   String get planSuspended;
 
-  /// No description provided for @planSuspendedHint.
+  /// No description provided for @planSuspendedSince.
   ///
   /// In it, this message translates to:
-  /// **'Riprenderà quando lo deciderai'**
-  String get planSuspendedHint;
+  /// **'Piano sospeso dal {date}'**
+  String planSuspendedSince(String date);
 
   /// IN-32: voce dello storico per l'inversione di giornate intere.
   ///
