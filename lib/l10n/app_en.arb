@@ -431,7 +431,7 @@
   "planStatusScheduled": "Scheduled",
   "planStatusSuspended": "Suspended",
   "planSuspended": "Plan suspended",
-  "planSuspendedHint": "It resumes when you decide",
+  "planSuspendedSince": "Plan suspended since {date}",
   "planViewDaySwap": "{first} ↔ {second} · whole day",
   "planViewNoSwaps": "No swaps on this plan.",
   "planViewOngoing": "ongoing",

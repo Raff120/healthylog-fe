@@ -306,12 +306,12 @@ class _WeeklyTab extends StatelessWidget {
   }
 }
 
-/// VG-18, PA-10: natura della giornata quando non ordinaria. Sospensione
-/// e assenza di piano sostituiscono l'intero contenuto con lo stato
-/// vuoto previsto da 4.4 interfaccia.md; programmato e concluso restano
-/// visibili con la striscia informativa di 6.1 sopra il contenuto — non
-/// sono condizioni che impediscono la consultazione, solo che la
-/// segnalano.
+/// VG-18, PA-10: natura della giornata quando non ordinaria. L'assenza di
+/// piano sostituisce l'intero contenuto con lo stato vuoto previsto da 4.4
+/// interfaccia.md; sospeso, programmato e concluso restano visibili con la
+/// striscia informativa di 6.1 sopra il contenuto — non sono condizioni
+/// che impediscono la consultazione né la spunta (CV-S3, SP-11), solo che
+/// la segnalano.
 class _DayContent extends ConsumerWidget {
   const _DayContent({super.key, required this.day});
 
@@ -371,27 +371,6 @@ class _MealsContent extends ConsumerWidget {
     final canManage = !readOnly && !ref.watch(isPlanLockedProvider(day.planId));
     final canCreate = !readOnly && canCreateOwnPlan(careLink);
     switch (day.coverage) {
-      case PlanDayCoverage.suspended:
-        // ref.watch (non solo read) tiene vivo il controller autoDispose
-        // per la durata dell'operazione, oltre a pilotare l'indicatore
-        // di attesa del pulsante (2.6).
-        final resuming =
-            ref.watch(dietPlanLifecycleControllerProvider)?.isLoading ?? false;
-        return EmptyStateView(
-          icon: Icons.pause_circle_outline,
-          title: context.l10n.planSuspended,
-          text: context.l10n.planSuspendedHint,
-          actionLabel: canManage ? context.l10n.planActionResume : null,
-          actionLoading: resuming,
-          onAction: !canManage
-              ? null
-              : () async {
-                  await ref
-                      .read(dietPlanLifecycleControllerProvider.notifier)
-                      .resume(day.planId!);
-                  ref.invalidate(planDayProvider(day.date));
-                },
-        );
       case PlanDayCoverage.none:
         final ownedPlans = readOnly ? null : ref.watch(ownedDietPlansProvider);
         final everCreated = readOnly || (ownedPlans?.value?.isNotEmpty ?? true);
@@ -415,13 +394,16 @@ class _MealsContent extends ConsumerWidget {
                 actionLabel: context.l10n.planCreateSubmit,
                 onAction: () => context.push('/diet-plans/new'),
               );
+      case PlanDayCoverage.suspended:
       case PlanDayCoverage.scheduled:
       case PlanDayCoverage.completed:
       case PlanDayCoverage.active:
         return Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            if (day.coverage == PlanDayCoverage.scheduled)
+            if (day.coverage == PlanDayCoverage.suspended)
+              _SuspendedBanner(day: day, canManage: canManage)
+            else if (day.coverage == PlanDayCoverage.scheduled)
               PlanStatusBanner(
                 text: context.l10n.planStartsOn(formatDate(context, day.planStartDate!)),
               )
@@ -433,7 +415,10 @@ class _MealsContent extends ConsumerWidget {
               child: _SlotsOrEmpty(
                 slots: day.slots,
                 date: day.date,
-                canCheck: day.coverage == PlanDayCoverage.active && canOperate,
+                // SP-11 (rivisto, vedi decisioni.md): si spunta su ogni
+                // giornata coperta da un piano, qualunque ne sia lo stato.
+                // Resta la sola facoltà di chi opera (CU-2, CU-3).
+                canCheck: canOperate,
                 planId: day.planId,
                 member: member,
               ),
@@ -441,6 +426,51 @@ class _MealsContent extends ConsumerWidget {
           ],
         );
     }
+  }
+}
+
+/// CV-S3, 6.1 interfaccia.md: la giornata sospesa presenta gli slot,
+/// sotto la striscia che ne dichiara la sospensione e ne offre la ripresa
+/// a chi ne ha titolo (UT-8). Prima lo stato vuoto ne prendeva il posto.
+class _SuspendedBanner extends ConsumerWidget {
+  const _SuspendedBanner({required this.day, required this.canManage});
+
+  final PlanDay day;
+  final bool canManage;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    // ref.watch (non solo read) tiene vivo il controller autoDispose per
+    // la durata dell'operazione, oltre a pilotare l'attesa del comando.
+    final resuming = ref.watch(dietPlanLifecycleControllerProvider)?.isLoading ?? false;
+    final since = _suspendedSince(ref);
+    return PlanStatusBanner(
+      text: since == null
+          ? context.l10n.planSuspended
+          : context.l10n.planSuspendedSince(formatDate(context, since)),
+      actionLabel: canManage ? context.l10n.planActionResume : null,
+      actionLoading: resuming,
+      onAction: () async {
+        await ref.read(dietPlanLifecycleControllerProvider.notifier).resume(day.planId!);
+        ref.invalidate(planDayProvider(day.date));
+      },
+    );
+  }
+
+  /// L'inizio della sospensione che comprende la giornata, dai propri
+  /// piani. Sulla giornata di un membro del Gruppo i suoi piani non sono
+  /// noti, e la striscia dice allora la sola sospensione.
+  DateTime? _suspendedSince(WidgetRef ref) {
+    final plans = ref.watch(ownedDietPlansProvider).value ?? const [];
+    for (final plan in plans) {
+      if (plan.id != day.planId) continue;
+      for (final suspension in plan.suspensions) {
+        final started = !day.date.isBefore(suspension.startDate);
+        final ongoing = suspension.endDate == null || day.date.isBefore(suspension.endDate!);
+        if (started && ongoing) return suspension.startDate;
+      }
+    }
+    return null;
   }
 }
 
@@ -456,10 +486,8 @@ class _SlotsOrEmpty extends StatelessWidget {
   final List<PlanDaySlot> slots;
   final DateTime date;
 
-  /// SP-11: false su Programmato e Concluso, gli unici casi in cui questo
-  /// widget è raggiunto con `coverage` diverso da Attivo (Sospeso e
-  /// assenza di piano sostituiscono l'intero contenuto, vedi
-  /// `_DayContent`). CU-2, CU-3: anche false per un membro non Cuoco.
+  /// SP-11: la spunta è ammessa su ogni giornata coperta da un piano;
+  /// false per il solo membro del Gruppo che non sia Cuoco (CU-2, CU-3).
   final bool canCheck;
 
   /// Piano che copre la giornata, per l'avvio dell'inversione (6.5
@@ -565,11 +593,9 @@ class _DayMenu extends ConsumerWidget {
     final canSwap = operable && isDaySwapOriginEligible(day);
     // NP-1, NP-3: il nome è del solo proprietario (NP-2), e non è
     // contenuto del piano — si dà anche guardando il passato, o un piano
-    // non ancora in corso. Non sulla giornata sospesa, che non presenta
-    // contenuto.
-    final canName = member == null &&
-        day.coverage != PlanDayCoverage.none &&
-        day.coverage != PlanDayCoverage.suspended;
+    // non ancora in corso. Anche sulla giornata sospesa, che presenta ora
+    // il proprio contenuto (CV-S3).
+    final canName = member == null && day.coverage != PlanDayCoverage.none;
     if (!canEdit && !canSwap && !canName) return const SizedBox.shrink();
     return PopupMenuButton<String>(
       tooltip: context.l10n.planMoreActions,
