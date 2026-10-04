@@ -169,6 +169,17 @@ void main() {
     expect(adapter.requests, isEmpty);
   });
 
+  /// Il difetto segnalato: il tocco sul pulsante disabilitato passava alla
+  /// card, che si apriva e chiudeva come se il pulsante non ci fosse.
+  testWidgets('il tocco sul pulsante disabilitato non apre la card (4.1)', (tester) async {
+    await _pumpCard(tester, slot: _slot(SlotStatus.toConsume), date: today, canCheck: false);
+
+    await tester.tap(find.byIcon(Icons.check));
+    await tester.pumpAndSettle();
+
+    expect(tester.widget<AnimatedRotation>(find.byType(AnimatedRotation)).turns, 0);
+  });
+
   testWidgets('la spunta su una data futura chiede conferma (SP-10)', (tester) async {
     final tomorrow = today.add(const Duration(days: 1));
     final adapter = await _pumpCard(tester, slot: _slot(SlotStatus.toConsume), date: tomorrow, canCheck: true);
