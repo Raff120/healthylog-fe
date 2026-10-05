@@ -178,8 +178,8 @@ void main() {
   });
 
   /// Dove il dispositivo non riserva nulla al bordo inferiore non c'è
-  /// striscia da sottrarre, e l'involucro non aggiunge alcun elemento.
-  testWidgets('senza zona riservata l\'involucro è trasparente', (tester) async {
+  /// striscia da sottrarre, e l'involucro non contende alcun gesto.
+  testWidgets('senza zona riservata l\'involucro non contende alcun gesto', (tester) async {
     await tester.pumpWidget(
       MediaQuery(
         data: const MediaQueryData(size: Size(400, viewportHeight)),
@@ -190,6 +190,54 @@ void main() {
       ),
     );
 
-    expect(find.byType(Stack), findsNothing);
+    expect(find.byType(GestureDetector), findsNothing);
+  });
+
+  /// Segnalato dall'utente sulla PWA: toccato un campo, la tastiera si apriva
+  /// e si richiudeva subito. All'apertura la striscia si annulla, e se con
+  /// essa mutasse la forma dell'involucro l'intera applicazione sottostante
+  /// verrebbe ricostruita da capo, e il campo perderebbe il fuoco.
+  testWidgets('aprire la tastiera non toglie il fuoco al campo', (tester) async {
+    final keyboard = ValueNotifier<double>(0);
+    addTearDown(keyboard.dispose);
+    final focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
+    final controller = TextEditingController();
+    addTearDown(controller.dispose);
+
+    await tester.pumpWidget(
+      ValueListenableBuilder<double>(
+        valueListenable: keyboard,
+        builder: (context, keyboardHeight, _) => MediaQuery(
+          // Come `device_insets.dart`: aperta la tastiera, la zona
+          // riservata si annulla.
+          data: MediaQueryData(
+            size: const Size(400, viewportHeight),
+            viewInsets: EdgeInsets.only(bottom: keyboardHeight),
+            padding: EdgeInsets.only(bottom: keyboardHeight > 0 ? 0 : band),
+            viewPadding: const EdgeInsets.only(bottom: band),
+          ),
+          child: withSystemGestureGuard(
+            minimumBand: 24,
+            child: MaterialApp(
+              home: Scaffold(
+                body: TextField(controller: controller, focusNode: focusNode),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byType(TextField));
+    await tester.pump();
+    expect(focusNode.hasFocus, isTrue);
+    final fieldState = tester.state(find.byType(EditableText));
+
+    keyboard.value = 300;
+    await tester.pump();
+
+    expect(focusNode.hasFocus, isTrue);
+    expect(tester.state(find.byType(EditableText)), same(fieldState));
   });
 }

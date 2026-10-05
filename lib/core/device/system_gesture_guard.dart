@@ -63,8 +63,11 @@ class _SystemGestureGuard extends StatelessWidget {
       math.max(media.systemGestureInsets.bottom, media.padding.bottom),
       keyboardOpen ? 0.0 : minimumBand,
     );
-    if (band <= 0) return child;
-
+    // La forma resta la stessa anche senza striscia: `child` è l'intera
+    // applicazione, e spostarlo nell'albero al variare della striscia — che
+    // si annulla all'aprirsi della tastiera — la ricostruirebbe da capo. Il
+    // campo appena toccato perdeva il fuoco, e la tastiera si richiudeva
+    // (segnalato dall'utente, vedi decisioni.md).
     return Stack(
       // Allineamento non direzionale: l'involucro sta sopra
       // `Localizations` e non ha di che risolvere `start` ed `end`.
@@ -72,24 +75,25 @@ class _SystemGestureGuard extends StatelessWidget {
       fit: StackFit.expand,
       children: [
         child,
-        Positioned(
-          left: 0,
-          right: 0,
-          bottom: 0,
-          height: band,
-          child: GestureDetector(
-            behavior: HitTestBehavior.translucent,
-            excludeFromSemantics: true,
-            onVerticalDragStart: (_) {},
-            onVerticalDragUpdate: (_) {},
-            onVerticalDragEnd: (_) {},
-            onVerticalDragCancel: () {},
-            onHorizontalDragStart: (_) {},
-            onHorizontalDragUpdate: (_) {},
-            onHorizontalDragEnd: (_) {},
-            onHorizontalDragCancel: () {},
+        if (band > 0)
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: 0,
+            height: band,
+            child: GestureDetector(
+              behavior: HitTestBehavior.translucent,
+              excludeFromSemantics: true,
+              onVerticalDragStart: (_) {},
+              onVerticalDragUpdate: (_) {},
+              onVerticalDragEnd: (_) {},
+              onVerticalDragCancel: () {},
+              onHorizontalDragStart: (_) {},
+              onHorizontalDragUpdate: (_) {},
+              onHorizontalDragEnd: (_) {},
+              onHorizontalDragCancel: () {},
+            ),
           ),
-        ),
       ],
     );
   }
