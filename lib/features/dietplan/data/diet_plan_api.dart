@@ -3,6 +3,7 @@ import 'package:dio/dio.dart';
 import 'diet_plan.dart';
 import 'diet_plan_requests.dart';
 import 'diet_plan_template.dart';
+import 'personal_annotations.dart';
 
 /// Chiamate HTTP del piano alimentare (4.4 tecnica, 5.1 funzionale).
 class DietPlanApi {
@@ -100,6 +101,18 @@ class DietPlanApi {
     final response = await _dio.put('/diet-plans/$id/personal-note', data: {'note': note});
     return (response.data as Map<String, dynamic>)['note'] as String?;
   }
+
+  /// NP-1, NP-2, CO-19: tutte le annotazioni personali del piano, riferite
+  /// allo schema; al solo proprietario.
+  Future<PersonalAnnotations> personalAnnotations(String id) async {
+    final response = await _dio.get('/diet-plans/$id/personal-annotations');
+    return PersonalAnnotations.fromJson(response.data as Map<String, dynamic>);
+  }
+
+  /// NP-1, EP-12: la nota di uno slot dello schema, dalla pagina delle note
+  /// che presenta lo schema e non una data. Vuota, la rimuove.
+  Future<void> updatePersonalSlotNote(String id, String slotId, String? note) =>
+      _dio.put('/diet-plans/$id/slots/$slotId/personal-note', data: {'note': note});
 
   /// PV-12, PV-13, PV-15: il PDF del piano, con il nome del file che il
   /// server propone nell'intestazione `Content-Disposition`.

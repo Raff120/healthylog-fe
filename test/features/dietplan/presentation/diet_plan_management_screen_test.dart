@@ -98,6 +98,10 @@ Future<void> _pumpManagementScreen(WidgetTester tester, DietPlanApi api, {CareAp
         builder: (context, state) => Scaffold(body: Text('Redazione ${state.pathParameters['id']}')),
       ),
       GoRoute(
+        path: '/diet-plans/:id/notes',
+        builder: (context, state) => Scaffold(body: Text('Note ${state.pathParameters['id']}')),
+      ),
+      GoRoute(
         path: '/diet-plans/:id',
         builder: (context, state) => Scaffold(body: Text('Vista ${state.pathParameters['id']}')),
       ),
@@ -416,7 +420,8 @@ void main() {
   });
 
   /// NP-1, NP-3: sul piano redatto dal Nutrizionista il Paziente non ha
-  /// azioni, ma le proprie note sì — sono sue, non contenuto del piano.
+  /// azioni, ma le proprie note sì — sono sue, non contenuto del piano. Le
+  /// raggiunge nella pagina dedicata (7.6).
   testWidgets('il Paziente raggiunge le proprie note dal piano in corso (NP-1)', (tester) async {
     final dio = Dio(BaseOptions(baseUrl: 'http://example.test'));
     dio.httpClientAdapter = _JsonAdapter((options) {
@@ -446,8 +451,7 @@ void main() {
     await tester.tap(find.text('Le tue note'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Chiedere del pane integrale'), findsOneWidget);
-    expect(find.textContaining('La vedi solo tu'), findsOneWidget);
+    expect(find.text('Note plan-1'), findsOneWidget);
   });
 
   /// PZ-9, CP-12: il piano redatto dal Paziente stesso resta di sua competenza anche da collegato.

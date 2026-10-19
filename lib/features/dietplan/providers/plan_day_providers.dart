@@ -13,6 +13,7 @@ import '../data/plan_day_api.dart';
 import '../data/plan_day_local_cache.dart';
 import '../data/slot_status.dart';
 import '../domain/plan_day_date.dart';
+import 'diet_plan_providers.dart';
 
 part 'plan_day_providers.g.dart';
 
@@ -208,6 +209,8 @@ class PersonalAnnotationController extends _$PersonalAnnotationController {
     state = await AsyncValue.guard(write);
     ref.invalidate(planDayProvider);
     ref.invalidate(planDayRangeProvider);
+    // La pagina delle note (7.6) presenta le stesse annotazioni.
+    ref.invalidate(personalAnnotationsProvider);
   }
 }
 

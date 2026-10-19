@@ -16,7 +16,6 @@ import '../data/plan_status.dart';
 import '../domain/current_diet_plan.dart';
 import '../providers/diet_plan_providers.dart';
 import 'widgets/delete_plan_dialog.dart';
-import 'widgets/personal_plan_note_dialog.dart';
 
 /// Gestione dei piani (7.1 interfaccia.md, raggiunta da Profilo → Piani):
 /// la card del piano in corso (Attivo, Sospeso o il prossimo Programmato,
@@ -271,8 +270,9 @@ class DietPlanManagementScreen extends ConsumerWidget {
                     onDelete: () => _delete(context, ref, current.id, current.status),
                     onExport: () => _export(context, ref, current.id),
                     // NP-1: al proprietario, Paziente compreso — per lui
-                    // è la sola azione della card (UT-8, NP-3).
-                    onPersonalNotes: () => editPersonalPlanNote(context, ref, current.id),
+                    // è la sola azione della card (UT-8, NP-3). Conduce
+                    // alla pagina delle note (7.6).
+                    onPersonalNotes: () => context.push('/diet-plans/${current.id}/notes'),
                   ),
                   if (others.isNotEmpty) const SizedBox(height: AppSpacing.md),
                 ],

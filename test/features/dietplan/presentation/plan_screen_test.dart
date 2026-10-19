@@ -345,7 +345,7 @@ const _weekdayLabels = ['lunedì', 'martedì', 'mercoledì', 'giovedì', 'venerd
 /// (VS-7).
 List<Map<String, dynamic>> _weekJson(DateTime weekStart, {Map<int, String> outOfPlan = const {}}) {
   return List.generate(7, (i) {
-    final date = weekStart.add(Duration(days: i));
+    final date = addDays(weekStart, i);
     final coverage = outOfPlan[i];
     final day = _dayJsonFor(isoDate(date), 'Pasto di ${_weekdayLabels[i]}');
     if (coverage != null) {
@@ -720,7 +720,7 @@ void main() {
     'lo scorrimento orizzontale del contenuto naviga al giorno successivo e precedente (VG-16, 6.2)',
     (tester) async {
       final today = dateOnly(DateTime.now());
-      final tomorrow = today.add(const Duration(days: 1));
+      final tomorrow = addDays(today, 1);
       final adapter = _ByDateAdapter((date) {
         if (date == isoDate(tomorrow)) {
           return _dayJsonFor(date, 'Pesce al forno');
@@ -791,7 +791,7 @@ void main() {
     'il gesto interrotto a metà scopre il giorno accanto e torna indietro da sé (6.2)',
     (tester) async {
       final today = dateOnly(DateTime.now());
-      final tomorrow = today.add(const Duration(days: 1));
+      final tomorrow = addDays(today, 1);
       final adapter = _ByDateAdapter((date) {
         if (date == isoDate(tomorrow)) {
           return _dayJsonFor(date, 'Pesce al forno');
@@ -862,7 +862,7 @@ void main() {
     (tester) async {
       final today = dateOnly(DateTime.now());
       final weekStart = startOfWeek(today);
-      final nextWeekStart = weekStart.add(const Duration(days: 7));
+      final nextWeekStart = addDays(weekStart, 7);
       final adapter = _ByDateAdapter((date) {
         if (date == isoDate(nextWeekStart)) {
           return _dayJsonFor(date, 'Pesce al forno');
@@ -919,7 +919,7 @@ void main() {
     'l\'azione "Oggi" compare solo altrove e riporta alla giornata corrente in un tocco (VG-19)',
     (tester) async {
       final today = dateOnly(DateTime.now());
-      final tomorrow = today.add(const Duration(days: 1));
+      final tomorrow = addDays(today, 1);
       final adapter = _ByDateAdapter((date) {
         if (date == isoDate(tomorrow)) {
           return _dayJsonFor(date, 'Pesce al forno');
@@ -1282,7 +1282,7 @@ void main() {
       (tester) async {
         final today = dateOnly(DateTime.now());
         final thisWeek = startOfWeek(today);
-        final nextWeek = thisWeek.add(const Duration(days: 7));
+        final nextWeek = addDays(thisWeek, 7);
         final requestedRanges = <String>[];
         final adapter = _DayOrRangeAdapter(
           dayResponseFor: (date) => _dayJsonFor(date, 'Pasta al pomodoro'),
@@ -1313,11 +1313,42 @@ void main() {
       },
     );
 
+    /// VS-12, VG-16, VG-17: la settimana adiacente è quella del calendario
+    /// anche quando la settimana di partenza conta 169 ore (fine dell'ora
+    /// legale, 25 ottobre 2026) o 167 (inizio, 28 marzo 2027). Le date
+    /// sono fisse: la prova non dipende dal giorno in cui gira.
+    for (final view in ['Settimana', 'Giorno']) {
+      testWidgets('le frecce attraversano il cambio dell\'ora legale ($view)', (tester) async {
+        await pumpPlanScreen(
+          tester,
+          _DayOrRangeAdapter(
+            dayResponseFor: (date) => _dayJsonFor(date, 'Pasta al pomodoro'),
+            rangeResponseFor: (from, to) => _weekJson(DateTime.parse(from)),
+          ),
+        );
+        await tester.tap(find.text(view));
+        await tester.pumpAndSettle();
+        final container = ProviderScope.containerOf(tester.element(find.byType(PlanScreen)));
+
+        container.read(selectedDayProvider.notifier).select(DateTime(2026, 10, 19));
+        await tester.pumpAndSettle();
+        await tester.tap(find.byTooltip('Settimana successiva'));
+        await tester.pumpAndSettle();
+        expect(container.read(selectedDayProvider), DateTime(2026, 10, 26));
+
+        container.read(selectedDayProvider.notifier).select(DateTime(2027, 3, 29));
+        await tester.pumpAndSettle();
+        await tester.tap(find.byTooltip('Settimana precedente'));
+        await tester.pumpAndSettle();
+        expect(container.read(selectedDayProvider), DateTime(2027, 3, 22));
+      });
+    }
+
     testWidgets(
       'il tocco sull\'intestazione di un giorno passa alla vista giornaliera di quel giorno, conservando il riferimento (VS-14)',
       (tester) async {
         final weekStart = startOfWeek(dateOnly(DateTime.now()));
-        final wednesday = weekStart.add(const Duration(days: 2));
+        final wednesday = addDays(weekStart, 2);
         final adapter = _DayOrRangeAdapter(
           dayResponseFor: (date) => _dayJsonFor(date, 'Contenuto di $date'),
           rangeResponseFor: (from, to) => _weekJson(weekStart),

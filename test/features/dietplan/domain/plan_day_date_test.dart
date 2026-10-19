@@ -43,6 +43,28 @@ void main() {
     });
   });
 
+  /// Il cambio dell'ora legale: la settimana del 19 ottobre 2026 conta 169
+  /// ore, quella del 22 marzo 2027 ne conta 167. Sommare multipli di 24
+  /// ore porterebbe alle 23 del giorno precedente o all'una del giorno.
+  group('addDays', () {
+    test('avanza di una settimana oltre la fine dell\'ora legale', () {
+      expect(addDays(DateTime(2026, 10, 19), 7), DateTime(2026, 10, 26));
+    });
+
+    test('arretra di una settimana oltre l\'inizio dell\'ora legale', () {
+      expect(addDays(DateTime(2027, 3, 29), -7), DateTime(2027, 3, 22));
+    });
+
+    test('attraversa un confine di mese e d\'anno, ignorando l\'orario', () {
+      expect(addDays(DateTime(2026, 12, 28, 23, 45), 7), DateTime(2027, 1, 4));
+    });
+
+    test('startOfWeek resta nella settimana del cambio d\'ora', () {
+      expect(startOfWeek(DateTime(2026, 10, 25)), DateTime(2026, 10, 19));
+      expect(startOfWeek(DateTime(2027, 3, 28)), DateTime(2027, 3, 22));
+    });
+  });
+
   group('weekRangeLabel', () {
     // VS-2, LO-9: la composizione degli estremi, nel formato della lingua
     // selezionata — qui l'italiano.

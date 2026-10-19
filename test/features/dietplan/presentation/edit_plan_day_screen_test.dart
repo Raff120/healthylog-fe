@@ -33,7 +33,7 @@ class _JsonAdapter implements HttpClientAdapter {
           headers: {Headers.contentTypeHeader: [Headers.jsonContentType]});
 }
 
-final _date = dateOnly(DateTime.now()).add(const Duration(days: 2));
+final _date = addDays(dateOnly(DateTime.now()), 2);
 
 Map<String, dynamic> _slotJson(String slotId, String type, int order, {String? content, String status = 'TO_CONSUME'}) => {
       'slotId': slotId,

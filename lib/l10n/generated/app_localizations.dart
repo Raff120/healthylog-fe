@@ -2323,11 +2323,47 @@ abstract class L10n {
   /// **'La tua nota'**
   String get personalNoteLabel;
 
-  /// No description provided for @personalPlanNotesAction.
+  /// No description provided for @personalNotesAdd.
   ///
   /// In it, this message translates to:
-  /// **'Le tue note sul piano'**
-  String get personalPlanNotesAction;
+  /// **'Aggiungi una nota'**
+  String get personalNotesAdd;
+
+  /// No description provided for @personalNotesChooseSlot.
+  ///
+  /// In it, this message translates to:
+  /// **'Scegli lo slot'**
+  String get personalNotesChooseSlot;
+
+  /// No description provided for @personalNotesEmptyText.
+  ///
+  /// In it, this message translates to:
+  /// **'Usa + per aggiungerne una sul piano o su uno slot.'**
+  String get personalNotesEmptyText;
+
+  /// No description provided for @personalNotesEmptyTitle.
+  ///
+  /// In it, this message translates to:
+  /// **'Nessuna nota'**
+  String get personalNotesEmptyTitle;
+
+  /// No description provided for @personalNotesPlanNote.
+  ///
+  /// In it, this message translates to:
+  /// **'Nota sul piano'**
+  String get personalNotesPlanNote;
+
+  /// No description provided for @personalNotesRetry.
+  ///
+  /// In it, this message translates to:
+  /// **'Riprova'**
+  String get personalNotesRetry;
+
+  /// No description provided for @personalNotesSlotNote.
+  ///
+  /// In it, this message translates to:
+  /// **'Nota su uno slot'**
+  String get personalNotesSlotNote;
 
   /// No description provided for @personalPlanNotesTitle.
   ///

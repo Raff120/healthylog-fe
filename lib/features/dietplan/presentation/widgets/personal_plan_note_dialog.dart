@@ -8,9 +8,9 @@ import '../../providers/diet_plan_providers.dart';
 import 'personal_text_dialog.dart';
 
 /// NP-1: legge la nota personale del piano e la apre nel dialogo delle
-/// annotazioni; confermata, la salva — vuota, la toglie. Comune ai punti
-/// da cui il proprietario la raggiunge: la card del piano in corso (7.1),
-/// il menu della giornaliera (6.2) e il dettaglio del piano (7.5).
+/// annotazioni; confermata, la salva — vuota, la toglie. Dalla pagina delle
+/// note (7.6), cui conducono la card del piano in corso (7.1), il menu
+/// della giornaliera (6.2) e il dettaglio del piano (7.5).
 Future<void> editPersonalPlanNote(BuildContext context, WidgetRef ref, String planId) async {
   final String? current;
   try {

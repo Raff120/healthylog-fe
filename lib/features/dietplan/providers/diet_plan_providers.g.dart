@@ -632,9 +632,170 @@ final class PersonalPlanNoteControllerProvider
 }
 
 String _$personalPlanNoteControllerHash() =>
-    r'7743413a726d82b377fbd2a5237c0e07ea5d4e71';
+    r'd285a8df412b8699418a69f6ecfdd71042f782fd';
 
 abstract class _$PersonalPlanNoteController
+    extends $Notifier<AsyncValue<void>?> {
+  AsyncValue<void>? build();
+  @$mustCallSuper
+  @override
+  WhenComplete runBuild() {
+    final ref = this.ref as $Ref<AsyncValue<void>?, AsyncValue<void>?>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<AsyncValue<void>?, AsyncValue<void>?>,
+              AsyncValue<void>?,
+              Object?,
+              Object?
+            >;
+    return element.handleCreate(ref, build);
+  }
+}
+
+/// NP-1, CO-19: tutte le annotazioni personali del piano, per la pagina
+/// delle note (7.6 interfaccia.md). Al solo proprietario (NP-2).
+
+@ProviderFor(personalAnnotations)
+final personalAnnotationsProvider = PersonalAnnotationsFamily._();
+
+/// NP-1, CO-19: tutte le annotazioni personali del piano, per la pagina
+/// delle note (7.6 interfaccia.md). Al solo proprietario (NP-2).
+
+final class PersonalAnnotationsProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<PersonalAnnotations>,
+          PersonalAnnotations,
+          FutureOr<PersonalAnnotations>
+        >
+    with
+        $FutureModifier<PersonalAnnotations>,
+        $FutureProvider<PersonalAnnotations> {
+  /// NP-1, CO-19: tutte le annotazioni personali del piano, per la pagina
+  /// delle note (7.6 interfaccia.md). Al solo proprietario (NP-2).
+  PersonalAnnotationsProvider._({
+    required PersonalAnnotationsFamily super.from,
+    required String super.argument,
+  }) : super(
+         retry: null,
+         name: r'personalAnnotationsProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$personalAnnotationsHash();
+
+  @override
+  String toString() {
+    return r'personalAnnotationsProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  $FutureProviderElement<PersonalAnnotations> $createElement(
+    $ProviderPointer pointer,
+  ) => $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<PersonalAnnotations> create(Ref ref) {
+    final argument = this.argument as String;
+    return personalAnnotations(ref, argument);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is PersonalAnnotationsProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$personalAnnotationsHash() =>
+    r'ddce7d4b57906680027604610b5d782e0cb03285';
+
+/// NP-1, CO-19: tutte le annotazioni personali del piano, per la pagina
+/// delle note (7.6 interfaccia.md). Al solo proprietario (NP-2).
+
+final class PersonalAnnotationsFamily extends $Family
+    with $FunctionalFamilyOverride<FutureOr<PersonalAnnotations>, String> {
+  PersonalAnnotationsFamily._()
+    : super(
+        retry: null,
+        name: r'personalAnnotationsProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  /// NP-1, CO-19: tutte le annotazioni personali del piano, per la pagina
+  /// delle note (7.6 interfaccia.md). Al solo proprietario (NP-2).
+
+  PersonalAnnotationsProvider call(String planId) =>
+      PersonalAnnotationsProvider._(argument: planId, from: this);
+
+  @override
+  String toString() => r'personalAnnotationsProvider';
+}
+
+/// NP-1, EP-12: la nota di uno slot dello schema, scritta dalla pagina
+/// delle note. La nota ricompare in ogni data in cui ricorre il contenuto
+/// dello slot: si rileggono anche le giornate, come dalla card del pasto.
+
+@ProviderFor(PersonalSlotNoteController)
+final personalSlotNoteControllerProvider =
+    PersonalSlotNoteControllerProvider._();
+
+/// NP-1, EP-12: la nota di uno slot dello schema, scritta dalla pagina
+/// delle note. La nota ricompare in ogni data in cui ricorre il contenuto
+/// dello slot: si rileggono anche le giornate, come dalla card del pasto.
+final class PersonalSlotNoteControllerProvider
+    extends $NotifierProvider<PersonalSlotNoteController, AsyncValue<void>?> {
+  /// NP-1, EP-12: la nota di uno slot dello schema, scritta dalla pagina
+  /// delle note. La nota ricompare in ogni data in cui ricorre il contenuto
+  /// dello slot: si rileggono anche le giornate, come dalla card del pasto.
+  PersonalSlotNoteControllerProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'personalSlotNoteControllerProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$personalSlotNoteControllerHash();
+
+  @$internal
+  @override
+  PersonalSlotNoteController create() => PersonalSlotNoteController();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(AsyncValue<void>? value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<AsyncValue<void>?>(value),
+    );
+  }
+}
+
+String _$personalSlotNoteControllerHash() =>
+    r'63c6b813b893a23cf9c480bbd5b62b692fc95b87';
+
+/// NP-1, EP-12: la nota di uno slot dello schema, scritta dalla pagina
+/// delle note. La nota ricompare in ogni data in cui ricorre il contenuto
+/// dello slot: si rileggono anche le giornate, come dalla card del pasto.
+
+abstract class _$PersonalSlotNoteController
     extends $Notifier<AsyncValue<void>?> {
   AsyncValue<void>? build();
   @$mustCallSuper

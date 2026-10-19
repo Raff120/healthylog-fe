@@ -13,6 +13,7 @@ import '../../../l10n/l10n_context.dart';
 import '../data/diet_plan_requests.dart';
 import '../data/diet_plan_template.dart';
 import '../domain/diet_plan_field_validators.dart';
+import '../domain/plan_day_date.dart';
 import '../../care/data/care_models.dart';
 import '../../care/providers/care_providers.dart';
 import '../../identity/data/account_role.dart';
@@ -84,9 +85,8 @@ class _CreateDietPlanScreenState extends ConsumerState<CreateDietPlanScreen> {
   /// corrente se si compila oggi stesso di lunedì, altrimenti il primo a
   /// venire.
   DateTime _nextMonday(DateTime from) {
-    final date = DateTime(from.year, from.month, from.day);
-    final daysUntilMonday = (DateTime.monday - date.weekday + 7) % 7;
-    return date.add(Duration(days: daysUntilMonday));
+    final daysUntilMonday = (DateTime.monday - from.weekday + 7) % 7;
+    return addDays(from, daysUntilMonday);
   }
 
   Future<void> _pickStartDate() async {
