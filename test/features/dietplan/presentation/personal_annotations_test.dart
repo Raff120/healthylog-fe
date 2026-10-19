@@ -14,12 +14,15 @@ import 'package:healthylog/features/care/providers/care_providers.dart';
 import 'package:healthylog/features/dietplan/data/diet_plan_api.dart';
 import 'package:healthylog/features/dietplan/data/meal_swap_api.dart';
 import 'package:healthylog/features/dietplan/data/plan_day.dart';
+import 'package:healthylog/features/dietplan/data/personal_annotations.dart';
 import 'package:healthylog/features/dietplan/data/plan_day_api.dart';
 import 'package:healthylog/features/dietplan/data/slot_item.dart';
 import 'package:healthylog/features/dietplan/data/slot_status.dart';
 import 'package:healthylog/features/dietplan/data/slot_type.dart';
+import 'package:healthylog/features/dietplan/data/weekday.dart';
 import 'package:healthylog/features/dietplan/domain/plan_day_date.dart';
 import 'package:healthylog/features/dietplan/presentation/diet_plan_view_screen.dart';
+import 'package:healthylog/features/dietplan/presentation/personal_notes_screen.dart';
 import 'package:healthylog/features/dietplan/presentation/plan_screen.dart';
 import 'package:healthylog/features/dietplan/presentation/widgets/meal_card.dart';
 import 'package:healthylog/features/dietplan/providers/diet_plan_providers.dart';
@@ -42,7 +45,7 @@ import '../../../support/slot_items_json.dart';
 import '../../../support/statistics_api_stub.dart';
 import '../../../support/workout_api_stub.dart';
 
-/// 5.4bis funzionale, 4.1, 6.2 e 7.5 interfaccia.md: le annotazioni
+/// 5.4bis funzionale, 4.1, 6.2, 7.5 e 7.6 interfaccia.md: le annotazioni
 /// personali lette, presentate e scritte dal proprietario, e assenti per
 /// chiunque altro (NP-2).
 class _Adapter implements HttpClientAdapter {
@@ -228,12 +231,18 @@ void main() {
           cookingGroupApiProvider.overrideWithValue(CookingGroupApi(_dio(notFound))),
           appDatabaseProvider.overrideWithValue(AppDatabase(NativeDatabase.memory())),
         ],
-        child: MaterialApp(
+        child: MaterialApp.router(
           locale: testLocale,
           localizationsDelegates: testLocalizationsDelegates,
           supportedLocales: testSupportedLocales,
           theme: AppTheme.light,
-          home: const PlanScreen(),
+          routerConfig: GoRouter(routes: [
+            GoRoute(path: '/', builder: (context, state) => const PlanScreen()),
+            GoRoute(
+              path: '/diet-plans/:id/notes',
+              builder: (context, state) => Scaffold(body: Text('Note ${state.pathParameters['id']}')),
+            ),
+          ]),
         ),
       ));
       await tester.pumpAndSettle();
@@ -264,15 +273,15 @@ void main() {
       expect(adapter.puts.single.data, {'name': 'Giorno leggero'});
     });
 
-    testWidgets('il menu conduce anche alla nota del piano (NP-1)', (tester) async {
+    testWidgets('il menu conduce anche alle note del piano (NP-1, 7.6)', (tester) async {
       await pumpPlanScreen(tester);
 
       await tester.tap(find.byTooltip('Altre azioni'));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Le tue note sul piano'));
+      await tester.tap(find.text('Le tue note'));
       await tester.pumpAndSettle();
 
-      expect(find.text('Chiedere del pane integrale'), findsOneWidget);
+      expect(find.text('Note plan-1'), findsOneWidget);
     });
 
     testWidgets('col nome dato, il menu lo rinomina', (tester) async {
@@ -312,6 +321,10 @@ void main() {
         };
       });
       final router = GoRouter(initialLocation: '/diet-plans/plan-1', routes: [
+        GoRoute(
+          path: '/diet-plans/:id/notes',
+          builder: (context, state) => Scaffold(body: Text('Note ${state.pathParameters['id']}')),
+        ),
         GoRoute(path: '/diet-plans/:id', builder: (context, state) => DietPlanViewScreen(planId: state.pathParameters['id']!)),
       ]);
       await tester.pumpWidget(ProviderScope(
@@ -336,11 +349,13 @@ void main() {
       await tester.pumpAndSettle();
     }
 
-    testWidgets('il proprietario legge la propria nota', (tester) async {
+    testWidgets('il proprietario raggiunge le proprie note (7.6)', (tester) async {
       await pumpDetail(tester, viewerId: 'user-1');
 
-      expect(find.text('Le tue note'), findsOneWidget);
-      expect(find.text('Chiedere del pane integrale'), findsOneWidget);
+      await tester.tap(find.text('Le tue note'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Note plan-1'), findsOneWidget);
     });
 
     testWidgets('chi legge il piano senza esserne il proprietario non vede la sezione (NP-2)', (tester) async {
@@ -348,6 +363,221 @@ void main() {
 
       expect(find.text('Le tue note'), findsNothing);
       expect(find.text('Chiedere del pane integrale'), findsNothing);
+    });
+  });
+
+  group('dati delle annotazioni (CO-19)', () {
+    test('la lettura d\'insieme omette i giorni non riconosciuti (VR-10)', () {
+      final annotations = PersonalAnnotations.fromJson({
+        'planNote': null,
+        'dayNames': [
+          {'week': 1, 'dayOfWeek': 'MONDAY', 'name': 'Lunedì leggero'},
+          {'week': 1, 'dayOfWeek': 'HOLIDAY', 'name': 'Sconosciuto'},
+        ],
+        'slotNotes': [
+          {'slotId': 's1', 'note': 'Troppa pasta'},
+        ],
+      });
+
+      expect(annotations.dayNames, hasLength(1));
+      expect(annotations.dayName(1, Weekday.monday), 'Lunedì leggero');
+      expect(annotations.slotNote('s1'), 'Troppa pasta');
+      expect(annotations.slotNote('s2'), isNull);
+      expect(annotations.isEmpty, isFalse);
+      expect(const PersonalAnnotations().isEmpty, isTrue);
+    });
+  });
+
+  group('pagina delle note (7.6)', () {
+    Map<String, dynamic> slotJson(String slotId, String type, String content, {String? label, int order = 0}) => {
+      'slotId': slotId,
+      'type': type,
+      'label': label,
+      'order': order,
+      'items': itemsJson(content),
+      'note': null,
+      'adherenceWeight': 1.0,
+    };
+
+    final planJson = {
+      'id': 'plan-1',
+      'ownerId': 'user-1',
+      'authorId': 'user-1',
+      'authorRole': 'USER',
+      'name': 'Dieta invernale',
+      'status': 'ACTIVE',
+      'startDate': '2026-01-01',
+      'endDate': null,
+      'periods': <dynamic>[],
+      'suspensions': <dynamic>[],
+      'adherence': null,
+      'weeklySchedule': [
+        {
+          'week': 1,
+          'dayOfWeek': 'MONDAY',
+          'slots': [slotJson('s1', 'LUNCH', 'Pasta al pomodoro'), slotJson('s2', 'DINNER', 'Minestrone', order: 1)],
+        },
+        {
+          'week': 2,
+          'dayOfWeek': 'TUESDAY',
+          'slots': [slotJson('s3', 'SNACK', 'Yogurt', label: 'Merenda')],
+        },
+      ],
+      'createdAt': '2026-01-01T00:00:00Z',
+      'updatedAt': '2026-01-01T00:00:00Z',
+    };
+
+    final someAnnotations = {
+      'planNote': 'Chiedere del pane integrale',
+      'dayNames': [
+        {'week': 2, 'dayOfWeek': 'TUESDAY', 'name': 'Giorno leggero'},
+      ],
+      'slotNotes': [
+        {'slotId': 's1', 'note': 'Troppa pasta'},
+        {'slotId': 's3', 'note': 'Meglio greco'},
+      ],
+    };
+
+    var offline = false;
+
+    Future<_Adapter> pumpNotes(WidgetTester tester, {Map<String, dynamic>? annotations}) async {
+      tester.view.physicalSize = const Size(800, 1600);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
+      final adapter = _Adapter((options) {
+        if (options.path.endsWith('/personal-annotations')) {
+          if (offline) throw DioException(requestOptions: options, type: DioExceptionType.connectionError);
+          return annotations ?? someAnnotations;
+        }
+        if (options.path == '/diet-plans/plan-1/personal-note') {
+          return {
+            'note': options.method == 'PUT'
+                ? (options.data as Map)['note']
+                : (annotations ?? someAnnotations)['planNote'],
+          };
+        }
+        if (options.method == 'PUT') return null;
+        return planJson;
+      });
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [dietPlanApiProvider.overrideWithValue(DietPlanApi(_dio(adapter)))],
+          child: MaterialApp(
+            locale: testLocale,
+            localizationsDelegates: testLocalizationsDelegates,
+            supportedLocales: testSupportedLocales,
+            theme: AppTheme.light,
+            home: const PersonalNotesScreen(planId: 'plan-1'),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      return adapter;
+    }
+
+    String dialogText(WidgetTester tester) =>
+        tester.widget<EditableText>(find.byType(EditableText).last).controller.text;
+
+    testWidgets('presenta la nota del piano e le note degli slot col loro contenuto nello schema', (tester) async {
+      await pumpNotes(tester);
+
+      expect(find.text('Nota sul piano'), findsOneWidget);
+      expect(find.text('Chiedere del pane integrale'), findsOneWidget);
+      expect(find.text('Settimana 1 · Lunedì'), findsOneWidget);
+      // NP-4: il nome del giorno nell'intestazione del gruppo.
+      expect(find.text('Settimana 2 · Martedì · Giorno leggero'), findsOneWidget);
+      expect(find.text('Pranzo'), findsOneWidget);
+      expect(find.textContaining('Pasta al pomodoro'), findsOneWidget);
+      expect(find.text('Troppa pasta'), findsOneWidget);
+      // GG-10: lo spuntino si presenta con la propria denominazione.
+      expect(find.text('Merenda'), findsOneWidget);
+      expect(find.text('Meglio greco'), findsOneWidget);
+      // Lo slot senza nota non compare.
+      expect(find.text('Cena'), findsNothing);
+      expect(find.textContaining('Minestrone'), findsNothing);
+    });
+
+    testWidgets('senza annotazioni invita a usare +', (tester) async {
+      await pumpNotes(tester, annotations: {'planNote': null, 'dayNames': <dynamic>[], 'slotNotes': <dynamic>[]});
+
+      expect(find.text('Nessuna nota'), findsOneWidget);
+      expect(find.text('Usa + per aggiungerne una sul piano o su uno slot.'), findsOneWidget);
+    });
+
+    testWidgets('il tocco su una nota la modifica, per slot dello schema (EP-12)', (tester) async {
+      final adapter = await pumpNotes(tester);
+
+      await tester.tap(find.text('Troppa pasta'));
+      await tester.pumpAndSettle();
+      expect(dialogText(tester), 'Troppa pasta');
+      await tester.enterText(find.byType(TextField).last, 'Meno pasta');
+      await tester.tap(find.text('Salva'));
+      await tester.pumpAndSettle();
+
+      expect(adapter.puts.single.path, '/diet-plans/plan-1/slots/s1/personal-note');
+      expect(adapter.puts.single.data, {'note': 'Meno pasta'});
+    });
+
+    testWidgets('+ aggiunge una nota allo slot scelto', (tester) async {
+      final adapter = await pumpNotes(tester);
+
+      await tester.tap(find.byTooltip('Aggiungi una nota'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Nota su uno slot'));
+      await tester.pumpAndSettle();
+      // Lo schema intero, slot non annotati compresi.
+      expect(find.text('Scegli lo slot'), findsOneWidget);
+      await tester.tap(find.byKey(const ValueKey('personal-note-target-s2')));
+      await tester.pumpAndSettle();
+      expect(dialogText(tester), isEmpty);
+      await tester.enterText(find.byType(TextField).last, 'Cenare prima');
+      await tester.tap(find.text('Salva'));
+      await tester.pumpAndSettle();
+
+      expect(adapter.puts.single.path, '/diet-plans/plan-1/slots/s2/personal-note');
+      expect(adapter.puts.single.data, {'note': 'Cenare prima'});
+    });
+
+    testWidgets('+ su uno slot già annotato apre la nota esistente', (tester) async {
+      await pumpNotes(tester);
+
+      await tester.tap(find.byTooltip('Aggiungi una nota'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Nota su uno slot'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const ValueKey('personal-note-target-s3')));
+      await tester.pumpAndSettle();
+
+      expect(dialogText(tester), 'Meglio greco');
+    });
+
+    testWidgets('+ sul piano apre la nota del piano esistente e la salva', (tester) async {
+      final adapter = await pumpNotes(tester);
+
+      await tester.tap(find.byTooltip('Aggiungi una nota'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Nota sul piano').last);
+      await tester.pumpAndSettle();
+      expect(dialogText(tester), 'Chiedere del pane integrale');
+      await tester.enterText(find.byType(TextField).last, 'Chiedere del riso');
+      await tester.tap(find.text('Salva'));
+      await tester.pumpAndSettle();
+
+      expect(adapter.puts.single.path, '/diet-plans/plan-1/personal-note');
+      expect(adapter.puts.single.data, {'note': 'Chiedere del riso'});
+    });
+
+    testWidgets('senza rete la pagina si ricarica (OF-20, 4.4)', (tester) async {
+      offline = true;
+      addTearDown(() => offline = false);
+      await pumpNotes(tester);
+
+      expect(find.text('Riprova'), findsOneWidget);
+      offline = false;
+      await tester.tap(find.text('Riprova'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Troppa pasta'), findsOneWidget);
     });
   });
 }
