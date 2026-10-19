@@ -17,6 +17,7 @@ import '../features/dietplan/presentation/diet_plan_template_list_screen.dart';
 import '../features/dietplan/presentation/diet_plan_template_preview_screen.dart';
 import '../features/dietplan/presentation/diet_plan_template_schedule_screen.dart';
 import '../features/dietplan/presentation/diet_plan_view_screen.dart';
+import '../features/dietplan/presentation/personal_notes_screen.dart';
 import '../features/dietplan/presentation/edit_plan_day_screen.dart';
 import '../features/identity/data/account_role.dart';
 import '../features/identity/presentation/change_password_screen.dart';
@@ -321,6 +322,11 @@ GoRouter goRouter(Ref ref) {
       GoRoute(
         path: '/diet-plans/:id/schedule',
         builder: (context, state) => DietPlanScheduleScreen(planId: state.pathParameters['id']!),
+      ),
+      GoRoute(
+        // 7.6 interfaccia.md: le annotazioni personali del piano (NP-1).
+        path: '/diet-plans/:id/notes',
+        builder: (context, state) => PersonalNotesScreen(planId: state.pathParameters['id']!),
       ),
       GoRoute(
         path: '/diet-plans/:id',
