@@ -27,6 +27,11 @@ DateTime dateOnly(DateTime date) => DateTime(date.year, date.month, date.day);
 /// dal backend.
 Weekday weekdayOf(DateTime date) => Weekday.values[date.weekday - 1];
 
+/// Giorno di calendario a `days` giorni da `date`, a mezzanotte locale.
+/// `DateTime.add(Duration(days: n))` somma n × 24 ore: a cavallo del cambio
+/// dell'ora legale una settimana ne conta 167 o 169, e il risultato cade
+/// alle 23 del giorno precedente o all'una del giorno giusto.
+DateTime addDays(DateTime date, int days) => DateTime(date.year, date.month, date.day + days);
+
 /// Lunedì della settimana che contiene `date` (LO-11).
-DateTime startOfWeek(DateTime date) =>
-    dateOnly(date).subtract(Duration(days: date.weekday - 1));
+DateTime startOfWeek(DateTime date) => addDays(date, 1 - date.weekday);
