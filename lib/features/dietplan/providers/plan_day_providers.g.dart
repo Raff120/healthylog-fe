@@ -913,7 +913,7 @@ final class PersonalAnnotationControllerProvider
 }
 
 String _$personalAnnotationControllerHash() =>
-    r'7d4c4aa431eb3b8b8e3e2386ed22ac21be705ddf';
+    r'd0135c89ac3789279150c2e3b4f8b5d98595905c';
 
 /// NP-1: nome della giornata e nota degli slot, sulla propria giornata
 /// soltanto (NP-2). Il nome appartiene al giorno dello schema e la nota

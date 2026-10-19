@@ -6,6 +6,8 @@ import '../../care/providers/care_providers.dart';
 import '../data/diet_plan.dart';
 import '../data/diet_plan_api.dart';
 import '../data/diet_plan_requests.dart';
+import '../data/personal_annotations.dart';
+import 'plan_day_providers.dart';
 
 part 'diet_plan_providers.g.dart';
 
@@ -162,5 +164,31 @@ class PersonalPlanNoteController extends _$PersonalPlanNoteController {
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(() => ref.read(dietPlanApiProvider).updatePersonalNote(planId, note));
     ref.invalidate(personalPlanNoteProvider(planId));
+    ref.invalidate(personalAnnotationsProvider(planId));
+  }
+}
+
+/// NP-1, CO-19: tutte le annotazioni personali del piano, per la pagina
+/// delle note (7.6 interfaccia.md). Al solo proprietario (NP-2).
+@riverpod
+Future<PersonalAnnotations> personalAnnotations(Ref ref, String planId) =>
+    ref.watch(dietPlanApiProvider).personalAnnotations(planId);
+
+/// NP-1, EP-12: la nota di uno slot dello schema, scritta dalla pagina
+/// delle note. La nota ricompare in ogni data in cui ricorre il contenuto
+/// dello slot: si rileggono anche le giornate, come dalla card del pasto.
+@riverpod
+class PersonalSlotNoteController extends _$PersonalSlotNoteController {
+  @override
+  AsyncValue<void>? build() => null;
+
+  Future<void> save(String planId, String slotId, String? note) async {
+    state = const AsyncValue.loading();
+    state = await AsyncValue.guard(
+      () => ref.read(dietPlanApiProvider).updatePersonalSlotNote(planId, slotId, note),
+    );
+    ref.invalidate(personalAnnotationsProvider(planId));
+    ref.invalidate(planDayProvider);
+    ref.invalidate(planDayRangeProvider);
   }
 }
