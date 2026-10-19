@@ -5,10 +5,10 @@ class PersonalDayName {
   const PersonalDayName({required this.week, required this.dayOfWeek, required this.name});
 
   factory PersonalDayName.fromJson(Map<String, dynamic> json) => PersonalDayName(
-        week: (json['week'] as num).toInt(),
-        dayOfWeek: Weekday.fromJson(json['dayOfWeek'] as String),
-        name: json['name'] as String,
-      );
+    week: (json['week'] as num).toInt(),
+    dayOfWeek: Weekday.fromJson(json['dayOfWeek'] as String),
+    name: json['name'] as String,
+  );
 
   final int week;
   final Weekday dayOfWeek;
@@ -19,10 +19,8 @@ class PersonalDayName {
 class PersonalSlotNote {
   const PersonalSlotNote({required this.slotId, required this.note});
 
-  factory PersonalSlotNote.fromJson(Map<String, dynamic> json) => PersonalSlotNote(
-        slotId: json['slotId'] as String,
-        note: json['note'] as String,
-      );
+  factory PersonalSlotNote.fromJson(Map<String, dynamic> json) =>
+      PersonalSlotNote(slotId: json['slotId'] as String, note: json['note'] as String);
 
   final String slotId;
   final String note;
@@ -35,17 +33,17 @@ class PersonalAnnotations {
   const PersonalAnnotations({this.planNote, this.dayNames = const [], this.slotNotes = const []});
 
   factory PersonalAnnotations.fromJson(Map<String, dynamic> json) => PersonalAnnotations(
-        planNote: json['planNote'] as String?,
-        dayNames: [
-          for (final item in json['dayNames'] as List? ?? const [])
-            if (Weekday.tryFromJson((item as Map<String, dynamic>)['dayOfWeek'] as String) != null)
-              PersonalDayName.fromJson(item),
-        ],
-        slotNotes: [
-          for (final item in json['slotNotes'] as List? ?? const [])
-            PersonalSlotNote.fromJson(item as Map<String, dynamic>),
-        ],
-      );
+    planNote: json['planNote'] as String?,
+    dayNames: [
+      for (final item in json['dayNames'] as List? ?? const [])
+        if (Weekday.tryFromJson((item as Map<String, dynamic>)['dayOfWeek'] as String) != null)
+          PersonalDayName.fromJson(item),
+    ],
+    slotNotes: [
+      for (final item in json['slotNotes'] as List? ?? const [])
+        PersonalSlotNote.fromJson(item as Map<String, dynamic>),
+    ],
+  );
 
   final String? planNote;
   final List<PersonalDayName> dayNames;

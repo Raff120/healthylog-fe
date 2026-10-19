@@ -76,11 +76,182 @@ class PersonalNotesScreen extends ConsumerWidget {
           context.l10n.personalPlanNotesTitle,
           style: typography.titleMedium.copyWith(color: colors.textPrimary),
         ),
+        actions: [
+          // 7.6: l'aggiunta di una nota sul piano o su uno slot dello schema.
+          IconButton(
+            tooltip: context.l10n.personalNotesAdd,
+            icon: Icon(Icons.add, color: colors.textPrimary),
+            onPressed: plan.value == null || annotations.value == null
+                ? null
+                : () => _add(context, ref, plan.value!, annotations.value!),
+          ),
+        ],
       ),
       body: SafeArea(child: body),
     );
   }
 }
+
+/// 7.6: la nota sul piano o su uno slot scelto. Se la nota c'è già, il
+/// dialogo si apre con quella.
+Future<void> _add(BuildContext context, WidgetRef ref, DietPlan plan, PersonalAnnotations annotations) async {
+  final target = await showModalBottomSheet<_NoteTarget>(
+    context: context,
+    builder: (sheetContext) => const _NoteTargetSheet(),
+  );
+  if (target == null || !context.mounted) return;
+  switch (target) {
+    case _NoteTarget.plan:
+      await editPersonalPlanNote(context, ref, plan.id);
+    case _NoteTarget.slot:
+      final slot = await showModalBottomSheet<DietPlanSlot>(
+        context: context,
+        isScrollControlled: true,
+        builder: (sheetContext) => _SlotPickerSheet(plan: plan, annotations: annotations),
+      );
+      if (slot == null || !context.mounted) return;
+      await editPersonalSchemaSlotNote(
+        context,
+        ref,
+        planId: plan.id,
+        slotId: slot.slotId,
+        currentNote: annotations.slotNote(slot.slotId),
+      );
+  }
+}
+
+enum _NoteTarget { plan, slot }
+
+class _NoteTargetSheet extends StatelessWidget {
+  const _NoteTargetSheet();
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final typography = context.typography;
+    return SafeArea(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          ListTile(
+            leading: Icon(Icons.description_outlined, color: colors.textSecondary),
+            title: Text(
+              context.l10n.personalNotesPlanNote,
+              style: typography.bodyLarge.copyWith(color: colors.textPrimary),
+            ),
+            onTap: () => Navigator.of(context).pop(_NoteTarget.plan),
+          ),
+          ListTile(
+            leading: Icon(Icons.restaurant_menu, color: colors.textSecondary),
+            title: Text(
+              context.l10n.personalNotesSlotNote,
+              style: typography.bodyLarge.copyWith(color: colors.textPrimary),
+            ),
+            onTap: () => Navigator.of(context).pop(_NoteTarget.slot),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// 7.6: la scelta di uno slot dello schema — settimana, giorno, slot, col
+/// contenuto in riassunto. Lo slot già annotato reca l'icona della nota.
+class _SlotPickerSheet extends StatelessWidget {
+  const _SlotPickerSheet({required this.plan, required this.annotations});
+
+  final DietPlan plan;
+  final PersonalAnnotations annotations;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final typography = context.typography;
+    final manyWeeks = weekCountOf(plan.weeklySchedule) > 1;
+    final days = [
+      for (final day in orderedScheduleDays(plan.weeklySchedule))
+        if (day.slots.isNotEmpty) day,
+    ];
+
+    return SafeArea(
+      child: FractionallySizedBox(
+        heightFactor: 0.75,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(AppSpacing.md),
+              child: Text(
+                context.l10n.personalNotesChooseSlot,
+                style: typography.titleMedium.copyWith(color: colors.textPrimary),
+              ),
+            ),
+            Expanded(
+              child: ListView(
+                children: [
+                  for (final day in days) ...[
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(AppSpacing.md, AppSpacing.sm, AppSpacing.md, AppSpacing.xxs),
+                      child: Text(
+                        scheduleDayTitle(context, day, annotations, manyWeeks: manyWeeks),
+                        style: typography.label.copyWith(color: colors.textSecondary),
+                      ),
+                    ),
+                    for (final slot in [...day.slots]..sort((a, b) => a.order.compareTo(b.order)))
+                      ListTile(
+                        key: ValueKey('personal-note-target-${slot.slotId}'),
+                        leading: Icon(slot.type.icon, color: colors.textSecondary),
+                        title: Text(
+                          _slotTitle(context, slot),
+                          style: typography.bodyLarge.copyWith(color: colors.textPrimary),
+                        ),
+                        subtitle: Text(
+                          slot.items.isEmpty
+                              ? context.l10n.slotNotSpecified
+                              : slot.items.map((item) => item.name).join(' · '),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: typography.caption.copyWith(color: colors.textSecondary),
+                        ),
+                        trailing: annotations.slotNote(slot.slotId) == null
+                            ? null
+                            : Icon(Icons.edit_note, color: colors.accent),
+                        onTap: () => Navigator.of(context).pop(slot),
+                      ),
+                  ],
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Il nome con cui lo slot si presenta: l'etichetta dello spuntino, se
+/// data (GG-10), altrimenti il tipo.
+String _slotTitle(BuildContext context, DietPlanSlot slot) =>
+    slot.label?.isNotEmpty == true ? slot.label! : slotTypeLabel(context, slot.type);
+
+/// NP-4: il giorno — con la settimana, quando sono più d'una — seguito dal
+/// nome che il proprietario gli ha dato.
+String scheduleDayTitle(
+  BuildContext context,
+  DietPlanWeekDay day,
+  PersonalAnnotations annotations, {
+  required bool manyWeeks,
+}) {
+  final weekday = weekdayLabel(context, day.dayOfWeek);
+  final label = manyWeeks ? context.l10n.scheduleWeekDay(day.week, weekday) : weekday;
+  final name = annotations.dayName(day.week, day.dayOfWeek);
+  return name == null ? label : '$label · $name';
+}
+
+/// I giorni dello schema nell'ordine del ciclo: settimana, poi giorno.
+List<DietPlanWeekDay> orderedScheduleDays(List<DietPlanWeekDay> days) =>
+    [...days]
+      ..sort((a, b) => a.week != b.week ? a.week.compareTo(b.week) : a.dayOfWeek.index.compareTo(b.dayOfWeek.index));
 
 class _NotesList extends ConsumerWidget {
   const _NotesList({required this.plan, required this.annotations});
@@ -110,7 +281,7 @@ class _NotesList extends ConsumerWidget {
               const SizedBox(height: AppSpacing.lg),
             ],
             for (final (day, slots) in groups) ...[
-              _GroupTitle(_dayTitle(context, day, manyWeeks)),
+              _GroupTitle(scheduleDayTitle(context, day, annotations, manyWeeks: manyWeeks)),
               for (final slot in slots)
                 Padding(
                   padding: const EdgeInsets.only(bottom: AppSpacing.sm),
@@ -134,15 +305,6 @@ class _NotesList extends ConsumerWidget {
       ),
     );
   }
-
-  /// NP-4: il giorno — con la settimana, quando sono più d'una — seguito
-  /// dal nome che il proprietario gli ha dato.
-  String _dayTitle(BuildContext context, DietPlanWeekDay day, bool manyWeeks) {
-    final weekday = weekdayLabel(context, day.dayOfWeek);
-    final label = manyWeeks ? context.l10n.scheduleWeekDay(day.week, weekday) : weekday;
-    final name = annotations.dayName(day.week, day.dayOfWeek);
-    return name == null ? label : '$label · $name';
-  }
 }
 
 /// I giorni dello schema che hanno almeno uno slot annotato, nell'ordine
@@ -151,10 +313,8 @@ List<(DietPlanWeekDay, List<DietPlanSlot>)> annotatedDaysOf(
   List<DietPlanWeekDay> days,
   PersonalAnnotations annotations,
 ) {
-  final ordered = [...days]
-    ..sort((a, b) => a.week != b.week ? a.week.compareTo(b.week) : a.dayOfWeek.index.compareTo(b.dayOfWeek.index));
   return [
-    for (final day in ordered)
+    for (final day in orderedScheduleDays(days))
       if (day.slots.any((slot) => annotations.slotNote(slot.slotId) != null))
         (
           day,
@@ -214,7 +374,7 @@ class _NoteCard extends StatelessWidget {
                     const SizedBox(width: AppSpacing.xs),
                     Expanded(
                       child: Text(
-                        slot.label?.isNotEmpty == true ? slot.label! : slotTypeLabel(context, slot.type),
+                        _slotTitle(context, slot),
                         style: typography.titleMedium.copyWith(color: colors.textPrimary),
                       ),
                     ),

@@ -29,9 +29,11 @@ Future<void> editPersonalSchemaSlotNote(
   if (note == null || !context.mounted) return;
   await ref.read(personalSlotNoteControllerProvider.notifier).save(planId, slotId, note.isEmpty ? null : note);
   if (!context.mounted) return;
-  ref.read(personalSlotNoteControllerProvider)?.whenOrNull(
-        error: (error, _) => ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(describeApiError(context, error.asApiException?.code ?? ''))),
-        ),
+  ref
+      .read(personalSlotNoteControllerProvider)
+      ?.whenOrNull(
+        error: (error, _) =>
+            ScaffoldMessenger.of(context)
+                .showSnackBar(SnackBar(content: Text(describeApiError(context, error.asApiException?.code ?? '')))),
       );
 }
