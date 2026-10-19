@@ -396,7 +396,7 @@ void main() {
 
       final requestedDates = <String>[];
       final today = dateOnly(DateTime.now());
-      final tomorrow = today.add(const Duration(days: 1));
+      final tomorrow = addDays(today, 1);
 
       final store = _InMemorySecureKeyValueStore()
         ..values['refresh_token'] = 'token-valido';

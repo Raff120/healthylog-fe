@@ -38,7 +38,7 @@ class DateSelector extends StatelessWidget {
             // sottostante — segnalato dall'utente come altrimenti privo
             // di un modo diretto per raggiungerle (vedi decisioni.md).
             IconButton(
-              onPressed: () => onSelect(weekStart.subtract(const Duration(days: 7))),
+              onPressed: () => onSelect(addDays(weekStart, -7)),
               icon: Icon(Icons.chevron_left, color: colors.textSecondary),
               tooltip: context.l10n.weekPrevious,
             ),
@@ -58,7 +58,7 @@ class DateSelector extends StatelessWidget {
               ),
             ),
             IconButton(
-              onPressed: () => onSelect(weekStart.add(const Duration(days: 7))),
+              onPressed: () => onSelect(addDays(weekStart, 7)),
               icon: Icon(Icons.chevron_right, color: colors.textSecondary),
               tooltip: context.l10n.weekNext,
             ),
@@ -82,9 +82,9 @@ class DateSelector extends StatelessWidget {
           onHorizontalDragEnd: (details) {
             final velocity = details.primaryVelocity ?? 0;
             if (velocity < -200) {
-              onSelect(weekStart.add(const Duration(days: 7)));
+              onSelect(addDays(weekStart, 7));
             } else if (velocity > 200) {
-              onSelect(weekStart.subtract(const Duration(days: 7)));
+              onSelect(addDays(weekStart, -7));
             }
           },
           child: SizedBox(
@@ -98,7 +98,7 @@ class DateSelector extends StatelessWidget {
                     Expanded(
                       child: Builder(
                         builder: (context) {
-                          final day = weekStart.add(Duration(days: i));
+                          final day = addDays(weekStart, i);
                           return _DayColumn(
                             date: day,
                             selected: day == selectedDate,

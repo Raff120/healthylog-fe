@@ -74,7 +74,7 @@ class _DateNavigator extends ConsumerWidget {
   }
 
   static DateTime _shifted(DateTime date, StatisticsPeriod period, int steps) {
-    if (period == StatisticsPeriod.week) return date.add(Duration(days: 7 * steps));
+    if (period == StatisticsPeriod.week) return addDays(date, 7 * steps);
     // Il giorno si riporta al primo del mese: un 31 spostato all'indietro
     // finirebbe altrimenti nel mese sbagliato.
     return DateTime(date.year, date.month + steps, 1);
