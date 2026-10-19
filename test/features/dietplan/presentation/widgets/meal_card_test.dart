@@ -181,7 +181,7 @@ void main() {
   });
 
   testWidgets('la spunta su una data futura chiede conferma (SP-10)', (tester) async {
-    final tomorrow = today.add(const Duration(days: 1));
+    final tomorrow = addDays(today, 1);
     final adapter = await _pumpCard(tester, slot: _slot(SlotStatus.toConsume), date: tomorrow, canCheck: true);
 
     await tester.tap(find.byIcon(Icons.check));
@@ -197,7 +197,7 @@ void main() {
   });
 
   testWidgets('la rinuncia alla conferma sulla data futura non dispone alcuna richiesta (SP-10)', (tester) async {
-    final tomorrow = today.add(const Duration(days: 1));
+    final tomorrow = addDays(today, 1);
     final adapter = await _pumpCard(tester, slot: _slot(SlotStatus.toConsume), date: tomorrow, canCheck: true);
 
     await tester.tap(find.byIcon(Icons.check));
@@ -209,7 +209,7 @@ void main() {
   });
 
   testWidgets('la spunta su una data passata non chiede conferma (SP-8)', (tester) async {
-    final yesterday = today.subtract(const Duration(days: 1));
+    final yesterday = addDays(today, -1);
     final adapter = await _pumpCard(tester, slot: _slot(SlotStatus.toConsume), date: yesterday, canCheck: true);
 
     await tester.tap(find.byIcon(Icons.check));
