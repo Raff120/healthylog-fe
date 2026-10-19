@@ -214,7 +214,7 @@ void main() {
         if (options.method == 'PUT') return null;
         if (options.queryParameters.containsKey('from')) {
           final from = DateTime.parse(options.queryParameters['from'] as String);
-          return [for (var i = 0; i < 7; i++) _dayJson(from.add(Duration(days: i)), dayName: dayName)];
+          return [for (var i = 0; i < 7; i++) _dayJson(addDays(from, i), dayName: dayName)];
         }
         return _dayJson(DateTime.parse(options.queryParameters['date'] as String), dayName: dayName);
       });

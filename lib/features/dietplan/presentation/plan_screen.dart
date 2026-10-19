@@ -294,8 +294,8 @@ class _WeeklyTab extends StatelessWidget {
       children: [
         WeekSelector(
           weekStart: weekStart,
-          onPrevious: () => onNavigate(weekStart.subtract(const Duration(days: 7))),
-          onNext: () => onNavigate(weekStart.add(const Duration(days: 7))),
+          onPrevious: () => onNavigate(addDays(weekStart, -7)),
+          onNext: () => onNavigate(addDays(weekStart, 7)),
           onCurrentWeek: isCurrentWeek ? null : () => onNavigate(currentWeekStart),
         ),
         const MemberContextBanner(),

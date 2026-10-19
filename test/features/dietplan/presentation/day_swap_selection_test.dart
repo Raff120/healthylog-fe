@@ -65,7 +65,7 @@ class _Adapter implements HttpClientAdapter {
           'order': 0,
           'items': itemsJson('Pasto di ${_labels[index]}'),
           'note': null,
-          'status': date == nextWeekStart.add(Duration(days: skippedIndex ?? -1)) ? 'SKIPPED' : 'TO_CONSUME',
+          'status': date == addDays(nextWeekStart, skippedIndex ?? -1) ? 'SKIPPED' : 'TO_CONSUME',
         },
       ],
     };
@@ -84,7 +84,7 @@ class _Adapter implements HttpClientAdapter {
       body = {'id': 'log-1', 'performedBy': 'user-1', 'performedAt': '2026-09-21T10:00:00Z', 'kind': 'DAY'};
     } else if (options.queryParameters.containsKey('from')) {
       final from = DateTime.parse(options.queryParameters['from'] as String);
-      body = [for (var i = 0; i < 7; i++) _day(from.add(Duration(days: i)))];
+      body = [for (var i = 0; i < 7; i++) _day(addDays(from, i))];
     } else {
       body = _day(DateTime.parse(options.queryParameters['date'] as String));
     }
@@ -104,7 +104,7 @@ class _NotFoundAdapter implements HttpClientAdapter {
 }
 
 void main() {
-  final nextWeekStart = startOfWeek(dateOnly(DateTime.now())).add(const Duration(days: 7));
+  final nextWeekStart = addDays(startOfWeek(dateOnly(DateTime.now())), 7);
 
   Future<void> pump(WidgetTester tester, _Adapter adapter) async {
     tester.view.physicalSize = const Size(800, 2400);
@@ -177,8 +177,8 @@ void main() {
     expect(adapter.posts, hasLength(1));
     expect(adapter.posts.single.path, '/diet-plans/plan-1/day-swaps');
     expect(adapter.posts.single.data, {
-      'firstDate': isoDate(nextWeekStart.add(const Duration(days: 1))),
-      'secondDate': isoDate(nextWeekStart.add(const Duration(days: 4))),
+      'firstDate': isoDate(addDays(nextWeekStart, 1)),
+      'secondDate': isoDate(addDays(nextWeekStart, 4)),
     });
     expect(find.text('Scegli con quale giornata scambiarla'), findsNothing);
   });
@@ -227,7 +227,7 @@ void main() {
     // settimana alcuna giornata con cui scambiarsi (IN-8) e non offrirebbe
     // il comando: il martedì della settimana successiva lo ha sempre.
     final container = ProviderScope.containerOf(tester.element(find.byType(PlanScreen)));
-    container.read(selectedDayProvider.notifier).select(nextWeekStart.add(const Duration(days: 1)));
+    container.read(selectedDayProvider.notifier).select(addDays(nextWeekStart, 1));
     await tester.pumpAndSettle();
 
     await tester.tap(find.byTooltip('Altre azioni'));
@@ -242,7 +242,7 @@ void main() {
   /// 6.5: avviata dalla giornaliera, la selezione vi riporta al termine,
   /// sulla giornata di partenza anche se nel frattempo si è navigato.
   group('ritorno alla giornaliera', () {
-    final tuesday = nextWeekStart.add(const Duration(days: 1));
+    final tuesday = addDays(nextWeekStart, 1);
 
     Future<ProviderContainer> startFromDailyView(WidgetTester tester, _Adapter adapter) async {
       await pump(tester, adapter);
@@ -260,7 +260,7 @@ void main() {
     testWidgets('compiuto lo scambio, torna alla giornata di partenza', (tester) async {
       final adapter = _Adapter(nextWeekStart);
       final container = await startFromDailyView(tester, adapter);
-      container.read(selectedDayProvider.notifier).select(nextWeekStart.add(const Duration(days: 4)));
+      container.read(selectedDayProvider.notifier).select(addDays(nextWeekStart, 4));
       await tester.pumpAndSettle();
 
       await tester.tap(find.text('Pasto di venerdì'), warnIfMissed: false);
@@ -307,8 +307,8 @@ void main() {
   /// 6.5, 4.5: lo scambio si compie previa conferma semplice, che nomina
   /// ciò che si scambia; rinunciare lascia attiva la selezione.
   group('conferma dello scambio', () {
-    final tuesday = nextWeekStart.add(const Duration(days: 1));
-    final friday = nextWeekStart.add(const Duration(days: 4));
+    final tuesday = addDays(nextWeekStart, 1);
+    final friday = addDays(nextWeekStart, 4);
 
     testWidgets('delle giornate: nomina le due giornate, e Annulla non scambia', (tester) async {
       final adapter = _Adapter(nextWeekStart);
